@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Task Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: transparent;
+            margin: 0;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            color: #073763;
+            font-size: 1.5em;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #dfecf7;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            width: 100%;
+        }
+
+        .task-input {
+            flex-grow: 1;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-right: 5px;
+            min-width: 0;
+        }
+
+        .square-btn {
+            width: 30px;
+            height: 25px;
+            border-radius: 5px;
+            background-color: #073763;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 14px;
+        }
+
+        .delete-btn {
+            background-color: red;
+            width: 30px;
+            height: 25px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: white;
+            border: none;
+        }
+
+        .square-btn:hover,
+        .delete-btn:hover {
+            background-color: #005bb5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        th,
+        td {
+            padding: 4px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #073763;
+            color: white;
+        }
+
+        .task-details {
+            display: none;
+            background-color: #f1f9ef;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 4px;
+            font-size: 11px;
+            width: 96%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        select {
+            background-color: #eff8f9;
+            padding: 3px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 10px;
+            width: calc(40% - 10px);
+            margin-right: 5px;
+            text-align: center;
+        }
+
+        .flashing {
+            background-color: red;
+            animation: flashing 1s infinite;
+        }
+
+        @keyframes flashing {
+            0% { background-color: red; }
+            50% { background-color: white; }
+            100% { background-color: red; }
+        }
+
+        .selected {
+            background-color: yellow;
+        }
+
+        #password-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #dfecf7;
+            margin: 15% auto;
+            padding: 20px;
+            border: 2px solid #073763;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 300px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .modal-content h2 {
+            color: #073763;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .modal-content input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #073763;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 10px;
+            background-color: #073763;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .modal-content button:hover {
+            background-color: #005bb5;
+        }
+
+        .close {
+            color: #073763;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #005bb5;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 5px;
+            }
+
+            input,
+            select {
+                font-size: 12px;
+            }
+
+            th,
+            td {
+                font-size: 10px;
+            }
+
+            .task-input {
+                width: 65%;
+            }
+
+            .task-details {
+                width: 95%;
+            }
+
+            select.wide-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Team Task Manager</h1>
+
+    <div class="form-container">
+        <div class="input-field">
+            <input type="text" class="task-input" id="task" placeholder="Enter task" required>
+            <button class="square-btn" onclick="showPasswordModal('add')">+</button>
+            <button class="square-btn delete-btn" onclick="showPasswordModal('delete')">X</button>
+        </div>
+        <div class="input-field">
+            <input type="date" id="due-date" required>
+            <select id="assign" style="flex-grow: 1; margin-left: 5px;">
+                <option value="ALL">ALL</option>
+                <option value="Haram & Faisal">Haram & Faisal</option>
+                <option value="October & Zayed">October & Zayed</option>
+                <option value="Giza & Giza Centers">Giza & Giza Centers</option>
+                <option value="Dokki & Mohandesin">Dokki & Mohandesin</option>
+                <option value="Fayoum & Bani Suief">Fayoum & Bani Suief</option>
+                <option value="Maadi & Manial">Maadi & Manial</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <table id="todo-table">
+            <thead>
+                <tr>
+                    <th>Assigned To</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="password-modal">
+        <div class="modal-content">
+            <span class="close" onclick="closePasswordModal()">&times;</span>
+            <h2>Enter Password</h2>
+            <input type="password" id="password-input" placeholder="Enter password">
+            <button onclick="checkPassword()">Submit</button>
+        </div>
+    </div>
+
+    <script>
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('due-date').value = today;
+        let currentAction = '';
+
+        document.getElementById('task').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                showPasswordModal('add');
+            }
+        });
+
+        function showPasswordModal(action) {
+            currentAction = action;
+            document.getElementById('password-modal').style.display = 'block';
+            document.getElementById('password-input').focus();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').style.display = 'none';
+            document.getElementById('password-input').value = '';
+        }
+
+        function checkPassword() {
+            const password = document.getElementById('password-input').value;
+            if (password === 'tito89') {
+                closePasswordModal();
+                if (currentAction === 'add') {
+                    addTask();
+                } else if (currentAction === 'delete') {
+                    deleteSelectedTasks();
+                }
+            } else {
+                alert('Incorrect password');
+            }
+        }
+
+        // Add event listener to close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('password-modal');
+            if (event.target === modal) {
+                closePasswordModal();
+            }
+        }
+
+        // Allow pressing Enter to submit password
+        document.getElementById('password-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        function addTask() {
+            const task = document.getElementById('task').value;
+            const dueDate = document.getElementById('due-date').value;
+            const assign = document.getElementById('assign').value;
+
+            if (!task || !dueDate) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            const table = document.getElementById('todo-table').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+
+            const assignCell = newRow.insertCell(0);
+            const dueDateCell = newRow.insertCell(1);
+            const statusCell = newRow.insertCell(2);
+
+            assignCell.textContent = assign;
+
+            dueDateCell.innerHTML = `<strong>${dueDate}</strong>`;
+
+            if (dueDate === today) {
+                dueDateCell.classList.add('flashing');
+            }
+
+            const statusDropdown = document.createElement('select');
+            statusDropdown.className = 'wide-select';
+            statusDropdown.innerHTML = `
+                <option value="Planned">Planned</option>
+                <option value="Scheduled">Scheduled</option>
+                <option value="Done">Done</option>`;
+            statusDropdown.style.textAlign = 'center';
+            statusDropdown.style.height = '20px';
+            statusDropdown.style.fontSize = '10px';
+            statusCell.appendChild(statusDropdown);
+
+            statusDropdown.addEventListener('change', function() {
+                if (this.value === 'Done') {
+                    dueDateCell.classList.remove('flashing');
+                } else if (dueDate === today) {
+                    dueDateCell.classList.add('flashing');
+                }
+            });
+
+            const detailsBox = document.createElement('div');
+            detailsBox.className = 'task-details';
+            detailsBox.innerHTML = `<span>${task}</span>`;
+
+            const detailsRow = table.insertRow();
+            const detailsCell = detailsRow.insertCell(0);
+            detailsCell.colSpan = 3;
+            detailsCell.appendChild(detailsBox);
+
+            newRow.className = 'task-row';
+
+            assignCell.addEventListener('click', toggleDetails);
+            dueDateCell.addEventListener('click', toggleDetails);
+            statusDropdown.addEventListener('mousedown', function (e) {
+                e.stopPropagation();
+            });
+
+            newRow.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                toggleSelectRow(newRow);
+            });
+
+            let longPressTimer;
+            const longPressHandler = function() {
+                toggleSelectRow(newRow);
+            };
+
+            [assignCell, dueDateCell].forEach(cell => {
+                cell.addEventListener('touchstart', function(e) {
+                    longPressTimer = setTimeout(longPressHandler, 500);
+                });
+
+                cell.addEventListener('touchend', function(e) {
+                    clearTimeout(longPressTimer);
+                });
+
+                cell.addEventListener('touchmove', function(e) {
+                    clearTimeout(longPressTimer);
+                });
+            });
+
+            function toggleDetails() {
+                detailsBox.style.display = detailsBox.style.display === 'none' || !detailsBox.style.display ? 'block' : 'none';
+            }
+
+            document.getElementById('task').value = '';
+        }
+
+        function toggleSelectRow(row) {
+            row.classList.toggle('selected');
+        }
+
+        function deleteSelectedTasks() {
+            const selectedRows = document.querySelectorAll('.task-row.selected');
+            selectedRows.forEach(row => {
+                row.nextElementSibling.remove();
+                row.remove();
+            });
+        }
+    </script>
+</body>
+
+</html>
