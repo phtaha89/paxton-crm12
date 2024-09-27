@@ -317,7 +317,6 @@
             }
         }
 
-        // Add event listener to close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('password-modal');
             if (event.target === modal) {
@@ -325,7 +324,6 @@
             }
         }
 
-        // Allow pressing Enter to submit password
         document.getElementById('password-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 checkPassword();
@@ -342,86 +340,99 @@
                 return;
             }
 
+            const newTask = { task, dueDate, assign, status: 'Planned' };
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.push(newTask);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+
+            renderTasks();
+            document.getElementById('task').value = '';
+        }
+
+        function renderTasks() {
             const table = document.getElementById('todo-table').getElementsByTagName('tbody')[0];
-            const newRow = table.insertRow();
+            table.innerHTML = '';
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-            const assignCell = newRow.insertCell(0);
-            const dueDateCell = newRow.insertCell(1);
-            const statusCell = newRow.insertCell(2);
+            tasks.forEach((taskData, index) => {
+                const newRow = table.insertRow();
+                newRow.className = 'task-row';
 
-            assignCell.textContent = assign;
+                const assignCell = newRow.insertCell(0);
+                const dueDateCell = newRow.insertCell(1);
+                const statusCell = newRow.insertCell(2);
 
-            dueDateCell.innerHTML = `<strong>${dueDate}</strong>`;
+                assignCell.textContent = taskData.assign;
+                dueDateCell.innerHTML = `<strong>${taskData.dueDate}</strong>`;
 
-            if (dueDate === today) {
-                dueDateCell.classList.add('flashing');
-            }
-
-            const statusDropdown = document.createElement('select');
-            statusDropdown.className = 'wide-select';
-            statusDropdown.innerHTML = `
-                <option value="Planned">Planned</option>
-                <option value="Scheduled">Scheduled</option>
-                <option value="Done">Done</option>`;
-            statusDropdown.style.textAlign = 'center';
-            statusDropdown.style.height = '20px';
-            statusDropdown.style.fontSize = '10px';
-            statusCell.appendChild(statusDropdown);
-
-            statusDropdown.addEventListener('change', function() {
-                if (this.value === 'Done') {
-                    dueDateCell.classList.remove('flashing');
-                } else if (dueDate === today) {
+                if (taskData.dueDate === today) {
                     dueDateCell.classList.add('flashing');
                 }
-            });
 
-            const detailsBox = document.createElement('div');
-            detailsBox.className = 'task-details';
-            detailsBox.innerHTML = `<span>${task}</span>`;
+                const statusDropdown = document.createElement('select');
+                statusDropdown.className = 'wide-select';
+                statusDropdown.innerHTML = `
+                    <option value="Planned" ${taskData.status === 'Planned' ? 'selected' : ''}>Planned</option>
+                    <option value="Scheduled" ${taskData.status === 'Scheduled' ? 'selected' : ''}>Scheduled</option>
+                    <option value="Done" ${taskData.status === 'Done' ? 'selected' : ''}>Done</option>`;
+                statusDropdown.style.textAlign = 'center';
+                statusDropdown.style.height = '20px';
+                statusDropdown.style.fontSize = '10px';
+                statusCell.appendChild(statusDropdown);
 
-            const detailsRow = table.insertRow();
-            const detailsCell = detailsRow.insertCell(0);
-            detailsCell.colSpan = 3;
-            detailsCell.appendChild(detailsBox);
-
-            newRow.className = 'task-row';
-
-            assignCell.addEventListener('click', toggleDetails);
-            dueDateCell.addEventListener('click', toggleDetails);
-            statusDropdown.addEventListener('mousedown', function (e) {
-                e.stopPropagation();
-            });
-
-            newRow.addEventListener('contextmenu', function (e) {
-                e.preventDefault();
-                toggleSelectRow(newRow);
-            });
-
-            let longPressTimer;
-            const longPressHandler = function() {
-                toggleSelectRow(newRow);
-            };
-
-            [assignCell, dueDateCell].forEach(cell => {
-                cell.addEventListener('touchstart', function(e) {
-                    longPressTimer = setTimeout(longPressHandler, 500);
+                statusDropdown.addEventListener('change', function() {
+                    taskData.status = this.value;
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    if (this.value === 'Done') {
+                        dueDateCell.classList.remove('flashing');
+                    } else if (taskData.dueDate === today) {
+                        dueDateCell.classList.add('flashing');
+                    }
                 });
 
-                cell.addEventListener('touchend', function(e) {
-                    clearTimeout(longPressTimer);
+                const detailsBox = document.createElement('div');
+                detailsBox.className = 'task-details';
+                detailsBox.innerHTML = `<span>${taskData.task}</span>`;
+
+                const detailsRow = table.insertRow();
+                const detailsCell = detailsRow.insertCell(0);
+                detailsCell.colSpan = 3;
+                detailsCell.appendChild(detailsBox);
+
+                assignCell.addEventListener('click', toggleDetails);
+                dueDateCell.addEventListener('click', toggleDetails);
+                statusDropdown.addEventListener('mousedown', function (e) {
+                    e.stopPropagation();
                 });
 
-                cell.addEventListener('touchmove', function(e) {
-                    clearTimeout(longPressTimer);
+                newRow.addEventListener('contextmenu', function (e) {
+                    e.preventDefault();
+                    toggleSelectRow(newRow);
                 });
+
+                let longPressTimer;
+                const longPressHandler = function() {
+                    toggleSelectRow(newRow);
+                };
+
+                [assignCell, dueDateCell].forEach(cell => {
+                    cell.addEventListener('touchstart', function(e) {
+                        longPressTimer = setTimeout(longPressHandler, 500);
+                    });
+
+                    cell.addEventListener('touchend', function(e) {
+                        clearTimeout(longPressTimer);
+                    });
+
+                    cell.addEventListener('touchmove', function(e) {
+                        clearTimeout(longPressTimer);
+                    });
+                });
+
+                function toggleDetails() {
+                    detailsBox.style.display = detailsBox.style.display === 'none' || !detailsBox.style.display ? 'block' : 'none';
+                }
             });
-
-            function toggleDetails() {
-                detailsBox.style.display = detailsBox.style.display === 'none' || !detailsBox.style.display ? 'block' : 'none';
-            }
-
-            document.getElementById('task').value = '';
         }
 
         function toggleSelectRow(row) {
@@ -430,11 +441,20 @@
 
         function deleteSelectedTasks() {
             const selectedRows = document.querySelectorAll('.task-row.selected');
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
             selectedRows.forEach(row => {
+                const index = row.rowIndex - 1;
+                tasks.splice(index, 1);
                 row.nextElementSibling.remove();
                 row.remove();
             });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
         }
+
+        window.onload = function() {
+            renderTasks();
+        };
     </script>
 </body>
 
