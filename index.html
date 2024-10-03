@@ -126,9 +126,17 @@
         }
 
         @keyframes flashing {
-            0% { background-color: red; }
-            50% { background-color: white; }
-            100% { background-color: red; }
+            0% {
+                background-color: red;
+            }
+
+            50% {
+                background-color: white;
+            }
+
+            100% {
+                background-color: red;
+            }
         }
 
         .selected {
@@ -144,7 +152,7 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0, 0, 0, 0.4);
         }
 
         .modal-content {
@@ -155,7 +163,7 @@
             border-radius: 10px;
             width: 80%;
             max-width: 300px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .modal-content h2 {
@@ -347,6 +355,18 @@
 
             renderTasks();
             document.getElementById('task').value = '';
+
+            // Send the task to the Google Apps Script
+            fetch('https://script.google.com/macros/s/AKfycbw0uDS86YVlIx7Wp3gW0Eq2wr9VoVB7yO_pJrj1RfA/exec', {
+                method: 'POST',
+                body: JSON.stringify(newTask),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => console.log('Success:', data))
+                .catch((error) => console.error('Error:', error));
         }
 
         function renderTasks() {
