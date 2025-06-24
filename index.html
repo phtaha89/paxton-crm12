@@ -1,481 +1,1741 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Task Manager</title>
+    <title>Visits Submission Form</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: transparent;
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 10px;
-            overflow-x: hidden;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
         }
-
-        h1 {
-            text-align: center;
-            color: #073763;
-            font-size: 1.5em;
+        body {
+            background-color: #f5f7fa;
+            padding: 12px;
+            color: #333;
         }
-
-        .form-container {
+        .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 640px;
             margin: 0 auto;
-            background-color: #dfecf7;
-            padding: 15px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            margin-bottom: 20px;
+            background-color: white;
+            padding: 14px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
-
-        .input-field {
+        .form-header {
             display: flex;
             align-items: center;
-            margin: 8px 0;
-            width: 100%;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
         }
-
-        .task-input {
-            flex-grow: 1;
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 12px;
-            margin-right: 5px;
-            min-width: 0;
-        }
-
-        .square-btn {
-            width: 30px;
-            height: 25px;
-            border-radius: 5px;
-            background-color: #073763;
+        .form-logo {
+            width: 36px;
+            height: 36px;
+            background-color: #4361ee;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
             color: white;
+            font-size: 18px;
+        }
+        .form-title {
+            color: #212b36;
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+        }
+        .form-group {
+            margin-bottom: 8px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 12px;
+            color: #495057;
+        }
+        select, input, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dce0e5;
+            border-radius: 18px;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            background-color: #fff;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        h2 {
+            color: #3a3a3a;
+            margin: 10px 0 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        h2 i {
+            margin-right: 8px;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 16px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        .info-section {
+            background-color: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0;
+            border: 1px solid #e9ecef;
+        }
+        .info-section-title {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: #3a3a3a;
+        }
+        .info-section-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .info-value {
+            font-weight: 600;
+            color: #4361ee;
+        }
+        .last-visit-date {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .saved-comment-title {
+            font-weight: 600;
+            color: #3a3a3a;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .saved-comment-content {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #90caf9;
+            font-size: 12px;
+            color: #0d47a1;
+        }
+        .tab-group {
+            display: flex;
+            gap: 2px;
+            margin: 12px 0;
+            background-color: #f5f7fa;
+            padding:4px;
+            border-radius: 18px;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 10px 12px;
             border: none;
+            border-radius: 6px;
             cursor: pointer;
-            margin-left: 5px;
+            font-weight: 500;
+            font-size: 13px;
+            background-color: transparent;
+            color: #495057;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .tab-button i {
+            margin-right: 0;
+            margin-bottom: 4px;
             font-size: 14px;
         }
-
-        .delete-btn {
-            background-color: red;
-            width: 30px;
-            height: 25px;
-            border-radius: 5px;
-            font-size: 12px;
+        .tab-button span {
+            font-size: 10px;
+            line-height: 1;
+        }
+        .tab-button.selected {
+            background-color: #4361ee;
             color: white;
+            box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
+        }
+        .tab-button:hover:not(:disabled):not(.selected) {
+            background-color: rgba(67, 97, 238, 0.08);
+        }
+        .tab-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .action-button-group {
+            display: flex;
+            gap: 10px;
+            margin: 24px 0 16px;
+        }
+        .action-button {
+            flex: 1;
+            padding: 10px;
             border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .square-btn:hover,
-        .delete-btn:hover {
-            background-color: #005bb5;
+        .action-button i {
+            margin-right: 8px;
         }
-
+        .action-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .submit-btn {
+            background-color: #4361ee;
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        }
+        .submit-btn:hover:not(:disabled) {
+            background-color: #3a56d4;
+            transform: translateY(-1px);
+        }
+        .reset-btn {
+            background-color: #fff;
+            color: red;
+            border: 1px solid #dce0e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .reset-btn:hover:not(:disabled) {
+            background-color: #f8f9fa;
+        }
+        .retrieve-btn {
+            background-color: #2e8540;
+            color: white;
+            box-shadow: 0 4px 12px rgba(46, 133, 64, 0.2);
+        }
+        .retrieve-btn:hover:not(:disabled) {
+            background-color: #267438;
+            transform: translateY(-1px);
+        }
+        .alert {
+            padding: 8px 12px;
+            margin: 12px 0;
+            border-radius: 14px;
+            font-size: 13px;
+            display: center;
+            animation: fadeIn 0.3s;
+            display: flex;
+            align-items: flex-start;
+        }
+        .alert i {
+            margin-right: 12px;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .alert-error {
+            background-color: #ffebee;
+            border: 1px solid #ef9a9a;
+            color: #c62828;
+        }
+        .alert-success {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            color: #2e7d32;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
+        }
         table {
             width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-            font-size: 10px;
+            border-collapse: separate;
+            border-spacing: 0;
+            max-height: 600px;
+            border-radius: 8px;
+            overflow: hidden;
         }
-
-        th,
-        td {
-            padding: 4px;
-            border: 1px solid #ccc;
-            font-weight: bold;
-            vertical-align: middle;
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 13px;
+            white-space: nowrap;
         }
-
         th {
-            background-color: #073763;
-            color: white;
-        }
-
-        .task-details {
-            display: none;
-            background-color: #f1f9ef;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            padding: 10px;
-            margin-top: 4px;
-            font-size: 11px;
-            width: 96%;
-            max-width: 600px;
-            text-align: center;
-        }
-
-        select {
-            background-color: #eff8f9;
-            padding: 3px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 10px;
-            width: calc(40% - 10px);
-            margin-right: 5px;
-            text-align: center;
-        }
-
-        .flashing {
-            background-color: red;
-            animation: flashing 1s infinite;
-        }
-
-        @keyframes flashing {
-            0% {
-                background-color: red;
-            }
-
-            50% {
-                background-color: white;
-            }
-
-            100% {
-                background-color: red;
-            }
-        }
-
-        .selected {
-            background-color: yellow;
-        }
-
-        #password-modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
             top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
         }
-
-        .modal-content {
-            background-color: #dfecf7;
-            margin: 15% auto;
-            padding: 20px;
-            border: 2px solid #073763;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 300px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
         }
-
-        .modal-content h2 {
-            color: #073763;
+        .hidden {
+            display: none;
+        }
+        .readonly-input {
+            background-color: #f8fafc;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        .designed-by {
             text-align: center;
-            margin-top: 0;
-            margin-bottom: 20px;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 24px;
         }
-
-        .modal-content input[type="password"] {
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+        .form-row > div {
+            flex: 1;
+        }
+        .search-box {
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .search-box input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #073763;
-            border-radius: 5px;
-            box-sizing: border-box;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid #dce0e5;
+            border-radius: 8px;
+            font-size: 14px;
         }
-
-        .modal-content button {
-            width: 100%;
-            padding: 10px;
-            background-color: #073763;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            color: #6c757d;
         }
-
-        .modal-content button:hover {
-            background-color: #005bb5;
+        .pharmacy-row {
+            color: #2e8540;
         }
-
-        .close {
-            color: #073763;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
+        .event-row {
+            color: #e67700;
         }
-
-        .close:hover,
-        .close:focus {
-            color: #005bb5;
-            text-decoration: none;
-            cursor: pointer;
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
         }
-
+        .form-helper-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-success {
+            background-color: #e6f7ed;
+            color: #2e8540;
+        }
+        .badge-warning {
+            background-color: #fff3e0;
+            color: #e67700;
+        }
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #dc3545;
+        }
+        #brickHcp, #specialtyHcp {
+            background-color: #f3e5f5;
+            color: #4a148c;
+            padding: 10px 12px;
+            border: 1px solid #ce93d8;
+            border-radius: 18px;
+        }
         @media (max-width: 600px) {
-            .form-container {
-                padding: 5px;
+            .container {
+                padding: 16px;
             }
-
-            input,
-            select {
+            .form-row {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .action-button {
+                padding: 10px;
+                font-size: 13px;
+            }
+            .tab-button {
+                padding: 8px;
                 font-size: 12px;
             }
-
-            th,
-            td {
-                font-size: 10px;
+            .tab-button i {
+                margin-right: 4px;
             }
-
-            .task-input {
-                width: 65%;
+            th, td {
+                padding: 10px 12px;
+                font-size: 12px;
             }
-
-            .task-details {
-                width: 95%;
-            }
-
-            select.wide-select {
-                width: 100%;
-            }
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c5d0e6;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8bbcf;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .login-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .login-title {
+            color: #212b36;
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+        .login-form-group {
+            margin-bottom: 16px;
+        }
+        .login-button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background-color: #4361ee;
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        }
+        .login-button:hover {
+            background-color: #3a56d4;
+            transform: translateY(-1px);
+        }
+        .logout-button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+            margin-left: auto;
+            display: block;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+        .med-rep-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .med-rep-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .med-rep-name {
+            font-weight: 600;
+            color: #3a3a3a;
+            font-size: 14px;
+        }
+        .med-rep-area {
+            font-size: 12px;
+            color: #6c757d;
         }
     </style>
 </head>
-
 <body>
-
-    <h1>Team Task Manager</h1>
-
-    <div class="form-container">
-        <div class="input-field">
-            <input type="text" class="task-input" id="task" placeholder="Enter task" required>
-            <button class="square-btn" onclick="showPasswordModal('add')">+</button>
-            <button class="square-btn delete-btn" onclick="showPasswordModal('delete')">X</button>
+    <div id="loginPage" class="login-container">
+        <div class="login-header">
+            <div class="form-logo">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h1 class="login-title">Medical Representative Login</h1>
         </div>
-        <div class="input-field">
-            <input type="date" id="due-date" required>
-            <select id="assign" style="flex-grow: 1; margin-left: 5px;">
-                <option value="ALL">ALL</option>
-                <option value="Haram & Faisal">Haram & Faisal</option>
-                <option value="October & Zayed">October & Zayed</option>
-                <option value="Giza & Giza Centers">Giza & Giza Centers</option>
-                <option value="Dokki & Mohandesin">Dokki & Mohandesin</option>
-                <option value="Fayoum & Bani Suief">Fayoum & Bani Suief</option>
-                <option value="Maadi & Manial">Maadi & Manial</option>
+        <div id="loginAlertContainer"></div>
+        <div class="login-form-group">
+            <label for="medRepLogin">Medical Representative</label>
+            <select id="medRepLogin" required>
+                <option value="">Select Medical Rep</option>
             </select>
         </div>
-    </div>
-
-    <div class="form-container">
-        <table id="todo-table">
-            <thead>
-                <tr>
-                    <th>Assigned To</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <div id="password-modal">
-        <div class="modal-content">
-            <span class="close" onclick="closePasswordModal()">&times;</span>
-            <h2>Enter Password</h2>
-            <input type="password" id="password-input" placeholder="Enter password">
-            <button onclick="checkPassword()">Submit</button>
+        <div class="login-form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter password" required />
         </div>
+        <button id="loginBtn" class="login-button">Login</button>
     </div>
-
+    <div id="formPage" class="container hidden">
+        <div class="form-header">
+            <div class="form-logo">
+                <i class="fas fa-clipboard-list"></i>
+            </div>
+            <h1 class="form-title">Visits Submission Form</h1>
+        </div>
+        <div class="med-rep-card">
+            <div class="med-rep-info">
+                <div class="med-rep-name" id="medRepName">Medical Rep Name</div>
+                <div class="med-rep-area" id="medRepArea">Area</div>
+            </div>
+            <button id="logoutBtn" class="logout-button">Logout</button>
+        </div>
+        <div id="alertContainer"></div>
+        <div class="tab-group">
+            <button id="hcpBtn" class="tab-button" disabled>
+                <i class="fas fa-user-md"></i> HCPs
+            </button>
+            <button id="amBtn" class="tab-button" disabled>
+                <i class="fas fa-clipboard-check"></i> AM Details
+            </button>
+            <button id="pharmacyBtn" class="tab-button" disabled>
+                <i class="fas fa-pills"></i> Pharmacy
+            </button>
+            <button id="eventBtn" class="tab-button" disabled>
+                <i class="fas fa-calendar-alt"></i> Event
+            </button>
+        </div>
+        <div id="hcpForm" class="hidden">
+            <h2><i class="fas fa-user-md"></i> HCP Submission Form</h2>
+            <div class="form-group">
+                <label for="hcp" class="required-field">Healthcare Professional</label>
+                <select id="hcp" required>
+                    <option value="">Select Healthcare Professional</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="brickHcp">Brick</label>
+                    <input type="text" id="brickHcp" class="readonly-input" readonly />
+                </div>
+                <div class="form-group">
+                    <label for="specialtyHcp">Specialty</label>
+                    <input type="text" id="specialtyHcp" class="readonly-input" readonly />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="visitTimeHcp">Visit Time</label>
+                <input type="datetime-local" id="visitTimeHcp" required readonly />
+            </div>
+            <div class="form-group">
+                <label for="commentsHcp" class="required-field">Comments</label>
+                <textarea id="commentsHcp" placeholder="Enter detailed visit notes here..." required></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="samples">Samples</label>
+                    <select id="samples" required>
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group hidden" id="sampleCountGroup">
+                    <label for="sampleCount">Sample Count</label>
+                    <input type="number" id="sampleCount" value="1" min="1" required />
+                </div>
+            </div>
+        </div>
+        <div id="pharmacyForm" class="hidden">
+            <h2><i class="fas fa-pills"></i> Pharmacy Submission</h2>
+            <div class="form-group">
+                <label for="pharmacyName" class="required-field">Pharmacy Name</label>
+                <input type="text" id="pharmacyName" placeholder="Enter pharmacy name" required />
+            </div>
+            <div class="form-group">
+                <label for="brick" class="required-field">Brick</label>
+                <select id="brick" required>
+                    <option value="">Select Brick</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="visitTimePharmacy">Visit Time</label>
+                <input type="datetime-local" id="visitTimePharmacy" required readonly />
+            </div>
+            <div class="form-group">
+                <label for="commentsPharmacy">Comments</label>
+                <textarea id="commentsPharmacy" placeholder="Enter pharmacy visit notes here..."></textarea>
+            </div>
+        </div>
+        <div id="eventForm" class="hidden">
+            <h2><i class="fas fa-calendar-alt"></i> Event Submission</h2>
+            <div class="form-group">
+                <label for="eventType" class="required-field">Event Type</label>
+                <select id="eventType" required>
+                    <option value="">Select Event Type</option>
+                    <option value="Meeting">Meeting</option>
+                    <option value="Training">Training</option>
+                    <option value="Event">Event</option>
+                    <option value="Official vacation">Official vacation</option>
+                    <option value="Annual leave">Annual leave</option>
+                    <option value="Casual leave">Casual leave</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="eventActivity" class="required-field">Event Time</label>
+                <select id="eventActivity" required>
+                    <option value="">Select Event Time</option>
+                    <option value="AM activity">AM activity</option>
+                    <option value="PM activity">PM activity</option>
+                    <option value="Full day">Full day</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="commentsEvent" class="required-field">Comments</label>
+                <textarea id="commentsEvent" placeholder="Enter event details here..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="dateEvent" class="required-field">Date</label>
+                <input type="date" id="dateEvent" required />
+            </div>
+        </div>
+        <div id="amForm" class="hidden">
+            <h2><i class="fas fa-clipboard-check"></i> AM Details Submission</h2>
+            <div class="form-group">
+                <label for="amDoctorName" class="required-field">AM Doctor Name</label>
+                <input type="text" id="amDoctorName" placeholder="Enter AM doctor name" required />
+            </div>
+            <div class="form-group">
+                <label for="associatedAccount" class="required-field">Associated Account</label>
+                <select id="associatedAccount" required>
+                    <option value="">Select Associated Account</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="amBrick" class="required-field">Brick</label>
+                <select id="amBrick" required>
+                    <option value="">Select Brick</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="visitTimeAm">Visit Time</label>
+                <input type="datetime-local" id="visitTimeAm" required readonly />
+            </div>
+            <div class="form-group">
+                <label for="commentsAm" class="required-field">Comments</label>
+                <textarea id="commentsAm" placeholder="Enter detailed AM notes here..." required></textarea>
+            </div>
+        </div>
+        <div id="remainingVisitsSection" class="info-section hidden">
+            <div class="info-section-title">Visit Statistics</div>
+            <div class="info-section-content">
+                <div>Remaining Visits:</div>
+                <div class="info-value"><span id="remainingVisits">0</span></div>
+            </div>
+            <div id="lastVisitDate" class="last-visit-date"></div>
+        </div>
+        <div id="savedCommentSection" class="info-section hidden">
+            <div class="saved-comment-title">Saved Comment:</div>
+            <div id="savedComment" class="saved-comment-content">No previous comments available</div>
+        </div>
+        <div class="action-button-group">
+            <button id="submitBtn" class="action-button submit-btn" disabled><i class="fas fa-save"></i> Submit</button>
+            <button id="resetBtn" class="action-button reset-btn"><i class="fas fa-undo"></i> Reset</button>
+            <button id="retrieveBtn" class="action-button retrieve-btn"><i class="fas fa-sync-alt"></i> Retrieve</button>
+        </div>
+        <div id="dataTable" class="hidden">
+            <h2><i class="fas fa-table"></i> Visit Data</h2>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search for data..." />
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>HCP Name</th>
+                            <th>Specialty</th>
+                            <th>Brick</th>
+                            <th>Target Visits</th>
+                            <th>Last Visit</th>
+                            <th>Remaining Visits</th>
+                            <th>Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="designed-by">Designed By: DrTahaDesigns</div>
+    </div>
     <script>
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('due-date').value = today;
-        let currentAction = '';
-
-        document.getElementById('task').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                showPasswordModal('add');
-            }
-        });
-
-        function showPasswordModal(action) {
-            currentAction = action;
-            document.getElementById('password-modal').style.display = 'block';
-            document.getElementById('password-input').focus();
+        document.addEventListener('DOMContentLoaded', () => {
+        // Cookie handling functions
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = `${name}=${JSON.stringify(value)};${expires};path=/`;
         }
 
-        function closePasswordModal() {
-            document.getElementById('password-modal').style.display = 'none';
-            document.getElementById('password-input').value = '';
-        }
-
-        function checkPassword() {
-            const password = document.getElementById('password-input').value;
-            if (password === 'tito89') {
-                closePasswordModal();
-                if (currentAction === 'add') {
-                    addTask();
-                } else if (currentAction === 'delete') {
-                    deleteSelectedTasks();
+        function getCookie(name) {
+            const cookieName = name + "=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const cookieArray = decodedCookie.split(';');
+            for (let i = 0; i < cookieArray.length; i++) {
+                let cookie = cookieArray[i];
+                while (cookie.charAt(0) === ' ') {
+                    cookie = cookie.substring(1);
                 }
-            } else {
-                alert('Incorrect password');
+                if (cookie.indexOf(cookieName) === 0) {
+                    return JSON.parse(cookie.substring(cookieName.length, cookie.length));
+                }
             }
+            return null;
         }
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('password-modal');
-            if (event.target === modal) {
-                closePasswordModal();
-            }
+        function deleteCookie(name) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
         }
 
-        document.getElementById('password-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkPassword();
+        // Elements
+        const loginPage = document.getElementById('loginPage');
+        const formPage = document.getElementById('formPage');
+        const medRepLoginSelect = document.getElementById('medRepLogin');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const medRepNameElement = document.getElementById('medRepName');
+        const medRepAreaElement = document.getElementById('medRepArea');
+        const loginAlertContainer = document.getElementById('loginAlertContainer');
+        const hcpBtn = document.getElementById('hcpBtn');
+        const pharmacyBtn = document.getElementById('pharmacyBtn');
+        const eventBtn = document.getElementById('eventBtn');
+        const amBtn = document.getElementById('amBtn');
+        const hcpForm = document.getElementById('hcpForm');
+        const pharmacyForm = document.getElementById('pharmacyForm');
+        const eventForm = document.getElementById('eventForm');
+        const amForm = document.getElementById('amForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const retrieveBtn = document.getElementById('retrieveBtn');
+        const remainingVisitsSection = document.getElementById('remainingVisitsSection');
+        const savedCommentSection = document.getElementById('savedCommentSection');
+        let currentMedRep = null;
+        let globalData = null;
+
+        // Check if user is already logged in using cookies
+        const savedUser = getCookie('currentUser');
+        if (savedUser) {
+            currentMedRep = savedUser;
+            medRepNameElement.textContent = currentMedRep.name;
+            medRepAreaElement.textContent = currentMedRep.area;
+            loginPage.classList.add('hidden');
+            formPage.classList.remove('hidden');
+            formManager.updateHcpOptions(currentMedRep.name);
+            formManager.updateBrickOptions(currentMedRep.name);
+            formManager.updateAmBrickOptions(currentMedRep.name);
+            formManager.updateAssociatedAccounts(currentMedRep.name);
+            formManager.updateRemainingHcpsCount(currentMedRep.name);
+            hcpBtn.disabled = false;
+            pharmacyBtn.disabled = false;
+            eventBtn.disabled = false;
+            amBtn.disabled = false;
+        }
+
+        const now = new Date();
+        const dateTimeStr = now.toISOString().slice(0, 16);
+        document.getElementById('visitTimeHcp').value = dateTimeStr;
+        document.getElementById('visitTimePharmacy').value = dateTimeStr;
+        document.getElementById('visitTimeAm').value = dateTimeStr;
+        document.getElementById('dateEvent').value = now.toISOString().slice(0, 10);
+
+
+            class FormManager {
+                constructor() {
+                    this.isLoading = false;
+                    this.elements = {
+                        hcpSelect: document.getElementById('hcp'),
+                        brickHcpInput: document.getElementById('brickHcp'),
+                        specialtyHcpInput: document.getElementById('specialtyHcp'),
+                        visitTimeHcpInput: document.getElementById('visitTimeHcp'),
+                        commentsHcpInput: document.getElementById('commentsHcp'),
+                        pharmacyNameInput: document.getElementById('pharmacyName'),
+                        brickSelect: document.getElementById('brick'),
+                        visitTimePharmacyInput: document.getElementById('visitTimePharmacy'),
+                        commentsPharmacyInput: document.getElementById('commentsPharmacy'),
+                        eventTypeSelect: document.getElementById('eventType'),
+                        eventActivitySelect: document.getElementById('eventActivity'),
+                        commentsEventInput: document.getElementById('commentsEvent'),
+                        dateEventInput: document.getElementById('dateEvent'),
+                        remainingVisitsSpan: document.getElementById('remainingVisits'),
+                        lastVisitDateSpan: document.getElementById('lastVisitDate'),
+                        savedCommentSpan: document.getElementById('savedComment'),
+                        dataTable: document.getElementById('dataTable'),
+                        tableBody: document.getElementById('tableBody'),
+                        alertContainer: document.getElementById('alertContainer'),
+                        samplesSelect: document.getElementById('samples'),
+                        sampleCountInput: document.getElementById('sampleCount'),
+                        searchInput: document.getElementById('searchInput'),
+                        amDoctorNameInput: document.getElementById('amDoctorName'),
+                        associatedAccountSelect: document.getElementById('associatedAccount'),
+                        amBrickSelect: document.getElementById('amBrick'),
+                        visitTimeAmInput: document.getElementById('visitTimeAm'),
+                        commentsAmInput: document.getElementById('commentsAm')
+                    };
+                    this.initialize();
+                }
+
+                async initialize() {
+                    try {
+                        await this.fetchAndSetupData();
+                        this.setupEventListeners();
+                        this.setCurrentDateTimeInCairo();
+                    } catch (error) {
+                        this.showAlert('Error initializing form. Please refresh the page.', 'error');
+                    }
+                }
+
+                async fetchAndSetupData() {
+                    const response = await this.fetchCSVData();
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch CSV data');
+                    }
+                    const csvText = await response.text();
+                    globalData = this.parseCSVData(csvText);
+                    this.populateMedicalReps();
+                }
+
+                async fetchCSVData() {
+                    try {
+                        return await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSDXrEXNQrIAleKADkuXphJl1wTxBoPifIlXVujsnjtmlKDRIq149Sf7mQJVQG0AP4qNSwjT1Ao_o6G/pub?gid=0&single=true&output=csv');
+                    } catch (error) {
+                        console.error('Error fetching CSV:', error);
+                        throw error;
+                    }
+                }
+
+                parseCSVData(csvText) {
+                    const rows = csvText.split('\n').filter(row => row.trim() !== '');
+                    const headers = rows[0].split(',');
+                    const data = {
+                        medicalReps: [],
+                        hcps: []
+                    };
+                    const uniqueReps = new Set();
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i].split(',');
+                        if (row.length < headers.length) continue;
+                        const repName = row[headers.indexOf('medical rep')].trim();
+                        const area = row[headers.indexOf('area')].trim();
+                        if (!uniqueReps.has(repName)) {
+                            uniqueReps.add(repName);
+                            data.medicalReps.push({ name: repName, area: area });
+                        }
+                        data.hcps.push({
+                            id: i,
+                            name: row[headers.indexOf('HCPS')].trim(),
+                            specialty: row[headers.indexOf('Speciality')].trim(),
+                            brick: row[headers.indexOf('Brick')].trim(),
+                            tv: parseInt(row[headers.indexOf('T.V')]) || 0,
+                            repName: repName
+                        });
+                    }
+                    return data;
+                }
+
+                async setCurrentDateTimeInCairo() {
+                    const now = new Date();
+                    now.setHours(now.getHours() + 3);
+                    const formattedDate = now.toISOString().slice(0, 16);
+                    this.elements.visitTimeHcpInput.value = formattedDate;
+                    this.elements.visitTimePharmacyInput.value = formattedDate;
+                    this.elements.dateEventInput.value = now.toISOString().slice(0, 10);
+                    this.elements.visitTimeAmInput.value = formattedDate;
+                }
+
+                setupEventListeners() {
+                    this.elements.hcpSelect.addEventListener('change', () => this.handleHcpChange());
+                    hcpBtn.addEventListener('click', () => this.showHcpForm());
+                    pharmacyBtn.addEventListener('click', () => this.showPharmacyForm());
+                    eventBtn.addEventListener('click', () => this.showEventForm());
+                    amBtn.addEventListener('click', () => this.showAmForm());
+                    submitBtn.addEventListener('click', () => this.handleSubmit());
+                    resetBtn.addEventListener('click', () => this.handleReset());
+                    retrieveBtn.addEventListener('click', () => this.handleRetrieve());
+                    this.elements.searchInput.addEventListener('input', () => this.filterTable());
+                    this.elements.samplesSelect.addEventListener('change', () => this.toggleSampleCount());
+                }
+
+                toggleSampleCount() {
+                    const sampleCountGroup = document.getElementById('sampleCountGroup');
+                    if (this.elements.samplesSelect.value === 'Yes') {
+                        sampleCountGroup.classList.remove('hidden');
+                    } else {
+                        sampleCountGroup.classList.add('hidden');
+                    }
+                }
+
+                showHcpForm() {
+                    hcpForm.classList.remove('hidden');
+                    pharmacyForm.classList.add('hidden');
+                    eventForm.classList.add('hidden');
+                    amForm.classList.add('hidden');
+                    remainingVisitsSection.classList.remove('hidden');
+                    savedCommentSection.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    this.updateRemainingHcpsCount(currentMedRep.name);
+                }
+
+                showPharmacyForm() {
+                    hcpForm.classList.add('hidden');
+                    pharmacyForm.classList.remove('hidden');
+                    eventForm.classList.add('hidden');
+                    amForm.classList.add('hidden');
+                    remainingVisitsSection.classList.add('hidden');
+                    savedCommentSection.classList.add('hidden');
+                    submitBtn.disabled = false;
+                }
+
+                showEventForm() {
+                    hcpForm.classList.add('hidden');
+                    pharmacyForm.classList.add('hidden');
+                    eventForm.classList.remove('hidden');
+                    amForm.classList.add('hidden');
+                    remainingVisitsSection.classList.add('hidden');
+                    savedCommentSection.classList.add('hidden');
+                    submitBtn.disabled = false;
+                }
+
+                showAmForm() {
+                    hcpForm.classList.add('hidden');
+                    pharmacyForm.classList.add('hidden');
+                    eventForm.classList.add('hidden');
+                    amForm.classList.remove('hidden');
+                    remainingVisitsSection.classList.add('hidden');
+                    savedCommentSection.classList.add('hidden');
+                    submitBtn.disabled = false;
+                }
+
+                showAlert(message, type) {
+                    const alert = document.createElement('div');
+                    alert.className = `alert alert-${type}`;
+                    alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
+                    alert.style.display = 'block';
+                    this.elements.alertContainer.innerHTML = '';
+                    this.elements.alertContainer.appendChild(alert);
+                    alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 5000);
+                }
+
+                setLoading(isLoading) {
+                    this.isLoading = isLoading;
+                    const buttons = document.querySelectorAll('button');
+                    buttons.forEach(button => {
+                        button.disabled = isLoading;
+                    });
+                }
+
+                async handleSubmit() {
+                    if (this.isLoading) return;
+                    try {
+                        const formData = this.getFormData();
+                        if (hcpForm.classList.contains('hidden')) {
+                            if (pharmacyForm.classList.contains('hidden')) {
+                                if (eventForm.classList.contains('hidden')) {
+                                    if (!formData.amDoctorName || !formData.associatedAccount || !formData.amBrick || !formData.commentsAm) {
+                                        throw new Error('Please fill in all required fields for the AM details form');
+                                    }
+                                    await this.storeAmDetailsInSupabase(formData);
+                                } else {
+                                    if (!formData.eventType || !formData.eventActivity || !formData.commentsEvent || !formData.dateEvent) {
+                                        throw new Error('Please fill in all required fields for the event form');
+                                    }
+                                    await this.storeEventInSupabase(formData);
+                                }
+                            } else {
+                                if (!formData.pharmacyName || !formData.visitTimePharmacy || !formData.brick) {
+                                    throw new Error('Please fill in all required fields for the pharmacy form');
+                                }
+                                await this.storePharmacyInSupabase(formData);
+                            }
+                        } else {
+                            if (!formData.comments) {
+                                throw new Error('Please add a visit comment');
+                            }
+                            await this.validateFormData(formData);
+                            await this.storeVisitInSupabase(formData);
+                            if (formData.samples === 'Yes') {
+                                await this.storeSampleInSupabase(formData);
+                            }
+                            this.showAlert('Visit successfully stored!', 'success');
+                        }
+                        this.handleReset();
+                        this.setLoading(true);
+                    } catch (error) {
+                        this.showAlert(error.message, 'error');
+                    } finally {
+                        this.setLoading(false);
+                    }
+                }
+
+                async storeEventInSupabase(formData) {
+                    const visitData = {
+                        hcp_name: formData.eventType,
+                        specialty: 'Event',
+                        brick: formData.eventActivity,
+                        comments: formData.commentsEvent,
+                        visit_date: formData.dateEvent,
+                        medical_rep: currentMedRep.name,
+                    };
+                    try {
+                        const response = await fetch(SUPABASE_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                                'apikey': SUPABASE_API_KEY,
+                                'Prefer': 'return=representation'
+                            },
+                            body: JSON.stringify(visitData)
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Failed to store event:', response.status, errorText);
+                            throw new Error(`Failed to store event: ${errorText}`);
+                        }
+                        this.showAlert('Event successfully stored!', 'success');
+                    } catch (error) {
+                        console.error('Network error while storing event:', error);
+                        throw new Error('Failed to store event. Please check your connection and try again.');
+                    }
+                }
+
+                getFormData() {
+                    return {
+                        hcpName: this.elements.hcpSelect.value,
+                        medicalRep: currentMedRep.name,
+                        visitDate: this.elements.visitTimeHcpInput.value,
+                        comments: this.elements.commentsHcpInput.value,
+                        pharmacyName: this.elements.pharmacyNameInput.value,
+                        brick: this.elements.brickSelect.value,
+                        visitTimePharmacy: this.elements.visitTimePharmacyInput.value,
+                        commentsPharmacy: this.elements.commentsPharmacyInput.value,
+                        eventType: this.elements.eventTypeSelect.value,
+                        eventActivity: this.elements.eventActivitySelect.value,
+                        commentsEvent: this.elements.commentsEventInput.value,
+                        dateEvent: this.elements.dateEventInput.value,
+                        samples: this.elements.samplesSelect.value,
+                        sampleCount: this.elements.sampleCountInput.value,
+                        amDoctorName: this.elements.amDoctorNameInput.value,
+                        associatedAccount: this.elements.associatedAccountSelect.value,
+                        amBrick: this.elements.amBrickSelect.value,
+                        visitTimeAm: this.elements.visitTimeAmInput.value,
+                        commentsAm: this.elements.commentsAmInput.value
+                    };
+                }
+
+                async validateFormData(data) {
+                    if (!data.hcpName || !data.medicalRep || !data.visitDate || !data.comments) {
+                        throw new Error('Please fill in all required fields');
+                    }
+                    if (await this.hasVisitedToday(data)) {
+                        throw new Error('This HCP has already been visited today');
+                    }
+                    const hcp = globalData.hcps.find(h => h.name === data.hcpName);
+                    if (hcp) {
+                        const remainingVisits = await this.getRemainingVisits(hcp.name);
+                        if (remainingVisits <= 0) {
+                            throw new Error('You have finished the required visits for this HCP this month');
+                        }
+                    }
+                }
+
+                async hasVisitedToday(formData) {
+                    const response = await fetch(`${SUPABASE_URL}?hcp_name=eq.${encodeURIComponent(formData.hcpName)}&medical_rep=eq.${encodeURIComponent(formData.medicalRep)}&visit_date=eq.${formData.visitDate}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                            'apikey': SUPABASE_API_KEY,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Failed to check visits:', response.status, errorText);
+                        throw new Error('Failed to check visits');
+                    }
+                    const visits = await response.json();
+                    return visits.length > 0;
+                }
+
+                async getRemainingVisits(hcpName) {
+                    const response = await fetch(`${SUPABASE_URL}?hcp_name=eq.${encodeURIComponent(hcpName)}&visit_date=gte.${this.getCurrentMonthStart()}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                            'apikey': SUPABASE_API_KEY,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Failed to retrieve visits:', response.status, errorText);
+                        throw new Error('Failed to retrieve visits');
+                    }
+                    const visits = await response.json();
+                    const hcp = globalData.hcps.find(h => h.name === hcpName);
+                    const remainingVisits = Math.max(0, hcp.tv - visits.length);
+                    return remainingVisits;
+                }
+
+                async storeVisitInSupabase(formData) {
+                    const hcp = globalData.hcps.find(h => h.name === formData.hcpName);
+                    const visitData = {
+                        hcp_name: formData.hcpName,
+                        specialty: hcp?.specialty,
+                        brick: hcp?.brick,
+                        target_visits: hcp?.tv,
+                        last_visit: formData.visitDate,
+                        remaining_visits: await this.getRemainingVisits(formData.hcpName) - 1,
+                        medical_rep: formData.medicalRep,
+                        visit_date: formData.visitDate,
+                        comments: formData.comments
+                    };
+                    try {
+                        const response = await fetch(SUPABASE_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                                'apikey': SUPABASE_API_KEY,
+                                'Prefer': 'return=representation'
+                            },
+                            body: JSON.stringify(visitData)
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Failed to store visit:', response.status, errorText);
+                            throw new Error(`Failed to store visit: ${errorText}`);
+                        }
+                        const commentData = {
+                            hcp_name: formData.hcpName,
+                            medical_rep: formData.medicalRep,
+                            comment: formData.comments
+                        };
+                        const commentResponse = await fetch(SAVED_COMMENTS_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                                'apikey': SUPABASE_API_KEY,
+                                'Prefer': 'return=representation'
+                            },
+                            body: JSON.stringify(commentData)
+                        });
+                        if (!commentResponse.ok) {
+                            const errorText = await commentResponse.text();
+                            console.error('Failed to save comment:', commentResponse.status, errorText);
+                            throw new Error(`Failed to save comment: ${errorText}`);
+                        }
+                    } catch (error) {
+                        console.error('Network error while storing visit:', error);
+                        throw new Error('Failed to store visit. Please check your connection and try again.');
+                    }
+                }
+
+                async storeSampleInSupabase(formData) {
+                    const hcp = globalData.hcps.find(h => h.name === formData.hcpName);
+                    const sampleData = {
+                        medRep: formData.medicalRep,
+                        area: hcp.brick,
+                        customerType: 'HCPS',
+                        accountType: hcp.specialty,
+                        customerName: formData.hcpName,
+                        product: 'Wouncure',
+                        count: parseInt(formData.sampleCount),
+                        date: formData.visitDate.split('T')[0],
+                        comments: formData.comments,
+                        sampleReason: 'Sample'
+                    };
+                    try {
+                        const response = await fetch('https://zitouedzklygvejqosul.supabase.co/rest/v1/samples_management', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                                'apikey': SUPABASE_API_KEY,
+                                'Prefer': 'return=representation'
+                            },
+                            body: JSON.stringify(sampleData)
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Failed to store sample:', response.status, errorText);
+                            throw new Error(`Failed to store sample: ${errorText}`);
+                        }
+                        this.showAlert('Sample successfully stored!', 'success');
+                    } catch (error) {
+                        console.error('Network error while storing sample:', error);
+                        throw new Error('Failed to store sample. Please check your connection and try again.');
+                    }
+                }
+
+                async storePharmacyInSupabase(formData) {
+                    if (!currentMedRep) {
+                        throw new Error('Please select a Medical Rep before submitting the pharmacy form.');
+                    }
+                    const visitData = {
+                        hcp_name: formData.pharmacyName,
+                        specialty: 'Pharmacy',
+                        brick: formData.brick,
+                        visit_date: formData.visitTimePharmacy,
+                        comments: formData.commentsPharmacy,
+                        medical_rep: currentMedRep.name,
+                    };
+                    try {
+                        const response = await fetch(SUPABASE_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                                'apikey': SUPABASE_API_KEY,
+                                'Prefer': 'return=representation'
+                            },
+                            body: JSON.stringify(visitData)
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Failed to store pharmacy visit:', response.status, errorText);
+                            throw new Error(`Failed to store pharmacy visit: ${errorText}`);
+                        }
+                        this.showAlert('Pharmacy visit successfully stored!', 'success');
+                    } catch (error) {
+                        console.error('Network error while storing pharmacy visit:', error);
+                        throw new Error('Failed to store pharmacy visit. Please check your connection and try again.');
+                    }
+                }
+
+                async storeAmDetailsInSupabase(formData) {
+                    if (!currentMedRep) {
+                        throw new Error('Please select a Medical Rep before submitting AM details.');
+                    }
+                    const visitData = {
+                        hcp_name: formData.amDoctorName,
+                        specialty: `AM(${formData.associatedAccount})`,
+                        brick: formData.amBrick,
+                        visit_date: formData.visitTimeAm,
+                        comments: formData.commentsAm,
+                        medical_rep: currentMedRep.name,
+                    };
+                    try {
+                        const response = await fetch(SUPABASE_URL, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                                'apikey': SUPABASE_API_KEY,
+                                'Prefer': 'return=representation'
+                            },
+                            body: JSON.stringify(visitData)
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Failed to store AM details:', response.status, errorText);
+                            throw new Error(`Failed to store AM details: ${errorText}`);
+                        }
+                        this.showAlert('AM details successfully stored!', 'success');
+                    } catch (error) {
+                        console.error('Network error while storing AM details:', error);
+                        throw new Error('Failed to store AM details. Please check your connection and try again.');
+                    }
+                }
+
+                populateMedicalReps() {
+                    medRepLoginSelect.innerHTML = '<option value="">Select Medical Rep</option>';
+                    globalData.medicalReps.forEach(rep => {
+                        const option = document.createElement('option');
+                        option.value = rep.name;
+                        option.textContent = rep.name;
+                        medRepLoginSelect.appendChild(option);
+                    });
+                }
+
+                async updateRemainingHcpsCount(repName) {
+                    try {
+                        const [googleSheetHcps, supabaseHcps] = await Promise.all([
+                            this.fetchGoogleSheetHcps(repName),
+                            this.fetchSupabaseHcps(repName)
+                        ]);
+                        const visitedHcpNames = new Set(supabaseHcps.map(visit => visit.hcp_name));
+                        const unvisitedHcps = googleSheetHcps.filter(hcp => !visitedHcpNames.has(hcp.name));
+                        this.elements.remainingVisitsSpan.textContent = unvisitedHcps.length;
+                        this.elements.lastVisitDateSpan.textContent = '';
+                        this.updateHcpDropdownWithUnvisitedStatus(unvisitedHcps);
+                    } catch (error) {
+                        console.error('Error updating unvisited HCPs count:', error);
+                        this.elements.remainingVisitsSpan.textContent = 'Error';
+                    }
+                }
+
+                async fetchGoogleSheetHcps(repName) {
+                    const response = await fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSDXrEXNQrIAleKADkuXphJl1wTxBoPifIlXVujsnjtmlKDRIq149Sf7mQJVQG0AP4qNSwjT1Ao_o6G/pub?gid=0&single=true&output=csv');
+                    if (!response.ok) throw new Error('Failed to fetch Google Sheet data');
+                    const csvText = await response.text();
+                    const rows = csvText.split('\n').filter(row => row.trim() !== '');
+                    const headers = rows[0].split(',');
+                    const hcps = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i].split(',');
+                        if (row.length < headers.length) continue;
+                        const hcpName = row[headers.indexOf('HCPS')].trim();
+                        const rep = row[headers.indexOf('medical rep')].trim();
+                        if (rep === repName) {
+                            hcps.push({
+                                name: hcpName,
+                                specialty: row[headers.indexOf('Speciality')].trim(),
+                                brick: row[headers.indexOf('Brick')].trim(),
+                                tv: parseInt(row[headers.indexOf('T.V')]) || 0
+                            });
+                        }
+                    }
+                    return hcps;
+                }
+
+                async fetchSupabaseHcps(repName) {
+                    const response = await fetch(`${SUPABASE_URL}?medical_rep=eq.${encodeURIComponent(repName)}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                            'apikey': SUPABASE_API_KEY,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch Supabase data');
+                    return await response.json();
+                }
+
+                updateHcpDropdownWithUnvisitedStatus(unvisitedHcps) {
+                    const hcpSelect = this.elements.hcpSelect;
+                    const currentValue = hcpSelect.value;
+                    const unvisitedHcpNames = new Set(unvisitedHcps.map(hcp => hcp.name));
+                    Array.from(hcpSelect.options).forEach(option => {
+                        if (option.value && unvisitedHcpNames.has(option.value)) {
+                            option.style.color = '#8B0000';
+                            option.style.fontWeight = 'bold';
+                        } else {
+                            option.style.color = '';
+                            option.style.fontWeight = '';
+                        }
+                    });
+                    hcpSelect.value = currentValue;
+                }
+
+                getCurrentMonthStart() {
+                    const today = new Date();
+                    return new Date(today.getFullYear(), today.getMonth(), 2).toISOString().split('T')[0];
+                }
+
+                updateHcpOptions(repName) {
+                    this.elements.hcpSelect.innerHTML = '<option value="">Select Healthcare Professional</option>';
+                    const filteredHcps = globalData.hcps.filter(hcp => hcp.repName === repName);
+                    filteredHcps.forEach(hcp => {
+                        const option = document.createElement('option');
+                        option.value = hcp.name;
+                        option.textContent = hcp.name;
+                        this.elements.hcpSelect.appendChild(option);
+                    });
+                }
+
+                updateBrickOptions(repName) {
+                    this.elements.brickSelect.innerHTML = '<option value="">Select Brick</option>';
+                    const filteredBricks = globalData.hcps.filter(hcp => hcp.repName === repName).map(hcp => hcp.brick);
+                    const uniqueBricks = [...new Set(filteredBricks)];
+                    uniqueBricks.forEach(brick => {
+                        const option = document.createElement('option');
+                        option.value = brick;
+                        option.textContent = brick;
+                        this.elements.brickSelect.appendChild(option);
+                    });
+                }
+
+                updateAmBrickOptions(repName) {
+                    this.elements.amBrickSelect.innerHTML = '<option value="">Select Brick</option>';
+                    const filteredBricks = globalData.hcps.filter(hcp => hcp.repName === repName).map(hcp => hcp.brick);
+                    const uniqueBricks = [...new Set(filteredBricks)];
+                    uniqueBricks.forEach(brick => {
+                        const option = document.createElement('option');
+                        option.value = brick;
+                        option.textContent = brick;
+                        this.elements.amBrickSelect.appendChild(option);
+                    });
+                }
+
+                updateAssociatedAccounts(repName) {
+                    this.elements.associatedAccountSelect.innerHTML = '<option value="">Select Associated Account</option>';
+                    const filteredHcps = globalData.hcps.filter(hcp =>
+                        hcp.repName === repName &&
+                        ['hospital', 'account', 'dialysis center'].includes(hcp.specialty.toLowerCase())
+                    );
+                    const uniqueHcpNames = new Set();
+                    filteredHcps.forEach(hcp => {
+                        if (!uniqueHcpNames.has(hcp.name)) {
+                            uniqueHcpNames.add(hcp.name);
+                            const option = document.createElement('option');
+                            option.value = hcp.name;
+                            option.textContent = hcp.name;
+                            this.elements.associatedAccountSelect.appendChild(option);
+                        }
+                    });
+                }
+
+                handleHcpChange() {
+                    const selectedHcp = this.elements.hcpSelect.value;
+                    if (selectedHcp) {
+                        this.updateRemainingVisits(selectedHcp);
+                        this.updateHcpDetails(selectedHcp);
+                        this.updateSavedComment(selectedHcp);
+                    } else {
+                        this.updateRemainingHcpsCount(currentMedRep.name);
+                    }
+                }
+
+                async updateRemainingVisits(hcpName) {
+                    const hcp = globalData.hcps.find(h => h.name === hcpName);
+                    if (hcp) {
+                        const remainingVisits = await this.getRemainingVisits(hcp.name);
+                        this.elements.remainingVisitsSpan.textContent = remainingVisits;
+                        const lastVisit = await this.getLastVisitDate(hcpName);
+                        this.elements.lastVisitDateSpan.textContent = lastVisit !== 'N/A' ? ` (Last Visit: ${new Date(lastVisit).toLocaleDateString()})` : '';
+                    } else {
+                        this.elements.remainingVisitsSpan.textContent = '0';
+                        this.elements.lastVisitDateSpan.textContent = '';
+                    }
+                }
+
+                async getLastVisitDate(hcpName) {
+                    const response = await fetch(`${SUPABASE_URL}?hcp_name=eq.${encodeURIComponent(hcpName)}&order=visit_date.desc&limit=1`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                            'apikey': SUPABASE_API_KEY,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Failed to retrieve last visit:', response.status, errorText);
+                        throw new Error('Failed to retrieve last visit');
+                    }
+                    const lastVisit = await response.json();
+                    return lastVisit.length > 0 ? lastVisit[0].visit_date : 'N/A';
+                }
+
+                async updateSavedComment(hcpName) {
+                    const medRep = currentMedRep.name;
+                    const response = await fetch(`${SAVED_COMMENTS_URL}?hcp_name=eq.${encodeURIComponent(hcpName)}&medical_rep=eq.${encodeURIComponent(medRep)}&order=created_at.desc&limit=1`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                            'apikey': SUPABASE_API_KEY,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Failed to retrieve saved comment:', response.status, errorText);
+                        throw new Error('Failed to retrieve saved comment');
+                    }
+                    const lastComment = await response.json();
+                    const savedComment = lastComment.length > 0 ? lastComment[0].comment : 'No previous comments available';
+                    this.elements.savedCommentSpan.textContent = savedComment;
+                }
+
+                updateHcpDetails(hcpName) {
+                    const hcp = globalData.hcps.find(h => h.name === hcpName);
+                    if (hcp) {
+                        this.elements.brickHcpInput.value = hcp.brick;
+                        this.elements.specialtyHcpInput.value = hcp.specialty;
+                    } else {
+                        this.elements.brickHcpInput.value = '';
+                        this.elements.specialtyHcpInput.value = '';
+                    }
+                }
+
+                async handleRetrieve() {
+                    const medRep = currentMedRep.name;
+                    if (!medRep) {
+                        this.showAlert('Please select a Medical Rep', 'error');
+                        return;
+                    }
+                    const tableBody = this.elements.tableBody;
+                    tableBody.innerHTML = '';
+                    try {
+                        const response = await fetch(`${SUPABASE_URL}?medical_rep=eq.${encodeURIComponent(medRep)}`, {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                                'apikey': SUPABASE_API_KEY,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Failed to retrieve visits:', response.status, errorText);
+                            throw new Error('Failed to retrieve visits');
+                        }
+                        const visits = await response.json();
+                        visits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                        const firstVisitsByDate = {};
+                        visits.forEach(visit => {
+                            const visitDate = new Date(visit.created_at).toLocaleDateString();
+                            const visitDateTime = new Date(visit.created_at).getTime();
+                            if (!firstVisitsByDate[visitDate] ||
+                                visitDateTime < new Date(firstVisitsByDate[visitDate].created_at).getTime()) {
+                                firstVisitsByDate[visitDate] = visit;
+                            }
+                        });
+                        visits.forEach(visit => {
+                            const row = document.createElement('tr');
+                            const visitDate = new Date(visit.created_at).toLocaleDateString();
+                            if (firstVisitsByDate[visitDate] === visit) {
+                                row.style.backgroundColor = '#e6ffe6';
+                            }
+                            if (visit.specialty === 'Pharmacy') {
+                                row.classList.add('pharmacy-row');
+                            }
+                            if (visit.hcp_name.toLowerCase() === 'event') {
+                                row.classList.add('event-row');
+                            }
+                            row.innerHTML = `
+                                <td>${visit.hcp_name}</td>
+                                <td>${visit.specialty || 'N/A'}</td>
+                                <td>${visit.brick || 'N/A'}</td>
+                                <td>${visit.target_visits || 'N/A'}</td>
+                                <td>${this.formatDateTime(new Date(visit.created_at)) || 'N/A'}</td>
+                                <td>${visit.remaining_visits !== null ? visit.remaining_visits : 0}</td>
+                                <td>${visit.comments || 'N/A'}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                        if (visits.length > 0) {
+                            this.elements.dataTable.classList.remove('hidden');
+                        } else {
+                            this.showAlert('No visits found for the selected Medical Rep.', 'info');
+                            this.elements.dataTable.classList.add('hidden');
+                        }
+                    } catch (error) {
+                        console.error('Error retrieving visits:', error);
+                        this.showAlert('Failed to retrieve visits. Please try again.', 'error');
+                    }
+                }
+
+                formatDateTime(date) {
+                    const options = {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true
+                    };
+                    return date.toLocaleString('en-US', options);
+                }
+
+                filterTable() {
+                    const searchTerm = this.elements.searchInput.value.toLowerCase();
+                    const rows = this.elements.tableBody.getElementsByTagName('tr');
+                    for (let i = 0; i < rows.length; i++) {
+                        const cells = rows[i].getElementsByTagName('td');
+                        let rowMatches = false;
+                        for (let j = 0; j < cells.length; j++) {
+                            if (cells[j].textContent.toLowerCase().includes(searchTerm)) {
+                                rowMatches = true;
+                                break;
+                            }
+                        }
+                        if (rowMatches) {
+                            rows[i].style.display = '';
+                        } else {
+                            rows[i].style.display = 'none';
+                        }
+                    }
+                }
+
+                handleReset() {
+                    this.elements.hcpSelect.value = '';
+                    this.elements.pharmacyNameInput.value = '';
+                    this.elements.brickSelect.value = '';
+                    this.elements.visitTimeHcpInput.value = '';
+                    this.elements.commentsHcpInput.value = '';
+                    this.elements.visitTimePharmacyInput.value = '';
+                    this.elements.commentsPharmacyInput.value = '';
+                    this.elements.eventTypeSelect.value = '';
+                    this.elements.eventActivitySelect.value = '';
+                    this.elements.commentsEventInput.value = '';
+                    this.elements.dateEventInput.value = '';
+                    this.elements.remainingVisitsSpan.textContent = '0';
+                    this.elements.lastVisitDateSpan.textContent = '';
+                    this.elements.savedCommentSpan.textContent = 'No previous comments available';
+                    this.elements.dataTable.classList.add('hidden');
+                    this.elements.samplesSelect.value = 'No';
+                    this.elements.sampleCountInput.value = '1';
+                    this.elements.amDoctorNameInput.value = '';
+                    this.elements.associatedAccountSelect.value = '';
+                    this.elements.amBrickSelect.value = '';
+                    this.elements.visitTimeAmInput.value = '';
+                    this.elements.commentsAmInput.value = '';
+                    document.getElementById('sampleCountGroup').classList.add('hidden');
+                    this.setCurrentDateTimeInCairo();
+                    hcpForm.classList.add('hidden');
+                    pharmacyForm.classList.add('hidden');
+                    eventForm.classList.add('hidden');
+                    amForm.classList.add('hidden');
+                    hcpBtn.disabled = false;
+                    pharmacyBtn.disabled = false;
+                    eventBtn.disabled = false;
+                    amBtn.disabled = false;
+                    submitBtn.disabled = true;
+                }
             }
-        });
 
-        function addTask() {
-            const task = document.getElementById('task').value;
-            const dueDate = document.getElementById('due-date').value;
-            const assign = document.getElementById('assign').value;
+            const SUPABASE_URL = 'https://zitouedzklygvejqosul.supabase.co/rest/v1/hcp_visits';
+            const SAVED_COMMENTS_URL = 'https://zitouedzklygvejqosul.supabase.co/rest/v1/saved_comments';
+            const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppdG91ZWR6a2x5Z3ZlanFvc3VsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyODE1MTI5NiwiZXhwIjoyMDQzNzI3Mjk2fQ.LTpIdUiHKjXPIT6h5WP1TlKGj7S1dAA02HfGqPB5YQk';
+            const formManager = new FormManager();
 
-            if (!task || !dueDate) {
-                alert("Please fill in all fields.");
+            loginBtn.addEventListener('click', async () => {
+            const selectedRep = medRepLoginSelect.value;
+            const password = passwordInput.value;
+            if (!selectedRep) {
+                showLoginAlert('Please select a Medical Representative', 'error');
                 return;
             }
-
-            const newTask = { task, dueDate, assign, status: 'Planned' };
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            tasks.push(newTask);
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-
-            renderTasks();
-            document.getElementById('task').value = '';
-
-            // Send the task to the Google Apps Script
-            fetch('https://script.google.com/macros/s/AKfycbw0uDS86YVlIx7Wp3gW0Eq2wr9VoVB7yO_pJrj1RfA/exec', {
-                method: 'POST',
-                body: JSON.stringify(newTask),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(response => response.json())
-                .then(data => console.log('Success:', data))
-                .catch((error) => console.error('Error:', error));
-        }
-
-        function renderTasks() {
-            const table = document.getElementById('todo-table').getElementsByTagName('tbody')[0];
-            table.innerHTML = '';
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
-            tasks.forEach((taskData, index) => {
-                const newRow = table.insertRow();
-                newRow.className = 'task-row';
-
-                const assignCell = newRow.insertCell(0);
-                const dueDateCell = newRow.insertCell(1);
-                const statusCell = newRow.insertCell(2);
-
-                assignCell.textContent = taskData.assign;
-                dueDateCell.innerHTML = `<strong>${taskData.dueDate}</strong>`;
-
-                if (taskData.dueDate === today) {
-                    dueDateCell.classList.add('flashing');
-                }
-
-                const statusDropdown = document.createElement('select');
-                statusDropdown.className = 'wide-select';
-                statusDropdown.innerHTML = `
-                    <option value="Planned" ${taskData.status === 'Planned' ? 'selected' : ''}>Planned</option>
-                    <option value="Scheduled" ${taskData.status === 'Scheduled' ? 'selected' : ''}>Scheduled</option>
-                    <option value="Done" ${taskData.status === 'Done' ? 'selected' : ''}>Done</option>`;
-                statusDropdown.style.textAlign = 'center';
-                statusDropdown.style.height = '20px';
-                statusDropdown.style.fontSize = '10px';
-                statusCell.appendChild(statusDropdown);
-
-                statusDropdown.addEventListener('change', function() {
-                    taskData.status = this.value;
-                    localStorage.setItem('tasks', JSON.stringify(tasks));
-                    if (this.value === 'Done') {
-                        dueDateCell.classList.remove('flashing');
-                    } else if (taskData.dueDate === today) {
-                        dueDateCell.classList.add('flashing');
+            try {
+                console.log('Attempting to fetch user data for:', selectedRep);
+                const response = await fetch(`https://zitouedzklygvejqosul.supabase.co/rest/v1/users?username=eq.${encodeURIComponent(selectedRep)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppdG91ZWR6a2x5Z3ZlanFvc3VsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyODE1MTI5NiwiZXhwIjoyMDQzNzI3Mjk2fQ.LTpIdUiHKjXPIT6h5WP1TlKGj7S1dAA02HfGqPB5YQk`,
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InppdG91ZWR6a2x5Z3ZlanFvc3VsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyODE1MTI5NiwiZXhwIjoyMDQzNzI3Mjk2fQ.LTpIdUiHKjXPIT6h5WP1TlKGj7S1dAA02HfGqPB5YQk',
+                        'Content-Type': 'application/json'
                     }
                 });
-
-                const detailsBox = document.createElement('div');
-                detailsBox.className = 'task-details';
-                detailsBox.innerHTML = `<span>${taskData.task}</span>`;
-
-                const detailsRow = table.insertRow();
-                const detailsCell = detailsRow.insertCell(0);
-                detailsCell.colSpan = 3;
-                detailsCell.appendChild(detailsBox);
-
-                assignCell.addEventListener('click', toggleDetails);
-                dueDateCell.addEventListener('click', toggleDetails);
-                statusDropdown.addEventListener('mousedown', function (e) {
-                    e.stopPropagation();
-                });
-
-                newRow.addEventListener('contextmenu', function (e) {
-                    e.preventDefault();
-                    toggleSelectRow(newRow);
-                });
-
-                let longPressTimer;
-                const longPressHandler = function() {
-                    toggleSelectRow(newRow);
-                };
-
-                [assignCell, dueDateCell].forEach(cell => {
-                    cell.addEventListener('touchstart', function(e) {
-                        longPressTimer = setTimeout(longPressHandler, 500);
-                    });
-
-                    cell.addEventListener('touchend', function(e) {
-                        clearTimeout(longPressTimer);
-                    });
-
-                    cell.addEventListener('touchmove', function(e) {
-                        clearTimeout(longPressTimer);
-                    });
-                });
-
-                function toggleDetails() {
-                    detailsBox.style.display = detailsBox.style.display === 'none' || !detailsBox.style.display ? 'block' : 'none';
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Failed to fetch user data:', response.status, errorText);
+                    throw new Error('Failed to fetch user data');
                 }
-            });
-        }
+                const users = await response.json();
+                console.log('Fetched users:', users);
+                if (users.length === 0) {
+                    showLoginAlert('User not found', 'error');
+                    return;
+                }
+                const user = users[0];
+                if (user.password !== password) {
+                    showLoginAlert('Incorrect password', 'error');
+                    return;
+                }
+                const repData = globalData.medicalReps.find(rep => rep.name === selectedRep);
+                if (repData) {
+                    currentMedRep = repData;
+                    setCookie('currentUser', currentMedRep, 7); // Save for 7 days
+                    medRepNameElement.textContent = repData.name;
+                    medRepAreaElement.textContent = repData.area;
+                    loginPage.classList.add('hidden');
+                    formPage.classList.remove('hidden');
+                    formManager.updateHcpOptions(selectedRep);
+                    formManager.updateBrickOptions(selectedRep);
+                    formManager.updateAmBrickOptions(selectedRep);
+                    formManager.updateAssociatedAccounts(selectedRep);
+                    await formManager.updateRemainingHcpsCount(selectedRep);
+                    hcpBtn.disabled = false;
+                    pharmacyBtn.disabled = false;
+                    eventBtn.disabled = false;
+                    amBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                showLoginAlert('An error occurred during login. Please try again.', 'error');
+            }
+        });
 
-        function toggleSelectRow(row) {
-            row.classList.toggle('selected');
-        }
+        logoutBtn.addEventListener('click', () => {
+            deleteCookie('currentUser');
+            formPage.classList.add('hidden');
+            loginPage.classList.remove('hidden');
+            passwordInput.value = '';
+            currentMedRep = null;
+            formManager.handleReset();
+        });
 
-        function deleteSelectedTasks() {
-            const selectedRows = document.querySelectorAll('.task-row.selected');
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            selectedRows.forEach(row => {
-                const index = row.rowIndex - 1;
-                tasks.splice(index, 1);
-                row.nextElementSibling.remove();
-                row.remove();
-            });
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            renderTasks();
-        }
-
-        window.onload = function() {
-            renderTasks();
-        };
+            function showLoginAlert(message, type) {
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type}`;
+                alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
+                alert.style.display = 'block';
+                loginAlertContainer.innerHTML = '';
+                loginAlertContainer.appendChild(alert);
+                alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 5000);
+            }
+        });
     </script>
 </body>
-
 </html>
