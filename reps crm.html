@@ -4438,14 +4438,43 @@
             window.removeFromWeeklyPlan = weeklyPlanManager.removeFromWeeklyPlan.bind(weeklyPlanManager);
 
             await fetchAllData();
-            // This part is now handled by the parent frame which sets `currentMedRep`
-            // and then loads this iframe.
-            // The parent frame will pass `currentMedRep` to this iframe.
-            // For testing purposes, you might want to manually set `currentMedRep` here
-            // if running this file directly, e.g.:
-            // currentMedRep = { name: "Test Rep", area: "Test Area", districtManager: "Test DM", governorate: "Test Gov" };
-            // For the actual integration, the parent will set it.
             
+            // --- Temporary: For direct testing of this HTML file without parent iframe ---
+            // If you are opening this file directly in your browser (not via index.html),
+            // uncomment the following block to simulate a logged-in medical representative.
+            // REMEMBER TO REMOVE OR COMMENT THIS OUT WHEN INTEGRATING WITH index.html.
+            /*
+            currentMedRep = { 
+                name: "Ahmed Ali", // Replace with a medical rep name from your Google Sheet
+                area: "Cairo",     // Replace with an area from your Google Sheet
+                districtManager: "Dr. Taha", // Replace with a DM from your Google Sheet
+                governorate: "Cairo" // Replace with a Governorate from your Google Sheet
+            };
+            if (currentMedRep) {
+                console.log("CRM Panel: Initializing with temporary currentMedRep for direct testing.");
+                medRepNameElement.textContent = currentMedRep.name;
+                medRepAreaElement.textContent = currentMedRep.area;
+                medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
+                
+                const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
+                if (dmGovernorates && dmGovernorates.size > 0) {
+                    medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
+                } else {
+                    medRepGovElement.textContent = `Governorate: N/A`;
+                }
+
+                formManager.initializeRepSpecificData(currentMedRep.name);
+                dashboardManager.initializeDashboardForRep(currentMedRep.name);
+                requestFormManager.initialize(currentMedRep.name);
+                weeklyPlanManager.initialize(currentMedRep.name);
+                
+                showMainSection('crm');
+            } else {
+                console.log("CRM Panel: currentMedRep is null. Waiting for message from parent frame.");
+            }
+            */
+            // --- End Temporary Block ---
+
             // Listen for messages from the parent frame (index.html)
             window.addEventListener('message', (event) => {
                 // Ensure the message is from a trusted origin in production
@@ -4454,6 +4483,7 @@
                 if (event.data && event.data.type === 'setMedicalRep') {
                     currentMedRep = event.data.repData;
                     if (currentMedRep) {
+                        console.log("CRM Panel: Received medical rep data from parent.", currentMedRep);
                         medRepNameElement.textContent = currentMedRep.name;
                         medRepAreaElement.textContent = currentMedRep.area;
                         medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
@@ -4473,20 +4503,17 @@
                         
                         // Default to showing CRM Form section
                         showMainSection('crm');
+                    } else {
+                        console.log("CRM Panel: Received setMedicalRep message, but repData was null.");
                     }
                 }
             });
 
-            // If this script loads after the parent has already sent the message,
-            // or if it's being run directly for testing, ensure initialization.
-            // This part is crucial for making sure the iframe is ready to receive messages.
-            // No direct initialization here, as it waits for the parent message.
-            // The parent (index.html) is responsible for sending the 'setMedicalRep' message.
-            
             // To ensure the parent knows this iframe is ready to receive the rep data,
             // you might send a "ready" message back to the parent.
             if (window.parent) {
                 window.parent.postMessage('crmIframeReady', '*');
+                console.log("CRM Panel: Sent 'crmIframeReady' message to parent.");
             }
         });
         
