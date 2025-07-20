@@ -920,7 +920,7 @@
 
         // Store the ID of the currently active full-page view
         let currentActiveViewId = null;
-        let medicalRepData = null; // Stores the logged-in medical rep's data
+        let userData = null; // Stores the logged-in user's data (including title)
 
         // Page configurations
         const pageConfig = {
@@ -937,8 +937,8 @@
         function showLogin() {
             console.log('Showing login view');
             sessionStorage.removeItem('isLoggedIn'); // Clear login state
-            sessionStorage.removeItem('medicalRepData'); // Clear medical rep data
-            medicalRepData = null; // Also clear in-memory data
+            sessionStorage.removeItem('userData'); // Clear user data
+            userData = null; // Also clear in-memory data
 
             document.getElementById('loginView').classList.remove('hidden');
             document.getElementById('homeView').classList.add('hidden');
@@ -966,7 +966,7 @@
 
         /**
          * Shows the home view and hides any active full-page view.
-         * Only proceeds if the user is logged in.
+         * Also updates card visibility based on user role.
          */
         function showHome() {
             if (sessionStorage.getItem('isLoggedIn') !== 'true') {
@@ -1008,11 +1008,56 @@
                 }
                 currentActiveViewId = null;
             }
+            updateNavigationAccess(); // Update card visibility based on role
         }
 
         /**
+         * Updates the visibility and enabled state of navigation cards based on the user's role.
+         */
+        function updateNavigationAccess() {
+            // Normalize userTitle to match the lowercase, hyphenated format used in switch cases
+            const userTitle = userData ? userData.title.toLowerCase().replace(/\s/g, '-') : null;
+            const mainCards = document.querySelectorAll('.main-card');
+
+            mainCards.forEach(card => {
+                const page = card.dataset.page;
+                let isDisabled = false;
+
+                switch (userTitle) {
+                    case 'medical-representative': // Updated to match normalized title
+                        // Medical Reps can only access CRM, UPA Codes, Price List
+                        if (page === 'dashboard' || page === 'admin') {
+                            isDisabled = true;
+                        }
+                        break;
+                    case 'district-manager': // Updated to match normalized title
+                        // District Managers can access everything except Admin Panel
+                        if (page === 'admin') {
+                            isDisabled = true;
+                        }
+                        break;
+                    case 'admin':
+                        // Admins can access everything
+                        isDisabled = false;
+                        break;
+                    default:
+                        // If no user or unknown role, disable all except login (handled by showLogin)
+                        isDisabled = true;
+                        break;
+                }
+
+                if (isDisabled) {
+                    card.classList.add('disabled');
+                } else {
+                    card.classList.remove('disabled');
+                }
+            });
+        }
+
+
+        /**
          * Loads a specific page view into an iframe.
-         * Only proceeds if the user is logged in.
+         * Only proceeds if the user is logged in and has permission.
          * @param {string} page - The page identifier (e.g., 'crm', 'dashboard').
          */
         function loadPage(page) {
@@ -1020,14 +1065,48 @@
                 showLogin(); // Redirect to login if not logged in
                 return;
             }
-            console.log(`Attempting to load page: ${page}`);
-            
+
+            // Normalize userTitle before permission check
+            const userTitle = userData ? userData.title.toLowerCase().replace(/\s/g, '-') : null;
             const config = pageConfig[page];
+
             if (!config) {
                 console.error(`Error: Unknown page identifier: ${page}`);
                 return;
             }
 
+            // Permission check based on user role
+            let hasPermission = false;
+            switch (userTitle) {
+                case 'medical-representative': // Updated to match normalized title
+                    hasPermission = (page === 'crm' || page === 'upa-codes' || page === 'price-list');
+                    break;
+                case 'district-manager': // Updated to match normalized title
+                    hasPermission = (page !== 'admin');
+                    break;
+                case 'admin':
+                    hasPermission = true;
+                    break;
+                default:
+                    hasPermission = false; // No permission for unknown roles
+                    break;
+            }
+
+            if (!hasPermission) {
+                const errorMessageElement = document.getElementById('loginErrorMessage'); // Re-using this for general messages
+                errorMessageElement.textContent = `Access Denied: Your role (${userData.title || 'Unknown'}) does not have permission to access the ${config.displayName}.`;
+                errorMessageElement.style.display = 'block'; // Make sure it's visible
+                setTimeout(() => {
+                    errorMessageElement.textContent = '';
+                    errorMessageElement.style.display = 'none';
+                }, 5000); // Hide message after 5 seconds
+                console.warn(`Access Denied: User role "${userData.title}" attempted to access "${page}".`);
+                return; // Prevent loading the page
+            }
+
+
+            console.log(`Attempting to load page: ${page}`);
+            
             const { viewId, displayName, fileName } = config;
 
             const homeView = document.getElementById('homeView');
@@ -1087,10 +1166,11 @@
 
             // Wait for the iframe to signal it's ready before sending data
             const messageListener = (event) => {
-                if (event.data === 'crmIframeReady' && event.source === iframe.contentWindow) {
-                    console.log(`CRM iframe at ${fileName} is ready. Sending medical rep data.`);
-                    // Send medical rep data to the iframe
-                    iframe.contentWindow.postMessage({ type: 'setMedicalRep', repData: medicalRepData }, '*');
+                // Ensure the message is from the correct iframe and type
+                if (event.data && event.data.type === 'crmIframeReady' && event.source === iframe.contentWindow) {
+                    console.log(`${displayName} iframe at ${fileName} is ready. Sending user data.`);
+                    // Send user data to the iframe
+                    iframe.contentWindow.postMessage({ type: 'setUserData', userData: userData }, '*');
                     window.removeEventListener('message', messageListener); // Remove listener after sending
                 }
             };
@@ -1119,8 +1199,12 @@
         async function fetchMedicalRepData(username) {
             const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
             try {
+                console.log(`Attempting to fetch Google Sheet data for user: ${username}`);
                 const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) throw new Error('Failed to fetch Google Sheet data');
+                if (!response.ok) {
+                    console.error('Failed to fetch Google Sheet data. Status:', response.status, 'Status Text:', response.statusText);
+                    throw new Error('Failed to fetch Google Sheet data');
+                }
                 const csvText = await response.text();
                 const lines = csvText.split('\n');
                 const headers = lines[0].split(',').map(h => h.trim());
@@ -1135,6 +1219,7 @@
                     }, {});
 
                     if (row['medical rep'] === username) {
+                        console.log(`Found medical rep data for ${username}:`, row);
                         return {
                             name: row['medical rep'],
                             area: row['area'],
@@ -1143,9 +1228,10 @@
                         };
                     }
                 }
+                console.warn(`Medical rep data not found in Google Sheet for username: ${username}`);
                 return null; // User not found in Google Sheet
             } catch (error) {
-                console.error('Error fetching medical rep data:', error);
+                console.error('Error fetching medical rep data from Google Sheet:', error);
                 return null;
             }
         }
@@ -1169,6 +1255,7 @@
             }
 
             try {
+                console.log(`Attempting Supabase login for username: ${username}`);
                 // Query the 'users' table to find a matching username and password
                 const { data, error } = await supabase
                     .from('users')
@@ -1177,7 +1264,7 @@
                     .eq('password', password);
 
                 if (error) {
-                    console.error('Supabase query error:', error.message);
+                    console.error('Supabase query error during login:', error.message);
                     errorMessageElement.textContent = 'An error occurred during login. Please try again.';
                     return;
                 }
@@ -1185,32 +1272,51 @@
                 if (data && data.length > 0) {
                     // User found and credentials match
                     const user = data[0];
-                    if (user.title === 'medical rep') {
-                        medicalRepData = await fetchMedicalRepData(username);
-                        if (medicalRepData) {
-                            sessionStorage.setItem('isLoggedIn', 'true');
-                            sessionStorage.setItem('medicalRepData', JSON.stringify(medicalRepData));
-                            console.log('Login successful for medical rep:', username);
-                            showHome(); // Redirect to home page
+                    console.log('Supabase user found:', user);
+                    let fetchedUserData = null;
+                    
+                    // Normalize the title from Supabase for consistent comparison
+                    const normalizedTitle = user.title.toLowerCase().replace(/\s/g, '-');
+                    console.log(`Normalized user title: ${normalizedTitle}`);
+
+                    if (normalizedTitle === 'medical-representative' || normalizedTitle === 'district-manager') {
+                        // For medical reps and district managers, fetch data from Google Sheet
+                        fetchedUserData = await fetchMedicalRepData(username);
+                        if (fetchedUserData) {
+                            fetchedUserData.title = normalizedTitle; // Add the normalized title
                         } else {
-                            errorMessageElement.textContent = 'Medical rep data not found for this user.';
-                            sessionStorage.removeItem('isLoggedIn');
-                            sessionStorage.removeItem('medicalRepData');
+                            console.warn(`Google Sheet data missing for user: ${username} with title: ${user.title}`);
                         }
-                    } else if (user.title === 'admin') {
-                        sessionStorage.setItem('isLoggedIn', 'true');
-                        sessionStorage.setItem('medicalRepData', JSON.stringify({ name: 'Admin', area: 'N/A', districtManager: 'N/A', governorate: 'N/A' })); // Store dummy data for admin
-                        console.log('Login successful for admin:', username);
-                        showHome();
+                    } else if (normalizedTitle === 'admin') {
+                        // For admin, create a dummy data object with the title
+                        fetchedUserData = { name: 'Admin', title: 'admin', area: 'N/A', districtManager: 'N/A', governorate: 'N/A' };
+                        console.log('Admin user logged in. Dummy data created.');
                     } else {
-                        errorMessageElement.textContent = 'Only medical reps and admins can log in.';
+                        console.warn(`Unsupported user title found in Supabase: '${user.title}' for user: ${username}`);
+                        errorMessageElement.textContent = `Login failed: Unsupported user role '${user.title}'.`;
+                        sessionStorage.removeItem('isLoggedIn');
+                        sessionStorage.removeItem('userData');
+                        return; // Exit if role is not supported
+                    }
+
+                    if (fetchedUserData) {
+                        sessionStorage.setItem('isLoggedIn', 'true');
+                        sessionStorage.setItem('userData', JSON.stringify(fetchedUserData));
+                        userData = fetchedUserData; // Update in-memory userData
+                        console.log('Login successful for user:', username, 'Role:', user.title, 'Full Data:', userData);
+                        showHome(); // Redirect to home page
+                    } else {
+                        errorMessageElement.textContent = 'User data not found in Google Sheet for this user. Please contact support.';
+                        sessionStorage.removeItem('isLoggedIn');
+                        sessionStorage.removeItem('userData');
                     }
                 } else {
                     // No user found or credentials do not match
+                    console.warn(`Login failed: Invalid username or password for ${username}`);
                     errorMessageElement.textContent = 'Invalid username or password.';
                 }
             } catch (err) {
-                console.error('Login process error:', err);
+                console.error('An unexpected error occurred during login process:', err);
                 errorMessageElement.textContent = 'An unexpected error occurred. Please try again later.';
             }
         }
@@ -1255,9 +1361,9 @@
 
             // Check session storage on initial load
             if (sessionStorage.getItem('isLoggedIn') === 'true') {
-                medicalRepData = JSON.parse(sessionStorage.getItem('medicalRepData'));
-                console.log('Session found. User is logged in.', medicalRepData);
-                showHome(); // Show home if session exists
+                userData = JSON.parse(sessionStorage.getItem('userData'));
+                console.log('Session found. User is logged in.', userData);
+                showHome(); // Show home if session exists and update card access
             } else {
                 console.log('No session found. Showing login view.');
                 showLogin(); // Otherwise, show login
