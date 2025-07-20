@@ -1503,40 +1503,27 @@
             color: #212121; /* Even darker gray on hover */
         }
 
+        /* Styles for the login required message */
+        .login-required-message {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #555;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-top: 50px;
+        }
+        .login-required-message i {
+            font-size: 2rem;
+            color: #4361ee;
+            margin-bottom: 15px;
+        }
+
     </style>
 </head>
 <body>
-    <div id="loginPage" class="login-container">
-        <div class="login-header">
-            <div class="form-logo">
-                <i class="fas fa-handshake"></i>
-            </div>
-            <h1 class="login-title">Paxton LLC CRM </h1>
-        </div>
-        <div id="loginAlertContainer"></div>
-        <!-- ENHANCEMENT: Added icons to input fields -->
-        <div class="login-form-group">
-            <label for="medRepLogin">Medical Representative</label>
-            <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <i class="fas fa-user-tie text-gray-400"></i>
-                </span>
-                <select id="medRepLogin" required class="pl-10">
-                    <option value="">Select Medical Rep</option>
-                </select>
-            </div>
-        </div>
-        <div class="login-form-group">
-            <label for="password">Password</label>
-            <div class="relative">
-                 <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <i class="fas fa-lock text-gray-400"></i>
-                </span>
-                <input type="password" id="password" placeholder="Enter password" required class="pl-10" />
-            </div>
-        </div>
-        <button id="loginBtn" class="login-button">Login</button>
-    </div>
+    <!-- Removed the entire loginPage div as login will be handled by index.html -->
 
     <div id="mainAppContainer" class="container hidden">
         <div class="med-rep-card">
@@ -1546,6 +1533,7 @@
                 <div class="med-rep-dm" id="medRepDM">District Manager: N/A</div>
                 <div class="med-rep-gov" id="medRepGov">Governorate: N/A</div>
             </div>
+            <!-- Logout button remains, as it clears local storage for this app -->
             <button id="logoutBtn" class="logout-button">Logout</button>
         </div>
 
@@ -2179,6 +2167,7 @@
                                             <td id="thursdayPm"></td>
                                         </tr>
                                     </tbody>
+                                </tbody>
                                 </table>
                             </div>
 
@@ -2193,6 +2182,13 @@
 
         </div>
         <div class="designed-by">Designed By: DrTahaDesigns</div>
+    </div>
+
+    <!-- Message to display if user is not logged in -->
+    <div id="loginRequiredMessage" class="container login-required-message hidden">
+        <i class="fas fa-info-circle"></i>
+        <p>Please log in via the main application page to access the CRM.</p>
+        <p>Your data will be displayed here automatically after successful login.</p>
     </div>
 
     <script>
@@ -2234,19 +2230,7 @@
                 localStorage.removeItem(name);
             }
 
-            function showLoginAlert(message, type) {
-                const alert = document.createElement('div');
-                alert.className = `alert alert-${type}`;
-                alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
-                alert.style.display = 'block';
-                document.getElementById('loginAlertContainer').innerHTML = '';
-                document.getElementById('loginAlertContainer').appendChild(alert);
-                alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                setTimeout(() => {
-                    alert.style.display = 'none';
-                }, 5000);
-            }
-
+            // Removed showLoginAlert as login is handled by main index.html
             function showAlert(message, type) {
                 const alert = document.createElement('div');
                 alert.className = `alert alert-${type}`;
@@ -2341,10 +2325,6 @@
                     // Fetch Supabase visit data using pagination
                     globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
 
-                    // Populate the login medical reps dropdown and medicalRepsAreas map
-                    const uniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(rep => !/[\u0600-\u06FF]/.test(rep)))];
-                    populateSelect(document.getElementById('medRepLogin'), uniqueReps);
-
                     // Populate medicalRepsAreas map and districtManagersGovernorates map
                     medicalRepsAreas.clear();
                     districtManagersGovernorates.clear();
@@ -2377,7 +2357,7 @@
 
                 } catch (error) {
                     console.error('Error fetching initial data:', error);
-                    showLoginAlert('Error loading data. Please try again later.', 'error');
+                    // showLoginAlert('Error loading data. Please try again later.', 'error'); // Removed as login is external
                 }
             }
 
@@ -2395,12 +2375,9 @@
                 });
             }
 
-            // --- Login and Logout Logic ---
-            const loginPage = document.getElementById('loginPage');
+            // --- Main App Container and Login/Logout Logic ---
             const mainAppContainer = document.getElementById('mainAppContainer');
-            const medRepLoginSelect = document.getElementById('medRepLogin');
-            const passwordInput = document.getElementById('password');
-            const loginBtn = document.getElementById('loginBtn');
+            const loginRequiredMessage = document.getElementById('loginRequiredMessage'); // New element
             const logoutBtn = document.getElementById('logoutBtn');
             const medRepNameElement = document.getElementById('medRepName');
             const medRepAreaElement = document.getElementById('medRepArea');
@@ -2417,94 +2394,19 @@
             const requestSection = document.getElementById('requestSection');
             const weeklyPlanSection = document.getElementById('weeklyPlanSection');
 
-            loginBtn.addEventListener('click', async () => {
-                const selectedRep = medRepLoginSelect.value;
-                const password = passwordInput.value;
-
-                if (!selectedRep) {
-                    showLoginAlert('Please select a Medical Representative', 'error');
-                    return;
-                }
-                try {
-                    // Authenticate against Supabase users table
-                    const response = await fetch(`https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/users?username=eq.${encodeURIComponent(selectedRep)}`, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
-                            'apikey': SUPABASE_API_KEY,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('Failed to fetch user data:', response.status, errorText);
-                        throw new Error('Failed to fetch user data');
-                    }
-                    const users = await response.json();
-
-                    if (users.length === 0) {
-                        showLoginAlert('User not found', 'error');
-                        return;
-                    }
-                    const user = users[0];
-                    if (user.password !== password) {
-                        showLoginAlert('Incorrect password', 'error');
-                        return;
-                    }
-
-                    // Find rep data from globalGoogleData
-                    const repData = globalGoogleData.find(row => row['medical rep'] === selectedRep);
-                    if (repData) {
-                        currentMedRep = {
-                            name: repData['medical rep'],
-                            area: repData['area'],
-                            districtManager: repData['District Manager'],
-                            governorate: repData['Governorate']
-                        };
-                        setLocalStorageItem('currentUser', currentMedRep);
-
-                        medRepNameElement.textContent = currentMedRep.name;
-                        medRepAreaElement.textContent = currentMedRep.area;
-                        medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
-                        
-                        // Display all governorates for the District Manager
-                        const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
-                        if (dmGovernorates && dmGovernorates.size > 0) {
-                            medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
-                        } else {
-                            medRepGovElement.textContent = `Governorate: N/A`;
-                        }
-
-                        loginPage.classList.add('hidden');
-                        mainAppContainer.classList.remove('hidden');
-
-                        formManager.initializeRepSpecificData(currentMedRep.name);
-                        dashboardManager.initializeDashboardForRep(currentMedRep.name);
-                        requestFormManager.initialize(currentMedRep.name);
-                        weeklyPlanManager.initialize(currentMedRep.name);
-
-                        // Default to showing CRM Form section, but no specific internal form.
-                        showMainSection('crm');
-                        // No specific internal form is shown by default after login.
-                        // The user will need to click on a CRM sub-tab (HCPs, Pharmacy, etc.) to see a form.
-                    }
-                } catch (error) {
-                    console.error('Error during login:', error);
-                    showLoginAlert('An error occurred during login. Please try again.', 'error');
-                }
-            });
+            // Removed loginBtn event listener as login is external
 
             logoutBtn.addEventListener('click', () => {
                 removeLocalStorageItem('currentUser');
                 mainAppContainer.classList.add('hidden');
-                loginPage.classList.remove('hidden');
-                passwordInput.value = '';
+                loginRequiredMessage.classList.remove('hidden'); // Show login required message
                 currentMedRep = null;
                 formManager.handleReset();
                 dashboardManager.resetDashboard();
                 requestFormManager.resetForm();
                 weeklyPlanManager.reset();
-                fetchAllData();
+                // No need to fetchAllData again, as the user is now logged out
+                // and the CRM tab should prompt for external login.
             });
 
             // --- Main Section Tab Management ---
@@ -4454,7 +4356,7 @@
                     const day = this.elements.dayFilter.value;
 
                     if (!day) {
-                        this.showMessage('Please select a day first.', 'error');
+                        this.showMessage('Please select a Day first.', 'error');
                         this.elements.eventTime.selectedIndex = 0;
                         return;
                     }
@@ -4635,8 +4537,9 @@
                     medRepGovElement.textContent = `Governorate: N/A`;
                 }
 
-                loginPage.classList.add('hidden');
+                // loginPage.classList.add('hidden'); // Removed as loginPage no longer exists
                 mainAppContainer.classList.remove('hidden');
+                loginRequiredMessage.classList.add('hidden'); // Hide login required message
 
                 formManager.initializeRepSpecificData(currentMedRep.name);
                 dashboardManager.initializeDashboardForRep(currentMedRep.name);
@@ -4644,6 +4547,15 @@
                 weeklyPlanManager.initialize(currentMedRep.name);
                 
                 showMainSection('crm');
+            } else {
+                // If no saved user, hide the main app and show the login required message
+                mainAppContainer.classList.add('hidden');
+                loginRequiredMessage.classList.remove('hidden');
+                // Disable all main tabs if not logged in
+                crmMainTabBtn.disabled = true;
+                dashboardMainTabBtn.disabled = true;
+                requestMainTabBtn.disabled = true;
+                weeklyPlanMainTabBtn.disabled = true;
             }
             
         });
