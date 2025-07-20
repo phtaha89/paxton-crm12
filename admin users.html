@@ -381,6 +381,29 @@
     .login-message {
       margin-bottom: 15px;
     }
+    /* Auto-login message and spinner styles */
+    .auto-login-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      padding: 20px;
+      font-size: 1.1em;
+      color: #3b82f6;
+    }
+    .spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-left-color: #3b82f6;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     /* Logout Button */
     .logout-btn {
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -587,6 +610,11 @@
     <div class="login-card">
       <h2>Admin Login</h2>
       <div id="loginMessage" class="login-message"></div>
+      <!-- Auto-login message and spinner -->
+      <div id="autoLoginMessage" class="auto-login-message" style="display: none;">
+        <p>Attempting auto-login...</p>
+        <div class="spinner"></div>
+      </div>
       <form id="loginForm">
         <div class="form-group">
           <label for="username">Username</label>
@@ -640,6 +668,7 @@
     const modalMessage = document.getElementById('modalMessage');
     const modalConfirmBtn = document.getElementById('modalConfirmBtn');
     const headerBanner = document.querySelector('.header-banner');
+    const autoLoginMessageDiv = document.getElementById('autoLoginMessage');
 
     // Function to show custom message (for user feedback)
     function showMessage(text, type = 'success', isLogin = false) {
@@ -933,8 +962,68 @@
       renderApp(); // Render the login view
     });
 
+    // Function to attempt auto-login using stored credentials
+    async function attemptAutoLogin() {
+      const storedUsername = localStorage.getItem('loggedInUsername');
+      const storedPassword = localStorage.getItem('loggedInPassword');
+
+      if (storedUsername && storedPassword) {
+        // Show auto-login message and hide the form
+        loginForm.style.display = 'none';
+        autoLoginMessageDiv.style.display = 'flex';
+        loginMessageDiv.innerHTML = ''; // Clear any previous login messages
+
+        try {
+          const { data, error } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('username', storedUsername)
+            .eq('password', storedPassword)
+            .single();
+
+          if (error || !data) {
+            // If auto-login fails (e.g., credentials changed or invalid), clear stored credentials
+            localStorage.removeItem('isAdminLoggedIn');
+            localStorage.removeItem('loggedInUsername');
+            localStorage.removeItem('loggedInPassword');
+            showMessage('Auto-login failed. Please log in manually.', 'error', true);
+            loginForm.style.display = 'block'; // Show login form again
+            autoLoginMessageDiv.style.display = 'none'; // Hide auto-login message
+            return;
+          }
+
+          if (data.title === 'admin') {
+            // If auto-login successful, ensure the flag is set and re-render to show admin view
+            localStorage.setItem('isAdminLoggedIn', 'true');
+            showMessage('Auto-login successful! Welcome, Admin.', 'success', true);
+            renderApp(); // Re-call renderApp to switch to the admin view
+          } else {
+            // User is not an admin, clear credentials and show error
+            localStorage.removeItem('isAdminLoggedIn');
+            localStorage.removeItem('loggedInUsername');
+            localStorage.removeItem('loggedInPassword');
+            showMessage('Auto-login failed: User is not an admin.', 'error', true);
+            loginForm.style.display = 'block'; // Show login form again
+            autoLoginMessageDiv.style.display = 'none'; // Hide auto-login message
+          }
+        } catch (err) {
+          // Handle any network or other errors during auto-login
+          localStorage.removeItem('isAdminLoggedIn');
+          localStorage.removeItem('loggedInUsername');
+          localStorage.removeItem('loggedInPassword');
+          showMessage('Auto-login failed: ' + err.message, 'error', true);
+          loginForm.style.display = 'block'; // Show login form again
+          autoLoginMessageDiv.style.display = 'none'; // Hide auto-login message
+        }
+      } else {
+        // No stored credentials, just show the login form
+        loginForm.style.display = 'block';
+        autoLoginMessageDiv.style.display = 'none';
+      }
+    }
+
     // Renders the appropriate view (login or app content) based on login status
-    async function renderApp() { // Made async to allow awaiting the auto-login attempt
+    async function renderApp() {
       const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
 
       if (isAdminLoggedIn) {
@@ -944,57 +1033,13 @@
         logoutButton.style.display = 'inline-flex'; // Show logout button
         loadUsers(); // Load user data for the admin interface
       } else {
-        loginContainer.style.display = 'flex'; // Show login form
+        loginContainer.style.display = 'flex'; // Show login form container
         appContent.style.display = 'none';     // Hide main app content
         headerBanner.style.display = 'none';   // Hide header banner
         logoutButton.style.display = 'none';   // Hide logout button
 
-        // Attempt auto-login from local storage
-        const storedUsername = localStorage.getItem('loggedInUsername');
-        const storedPassword = localStorage.getItem('loggedInPassword');
-
-        if (storedUsername && storedPassword) {
-          usernameInput.value = storedUsername; // Pre-fill username
-          passwordInput.value = storedPassword; // Pre-fill password (won't be visible but used for login)
-
-          // Attempt to log in automatically using stored credentials
-          try {
-            const { data, error } = await supabaseClient
-              .from('users')
-              .select('*')
-              .eq('username', storedUsername)
-              .eq('password', storedPassword)
-              .single();
-
-            if (error || !data) {
-              // If auto-login fails (e.g., credentials changed or invalid), clear stored credentials
-              localStorage.removeItem('isAdminLoggedIn');
-              localStorage.removeItem('loggedInUsername');
-              localStorage.removeItem('loggedInPassword');
-              showMessage('Auto-login failed. Please log in manually.', 'error', true);
-              return;
-            }
-
-            if (data.title === 'admin') {
-              // If auto-login successful, ensure the flag is set and re-render to show admin view
-              localStorage.setItem('isAdminLoggedIn', 'true');
-              showMessage('Auto-login successful! Welcome, Admin.', 'success', true);
-              renderApp(); // Re-call renderApp to switch to the admin view
-            } else {
-              // User is not an admin, clear credentials and show error
-              localStorage.removeItem('isAdminLoggedIn');
-              localStorage.removeItem('loggedInUsername');
-              localStorage.removeItem('loggedInPassword');
-              showMessage('Auto-login failed: User is not an admin.', 'error', true);
-            }
-          } catch (err) {
-            // Handle any network or other errors during auto-login
-            localStorage.removeItem('isAdminLoggedIn');
-            localStorage.removeItem('loggedInUsername');
-            localStorage.removeItem('loggedInPassword');
-            showMessage('Auto-login failed: ' + err.message, 'error', true);
-          }
-        }
+        // Attempt auto-login if credentials exist in local storage
+        await attemptAutoLogin();
       }
     }
 
