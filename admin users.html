@@ -905,11 +905,14 @@
 
         // Check if the logged-in user has the 'admin' title
         if (data.title === 'admin') {
-          // If admin, set a session storage flag.
-          // This flag is what the 'index page' would also set for seamless login.
-          sessionStorage.setItem('isAdminLoggedIn', 'true');
-          // Store the logged-in username in session storage
-          sessionStorage.setItem('loggedInUsername', username);
+          // If admin, set a local storage flag.
+          // This allows for persistent login across browser sessions.
+          localStorage.setItem('isAdminLoggedIn', 'true');
+          // Store the logged-in username and password in local storage for auto-login
+          // WARNING: Storing passwords in localStorage is generally not recommended for security reasons.
+          // For production applications, consider more secure authentication methods (e.g., JWTs, OAuth).
+          localStorage.setItem('loggedInUsername', username);
+          localStorage.setItem('loggedInPassword', password);
           showMessage('Login successful! Welcome, Admin.', 'success', true);
           renderApp(); // Render the admin application view
         } else {
@@ -922,19 +925,17 @@
 
     // Logout Functionality
     logoutButton.addEventListener('click', () => {
-      // Remove the admin login flag and stored username from session storage
-      sessionStorage.removeItem('isAdminLoggedIn');
-      sessionStorage.removeItem('loggedInUsername'); // Clear stored username on logout
+      // Remove the admin login flag and stored credentials from local storage
+      localStorage.removeItem('isAdminLoggedIn');
+      localStorage.removeItem('loggedInUsername');
+      localStorage.removeItem('loggedInPassword'); // Clear stored password on logout
       showMessage('Logged out successfully.', 'success');
       renderApp(); // Render the login view
     });
 
     // Renders the appropriate view (login or app content) based on login status
-    function renderApp() {
-      // Check if the 'isAdminLoggedIn' flag is set in session storage
-      // This allows for persistent login across tabs/refreshes within the same session
-      // and can be set by an 'index page' if it's on the same origin.
-      const isAdminLoggedIn = sessionStorage.getItem('isAdminLoggedIn') === 'true';
+    async function renderApp() { // Made async to allow awaiting the auto-login attempt
+      const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
 
       if (isAdminLoggedIn) {
         loginContainer.style.display = 'none'; // Hide login form
@@ -948,10 +949,51 @@
         headerBanner.style.display = 'none';   // Hide header banner
         logoutButton.style.display = 'none';   // Hide logout button
 
-        // Pre-fill username from session storage if available
-        const storedUsername = sessionStorage.getItem('loggedInUsername');
-        if (storedUsername) {
-          usernameInput.value = storedUsername;
+        // Attempt auto-login from local storage
+        const storedUsername = localStorage.getItem('loggedInUsername');
+        const storedPassword = localStorage.getItem('loggedInPassword');
+
+        if (storedUsername && storedPassword) {
+          usernameInput.value = storedUsername; // Pre-fill username
+          passwordInput.value = storedPassword; // Pre-fill password (won't be visible but used for login)
+
+          // Attempt to log in automatically using stored credentials
+          try {
+            const { data, error } = await supabaseClient
+              .from('users')
+              .select('*')
+              .eq('username', storedUsername)
+              .eq('password', storedPassword)
+              .single();
+
+            if (error || !data) {
+              // If auto-login fails (e.g., credentials changed or invalid), clear stored credentials
+              localStorage.removeItem('isAdminLoggedIn');
+              localStorage.removeItem('loggedInUsername');
+              localStorage.removeItem('loggedInPassword');
+              showMessage('Auto-login failed. Please log in manually.', 'error', true);
+              return;
+            }
+
+            if (data.title === 'admin') {
+              // If auto-login successful, ensure the flag is set and re-render to show admin view
+              localStorage.setItem('isAdminLoggedIn', 'true');
+              showMessage('Auto-login successful! Welcome, Admin.', 'success', true);
+              renderApp(); // Re-call renderApp to switch to the admin view
+            } else {
+              // User is not an admin, clear credentials and show error
+              localStorage.removeItem('isAdminLoggedIn');
+              localStorage.removeItem('loggedInUsername');
+              localStorage.removeItem('loggedInPassword');
+              showMessage('Auto-login failed: User is not an admin.', 'error', true);
+            }
+          } catch (err) {
+            // Handle any network or other errors during auto-login
+            localStorage.removeItem('isAdminLoggedIn');
+            localStorage.removeItem('loggedInUsername');
+            localStorage.removeItem('loggedInPassword');
+            showMessage('Auto-login failed: ' + err.message, 'error', true);
+          }
         }
       }
     }
