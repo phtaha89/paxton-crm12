@@ -39,6 +39,7 @@
         /* Body and HTML for full height layout */
         html, body {
             height: 100%;
+            font-size: 16px; /* Base font size for rem calculations */
         }
 
         body {
@@ -56,7 +57,7 @@
         .container {
             max-width: 1600px; /* Increased max-width for more spacious layout */
             margin: 0 auto;
-            padding: 20px;
+            padding: 1.25rem; /* Responsive padding */
             width: 100%;
             flex-grow: 1; /* Allows container to expand and fill space */
             display: flex;
@@ -66,27 +67,25 @@
         /* Header styling with flexbox for alignment */
         .header {
             display: flex;
+            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
             justify-content: flex-end; /* Aligns admin tab to the right by default */
             align-items: center;
             background: var(--white);
-            padding: 6px 25px; /* Made header slimmer */
+            padding: 0.75rem 1.5rem; /* Responsive padding */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 20px;
+            margin-bottom: 1.25rem; /* Responsive margin */
             position: relative;
             z-index: 100; /* Ensures header is always on top */
-            gap: 15px; /* Space between buttons */
+            gap: 1rem; /* Responsive space between buttons */
         }
-
-        /* admin tab button styling - REMOVED, now a card */
-        /* .admin-tab { ... } */
         
         /* Back button styling, similar to admin tab but with primary coffee color */
         .back-button {
             background: var(--coffee-light); /* Changed to coffee color */
             color: var(--white);
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 0.625rem 1.25rem; /* Responsive padding */
+            border-radius: 0.5rem; /* Responsive border-radius */
             cursor: pointer;
             font-weight: 500;
             font-size: 0.95rem;
@@ -95,14 +94,14 @@
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.5rem; /* Responsive space */
             margin-right: auto; /* Pushes the button to the left */
         }
 
         .back-button:hover {
             background: var(--coffee-dark); /* Changed to darker coffee color */
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
+            transform: translateY(-0.125rem); /* Slight lift effect */
+            box-shadow: 0 0.375rem 0.9375rem rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
         }
 
         /* User Info and Logout Button styling */
@@ -111,19 +110,19 @@
             font-size: 0.9rem;
             color: var(--text-color-dark);
             font-weight: 500;
-            padding: 5px 10px;
-            border-radius: 6px;
+            padding: 0.3125rem 0.625rem; /* Responsive padding */
+            border-radius: 0.375rem; /* Responsive border-radius */
             background-color: var(--bg-light);
             display: flex; /* Use flex to align text and logout button */
             align-items: center;
-            gap: 10px;
+            gap: 0.625rem; /* Responsive gap */
         }
 
         .logout-button {
             background: #dc2626; /* Red for logout */
             color: var(--white);
-            padding: 8px 15px;
-            border-radius: 8px;
+            padding: 0.5rem 0.9375rem; /* Responsive padding */
+            border-radius: 0.5rem; /* Responsive border-radius */
             cursor: pointer;
             font-weight: 500;
             font-size: 0.85rem;
@@ -133,8 +132,8 @@
 
         .logout-button:hover {
             background: #b91c1c;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.25rem 0.625rem rgba(220, 38, 38, 0.2);
         }
 
         /* Utility class to hide elements */
@@ -146,8 +145,8 @@
         .banner {
             background: linear-gradient(135deg, var(--coffee-gradient-start), var(--coffee-gradient-end)); /* Changed to coffee gradient */
             color: white;
-            padding: 25px 40px; /* Made banner slimmer */
-            margin-bottom: 30px; /* Increased margin below banner */
+            padding: 1.5625rem 2.5rem; /* Responsive padding */
+            margin-bottom: 1.875rem; /* Responsive margin */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
             position: relative;
@@ -156,7 +155,7 @@
             display: flex; /* Use flexbox for horizontal alignment of logo and text */
             flex-direction: row; /* Always row for logo and text */
             align-items: center; /* Vertically align items */
-            gap: 30px; /* Space between logo and text */
+            gap: 1.875rem; /* Responsive space between logo and text */
         }
 
         .banner::before {
@@ -178,10 +177,10 @@
 
         /* Company Logo styling within the banner */
         .company-logo {
-            max-width: 90px; /* Adjust size as needed */
+            max-width: 5.625rem; /* Responsive max-width */
             height: auto;
-            border-radius: 8px; /* Slightly rounded corners for the logo */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Subtle shadow */
+            border-radius: 0.5rem; /* Responsive border-radius */
+            box-shadow: 0 0.25rem 0.625rem rgba(0,0,0,0.1); /* Subtle shadow */
             z-index: 1; /* Ensure logo is above shine effect */
             flex-shrink: 0; /* Prevent logo from shrinking */
         }
@@ -192,16 +191,16 @@
         }
 
         .banner h1 {
-            font-size: 3.5rem; /* Larger main title */
+            font-size: 2.5rem; /* Responsive font size */
             font-weight: 700;
-            margin-bottom: 8px; /* Reduced margin below title */
+            margin-bottom: 0.5rem; /* Responsive margin */
             position: relative;
             z-index: 1;
-            text-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            text-shadow: 0 0.1875rem 0.375rem rgba(0,0,0,0.2);
         }
 
         .banner .subtitle {
-            font-size: 1.3rem; /* Larger subtitle */
+            font-size: 1.1rem; /* Responsive font size */
             opacity: 0.98;
             font-weight: 400;
             position: relative;
@@ -211,9 +210,9 @@
         /* Home view grid for navigation cards */
         .home-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid columns */
-            gap: 25px; /* Space between grid items */
-            padding: 20px 0;
+            grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); /* Responsive grid columns */
+            gap: 1.5625rem; /* Responsive space between grid items */
+            padding: 1.25rem 0; /* Responsive padding */
             flex-grow: 1; /* Allows grid to expand */
             align-content: start; /* Aligns content to the start of the grid */
         }
@@ -221,7 +220,7 @@
         /* Styling for each navigation card */
         .main-card {
             background: var(--white);
-            padding: 30px;
+            padding: 1.875rem; /* Responsive padding */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-md);
             cursor: pointer;
@@ -231,7 +230,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 180px; /* Ensures consistent card height */
+            min-height: 11.25rem; /* Responsive min-height */
             position: relative;
             overflow: hidden;
             border: 1px solid #e2e8f0; /* Subtle border */
@@ -255,7 +254,7 @@
         }
 
         .main-card:hover {
-            transform: translateY(-5px); /* Lift effect on hover */
+            transform: translateY(-0.3125rem); /* Lift effect on hover */
             box-shadow: var(--shadow-lg); /* Larger shadow on hover */
             border-color: var(--coffee-light); /* Highlight border on hover */
         }
@@ -277,8 +276,8 @@
 
         /* Icon styling for cards */
         .main-card-icon {
-            font-size: 3.5rem; /* Larger icon size */
-            margin-bottom: 15px;
+            font-size: 2.8rem; /* Responsive icon size */
+            margin-bottom: 0.9375rem; /* Responsive margin */
             color: var(--coffee-light); /* Changed to coffee color */
             line-height: 1; /* Ensures icon is vertically centered */
         }
@@ -289,10 +288,10 @@
 
         /* Title styling for cards */
         .main-card-title {
-            font-size: 1.5rem; /* Larger title size */
+            font-size: 1.25rem; /* Responsive title size */
             font-weight: 600;
             color: var(--text-color-dark);
-            margin-bottom: 5px;
+            margin-bottom: 0.3125rem; /* Responsive margin */
         }
 
         .main-card.disabled .main-card-title {
@@ -301,7 +300,7 @@
 
         /* Subtitle styling for cards */
         .main-card-subtitle {
-            font-size: 0.95rem;
+            font-size: 0.9rem; /* Responsive font size */
             color: var(--text-color-light);
             line-height: 1.4;
         }
@@ -317,9 +316,9 @@
             position: relative;
             overflow: hidden; /* Ensures content within iframe doesn't overflow */
             transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
-            transform: translateY(10px); /* Initial slight offset for animation */
+            transform: translateY(0.625rem); /* Initial slight offset for animation */
             opacity: 0; /* Start hidden */
-            height: calc(100vh - 120px); /* Calculate height to fill screen minus header/padding */
+            height: calc(100vh - 7.5rem); /* Calculate height to fill screen minus header/padding */
         }
 
         .full-page-view.active {
@@ -350,7 +349,7 @@
         /* Error state styling */
         .error-state {
             display: none; /* Hidden by default */
-            padding: 60px 40px;
+            padding: 3.75rem 2.5rem; /* Responsive padding */
             text-align: center;
             color: var(--primary-red);
             position: absolute; /* Overlay on top of iframe */
@@ -372,13 +371,13 @@
 
         .error-icon {
             font-size: 3rem;
-            margin-bottom: 20px;
+            margin-bottom: 1.25rem; /* Responsive margin */
         }
 
         .error-title {
             font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 0.625rem; /* Responsive margin */
         }
 
         .error-text {
@@ -407,13 +406,13 @@
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid var(--coffee-light); /* Changed to coffee color */
+            width: 2.5rem; /* Responsive width */
+            height: 2.5rem; /* Responsive height */
+            border: 0.25rem solid #f3f4f6; /* Responsive border */
+            border-top: 0.25rem solid var(--coffee-light); /* Changed to coffee color */
             border-radius: 50%;
             animation: spin 1s linear infinite; /* Spinner animation */
-            margin-bottom: 20px;
+            margin-bottom: 1.25rem; /* Responsive margin */
         }
 
         .loading-text {
@@ -429,13 +428,13 @@
         /* Status indicator in banner */
         .status-indicator {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 10px; /* Slightly larger */
-            height: 10px;
+            top: 1.25rem; /* Responsive top */
+            right: 1.25rem; /* Responsive right */
+            width: 0.625rem; /* Responsive width */
+            height: 0.625rem; /* Responsive height */
             border-radius: 50%;
             background: #10b981; /* Green color */
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); /* Larger pulse shadow */
+            box-shadow: 0 0 0 0.1875rem rgba(16, 185, 129, 0.2); /* Responsive pulse shadow */
             animation: pulse 2s infinite;
         }
 
@@ -446,7 +445,7 @@
 
         /* Demo styles for missing pages */
         .demo-content {
-            padding: 40px;
+            padding: 2.5rem; /* Responsive padding */
             text-align: center;
             color: var(--text-color-dark);
             width: 100%; /* Ensure demo content takes full width */
@@ -459,7 +458,7 @@
 
         .demo-content h2 {
             color: var(--coffee-dark);
-            margin-bottom: 20px;
+            margin-bottom: 1.25rem; /* Responsive margin */
             font-size: 2rem;
         }
 
@@ -467,7 +466,7 @@
             color: var(--text-color-light);
             font-size: 1.1rem;
             line-height: 1.6;
-            max-width: 600px; /* Limit width for readability */
+            max-width: 37.5rem; /* Responsive max-width */
         }
 
         /* Login Page Styles */
@@ -477,31 +476,31 @@
             align-items: center;
             min-height: 100vh;
             background: var(--bg-medium);
-            padding: 20px;
+            padding: 1.25rem; /* Responsive padding */
         }
 
         .login-box {
             background: var(--white);
-            padding: 40px;
+            padding: 2.5rem; /* Responsive padding */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
             text-align: center;
             width: 100%;
-            max-width: 400px;
+            max-width: 30rem; /* Increased max-width for login box */
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 1.25rem; /* Responsive gap */
         }
 
         .login-box h2 {
-            font-size: 2rem;
+            font-size: 1.75rem; /* Responsive font size */
             color: var(--coffee-dark);
-            margin-bottom: 10px;
+            margin-bottom: 0.625rem; /* Responsive margin */
         }
 
         .login-box p {
             color: var(--text-color-light);
-            margin-bottom: 20px;
+            margin-bottom: 1.25rem; /* Responsive margin */
         }
 
         .login-input-group {
@@ -510,16 +509,16 @@
 
         .login-input-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 0.5rem; /* Responsive margin */
             font-weight: 500;
             color: var(--text-color-dark);
         }
 
         .login-input-group input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 0.75rem 0.9375rem; /* Responsive padding */
             border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 0.5rem; /* Responsive border-radius */
             font-size: 1rem;
             color: var(--text-color-dark);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -528,14 +527,14 @@
         .login-input-group input:focus {
             outline: none;
             border-color: var(--coffee-light);
-            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
+            box-shadow: 0 0 0 0.1875rem rgba(139, 94, 60, 0.2);
         }
 
         .login-button {
             background: var(--coffee-light);
             color: var(--white);
-            padding: 12px 25px;
-            border-radius: 8px;
+            padding: 0.75rem 1.5625rem; /* Responsive padding */
+            border-radius: 0.5rem; /* Responsive border-radius */
             cursor: pointer;
             font-weight: 600;
             font-size: 1.1rem;
@@ -546,118 +545,147 @@
 
         .login-button:hover {
             background: var(--coffee-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25);
+            transform: translateY(-0.125rem);
+            box-shadow: 0 0.375rem 0.9375rem rgba(139, 94, 60, 0.25);
         }
 
         .login-error-message {
             color: var(--primary-red);
             font-size: 0.9rem;
-            margin-top: 10px;
+            margin-top: 0.625rem; /* Responsive margin */
             min-height: 1.2em; /* Reserve space to prevent layout shift */
         }
 
         /* Responsive adjustments for smaller screens */
         @media (max-width: 1024px) {
+            html {
+                font-size: 15px; /* Adjust base font size for tablets */
+            }
             .container {
-                padding: 15px;
+                padding: 1rem;
             }
             .banner {
-                padding: 25px 30px; /* Slightly more compact */
-                gap: 20px;
+                padding: 1.5rem 2rem;
+                gap: 1.25rem;
             }
             .banner h1 {
-                font-size: 3rem;
+                font-size: 2.2rem;
             }
             .banner .subtitle {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
             .company-logo {
-                max-width: 80px; /* Adjust size for medium screens */
+                max-width: 4.5rem;
             }
             .home-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
+                grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+                gap: 1.25rem;
             }
             .main-card-icon {
-                font-size: 3rem;
+                font-size: 2.5rem;
             }
             .main-card-title {
-                font-size: 1.3rem;
+                font-size: 1.15rem;
+            }
+            .login-box {
+                max-width: 25rem; /* Adjusted for tablets */
+                padding: 2rem;
             }
         }
 
         @media (max-width: 768px) {
+            html {
+                font-size: 14px; /* Adjust base font size for mobile */
+            }
             .container {
-                padding: 10px;
+                padding: 0.75rem;
             }
             .header {
-                flex-direction: row; /* Keep buttons in a row */
-                justify-content: space-between; /* Space out buttons */
-                padding: 8px 15px; /* Slimmer header on mobile */
+                flex-direction: column; /* Stack header items on small mobile */
+                align-items: flex-start; /* Align stacked items to start */
+                padding: 0.5rem 1rem;
+                gap: 0.75rem;
             }
-            .admin-tab, .back-button {
-                padding: 8px 15px;
-                font-size: 0.85rem;
+            .back-button, .user-info, .logout-button {
+                width: 100%; /* Full width for stacked items */
+                margin-right: 0; /* Remove auto margin */
+                justify-content: center; /* Center content within buttons/info */
+            }
+            .user-info {
+                order: -1; /* Place user info at the top when stacked */
+                margin-bottom: 0.5rem;
             }
             .banner {
-                /* Maintain row direction for logo and text */
-                padding: 20px 15px; /* Adjust padding for mobile row layout */
-                margin-bottom: 20px;
-                gap: 15px; /* Adjust gap for mobile row layout */
+                padding: 1.25rem 1rem;
+                margin-bottom: 1.25rem;
+                gap: 1rem;
             }
             .company-logo {
-                max-width: 60px; /* Even smaller on mobile to allow space for text */
+                max-width: 3.5rem;
             }
             .banner h1 {
-                font-size: 2rem; /* Reduced font size for mobile row layout */
-                margin-bottom: 4px; /* Reduced margin */
+                font-size: 1.8rem;
+                margin-bottom: 0.25rem;
             }
             .banner .subtitle {
-                font-size: 0.9rem; /* Reduced font size for mobile */
+                font-size: 0.85rem;
             }
             .home-grid {
                 grid-template-columns: 1fr; /* Single column on very small screens */
-                gap: 15px;
+                gap: 1rem;
             }
             .main-card {
-                min-height: 150px;
-                padding: 25px;
+                min-height: 9.375rem;
+                padding: 1.5rem;
             }
             .main-card-icon {
-                font-size: 2.8rem;
+                font-size: 2.2rem;
             }
             .main-card-title {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
             .full-page-view {
-                height: calc(100vh - 90px); /* Adjust height for mobile header */
+                height: calc(100vh - 6.5rem); /* Adjust height for mobile header */
             }
             .login-box {
-                padding: 30px 20px;
+                padding: 1.875rem 1.25rem;
+                max-width: 20rem; /* Adjusted for smaller screens */
             }
             .login-box h2 {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
             }
         }
 
         @media (max-width: 480px) {
+            html {
+                font-size: 13px; /* Even smaller base font size */
+            }
+            .container {
+                padding: 0.5rem;
+            }
             .banner {
-                padding: 15px 10px;
-                gap: 10px;
+                padding: 1rem 0.75rem;
+                gap: 0.75rem;
             }
             .company-logo {
-                max-width: 50px;
+                max-width: 3rem;
             }
             .banner h1 {
-                font-size: 1.6rem;
+                font-size: 1.4rem;
             }
             .banner .subtitle {
+                font-size: 0.75rem;
+            }
+            .back-button, .logout-button {
+                padding: 0.5rem 0.75rem;
                 font-size: 0.8rem;
             }
-            .admin-tab, .back-button {
-                font-size: 0.8rem;
-                padding: 6px 12px;
+            .login-box {
+                max-width: 18rem;
+                padding: 1.5rem 1rem;
+            }
+            .login-box h2 {
+                font-size: 1.3rem;
             }
         }
     </style>
@@ -943,11 +971,10 @@
             console.log(`User logged in as: ${username} (${userTitle})`);
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
-            document.getElementById('homeView').classList.remove('hidden');
+            document.getElementById('homeView').classList.remove('hidden'); // Ensure home view is visible
 
             const userInfoElement = document.getElementById('userInfo');
             const logoutButton = document.getElementById('logoutButton');
-            // Removed adminButton as it's now a card
             const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
             const adminPanelCard = document.getElementById('adminPanelCard'); // Get the new admin panel card
 
@@ -956,17 +983,10 @@
             userInfoElement.classList.remove('hidden');
             logoutButton.classList.remove('hidden');
 
-            // Reset visibility for all elements first
-            if (dashboardCard) {
-                dashboardCard.classList.remove('disabled');
-            }
-            if (adminPanelCard) { // Ensure admin panel card is enabled by default
-                adminPanelCard.classList.remove('disabled');
-            }
+            // Reset visibility for all cards first
             document.querySelectorAll('.main-card').forEach(card => {
                 card.classList.remove('disabled');
             });
-
 
             // Apply role-based visibility
             if (userTitle === 'Medical Representative') {
@@ -984,7 +1004,7 @@
             } else if (userTitle === 'admin') {
                 // admin sees everything, no changes needed from default (all enabled)
             } else {
-                // Default for unknown roles: hide admin and dashboard for safety
+                // Default for unknown roles: disable admin and dashboard for safety
                 if (adminPanelCard) {
                     adminPanelCard.classList.add('disabled');
                 }
@@ -993,12 +1013,8 @@
                 }
             }
 
-            // Specific auto-navigation based on user title
-            if (userTitle === 'admin') {
-                loadPage('admin');
-            } else if (userTitle === 'Dashboard') {
-                loadPage('dashboard');
-            }
+            // Removed auto-navigation based on user title.
+            // All users will now land on the home page after login.
         }
 
         /**
@@ -1021,7 +1037,6 @@
             // Hide user info and logout button
             document.getElementById('userInfo').classList.add('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
-            // No adminButton to show/hide in header anymore
             
             // Ensure home view is shown on logout, and all cards are reset to default disabled state
             showHome(); // This will hide full-page views and show home.
@@ -1037,10 +1052,9 @@
             console.log('Showing home view');
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
-            // Removed adminButton from here
             const userInfoElement = document.getElementById('userInfo');
             const logoutButton = document.getElementById('logoutButton');
-            const adminPanelCard = document.getElementById('adminPanelCard'); // Get the new admin panel card
+            const adminPanelCard = document.getElementById('adminPanelCard');
             const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
             
             if (homeView) {
@@ -1058,7 +1072,7 @@
                 if (dashboardCard) dashboardCard.classList.add('disabled');
             } else if (userTitle === 'District Manager') {
                 if (adminPanelCard) adminPanelCard.classList.add('disabled');
-                if (dashboardCard) dashboardCard.classList.remove('disabled'); // Dashboard is enabled for DM
+                if (dashboardCard) dashboardCard.classList.remove('disabled');
             } else if (userTitle === 'admin') {
                 if (adminPanelCard) adminPanelCard.classList.remove('disabled');
                 if (dashboardCard) dashboardCard.classList.remove('disabled');
@@ -1119,7 +1133,6 @@
 
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
-            // const adminButton = document.getElementById('adminButton'); // Removed
             const targetView = document.getElementById(viewId);
             const userInfoElement = document.getElementById('userInfo');
             const logoutButton = document.getElementById('logoutButton');
@@ -1144,7 +1157,6 @@
                 console.error('Error: One or more required DOM elements not found for page loading. Debug details:');
                 console.error('  homeView:', homeView);
                 console.error('  backButton:', backButton);
-                // console.error('  adminButton:', adminButton); // Removed
                 console.error('  targetView:', targetView);
                 console.error('  loadingOverlay:', loadingOverlay);
                 console.error('  errorState:', errorState);
@@ -1160,7 +1172,6 @@
 
             homeView.classList.add('hidden');
             backButton.classList.remove('hidden');
-            // admin button is no longer in the header, so no need to hide it here.
             // User info and logout buttons remain visible in the header.
             console.log(`Header button visibility set for page: ${page}.`);
 
@@ -1246,13 +1257,6 @@
                     }
                 });
             });
-
-            // Removed the specific adminButton click listener as it's now a card
-            /*
-            document.getElementById('adminButton').addEventListener('click', function() {
-                loadPage('admin');
-            });
-            */
 
             document.getElementById('backButton').addEventListener('click', function() {
                 showHome();
