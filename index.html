@@ -25,10 +25,6 @@
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
             --border-radius: 8px; /* Slightly decreased for a more app-like feel */
-
-            /* New variables for dynamic height calculation */
-            --header-height: 56px; /* Approx height of header (padding + content) */
-            --container-padding: 15px; /* Top/bottom padding of .container */
         }
 
         /* Base styles for all elements */
@@ -58,7 +54,7 @@
         .container {
             max-width: 1400px; /* Decreased max-width for a more compact app feel */
             margin: 0 auto;
-            padding: var(--container-padding); /* Use variable for padding */
+            padding: 15px; /* Reduced padding */
             width: 100%;
             flex-grow: 1; /* Allows container to expand and fill space */
             display: flex;
@@ -78,7 +74,6 @@
             position: relative;
             z-index: 100; /* Ensures header is always on top */
             gap: 15px; /* Space between buttons */
-            height: var(--header-height); /* Explicitly set header height */
         }
 
         /* Admin tab button styling - REMOVED, now a card */
@@ -292,8 +287,7 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
             transform: translateY(10px);
             opacity: 0;
-            /* Adjusted height to fill almost entire viewport, accounting for header and container padding */
-            height: calc(100vh - var(--header-height) - (var(--container-padding) * 2));
+            height: calc(100vh - 100px); /* Adjusted height to accommodate smaller header/padding */
         }
 
         .full-page-view.active {
@@ -473,11 +467,6 @@
             .main-card-title {
                 font-size: 1.1rem;
             }
-            /* Adjust header height and container padding for this breakpoint */
-            :root {
-                --header-height: 50px;
-                --container-padding: 10px;
-            }
         }
 
         @media (max-width: 768px) {
@@ -522,10 +511,8 @@
             .main-card-title {
                 font-size: 1rem;
             }
-            /* Adjust header height and container padding for this breakpoint */
-            :root {
-                --header-height: 44px;
-                --container-padding: 8px;
+            .full-page-view {
+                height: calc(100vh - 80px);
             }
         }
 
@@ -553,11 +540,6 @@
             .main-card-subtitle {
                 font-size: 0.8rem;
             }
-            /* Adjust header height and container padding for this breakpoint */
-            :root {
-                --header-height: 38px;
-                --container-padding: 8px;
-            }
         }
     </style>
 </head>
@@ -569,7 +551,6 @@
                 &#x2190; Back to Home
             </button>
             <!-- Admin tab button - REMOVED, now a card -->
-            <!-- The admin button is now a card in the home-grid, so this element is hidden -->
             <button id="adminButton" class="admin-tab hidden">
                 Admin
             </button>
@@ -735,94 +716,6 @@
     <script>
         // Store the ID of the currently active full-page view
         let currentActiveViewId = null;
-
-        // Global variables for swipe detection
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let currentSwipeView = null; // To keep track of which view has swipe listeners attached
-
-        /**
-         * Handles the touchstart event to record initial touch coordinates.
-         * @param {TouchEvent} event - The touchstart event object.
-         */
-        function handleTouchStart(event) {
-            touchStartX = event.touches[0].clientX;
-            touchStartY = event.touches[0].clientY;
-        }
-
-        /**
-         * Handles the touchmove event. (Currently empty as preventDefault is not used for simple navigation)
-         * @param {TouchEvent} event - The touchmove event object.
-         */
-        function handleTouchMove(event) {
-            // No action needed here for a simple swipe-to-go-back gesture
-            // If preventing default scrolling was required, logic would go here
-        }
-
-        /**
-         * Handles the touchend event to detect a swipe gesture and trigger navigation.
-         * @param {TouchEvent} event - The touchend event object.
-         */
-        function handleTouchEnd(event) {
-            // If no touch was started or coordinates are reset, exit
-            if (touchStartX === 0 && touchStartY === 0) return;
-
-            const touchEndX = event.changedTouches[0].clientX;
-            const touchEndY = event.changedTouches[0].clientY;
-
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
-
-            const minSwipeDistance = 75; // Minimum horizontal distance for a swipe to be registered
-            const maxVerticalDeviation = 50; // Maximum allowed vertical movement for a horizontal swipe
-
-            // Check for a rightward swipe (positive deltaX) with minimal vertical deviation
-            if (deltaX > minSwipeDistance && Math.abs(deltaY) < maxVerticalDeviation) {
-                console.log('Right swipe detected! Going back to home.');
-                showHome();
-            }
-
-            // Reset touch coordinates after the gesture ends
-            touchStartX = 0;
-            touchStartY = 0;
-        }
-
-        /**
-         * Attaches swipe event listeners to a given view element.
-         * @param {HTMLElement} viewElement - The full-page view element to attach listeners to.
-         */
-        function attachSwipeListeners(viewElement) {
-            if (!viewElement) return;
-
-            // Remove existing listeners from the previously active view to prevent duplicates
-            if (currentSwipeView && currentSwipeView !== viewElement) {
-                removeSwipeListeners(currentSwipeView);
-            }
-
-            currentSwipeView = viewElement; // Set the current view with listeners
-
-            // Add event listeners for touch gestures (passive: true for performance)
-            viewElement.addEventListener('touchstart', handleTouchStart, { passive: true });
-            viewElement.addEventListener('touchmove', handleTouchMove, { passive: true });
-            viewElement.addEventListener('touchend', handleTouchEnd, { passive: true });
-            console.log(`Swipe listeners attached to: ${viewElement.id}`);
-        }
-
-        /**
-         * Removes swipe event listeners from a given view element.
-         * @param {HTMLElement} viewElement - The full-page view element to remove listeners from.
-         */
-        function removeSwipeListeners(viewElement) {
-            if (!viewElement || !currentSwipeView || viewElement !== currentSwipeView) return;
-
-            // Remove the event listeners
-            viewElement.removeEventListener('touchstart', handleTouchStart);
-            viewElement.removeEventListener('touchmove', handleTouchMove);
-            viewElement.removeEventListener('touchend', handleTouchEnd);
-            console.log(`Swipe listeners removed from: ${viewElement.id}`);
-            currentSwipeView = null; // Clear the reference
-        }
-
         /**
          * Shows the home view and hides any active full-page view.
          */
@@ -830,6 +723,7 @@
             console.log('Showing home view');
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
+            // const adminButton = document.getElementById('adminButton'); // Admin button is now a card
 
             if (homeView) {
                 homeView.classList.remove('hidden');
@@ -844,9 +738,7 @@
                 const activeView = document.getElementById(currentActiveViewId);
                 if (activeView) {
                     activeView.classList.remove('active');
-                    // Remove swipe listeners when hiding a view
-                    removeSwipeListeners(activeView);
-                    // Add hidden class after transition to allow CSS transition to complete
+                    // Add hidden class after transition for better performance/layout
                     setTimeout(() => activeView.classList.add('hidden'), 300);
                     // Also hide the iframe and show demo content if it was an iframe view
                     const iframe = activeView.querySelector('iframe');
@@ -884,6 +776,7 @@
             // Get references to main UI elements
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
+            // const adminButton = document.getElementById('adminButton'); // Admin button is now a card
             const targetView = document.getElementById(viewId);
 
             // Initialize variables for elements inside targetView
@@ -910,6 +803,7 @@
                 console.error('Error: One or more required DOM elements not found for page loading. Debug details:');
                 console.error('  homeView:', homeView);
                 console.error('  backButton:', backButton);
+                // console.error('  adminButton:', adminButton); // Admin button is now a card
                 console.error('  targetView:', targetView);
                 console.error('  loadingOverlay:', loadingOverlay);
                 console.error('  errorState:', errorState);
@@ -925,6 +819,7 @@
             // Hide the home view and show the back button
             homeView.classList.add('hidden');
             backButton.classList.remove('hidden'); // This line makes the back button visible
+            // adminButton.classList.add('hidden'); // Admin button is now a card
             console.log(`Back button visibility set for page: ${page}.`);
 
 
@@ -933,8 +828,6 @@
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
-                    // Remove swipe listeners from the previous view when switching
-                    removeSwipeListeners(prevActiveView);
                     // Delay adding 'hidden' to allow CSS transition to complete
                     setTimeout(() => prevActiveView.classList.add('hidden'), 300);
                 }
@@ -945,10 +838,7 @@
 
             // Show the target full-page view with a slight delay for transition effect
             targetView.classList.remove('hidden');
-            setTimeout(() => {
-                targetView.classList.add('active');
-                attachSwipeListeners(targetView); // Attach swipe listeners to the newly active view
-            }, 10);
+            setTimeout(() => targetView.classList.add('active'), 10);
 
             // Show the loading spinner and hide any previous error state
             loadingOverlay.classList.add('show');
@@ -993,8 +883,10 @@
                 });
             });
 
-            // The Admin button in the header is removed as it's now a card.
-            // The event listener for the old admin button is no longer needed.
+            // The Admin button in the header is removed. The Admin Panel is now a card.
+            // document.getElementById('adminButton').addEventListener('click', function() {
+            //     loadPage('admin');
+            // });
 
             // Add click event listener to the Back button
             document.getElementById('backButton').addEventListener('click', function() {
