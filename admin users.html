@@ -28,7 +28,8 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      display: none; /* Hidden by default, shown when logged in */
+      /* Always visible now as login is removed */
+      display: flex;
     }
     .header-content {
       max-width: 1200px;
@@ -354,9 +355,9 @@
       border-radius: 12px;
       border: 2px dashed #e2e8f0;
     }
-    /* Login Box Styles */
+    /* Login Box Styles - No longer needed, but keeping for reference if user changes mind */
     .login-container {
-      display: flex;
+      display: none; /* Always hidden now */
       justify-content: center;
       align-items: center;
       min-height: calc(100vh - 80px);
@@ -554,11 +555,11 @@
         <div class="stat-badge">
           <span id="totalUsers">0</span> Users
         </div>
-        <button id="logoutButton" class="logout-btn">Logout</button>
+        <!-- Logout button removed -->
       </div>
     </div>
   </div>
-  <div id="appContent" style="display: none;">
+  <div id="appContent">
     <div class="container">
       <div id="message"></div>
       <div class="main-content">
@@ -605,29 +606,6 @@
       </div>
     </div>
   </div>
-  <!-- Login Box -->
-  <div id="loginContainer" class="login-container">
-    <div class="login-card">
-      <h2>Admin Login</h2>
-      <div id="loginMessage" class="login-message"></div>
-      <!-- Auto-login message and spinner -->
-      <div id="autoLoginMessage" class="auto-login-message" style="display: none;">
-        <p>Attempting auto-login...</p>
-        <div class="spinner"></div>
-      </div>
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" class="form-input" required />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" class="form-input" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Login</button>
-      </form>
-    </div>
-  </div>
   <!-- Custom Confirmation Modal -->
   <div id="confirmationModal" class="modal">
     <div class="modal-content">
@@ -657,22 +635,16 @@
 
     // DOM Elements
     const messageDiv = document.getElementById('message');
-    const loginMessageDiv = document.getElementById('loginMessage');
     const appContent = document.getElementById('appContent');
-    const loginContainer = document.getElementById('loginContainer');
-    const loginForm = document.getElementById('loginForm');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const logoutButton = document.getElementById('logoutButton');
+    // Removed login-related DOM elements
     const confirmationModal = document.getElementById('confirmationModal');
     const modalMessage = document.getElementById('modalMessage');
     const modalConfirmBtn = document.getElementById('modalConfirmBtn');
     const headerBanner = document.querySelector('.header-banner');
-    const autoLoginMessageDiv = document.getElementById('autoLoginMessage');
 
     // Function to show custom message (for user feedback)
     function showMessage(text, type = 'success', isLogin = false) {
-      const messageContainer = isLogin ? loginMessageDiv : messageDiv;
+      const messageContainer = messageDiv;
       messageContainer.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
       setTimeout(() => {
         messageContainer.innerHTML = '';
@@ -909,143 +881,19 @@
       }
     });
 
-    // Admin Login Functionality
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      try {
-        // Query Supabase to find a user with the provided username and password
-        // IMPORTANT: This is a custom login against your 'users' table.
-        // For production, consider using Supabase's built-in authentication methods (e.g., signInWithPassword)
-        // and managing user roles/titles via Supabase's auth system or RLS.
-        const { data, error } = await supabaseClient
-          .from('users')
-          .select('*')
-          .eq('username', username)
-          .eq('password', password)
-          .single(); // Expecting a single result
-
-        if (error || !data) {
-          showMessage('Invalid username or password.', 'error', true);
-          return;
-        }
-
-        // Check if the logged-in user has the 'admin' title
-        if (data.title === 'admin') {
-          // If admin, set a local storage flag.
-          // This allows for persistent login across browser sessions.
-          localStorage.setItem('isAdminLoggedIn', 'true');
-          // Store the logged-in username and password in local storage for auto-login
-          // WARNING: Storing passwords in localStorage is generally not recommended for security reasons.
-          // For production applications, consider more secure authentication methods (e.g., JWTs, OAuth).
-          localStorage.setItem('loggedInUsername', username);
-          localStorage.setItem('loggedInPassword', password);
-          showMessage('Login successful! Welcome, Admin.', 'success', true);
-          renderApp(); // Render the admin application view
-        } else {
-          showMessage('Only admin users can log in.', 'error', true);
-        }
-      } catch (err) {
-        showMessage('Login failed: ' + err.message, 'error', true);
-      }
-    });
-
-    // Logout Functionality
-    logoutButton.addEventListener('click', () => {
-      // Remove the admin login flag and stored credentials from local storage
-      localStorage.removeItem('isAdminLoggedIn');
-      localStorage.removeItem('loggedInUsername');
-      localStorage.removeItem('loggedInPassword'); // Clear stored password on logout
-      showMessage('Logged out successfully.', 'success');
-      renderApp(); // Render the login view
-    });
-
-    // Function to attempt auto-login using stored credentials
-    async function attemptAutoLogin() {
-      const storedUsername = localStorage.getItem('loggedInUsername');
-      const storedPassword = localStorage.getItem('loggedInPassword');
-
-      if (storedUsername && storedPassword) {
-        // Show auto-login message and hide the form
-        loginForm.style.display = 'none';
-        autoLoginMessageDiv.style.display = 'flex';
-        loginMessageDiv.innerHTML = ''; // Clear any previous login messages
-
-        try {
-          const { data, error } = await supabaseClient
-            .from('users')
-            .select('*')
-            .eq('username', storedUsername)
-            .eq('password', storedPassword)
-            .single();
-
-          if (error || !data) {
-            // If auto-login fails (e.g., credentials changed or invalid), clear stored credentials
-            localStorage.removeItem('isAdminLoggedIn');
-            localStorage.removeItem('loggedInUsername');
-            localStorage.removeItem('loggedInPassword');
-            showMessage('Auto-login failed. Please log in manually.', 'error', true);
-            loginForm.style.display = 'block'; // Show login form again
-            autoLoginMessageDiv.style.display = 'none'; // Hide auto-login message
-            return;
-          }
-
-          if (data.title === 'admin') {
-            // If auto-login successful, ensure the flag is set and re-render to show admin view
-            localStorage.setItem('isAdminLoggedIn', 'true');
-            showMessage('Auto-login successful! Welcome, Admin.', 'success', true);
-            renderApp(); // Re-call renderApp to switch to the admin view
-          } else {
-            // User is not an admin, clear credentials and show error
-            localStorage.removeItem('isAdminLoggedIn');
-            localStorage.removeItem('loggedInUsername');
-            localStorage.removeItem('loggedInPassword');
-            showMessage('Auto-login failed: User is not an admin.', 'error', true);
-            loginForm.style.display = 'block'; // Show login form again
-            autoLoginMessageDiv.style.display = 'none'; // Hide auto-login message
-          }
-        } catch (err) {
-          // Handle any network or other errors during auto-login
-          localStorage.removeItem('isAdminLoggedIn');
-          localStorage.removeItem('loggedInUsername');
-          localStorage.removeItem('loggedInPassword');
-          showMessage('Auto-login failed: ' + err.message, 'error', true);
-          loginForm.style.display = 'block'; // Show login form again
-          autoLoginMessageDiv.style.display = 'none'; // Hide auto-login message
-        }
-      } else {
-        // No stored credentials, just show the login form
-        loginForm.style.display = 'block';
-        autoLoginMessageDiv.style.display = 'none';
-      }
-    }
-
-    // Renders the appropriate view (login or app content) based on login status
-    async function renderApp() {
-      const isAdminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
-
-      if (isAdminLoggedIn) {
-        loginContainer.style.display = 'none'; // Hide login form
-        appContent.style.display = 'block';    // Show main app content
-        headerBanner.style.display = 'flex';   // Show header banner
-        logoutButton.style.display = 'inline-flex'; // Show logout button
-        loadUsers(); // Load user data for the admin interface
-      } else {
-        loginContainer.style.display = 'flex'; // Show login form container
-        appContent.style.display = 'none';     // Hide main app content
-        headerBanner.style.display = 'none';   // Hide header banner
-        logoutButton.style.display = 'none';   // Hide logout button
-
-        // Attempt auto-login if credentials exist in local storage
-        await attemptAutoLogin();
-      }
+    // Renders the appropriate view (now always the admin content)
+    function renderApp() {
+      // Since the login box is removed, we assume the user is always "logged in" as admin
+      // and directly display the app content.
+      appContent.style.display = 'block';
+      headerBanner.style.display = 'flex';
+      // logoutButton.style.display = 'inline-flex'; // Removed as button is gone
+      loadUsers(); // Load user data for the admin interface
     }
 
     // Initialize the application view when the DOM is fully loaded
     document.addEventListener('DOMContentLoaded', () => {
-      renderApp(); // Determine and render the initial view
+      renderApp();
     });
   </script>
 </body>
