@@ -908,6 +908,8 @@
           // If admin, set a session storage flag.
           // This flag is what the 'index page' would also set for seamless login.
           sessionStorage.setItem('isAdminLoggedIn', 'true');
+          // Store the logged-in username in session storage
+          sessionStorage.setItem('loggedInUsername', username);
           showMessage('Login successful! Welcome, Admin.', 'success', true);
           renderApp(); // Render the admin application view
         } else {
@@ -920,8 +922,9 @@
 
     // Logout Functionality
     logoutButton.addEventListener('click', () => {
-      // Remove the admin login flag from session storage
+      // Remove the admin login flag and stored username from session storage
       sessionStorage.removeItem('isAdminLoggedIn');
+      sessionStorage.removeItem('loggedInUsername'); // Clear stored username on logout
       showMessage('Logged out successfully.', 'success');
       renderApp(); // Render the login view
     });
@@ -944,6 +947,12 @@
         appContent.style.display = 'none';     // Hide main app content
         headerBanner.style.display = 'none';   // Hide header banner
         logoutButton.style.display = 'none';   // Hide logout button
+
+        // Pre-fill username from session storage if available
+        const storedUsername = sessionStorage.getItem('loggedInUsername');
+        if (storedUsername) {
+          usernameInput.value = storedUsername;
+        }
       }
     }
 
