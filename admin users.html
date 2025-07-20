@@ -6,17 +6,20 @@
   <title>User Management</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* Base styles for all elements */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
     body {
-      font-family: 'Inter', sans-serif; /* Changed to Inter for consistency */
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #91C8E4;
       color: #334155;
       line-height: 1.6;
       min-height: 100vh;
+      display: flex; /* Ensure body is a flex container */
+      flex-direction: column; /* Arrange content vertically */
     }
     /* Slim Banner Header */
     .header-banner {
@@ -27,7 +30,8 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      display: none;
+      display: flex; /* Always display header */
+      flex-shrink: 0; /* Prevent header from shrinking */
     }
     .header-content {
       max-width: 1200px;
@@ -35,6 +39,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      width: 100%; /* Ensure content fills header width */
     }
     .header-info {
       display: flex;
@@ -69,12 +74,16 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 10px;
+      flex-grow: 1; /* Allow container to take remaining space */
+      display: flex;
+      flex-direction: column;
     }
     .main-content {
       display: grid;
       grid-template-columns: 1fr 2fr;
       gap: 14px;
       margin-top: 20px;
+      flex-grow: 1; /* Allow main content to grow */
     }
     /* Card Styles */
     .card {
@@ -84,6 +93,8 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(10px);
       overflow: hidden;
+      display: flex; /* Make card a flex container */
+      flex-direction: column; /* Arrange card content vertically */
     }
     .card-header {
       padding: 10px 14px;
@@ -98,6 +109,9 @@
     }
     .card-body {
       padding: 24px;
+      flex-grow: 1; /* Allow card body to grow */
+      display: flex;
+      flex-direction: column;
     }
     /* Form Styles */
     .form-group {
@@ -193,6 +207,7 @@
       max-height: 600px;
       overflow-y: auto;
       overflow-x: hidden;
+      flex-grow: 1; /* Allow users list to grow */
     }
     .users-cascade::-webkit-scrollbar {
       width: 6px;
@@ -353,22 +368,8 @@
       border-radius: 12px;
       border: 2px dashed #e2e8f0;
     }
-    /* Login Required Message */
-    .login-required-message {
-        text-align: center;
-        padding: 40px;
-        font-size: 1.2rem;
-        color: #555;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        margin-top: 50px;
-    }
-    .login-required-message i {
-        font-size: 2rem;
-        color: #4361ee;
-        margin-bottom: 15px;
-    }
+    /* Removed Login Box Styles as it's handled by parent */
+    /* Removed Logout Button Styles */
     /* Modal Styles */
     .modal {
       display: none;
@@ -500,11 +501,12 @@
         <div class="stat-badge">
           <span id="totalUsers">0</span> Users
         </div>
-        <button id="logoutButton" class="logout-btn">Logout</button>
+        <!-- Logout button removed as it's handled by the parent frame -->
       </div>
     </div>
   </div>
-  <div id="appContent" style="display: none;">
+  <!-- Main Application Content - Always visible -->
+  <div id="appContent" style="display: block; flex-grow: 1; display: flex; flex-direction: column;">
     <div class="container">
       <div id="message"></div>
       <div class="main-content">
@@ -551,7 +553,6 @@
       </div>
     </div>
   </div>
-  <!-- Removed Login Box -->
   <!-- Custom Confirmation Modal -->
   <div id="confirmationModal" class="modal">
     <div class="modal-content">
@@ -568,54 +569,26 @@
       </div>
     </div>
   </div>
-
-  <!-- Message to display if user is not logged in -->
-  <div id="loginRequiredMessage" class="container login-required-message hidden">
-      <i class="fas fa-info-circle"></i>
-      <p>Please log in as an administrator via the main application page to access User Management.</p>
-  </div>
-
   <script>
     // Supabase client
     const { createClient } = supabase;
     const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeXp1BeZz0yjp5c'; /* Updated API Key */
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
     let users = [];
     let activeEditId = null;
     let confirmCallback = null;
     // DOM Elements
     const messageDiv = document.getElementById('message');
-    // const loginMessageDiv = document.getElementById('loginMessage'); // Removed
     const appContent = document.getElementById('appContent');
-    // const loginContainer = document.getElementById('loginContainer'); // Removed
-    // const loginForm = document.getElementById('loginForm'); // Removed
-    // const usernameInput = document.getElementById('username'); // Removed
-    // const passwordInput = document.getElementById('password'); // Removed
-    const logoutButton = document.getElementById('logoutButton');
+    // Removed logoutButton as it's no longer in this file
     const confirmationModal = document.getElementById('confirmationModal');
     const modalMessage = document.getElementById('modalMessage');
     const modalConfirmBtn = document.getElementById('modalConfirmBtn');
     const headerBanner = document.querySelector('.header-banner');
-    const loginRequiredMessage = document.getElementById('loginRequiredMessage'); // New element
-
-    // Helper function to get/set/remove localStorage items
-    function setLocalStorageItem(name, value) {
-        localStorage.setItem(name, JSON.stringify(value));
-    }
-
-    function getLocalStorageItem(name) {
-        const item = localStorage.getItem(name);
-        return item ? JSON.parse(item) : null;
-    }
-
-    function removeLocalStorageItem(name) {
-        localStorage.removeItem(name);
-    }
-
     // Function to show custom message
-    function showMessage(text, type = 'success') { /* Removed isLogin parameter */
-      const messageContainer = messageDiv; /* Always use messageDiv */
+    function showMessage(text, type = 'success') {
+      const messageContainer = messageDiv;
       messageContainer.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
       setTimeout(() => {
         messageContainer.innerHTML = '';
@@ -814,36 +787,10 @@
         });
       }
     });
-    // Removed Admin Login Functionality - now handled by index.html
     
-    // Logout Functionality (modified to use localStorage)
-    logoutButton.addEventListener('click', () => {
-      removeLocalStorageItem('isAdminLoggedIn');
-      showMessage('Logged out successfully.', 'success');
-      renderApp(); // Re-render to show login required message
-    });
-
-    // Render the appropriate view based on login status (modified to use localStorage)
-    function renderApp() {
-      const isAdminLoggedIn = getLocalStorageItem('isAdminLoggedIn') === 'true'; // Check localStorage
-      if (isAdminLoggedIn) {
-        // loginContainer.style.display = 'none'; // Removed
-        appContent.style.display = 'block';
-        headerBanner.style.display = 'flex';
-        logoutButton.style.display = 'inline-flex';
-        loginRequiredMessage.classList.add('hidden'); // Hide login required message
-        loadUsers();
-      } else {
-        // loginContainer.style.display = 'flex'; // Removed
-        appContent.style.display = 'none';
-        headerBanner.style.display = 'none';
-        logoutButton.style.display = 'none';
-        loginRequiredMessage.classList.remove('hidden'); // Show login required message
-      }
-    }
-    // Initialize on DOMContentLoaded
+    // Initialize on DOMContentLoaded - Directly load users as login is handled by parent
     document.addEventListener('DOMContentLoaded', () => {
-      renderApp();
+      loadUsers();
     });
   </script>
 </body>
