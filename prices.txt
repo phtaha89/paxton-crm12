@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paxton Products List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: transparent; /* Soft light gray background */
+        }
+        h1 {
+            font-weight: bold;
+            background-image: linear-gradient(to right, #4b0082, #1e1e1e); /* Dark gradient for title */
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin: 30px;
+        }
+        .price-offer {
+            background-color: #c65d1d; /* Dark orange */
+            color: white;
+            border: none;
+            padding: 8px; /* Reduced padding */
+            border-radius: 20px;
+            margin: 10px 0; /* Reduced margins */
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .price-offer:hover {
+            background-color: #b65a1a; /* Slightly lighter on hover */
+        }
+        .product {
+            margin: 12px;
+            background: rgba(255, 255, 255, 0.9); /* Slightly translucent white */
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .product:hover {
+            transform: scale(1.03);
+        }
+        .button {
+            color: white;
+            border: none; /* Removed border */
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 20px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+        }
+        .taurolock {
+            background-color: #004080; /* Dark blue */
+        }
+        .wouncure {
+            background-color: #006400; /* Dark green */
+        }
+        .shower-guard, .exit-pro, .diafex {
+            background-color: #8b0000; /* Dark red */
+        }
+        .info {
+            margin-top: 10px;
+            text-align: center;
+            display: none; /* Initially hidden */
+        }
+        .price-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .pharmacy-price, .public-price {
+            border-radius: 15px;
+            padding: 5px 8px;
+            margin: 0 5px;
+            font-weight: normal;
+            font-size: 14px;
+            color: black;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            flex: 1;
+        }
+        .pharmacy-price {
+            background-color: #cfe2f3; /* Lighter blue */
+        }
+        .public-price {
+            background-color: #f8d7da; /* Lighter red */
+        }
+        .discount-circle {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffd206; /* Circle color */
+            color: #02043d; /* Font color inside circles */
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            padding: 10px;
+            min-width: 28px;
+            min-height: 28px;
+            margin: 15px;
+        }
+        .small-label {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .upa-price {
+            color: darkred;
+            font-weight: bold;
+            font-size: 11px; /* Smaller font for UPA prices */
+            margin-top: 5px;
+        }
+        @media (max-width: 600px) {
+            .button {
+                width: 100%;
+            }
+            .small-label {
+                font-size: 8px;
+            }
+            .pharmacy-price, .public-price {
+                font-size: 12px;
+            }
+            .discount-circle {
+                min-width: 30px;
+                min-height: 30px;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <button class="price-offer taurolock" onclick="window.open('https://lh3.googleusercontent.com/pw/AP1GczPw7_SLvIJ76Roe55zgh0WaUpSqLFBI3aBcWaP_ctRhPSpMQ80jRveBxq3v3ksg2clVGldBwchpcGaYeKR06a4gGF8k5Z5ki5HdHPXzAjzq9eV8qLJiVY2ynWGWn-0qL2nKwGedaNhgDTJhPxww2373cg=w940-h788-s-no-gm?authuser=0', '_blank')">Taurolock</button>
+
+    <button class="price-offer wouncure" onclick="window.open('https://lh3.googleusercontent.com/pw/AP1GczP4j3dXVrf_I4_3mEPBrx9U-_r1BWwF2VBONI22ROyTnBKkHnlPdDnN3djdxInU6McbG8iDvvI5WP33S4KFgIoP2uiLrIsfQw-D0bwUPSVce8yBsocWrn2YQ-ugP0sU1hJKx4k_Kg2oFnH3TZleQfcuaw=w940-h788-s-no-gm?authuser=0', '_blank')">Wouncure</button>
+
+    <button class="price-offer emodial" onclick="window.open('https://lh3.googleusercontent.com/pw/AP1GczNPs_34Xtdl1c161TaD4HUvhDliUR4zUnVfgQ6SUnK7MdwzYoCIIDesb4UvVU0hx6xBaoWTndLMxKlaYciflat44YfzrP3Y5tfHSeYEEaokGu4rEefbthszq5qjWRf6wPf2MY6pC0qp0cto0pMYabMtUA=w940-h788-s-no-gm?authuser=0', '_blank')">Emodial</button>
+</div>
+
+<div class="product" onclick="toggleInfo('info1')">
+    <button class="button taurolock">Taurolock Hep 100 / amp 3 ml</button>
+    <div id="info1" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">288.57 EGP</div>
+            </div>
+            <div class="discount-circle">12%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">327.92 EGP</div>
+            </div>
+        </div>
+        <div class="upa-price">UPA price: 245 EGP</div>
+    </div>
+</div>
+
+<div class="product" onclick="toggleInfo('info2')">
+    <button class="button taurolock">Taurolock Hep 500 / amp 5 ml</button>
+    <div id="info2" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">318.16 EGP</div>
+            </div>
+            <div class="discount-circle">12%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">361.54 EGP</div>
+            </div>
+        </div>
+        <div class="upa-price">UPA price: 275 EGP</div>
+    </div>
+</div>
+
+<div class="product" onclick="toggleInfo('info3')">
+    <button class="button taurolock">Taurolock Hep 500 / vial 10 ml</button>
+    <div id="info3" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">524.26 EGP</div>
+            </div>
+            <div class="discount-circle">12%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">595.75 EGP</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="product" onclick="toggleInfo('info4')">
+    <button class="button taurolock">Taurolock U 25.000 / vial 5 ml</button>
+    <div id="info4" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">1802.53 EGP</div>
+            </div>
+            <div class="discount-circle">12%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">2,048.32 EGP</div>
+            </div>
+        </div>
+        <div class="upa-price">UPA price: 1,500 EGP</div>
+    </div>
+</div>
+
+<div class="product" onclick="toggleInfo('info5')">
+    <button class="button wouncure">Wouncure powder 10 gm</button>
+    <div id="info5" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">37.75 EGP</div>
+            </div>
+            <div class="discount-circle">26%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">51 EGP</div>
+            </div>
+        </div>
+        <div class="upa-price">UPA price: 25.5 EGP</div>
+        <div style="display: inline-flex; align-items: center;">
+            <div style="display: inline-flex; align-items: center; background-color: #cfee9f; border-radius: 10px; padding: 2px; font-size: 10px; margin-right: 8px;">
+                <span class="code-label">Sofico:<span style="margin-left: 2px;"> 11600028</span>
+            </div>
+            <div style="display: inline-flex; align-items: center; background-color: #99d6f7; border-radius: 10px; padding: 2px; font-size: 10px;">
+                <span class="code-label">Pharma overseas:<span style="margin-left: 2px;"> 36310</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="product" onclick="toggleInfo('info6')">
+    <button class="button wouncure">Wouncure powder 20 gm</button>
+    <div id="info6" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">65.5 EGP</div>
+            </div>
+            <div class="discount-circle">26%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">88 EGP</div>
+            </div>
+        </div>
+        <div class="upa-price">UPA price: 45 EGP</div>
+        <div style="display: inline-flex; align-items: center;">
+            <div style="display: inline-flex; align-items: center; background-color: #cfee9f; border-radius: 10px; padding: 2px; font-size: 10px; margin-right: 8px;">
+                <span class="code-label">Sofico:<span style="margin-left: 2px;"> 11600029</span>
+            </div>
+            <div style="display: inline-flex; align-items: center; background-color: #99d6f7; border-radius: 10px; padding: 2px; font-size: 10px;">
+                <span class="code-label">Pharma overseas:<span style="margin-left: 2px;"> 36311</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="product" onclick="toggleInfo('info7')">
+    <button class="button shower-guard">Shower Guard</button>
+    <div id="info7" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">150.00 EGP</div>
+            </div>
+            <div class="discount-circle">12%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">168.00 EGP</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="product" onclick="toggleInfo('info8')">
+    <button class="button exit-pro">Exit Pro</button>
+    <div id="info8" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">270.00 EGP</div>
+            </div>
+            <div class="discount-circle">12%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">306.82 EGP</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="product" onclick="toggleInfo('info9')">
+    <button class="button diafex">Diafex</button>
+    <div id="info9" class="info">
+        <div class="price-container">
+            <div>
+                <div class="small-label">Pharmacist Price</div>
+                <div class="pharmacy-price">100.00 EGP</div>
+            </div>
+            <div class="discount-circle">13%</div>
+            <div>
+                <div class="small-label">Public Price</div>
+                <div class="public-price">113.64 EGP</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleInfo(infoId) {
+        const info = document.getElementById(infoId);
+        info.style.display = (info.style.display === 'block') ? 'none' : 'block';
+    }
+</script>
+
+</body>
+</html>

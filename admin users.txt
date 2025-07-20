@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Management</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #91C8E4;
+      color: #334155;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    /* Slim Banner Header */
+    .header-banner {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      color: white;
+      padding: 12px 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: none;
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .header-title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 700;
+      margin: 0;
+    }
+    .header-subtitle {
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      opacity: 0.8;
+      margin: 0;
+    }
+    .header-stats {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+      opacity: 0.9;
+    }
+    .stat-badge {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+    }
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px;
+    }
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    /* Card Styles */
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+    }
+    .card-header h2 {
+      font-size: clamp(1.125rem, 3vw, 1.375rem);
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0;
+    }
+    .card-body {
+      padding: 24px;
+    }
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #374151;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      text-align: left;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.8);
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      background: white;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11px;
+    }
+    /* Button Styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    .btn:hover::before {
+      left: 100%;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+    }
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(107, 114, 128, 0.3);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+    }
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    }
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+    }
+    /* Cascading Users Menu */
+    .users-cascade {
+      max-height: 600px;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .users-cascade::-webkit-scrollbar {
+      width: 6px;
+    }
+    .users-cascade::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    .users-cascade::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    .users-cascade::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .user-item {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border: 1px solid #e2e8f0;
+    }
+    .user-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    .user-header {
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s ease;
+      text-align: left;
+    }
+    .user-header:hover {
+      background: #f8fafc;
+    }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+    }
+    .user-details h4 {
+      margin: 0;
+      font-size: clamp(1rem, 2.5vw, 1.125rem);
+      color: #1e293b;
+      text-align: left;
+    }
+    .user-details p {
+      margin: 0;
+      font-size: clamp(0.75rem, 1.5vw, 0.875rem);
+      text-align: left;
+    }
+    /* Title Colors */
+    .title-medical { color: #059669; }
+    .title-district { color: #dc2626; }
+    .title-moderator { color: #7c3aed; }
+    .title-admin { color: #ea580c; }
+    .title-default { color: #64748b; }
+    .user-id {
+      background: #e2e8f0;
+      color: #475569;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: clamp(0.625rem, 1.2vw, 0.75rem);
+      font-weight: 500;
+    }
+    .user-actions {
+      padding: 16px 20px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: none;
+    }
+    .user-actions.active {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .edit-form {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 12px;
+      border: 2px solid #e2e8f0;
+    }
+    .edit-form h4 {
+      margin-bottom: 16px;
+      color: #1e293b;
+    }
+    /* Alert Styles */
+    .alert {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      position: relative;
+      overflow: hidden;
+    }
+    .alert::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: currentColor;
+    }
+    .alert-success {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+      color: #166534;
+      border: 1px solid #a7f3d0;
+    }
+    .alert-error {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+      font-size: clamp(1rem, 2.5vw, 1.125rem);
+    }
+    .no-users {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+      font-size: clamp(1rem, 2.5vw, 1.125rem);
+      background: white;
+      border-radius: 12px;
+      border: 2px dashed #e2e8f0;
+    }
+    /* Login Box Styles */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 80px);
+      padding: 20px;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 350px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+    .login-card h2 {
+      margin-bottom: 20px;
+      color: #1e293b;
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
+    }
+    .login-message {
+      margin-bottom: 15px;
+    }
+    /* Logout Button */
+    .logout-btn {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: clamp(0.875rem, 2vw, 1rem);
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    }
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 400px;
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+      animation-name: animatetop;
+      animation-duration: 0.4s
+    }
+    @keyframes animatetop {
+      from {top: -300px; opacity: 0}
+      to {top: 0; opacity: 1}
+    }
+    .modal-header {
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      margin: 0;
+    }
+    .close-button {
+      color: white;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close-button:hover,
+    .close-button:focus {
+      color: #000;
+      text-decoration: none;
+    }
+    .modal-body {
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .modal-footer {
+      padding: 10px 16px;
+      background-color: #f1f1f1;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      text-align: right;
+    }
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+      }
+      .header-info {
+        align-items: center;
+      }
+      .header-stats {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .main-content {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .actions {
+        flex-direction: column;
+      }
+      .btn {
+        width: 100%;
+      }
+      .user-header {
+        flex-direction: row;
+        gap: 12px;
+        text-align: left;
+      }
+      .user-info {
+        flex-direction: row;
+        text-align: left;
+      }
+      .card-body {
+        padding: 16px;
+      }
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 12px;
+      }
+      .user-actions {
+        padding: 12px 16px;
+      }
+      .edit-form {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Slim Banner Header -->
+  <div class="header-banner">
+    <div class="header-content">
+      <div class="header-info">
+        <h1 class="header-title">User Management</h1>
+        <p class="header-subtitle">Manage your system users efficiently</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-badge">
+          <span id="totalUsers">0</span> Users
+        </div>
+        <button id="logoutButton" class="logout-btn">Logout</button>
+      </div>
+    </div>
+  </div>
+  <div id="appContent" style="display: none;">
+    <div class="container">
+      <div id="message"></div>
+      <div class="main-content">
+        <!-- Add User Form -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Add New User</h2>
+          </div>
+          <div class="card-body">
+            <form id="addUserForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="newUsername">Username *</label>
+                  <input type="text" id="newUsername" class="form-input" required />
+                </div>
+                <div class="form-group">
+                  <label for="newTitle">Title *</label>
+                  <select id="newTitle" class="form-input" required>
+                    <option value="">Select Title</option>
+                    <option value="Medical Representative">Medical Representative</option>
+                    <option value="District Manager">District Manager</option>
+                    <option value="Moderator">Moderator</option>
+                    <option value="admin">admin</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="newPassword">Password *</label>
+                <input type="password" id="newPassword" class="form-input" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Add User</button>
+            </form>
+          </div>
+        </div>
+        <!-- Users Cascade Menu -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Current Users</h2>
+          </div>
+          <div class="card-body">
+            <div id="usersList" class="loading">Loading users...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Login Box -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-card">
+      <h2>Admin Login</h2>
+      <div id="loginMessage" class="login-message"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-input" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+    </div>
+  </div>
+  <!-- Custom Confirmation Modal -->
+  <div id="confirmationModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Confirm Action</h3>
+        <span class="close-button" onclick="closeModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p id="modalMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="modalConfirmBtn">Confirm</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Supabase client
+    const { createClient } = supabase;
+    const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    let users = [];
+    let activeEditId = null;
+    let confirmCallback = null;
+    // DOM Elements
+    const messageDiv = document.getElementById('message');
+    const loginMessageDiv = document.getElementById('loginMessage');
+    const appContent = document.getElementById('appContent');
+    const loginContainer = document.getElementById('loginContainer');
+    const loginForm = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const logoutButton = document.getElementById('logoutButton');
+    const confirmationModal = document.getElementById('confirmationModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+    const headerBanner = document.querySelector('.header-banner');
+    // Function to show custom message
+    function showMessage(text, type = 'success', isLogin = false) {
+      const messageContainer = isLogin ? loginMessageDiv : messageDiv;
+      messageContainer.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+      setTimeout(() => {
+        messageContainer.innerHTML = '';
+      }, 5000);
+    }
+    // Function to show custom confirmation modal
+    function showConfirmationModal(message, callback) {
+      modalMessage.textContent = message;
+      confirmCallback = callback;
+      confirmationModal.style.display = 'flex';
+    }
+    // Function to close custom confirmation modal
+    function closeModal() {
+      confirmationModal.style.display = 'none';
+      confirmCallback = null;
+    }
+    // Event listener for modal confirm button
+    modalConfirmBtn.onclick = () => {
+      if (confirmCallback) {
+        confirmCallback(true);
+      }
+      closeModal();
+    };
+    // Helper to get title class for styling
+    function getTitleClass(title) {
+      if (!title) return 'title-default';
+      const titleLower = title.toLowerCase();
+      if (titleLower.includes('medical')) return 'title-medical';
+      if (titleLower.includes('district')) return 'title-district';
+      if (titleLower.includes('moderator')) return 'title-moderator';
+      if (titleLower.includes('admin')) return 'title-admin';
+      return 'title-default';
+    }
+    // Update total user count display
+    function updateUserCount() {
+      document.getElementById('totalUsers').textContent = users.length;
+    }
+    // Load users from Supabase
+    async function loadUsers() {
+      try {
+        const { data, error } = await supabaseClient.from('users').select('*').order('id');
+        if (error) throw error;
+        users = data;
+        updateUserCount();
+        displayUsers();
+      } catch (err) {
+        showMessage('Failed to load users: ' + err.message, 'error');
+        document.getElementById('usersList').innerHTML = '<div class="alert alert-error">Failed to load users.</div>';
+      }
+    }
+    // Display users in the list
+    function displayUsers() {
+      const usersList = document.getElementById('usersList');
+      if (!users.length) {
+        usersList.innerHTML = '<div class="no-users">No users found.<br>Add your first user above.</div>';
+        return;
+      }
+      usersList.innerHTML = `
+        <div class="users-cascade">
+          ${users.map(user => `
+            <div class="user-item">
+              <div class="user-header" onclick="toggleUserActions(${user.id})">
+                <div class="user-info">
+                  <div class="user-avatar">
+                    ${user.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div class="user-details">
+                    <h4>${user.username}</h4>
+                    <p class="${getTitleClass(user.title)}">${user.title || 'No title'}</p>
+                  </div>
+                </div>
+                <div class="user-id">ID: ${user.id}</div>
+              </div>
+              <div class="user-actions" id="userActions${user.id}">
+                <div class="actions">
+                  <button class="btn btn-sm btn-secondary" onclick="editUser(${user.id})">Edit User</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Delete User</button>
+                </div>
+                <div id="editForm${user.id}" class="edit-form" style="display: none;">
+                  <h4>Edit User Information</h4>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Username</label>
+                      <input type="text" id="editUsername${user.id}" class="form-input" value="${user.username}" required />
+                    </div>
+                    <div class="form-group">
+                      <label>Title *</label>
+                      <select id="editTitle${user.id}" class="form-input" required>
+                        <option value="">Select Title</option>
+                        <option value="Medical Representative" ${user.title === 'Medical Representative' ? 'selected' : ''}>Medical Representative</option>
+                        <option value="District Manager" ${user.title === 'District Manager' ? 'selected' : ''}>District Manager</option>
+                        <option value="Moderator" ${user.title === 'Moderator' ? 'selected' : ''}>Moderator</option>
+                        <option value="admin" ${user.title === 'admin' ? 'selected' : ''}>admin</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>New Password (optional)</label>
+                    <input type="password" id="editPassword${user.id}" class="form-input" />
+                  </div>
+                  <div class="actions">
+                    <button class="btn btn-primary" onclick="saveUser(${user.id})">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="cancelEdit(${user.id})">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>`;
+    }
+    // Toggle user action panel visibility
+    function toggleUserActions(userId) {
+      const actionsDiv = document.getElementById(`userActions${userId}`);
+      const isActive = actionsDiv.classList.contains('active');
+      document.querySelectorAll('.user-actions.active').forEach(el => {
+        el.classList.remove('active');
+      });
+      if (!isActive) {
+        actionsDiv.classList.add('active');
+      }
+    }
+    // Add new user form submission
+    document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('newUsername').value.trim();
+      const password = document.getElementById('newPassword').value.trim();
+      const title = document.getElementById('newTitle').value.trim();
+      if (!username || !password || !title) return showMessage('Username, password, and title are required', 'error');
+      try {
+        const { error } = await supabaseClient
+          .from('users')
+          .insert([{ username, password, title }]);
+        if (error) throw error;
+        showMessage('User added successfully!');
+        e.target.reset();
+        loadUsers();
+      } catch (err) {
+        showMessage('Error adding user: ' + err.message, 'error');
+      }
+    });
+    // Edit user functionality
+    function editUser(userId) {
+      document.querySelectorAll('.edit-form').forEach(form => {
+        form.style.display = 'none';
+      });
+      document.getElementById(`editForm${userId}`).style.display = 'block';
+      activeEditId = userId;
+    }
+    // Cancel edit operation
+    function cancelEdit(userId) {
+      document.getElementById(`editForm${userId}`).style.display = 'none';
+      activeEditId = null;
+    }
+    // Save user changes
+    async function saveUser(userId) {
+      const username = document.getElementById(`editUsername${userId}`).value.trim();
+      const title = document.getElementById(`editTitle${userId}`).value.trim();
+      const password = document.getElementById(`editPassword${userId}`).value.trim();
+      if (!username || !title) return showMessage('Username and title are required', 'error');
+      try {
+        const updateData = { username, title };
+        if (password) updateData.password = password;
+        const { error } = await supabaseClient.from('users').update(updateData).eq('id', userId);
+        if (error) throw error;
+        showMessage('User updated successfully!');
+        cancelEdit(userId);
+        loadUsers();
+      } catch (err) {
+        showMessage('Update failed: ' + err.message, 'error');
+      }
+    }
+    // Delete user functionality
+    async function deleteUser(userId) {
+      const user = users.find(user => user.id === userId);
+      if (user && user.title === 'admin') {
+        showMessage('Admin users cannot be deleted from the front end.', 'error');
+        return;
+      }
+      showConfirmationModal('Are you sure you want to delete this user? This action cannot be undone.', async (confirmed) => {
+        if (!confirmed) return;
+        try {
+          const { error } = await supabaseClient.from('users').delete().eq('id', userId);
+          if (error) throw error;
+          showMessage('User deleted successfully!');
+          loadUsers();
+        } catch (err) {
+          showMessage('Delete failed: ' + err.message, 'error');
+        }
+      });
+    }
+    // Close user actions when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.user-item') && !e.target.closest('.modal-content')) {
+        document.querySelectorAll('.user-actions.active').forEach(el => {
+          el.classList.remove('active');
+        });
+      }
+    });
+    // Admin Login Functionality
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+      try {
+        const { data, error } = await supabaseClient
+          .from('users')
+          .select('*')
+          .eq('username', username)
+          .eq('password', password)
+          .single();
+        if (error || !data) {
+          showMessage('Invalid username or password.', 'error', true);
+          return;
+        }
+        if (data.title === 'admin') {
+          sessionStorage.setItem('isAdminLoggedIn', 'true');
+          showMessage('Login successful! Welcome, Admin.', 'success', true);
+          renderApp();
+        } else {
+          showMessage('Only admin users can log in.', 'error', true);
+        }
+      } catch (err) {
+        showMessage('Login failed: ' + err.message, 'error', true);
+      }
+    });
+    // Logout Functionality
+    logoutButton.addEventListener('click', () => {
+      sessionStorage.removeItem('isAdminLoggedIn');
+      showMessage('Logged out successfully.', 'success');
+      renderApp();
+    });
+    // Render the appropriate view based on login status
+    function renderApp() {
+      const isAdminLoggedIn = sessionStorage.getItem('isAdminLoggedIn') === 'true';
+      if (isAdminLoggedIn) {
+        loginContainer.style.display = 'none';
+        appContent.style.display = 'block';
+        headerBanner.style.display = 'flex';
+        logoutButton.style.display = 'inline-flex';
+        loadUsers();
+      } else {
+        loginContainer.style.display = 'flex';
+        appContent.style.display = 'none';
+        headerBanner.style.display = 'none';
+        logoutButton.style.display = 'none';
+      }
+    }
+    // Initialize on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      renderApp();
+    });
+  </script>
+</body>
+</html>
