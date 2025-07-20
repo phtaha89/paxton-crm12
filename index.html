@@ -669,7 +669,7 @@
             }
             .login-card .company-logo-login {
                 max-width: 50px; /* Even smaller logo on mobile */
-                margin-bottom: 10px; /* Adjusted margin */
+                margin-bottom: 10px;
             }
             .login-card h2 {
                 font-size: 1.5rem; /* Adjusted font size */
@@ -678,8 +678,8 @@
                 font-size: 0.85rem; /* Adjusted font size */
             }
             .login-input, .login-button {
-                font-size: 0.85rem; /* Adjusted font size */
-                padding: 8px 10px; /* Adjusted padding */
+                font-size: 0.85rem;
+                padding: 8px 10px;
             }
         }
 
@@ -920,18 +920,29 @@
 
         // Store the ID of the currently active full-page view
         let currentActiveViewId = null;
-        let isLoggedIn = false; // Tracks user login status
+        let medicalRepData = null; // Stores the logged-in medical rep's data
+
+        // Page configurations
+        const pageConfig = {
+            'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
+            'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
+            'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
+            'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
+            'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
+        };
 
         /**
          * Shows the login view and hides all other views.
          */
         function showLogin() {
             console.log('Showing login view');
-            isLoggedIn = false;
+            sessionStorage.removeItem('isLoggedIn'); // Clear login state
+            sessionStorage.removeItem('medicalRepData'); // Clear medical rep data
+            medicalRepData = null; // Also clear in-memory data
+
             document.getElementById('loginView').classList.remove('hidden');
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('backButton').classList.add('hidden');
-            // Admin button is now a card, so no need to hide it here
             document.getElementById('logoutButton').classList.add('hidden');
 
             // Hide any active full-page view
@@ -958,13 +969,13 @@
          * Only proceeds if the user is logged in.
          */
         function showHome() {
-            if (!isLoggedIn) {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true') {
                 showLogin(); // Redirect to login if not logged in
                 return;
             }
             console.log('Showing home view');
             const homeView = document.getElementById('homeView');
-            const loginView = document.getElementById('loginView'); // Get login view
+            const loginView = document.getElementById('loginView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
             
@@ -972,7 +983,7 @@
                 homeView.classList.remove('hidden');
             }
             
-            if (loginView) { // Hide login view when showing home
+            if (loginView) {
                 loginView.classList.add('hidden');
             }
 
@@ -980,7 +991,6 @@
                 backButton.classList.add('hidden');
             }
 
-            // Show logout button when returning to home view
             if (logoutButton) {
                 logoutButton.classList.remove('hidden');
             }
@@ -990,9 +1000,7 @@
                 const activeView = document.getElementById(currentActiveViewId);
                 if (activeView) {
                     activeView.classList.remove('active');
-                    // Add hidden class after transition for better performance/layout
                     setTimeout(() => activeView.classList.add('hidden'), 300);
-                    // Also hide the iframe and show demo content if it was an iframe view
                     const iframe = activeView.querySelector('iframe');
                     const demoContent = activeView.querySelector('.demo-content');
                     if (iframe) iframe.classList.add('hidden');
@@ -1008,21 +1016,12 @@
          * @param {string} page - The page identifier (e.g., 'crm', 'dashboard').
          */
         function loadPage(page) {
-            if (!isLoggedIn) {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true') {
                 showLogin(); // Redirect to login if not logged in
                 return;
             }
             console.log(`Attempting to load page: ${page}`);
             
-            // Configuration for each page, including view ID, display name, and file name
-            const pageConfig = {
-                'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
-                'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
-                'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
-                'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
-                'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
-            };
-
             const config = pageConfig[page];
             if (!config) {
                 console.error(`Error: Unknown page identifier: ${page}`);
@@ -1031,22 +1030,18 @@
 
             const { viewId, displayName, fileName } = config;
 
-            // Get references to main UI elements
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
-            const logoutButton = document.getElementById('logoutButton'); // Admin button is no longer in header
+            const logoutButton = document.getElementById('logoutButton');
             const targetView = document.getElementById(viewId);
 
-            // Initialize variables for elements inside targetView
             let loadingOverlay = null;
             let errorState = null;
             let iframeContainer = null;
             let iframe = null;
             let demoContent = null;
 
-            // Ensure targetView exists before querying its children
             if (targetView) {
-                // Using querySelector with classes as they are unique within each full-page-view
                 loadingOverlay = targetView.querySelector('.loading'); 
                 errorState = targetView.querySelector('.error-state'); 
                 iframeContainer = targetView.querySelector('.iframe-container-fpv');
@@ -1056,76 +1051,108 @@
                 }
             }
 
-            // Basic validation to ensure all required elements exist
             if (!homeView || !backButton || !logoutButton || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
-                console.error('Error: One or more required DOM elements not found for page loading. Debug details:');
-                console.error('  homeView:', homeView);
-                console.error('  backButton:', backButton);
-                console.error('  logoutButton:', logoutButton);
-                console.error('  targetView:', targetView);
-                console.error('  loadingOverlay:', loadingOverlay);
-                console.error('  errorState:', errorState);
-                console.error('  iframeContainer:', iframeContainer);
-                console.error('  iframe:', iframe);
-                console.error('  demoContent:', demoContent);
-                return; // Exit if elements are missing
+                console.error('Error: One or more required DOM elements not found for page loading.');
+                return;
             }
 
-            // --- Execution continues here if all elements are found ---
             console.log(`All required DOM elements found for page: ${page}. Proceeding to load.`);
 
-            // Hide the home view, show the back button, and hide the logout button
             homeView.classList.add('hidden');
-            backButton.classList.remove('hidden'); // This line makes the back button visible
-            logoutButton.classList.add('hidden'); // Hide logout button when navigating to a page
+            backButton.classList.remove('hidden');
+            logoutButton.classList.add('hidden');
             console.log(`Button visibility set for page: ${page}.`);
 
-
-            // If there's a currently active full-page view and it's different from the target, hide it
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
-                    // Delay adding 'hidden' to allow CSS transition to complete
                     setTimeout(() => prevActiveView.classList.add('hidden'), 300);
                 }
             }
 
-            // Set the new active view ID
             currentActiveViewId = viewId;
 
-            // Show the target full-page view with a slight delay for transition effect
             targetView.classList.remove('hidden');
             setTimeout(() => targetView.classList.add('active'), 10);
 
-            // Show the loading spinner and hide any previous error state
             loadingOverlay.classList.add('show');
             errorState.classList.remove('show');
 
-            // Hide the demo content and show the iframe before loading new content
             demoContent.classList.add('hidden');
             iframe.classList.remove('hidden');
 
-            // Set the iframe's source and attach event listeners for loading status
+            // Set the iframe's source. This will trigger a reload if already loaded.
             iframe.src = fileName;
+
+            // Wait for the iframe to signal it's ready before sending data
+            const messageListener = (event) => {
+                if (event.data === 'crmIframeReady' && event.source === iframe.contentWindow) {
+                    console.log(`CRM iframe at ${fileName} is ready. Sending medical rep data.`);
+                    // Send medical rep data to the iframe
+                    iframe.contentWindow.postMessage({ type: 'setMedicalRep', repData: medicalRepData }, '*');
+                    window.removeEventListener('message', messageListener); // Remove listener after sending
+                }
+            };
+            window.addEventListener('message', messageListener);
 
             iframe.onload = function() {
                 console.log(`${displayName} iframe loaded successfully from ${fileName}.`);
-                loadingOverlay.classList.remove('show'); // Hide spinner
-                errorState.classList.remove('show');     // Hide error
+                loadingOverlay.classList.remove('show');
+                errorState.classList.remove('show');
             };
 
             iframe.onerror = function() {
                 console.error(`Failed to load ${displayName} iframe from ${fileName}. Displaying demo content.`);
-                loadingOverlay.classList.remove('show'); // Hide spinner
-                errorState.classList.add('show');        // Show error message
-                demoContent.classList.remove('hidden');  // Show demo content as fallback
-                iframe.classList.add('hidden');          // Hide the broken iframe
+                loadingOverlay.classList.remove('show');
+                errorState.classList.add('show');
+                demoContent.classList.remove('hidden');
+                iframe.classList.add('hidden');
             };
         }
 
         /**
-         * Handles user login by querying Supabase.
+         * Fetches medical representative data from Google Sheet.
+         * @param {string} username - The username to search for.
+         * @returns {Promise<Object|null>} The medical rep data or null if not found.
+         */
+        async function fetchMedicalRepData(username) {
+            const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+            try {
+                const response = await fetch(GOOGLE_SHEET_URL);
+                if (!response.ok) throw new Error('Failed to fetch Google Sheet data');
+                const csvText = await response.text();
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const values = line.split(',').map(v => v.trim());
+                    const row = headers.reduce((obj, header, index) => {
+                        obj[header] = values[index] || '';
+                        return obj;
+                    }, {});
+
+                    if (row['medical rep'] === username) {
+                        return {
+                            name: row['medical rep'],
+                            area: row['area'],
+                            districtManager: row['District Manager'],
+                            governorate: row['Governorate']
+                        };
+                    }
+                }
+                return null; // User not found in Google Sheet
+            } catch (error) {
+                console.error('Error fetching medical rep data:', error);
+                return null;
+            }
+        }
+
+
+        /**
+         * Handles user login by querying Supabase and fetching medical rep data.
          * @param {Event} event - The form submission event.
          */
         async function handleLogin(event) {
@@ -1143,14 +1170,11 @@
 
             try {
                 // Query the 'users' table to find a matching username and password
-                // NOTE: In a production environment, passwords should NEVER be stored or
-                // compared as plain text. Always use secure hashing (e.g., bcrypt)
-                // and Supabase's built-in authentication for better security.
                 const { data, error } = await supabase
                     .from('users')
                     .select('*')
                     .eq('username', username)
-                    .eq('password', password); // Direct comparison for demo purposes
+                    .eq('password', password);
 
                 if (error) {
                     console.error('Supabase query error:', error.message);
@@ -1160,9 +1184,27 @@
 
                 if (data && data.length > 0) {
                     // User found and credentials match
-                    isLoggedIn = true;
-                    console.log('Login successful for user:', username);
-                    showHome(); // Redirect to home page
+                    const user = data[0];
+                    if (user.title === 'medical rep') {
+                        medicalRepData = await fetchMedicalRepData(username);
+                        if (medicalRepData) {
+                            sessionStorage.setItem('isLoggedIn', 'true');
+                            sessionStorage.setItem('medicalRepData', JSON.stringify(medicalRepData));
+                            console.log('Login successful for medical rep:', username);
+                            showHome(); // Redirect to home page
+                        } else {
+                            errorMessageElement.textContent = 'Medical rep data not found for this user.';
+                            sessionStorage.removeItem('isLoggedIn');
+                            sessionStorage.removeItem('medicalRepData');
+                        }
+                    } else if (user.title === 'admin') {
+                        sessionStorage.setItem('isLoggedIn', 'true');
+                        sessionStorage.setItem('medicalRepData', JSON.stringify({ name: 'Admin', area: 'N/A', districtManager: 'N/A', governorate: 'N/A' })); // Store dummy data for admin
+                        console.log('Login successful for admin:', username);
+                        showHome();
+                    } else {
+                        errorMessageElement.textContent = 'Only medical reps and admins can log in.';
+                    }
                 } else {
                     // No user found or credentials do not match
                     errorMessageElement.textContent = 'Invalid username or password.';
@@ -1190,18 +1232,15 @@
                 card.addEventListener('click', function() {
                     const page = this.dataset.page; // Get the 'data-page' attribute
                     // Only load the page if it's not disabled and user is logged in
-                    if (isLoggedIn && page && !this.classList.contains('disabled')) {
+                    if (sessionStorage.getItem('isLoggedIn') === 'true' && page && !this.classList.contains('disabled')) {
                         loadPage(page);
                     } else if (this.classList.contains('disabled')) {
                         console.log(`Card for page "${page}" is disabled.`);
-                    } else if (!isLoggedIn) {
+                    } else {
                         showLogin(); // Prompt login if not logged in
                     }
                 });
             });
-
-            // Admin button is now a card, so its event listener is handled by the general .main-card listener
-            // document.getElementById('adminButton').addEventListener('click', function() { loadPage('admin'); }); // REMOVED
 
             // Add click event listener to the Back button
             document.getElementById('backButton').addEventListener('click', function() {
@@ -1214,8 +1253,15 @@
             // Add event listener for the logout button
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
 
-            // Initially show the login view
-            showLogin();
+            // Check session storage on initial load
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                medicalRepData = JSON.parse(sessionStorage.getItem('medicalRepData'));
+                console.log('Session found. User is logged in.', medicalRepData);
+                showHome(); // Show home if session exists
+            } else {
+                console.log('No session found. Showing login view.');
+                showLogin(); // Otherwise, show login
+            }
         });
     </script>
 </body>
