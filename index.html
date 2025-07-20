@@ -6,8 +6,6 @@
     <title>Paxton LLC CRM</title>
     <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Supabase CDN for client library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* CSS Variables for easier theme management and consistency */
         :root {
@@ -26,7 +24,11 @@
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
-            --border-radius: 12px;
+            --border-radius: 8px; /* Slightly decreased for a more app-like feel */
+
+            /* New variables for dynamic height calculation */
+            --header-height: 56px; /* Approx height of header (padding + content) */
+            --container-padding: 15px; /* Top/bottom padding of .container */
         }
 
         /* Base styles for all elements */
@@ -39,7 +41,6 @@
         /* Body and HTML for full height layout */
         html, body {
             height: 100%;
-            font-size: 16px; /* Base font size for rem calculations */
         }
 
         body {
@@ -55,9 +56,9 @@
 
         /* Main container for the application, taking full available width and height */
         .container {
-            max-width: 1600px; /* Increased max-width for more spacious layout */
+            max-width: 1400px; /* Decreased max-width for a more compact app feel */
             margin: 0 auto;
-            padding: 1.25rem; /* Responsive padding */
+            padding: var(--container-padding); /* Use variable for padding */
             width: 100%;
             flex-grow: 1; /* Allows container to expand and fill space */
             display: flex;
@@ -67,73 +68,46 @@
         /* Header styling with flexbox for alignment */
         .header {
             display: flex;
-            flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-            justify-content: flex-end; /* Aligns admin tab to the right by default */
+            justify-content: flex-start; /* Align back button to the left */
             align-items: center;
             background: var(--white);
-            padding: 0.75rem 1.5rem; /* Responsive padding */
+            padding: 8px 20px; /* Adjusted padding */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 1.25rem; /* Responsive margin */
+            margin-bottom: 15px; /* Reduced margin */
             position: relative;
             z-index: 100; /* Ensures header is always on top */
-            gap: 1rem; /* Responsive space between buttons */
+            gap: 15px; /* Space between buttons */
+            height: var(--header-height); /* Explicitly set header height */
+        }
+
+        /* Admin tab button styling - REMOVED, now a card */
+        .admin-tab {
+            display: none; /* Hide the old admin button */
         }
         
         /* Back button styling, similar to admin tab but with primary coffee color */
         .back-button {
             background: var(--coffee-light); /* Changed to coffee color */
             color: var(--white);
-            padding: 0.625rem 1.25rem; /* Responsive padding */
-            border-radius: 0.5rem; /* Responsive border-radius */
+            padding: 8px 18px; /* Slightly reduced padding */
+            border-radius: 6px; /* Reduced border-radius */
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem; /* Slightly smaller font */
             border: none;
             transition: all 0.25s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem; /* Responsive space */
+            gap: 6px; /* Reduced gap */
             margin-right: auto; /* Pushes the button to the left */
         }
 
         .back-button:hover {
             background: var(--coffee-dark); /* Changed to darker coffee color */
-            transform: translateY(-0.125rem); /* Slight lift effect */
-            box-shadow: 0 0.375rem 0.9375rem rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
-        }
-
-        /* User Info and Logout Button styling */
-        .user-info {
-            margin-right: auto; /* Pushes user info to the left */
-            font-size: 0.9rem;
-            color: var(--text-color-dark);
-            font-weight: 500;
-            padding: 0.3125rem 0.625rem; /* Responsive padding */
-            border-radius: 0.375rem; /* Responsive border-radius */
-            background-color: var(--bg-light);
-            display: flex; /* Use flex to align text and logout button */
-            align-items: center;
-            gap: 0.625rem; /* Responsive gap */
-        }
-
-        .logout-button {
-            background: #dc2626; /* Red for logout */
-            color: var(--white);
-            padding: 0.5rem 0.9375rem; /* Responsive padding */
-            border-radius: 0.5rem; /* Responsive border-radius */
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.85rem;
-            border: none;
-            transition: all 0.25s ease;
-        }
-
-        .logout-button:hover {
-            background: #b91c1c;
-            transform: translateY(-0.0625rem);
-            box-shadow: 0 0.25rem 0.625rem rgba(220, 38, 38, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
         }
 
         /* Utility class to hide elements */
@@ -143,19 +117,19 @@
 
         /* Banner styling with gradient and shine animation */
         .banner {
-            background: linear-gradient(135deg, var(--coffee-gradient-start), var(--coffee-gradient-end)); /* Changed to coffee gradient */
+            background: linear-gradient(135deg, var(--coffee-gradient-start), var(--coffee-gradient-end));
             color: white;
-            padding: 1.5625rem 2.5rem; /* Responsive padding */
-            margin-bottom: 1.875rem; /* Responsive margin */
+            padding: 20px 30px; /* Reduced padding */
+            margin-bottom: 25px; /* Reduced margin below banner */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
-            flex-shrink: 0; /* Prevents banner from shrinking */
-            display: flex; /* Use flexbox for horizontal alignment of logo and text */
-            flex-direction: row; /* Always row for logo and text */
-            align-items: center; /* Vertically align items */
-            gap: 1.875rem; /* Responsive space between logo and text */
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 20px; /* Reduced space between logo and text */
         }
 
         .banner::before {
@@ -167,7 +141,7 @@
             bottom: 0;
             background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
             transform: translateX(-100%);
-            animation: shine 3s infinite; /* Shine animation for visual flair */
+            animation: shine 3s infinite;
         }
 
         @keyframes shine {
@@ -177,30 +151,30 @@
 
         /* Company Logo styling within the banner */
         .company-logo {
-            max-width: 5.625rem; /* Responsive max-width */
+            max-width: 80px; /* Slightly smaller logo */
             height: auto;
-            border-radius: 0.5rem; /* Responsive border-radius */
-            box-shadow: 0 0.25rem 0.625rem rgba(0,0,0,0.1); /* Subtle shadow */
-            z-index: 1; /* Ensure logo is above shine effect */
-            flex-shrink: 0; /* Prevent logo from shrinking */
+            border-radius: 6px; /* Reduced rounded corners */
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            z-index: 1;
+            flex-shrink: 0;
         }
 
         .banner-text-content {
-            flex-grow: 1; /* Allows text content to take remaining space */
-            text-align: left; /* Ensure text is left-aligned within its container */
+            flex-grow: 1;
+            text-align: left;
         }
 
         .banner h1 {
-            font-size: 2.5rem; /* Responsive font size */
+            font-size: 2.8rem; /* Reduced main title size */
             font-weight: 700;
-            margin-bottom: 0.5rem; /* Responsive margin */
+            margin-bottom: 6px; /* Reduced margin below title */
             position: relative;
             z-index: 1;
-            text-shadow: 0 0.1875rem 0.375rem rgba(0,0,0,0.2);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .banner .subtitle {
-            font-size: 1.1rem; /* Responsive font size */
+            font-size: 1.1rem; /* Reduced subtitle size */
             opacity: 0.98;
             font-weight: 400;
             position: relative;
@@ -210,30 +184,30 @@
         /* Home view grid for navigation cards */
         .home-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); /* Responsive grid columns */
-            gap: 1.5625rem; /* Responsive space between grid items */
-            padding: 1.25rem 0; /* Responsive padding */
-            flex-grow: 1; /* Allows grid to expand */
-            align-content: start; /* Aligns content to the start of the grid */
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Slightly smaller minmax */
+            gap: 20px; /* Reduced space between grid items */
+            padding: 15px 0; /* Reduced padding */
+            flex-grow: 1;
+            align-content: start;
         }
 
         /* Styling for each navigation card */
         .main-card {
             background: var(--white);
-            padding: 1.875rem; /* Responsive padding */
+            padding: 25px; /* Reduced padding */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition for hover */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 11.25rem; /* Responsive min-height */
+            min-height: 160px; /* Reduced consistent card height */
             position: relative;
             overflow: hidden;
-            border: 1px solid #e2e8f0; /* Subtle border */
+            border: 1px solid #e2e8f0;
         }
 
         /* Pseudo-element for hover effect on cards */
@@ -244,7 +218,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom right, rgba(139, 94, 60, 0.03), transparent 50%); /* Adjusted shadow color */
+            background: linear-gradient(to bottom right, rgba(139, 94, 60, 0.03), transparent 50%);
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -254,9 +228,9 @@
         }
 
         .main-card:hover {
-            transform: translateY(-0.3125rem); /* Lift effect on hover */
-            box-shadow: var(--shadow-lg); /* Larger shadow on hover */
-            border-color: var(--coffee-light); /* Highlight border on hover */
+            transform: translateY(-4px); /* Slightly less lift effect on hover */
+            box-shadow: var(--shadow-lg);
+            border-color: var(--coffee-light);
         }
 
         /* Disabled card styling */
@@ -269,29 +243,29 @@
         }
 
         .main-card.disabled:hover {
-            transform: none; /* No lift for disabled cards */
+            transform: none;
             box-shadow: var(--shadow-sm);
             border-color: #cbd5e1;
         }
 
         /* Icon styling for cards */
         .main-card-icon {
-            font-size: 2.8rem; /* Responsive icon size */
-            margin-bottom: 0.9375rem; /* Responsive margin */
-            color: var(--coffee-light); /* Changed to coffee color */
-            line-height: 1; /* Ensures icon is vertically centered */
+            font-size: 3rem; /* Reduced icon size */
+            margin-bottom: 12px; /* Reduced margin */
+            color: var(--coffee-light);
+            line-height: 1;
         }
 
         .main-card.disabled .main-card-icon {
-            color: var(--text-color-light); /* Muted icon for disabled cards */
+            color: var(--text-color-light);
         }
 
         /* Title styling for cards */
         .main-card-title {
-            font-size: 1.25rem; /* Responsive title size */
+            font-size: 1.3rem; /* Reduced title size */
             font-weight: 600;
             color: var(--text-color-dark);
-            margin-bottom: 0.3125rem; /* Responsive margin */
+            margin-bottom: 4px;
         }
 
         .main-card.disabled .main-card-title {
@@ -300,7 +274,7 @@
 
         /* Subtitle styling for cards */
         .main-card-subtitle {
-            font-size: 0.9rem; /* Responsive font size */
+            font-size: 0.88rem; /* Reduced subtitle size */
             color: var(--text-color-light);
             line-height: 1.4;
         }
@@ -310,55 +284,56 @@
             background: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
-            flex-grow: 1; /* Allows full page view to fill available space */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden; /* Ensures content within iframe doesn't overflow */
-            transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
-            transform: translateY(0.625rem); /* Initial slight offset for animation */
-            opacity: 0; /* Start hidden */
-            height: calc(100vh - 7.5rem); /* Calculate height to fill screen minus header/padding */
+            overflow: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(10px);
+            opacity: 0;
+            /* Adjusted height to fill almost entire viewport, accounting for header and container padding */
+            height: calc(100vh - var(--header-height) - (var(--container-padding) * 2));
         }
 
         .full-page-view.active {
-            opacity: 1; /* Fully visible */
-            transform: translateY(0); /* Move to final position */
-            display: flex; /* Ensure it's a flex container when active */
+            opacity: 1;
+            transform: translateY(0);
+            display: flex;
         }
 
         /* Iframe container within full page view */
         .iframe-container-fpv {
-            flex-grow: 1; /* Allows iframe to take all available space */
+            flex-grow: 1;
             position: relative;
             width: 100%;
             height: 100%;
             border: none;
-            display: block; /* Removes extra space below iframe */
-            background: var(--white); /* Fallback background */
+            display: block;
+            background: var(--white);
         }
 
         .full-page-view iframe {
             width: 100%;
             height: 100%;
             border: none;
-            display: block; /* Removes extra space below iframe */
-            background: var(--white); /* Fallback background */
+            display: block;
+            background: var(--white);
         }
 
         /* Error state styling */
         .error-state {
-            display: none; /* Hidden by default */
-            padding: 3.75rem 2.5rem; /* Responsive padding */
+            display: none;
+            padding: 50px 30px; /* Reduced padding */
             text-align: center;
             color: var(--primary-red);
-            position: absolute; /* Overlay on top of iframe */
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 5; /* Above iframe, below loading */
+            z-index: 5;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -370,31 +345,31 @@
         }
 
         .error-icon {
-            font-size: 3rem;
-            margin-bottom: 1.25rem; /* Responsive margin */
+            font-size: 2.5rem; /* Reduced icon size */
+            margin-bottom: 15px; /* Reduced margin */
         }
 
         .error-title {
-            font-size: 1.5rem;
+            font-size: 1.3rem; /* Reduced title size */
             font-weight: 600;
-            margin-bottom: 0.625rem; /* Responsive margin */
+            margin-bottom: 8px;
         }
 
         .error-text {
             color: var(--text-color-light);
-            font-size: 1rem;
+            font-size: 0.95rem; /* Reduced font size */
         }
 
         /* Loading overlay styling */
         .loading {
-            display: none; /* Hidden by default */
+            display: none;
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 10; /* Highest z-index */
+            z-index: 10;
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -406,18 +381,19 @@
         }
 
         .spinner {
-            width: 2.5rem; /* Responsive width */
-            height: 2.5rem; /* Responsive height */
-            border: 0.25rem solid #f3f4f6; /* Responsive border */
-            border-top: 0.25rem solid var(--coffee-light); /* Changed to coffee color */
+            width: 35px; /* Slightly smaller spinner */
+            height: 35px;
+            border: 3px solid #f3f4f6; /* Slightly thinner border */
+            border-top: 3px solid var(--coffee-light);
             border-radius: 50%;
-            animation: spin 1s linear infinite; /* Spinner animation */
-            margin-bottom: 1.25rem; /* Responsive margin */
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px; /* Reduced margin */
         }
 
         .loading-text {
             color: var(--text-color-light);
             font-weight: 500;
+            font-size: 0.9rem; /* Reduced font size */
         }
 
         @keyframes spin {
@@ -428,13 +404,13 @@
         /* Status indicator in banner */
         .status-indicator {
             position: absolute;
-            top: 1.25rem; /* Responsive top */
-            right: 1.25rem; /* Responsive right */
-            width: 0.625rem; /* Responsive width */
-            height: 0.625rem; /* Responsive height */
+            top: 15px; /* Adjusted position */
+            right: 15px; /* Adjusted position */
+            width: 8px; /* Smaller */
+            height: 8px; /* Smaller */
             border-radius: 50%;
             background: #10b981; /* Green color */
-            box-shadow: 0 0 0 0.1875rem rgba(16, 185, 129, 0.2); /* Responsive pulse shadow */
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); /* Smaller pulse shadow */
             animation: pulse 2s infinite;
         }
 
@@ -445,12 +421,12 @@
 
         /* Demo styles for missing pages */
         .demo-content {
-            padding: 2.5rem; /* Responsive padding */
+            padding: 30px; /* Reduced padding */
             text-align: center;
             color: var(--text-color-dark);
-            width: 100%; /* Ensure demo content takes full width */
-            height: 100%; /* Ensure demo content takes full height */
-            display: flex; /* Use flexbox for centering text */
+            width: 100%;
+            height: 100%;
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -458,115 +434,25 @@
 
         .demo-content h2 {
             color: var(--coffee-dark);
-            margin-bottom: 1.25rem; /* Responsive margin */
-            font-size: 2rem;
+            margin-bottom: 15px; /* Reduced margin */
+            font-size: 1.8rem; /* Reduced font size */
         }
 
         .demo-content p {
             color: var(--text-color-light);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            max-width: 37.5rem; /* Responsive max-width */
-        }
-
-        /* Login Page Styles */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: var(--bg-medium);
-            padding: 1.25rem; /* Responsive padding */
-        }
-
-        .login-box {
-            background: var(--white);
-            padding: 2.5rem; /* Responsive padding */
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-lg);
-            text-align: center;
-            width: 100%;
-            max-width: 30rem; /* Increased max-width for login box */
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem; /* Responsive gap */
-        }
-
-        .login-box h2 {
-            font-size: 1.75rem; /* Responsive font size */
-            color: var(--coffee-dark);
-            margin-bottom: 0.625rem; /* Responsive margin */
-        }
-
-        .login-box p {
-            color: var(--text-color-light);
-            margin-bottom: 1.25rem; /* Responsive margin */
-        }
-
-        .login-input-group {
-            text-align: left;
-        }
-
-        .login-input-group label {
-            display: block;
-            margin-bottom: 0.5rem; /* Responsive margin */
-            font-weight: 500;
-            color: var(--text-color-dark);
-        }
-
-        .login-input-group input {
-            width: 100%;
-            padding: 0.75rem 0.9375rem; /* Responsive padding */
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem; /* Responsive border-radius */
-            font-size: 1rem;
-            color: var(--text-color-dark);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .login-input-group input:focus {
-            outline: none;
-            border-color: var(--coffee-light);
-            box-shadow: 0 0 0 0.1875rem rgba(139, 94, 60, 0.2);
-        }
-
-        .login-button {
-            background: var(--coffee-light);
-            color: var(--white);
-            padding: 0.75rem 1.5625rem; /* Responsive padding */
-            border-radius: 0.5rem; /* Responsive border-radius */
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.1rem;
-            border: none;
-            transition: all 0.25s ease;
-            width: 100%;
-        }
-
-        .login-button:hover {
-            background: var(--coffee-dark);
-            transform: translateY(-0.125rem);
-            box-shadow: 0 0.375rem 0.9375rem rgba(139, 94, 60, 0.25);
-        }
-
-        .login-error-message {
-            color: var(--primary-red);
-            font-size: 0.9rem;
-            margin-top: 0.625rem; /* Responsive margin */
-            min-height: 1.2em; /* Reserve space to prevent layout shift */
+            font-size: 1rem; /* Reduced font size */
+            line-height: 1.5;
+            max-width: 500px; /* Reduced max-width */
         }
 
         /* Responsive adjustments for smaller screens */
         @media (max-width: 1024px) {
-            html {
-                font-size: 15px; /* Adjust base font size for tablets */
-            }
             .container {
-                padding: 1rem;
+                padding: 10px;
             }
             .banner {
-                padding: 1.5rem 2rem;
-                gap: 1.25rem;
+                padding: 15px 20px; /* More compact */
+                gap: 15px;
             }
             .banner h1 {
                 font-size: 2.2rem;
@@ -575,100 +461,81 @@
                 font-size: 1rem;
             }
             .company-logo {
-                max-width: 4.5rem;
+                max-width: 70px;
             }
             .home-grid {
-                grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-                gap: 1.25rem;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 15px;
             }
             .main-card-icon {
                 font-size: 2.5rem;
             }
             .main-card-title {
-                font-size: 1.15rem;
+                font-size: 1.1rem;
             }
-            .login-box {
-                max-width: 25rem; /* Adjusted for tablets */
-                padding: 2rem;
+            /* Adjust header height and container padding for this breakpoint */
+            :root {
+                --header-height: 50px;
+                --container-padding: 10px;
             }
         }
 
         @media (max-width: 768px) {
-            html {
-                font-size: 14px; /* Adjust base font size for mobile */
-            }
             .container {
-                padding: 0.75rem;
+                padding: 8px;
             }
             .header {
-                flex-direction: column; /* Stack header items on small mobile */
-                align-items: flex-start; /* Align stacked items to start */
-                padding: 0.5rem 1rem;
-                gap: 0.75rem;
+                flex-direction: row;
+                justify-content: flex-start; /* Keep back button to the left */
+                padding: 6px 10px;
             }
-            .back-button, .user-info, .logout-button {
-                width: 100%; /* Full width for stacked items */
-                margin-right: 0; /* Remove auto margin */
-                justify-content: center; /* Center content within buttons/info */
-            }
-            .user-info {
-                order: -1; /* Place user info at the top when stacked */
-                margin-bottom: 0.5rem;
+            .back-button {
+                padding: 7px 12px;
+                font-size: 0.8rem;
             }
             .banner {
-                padding: 1.25rem 1rem;
-                margin-bottom: 1.25rem;
-                gap: 1rem;
+                padding: 15px 15px;
+                margin-bottom: 15px;
+                gap: 10px;
             }
             .company-logo {
-                max-width: 3.5rem;
+                max-width: 50px;
             }
             .banner h1 {
                 font-size: 1.8rem;
-                margin-bottom: 0.25rem;
+                margin-bottom: 3px;
             }
             .banner .subtitle {
                 font-size: 0.85rem;
             }
             .home-grid {
-                grid-template-columns: 1fr; /* Single column on very small screens */
-                gap: 1rem;
+                grid-template-columns: 1fr;
+                gap: 10px;
             }
             .main-card {
-                min-height: 9.375rem;
-                padding: 1.5rem;
+                min-height: 130px;
+                padding: 20px;
             }
             .main-card-icon {
                 font-size: 2.2rem;
             }
             .main-card-title {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
-            .full-page-view {
-                height: calc(100vh - 6.5rem); /* Adjust height for mobile header */
-            }
-            .login-box {
-                padding: 1.875rem 1.25rem;
-                max-width: 20rem; /* Adjusted for smaller screens */
-            }
-            .login-box h2 {
-                font-size: 1.5rem;
+            /* Adjust header height and container padding for this breakpoint */
+            :root {
+                --header-height: 44px;
+                --container-padding: 8px;
             }
         }
 
         @media (max-width: 480px) {
-            html {
-                font-size: 13px; /* Even smaller base font size */
-            }
-            .container {
-                padding: 0.5rem;
-            }
             .banner {
-                padding: 1rem 0.75rem;
-                gap: 0.75rem;
+                padding: 10px 10px;
+                gap: 8px;
             }
             .company-logo {
-                max-width: 3rem;
+                max-width: 40px;
             }
             .banner h1 {
                 font-size: 1.4rem;
@@ -676,54 +543,35 @@
             .banner .subtitle {
                 font-size: 0.75rem;
             }
-            .back-button, .logout-button {
-                padding: 0.5rem 0.75rem;
+            .back-button {
+                font-size: 0.75rem;
+                padding: 5px 10px;
+            }
+            .main-card-title {
+                font-size: 0.95rem;
+            }
+            .main-card-subtitle {
                 font-size: 0.8rem;
             }
-            .login-box {
-                max-width: 18rem;
-                padding: 1.5rem 1rem;
-            }
-            .login-box h2 {
-                font-size: 1.3rem;
+            /* Adjust header height and container padding for this breakpoint */
+            :root {
+                --header-height: 38px;
+                --container-padding: 8px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Login View -->
-    <div id="loginView" class="login-container">
-        <div class="login-box">
-            <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" style="max-width: 80px; margin: 0 auto 20px auto;" onerror="this.onerror=null;this.src='https://placehold.co/80x80/A0522D/FFFFFF?text=Logo';">
-            <h2>Welcome to Paxton LLC CRM</h2>
-            <p>Please log in to access your account.</p>
-            <div class="login-input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" placeholder="Enter your username">
-            </div>
-            <div class="login-input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter your password">
-            </div>
-            <button id="loginButton" class="login-button">Log In</button>
-            <div id="loginErrorMessage" class="login-error-message"></div>
-        </div>
-    </div>
-
-    <!-- Main Application Container (initially hidden) -->
-    <div id="appContainer" class="container hidden">
+    <div class="container">
         <div class="header">
             <!-- Back button, initially hidden -->
             <button id="backButton" class="back-button hidden">
                 &#x2190; Back to Home
             </button>
-            <!-- User Info Display -->
-            <div id="userInfo" class="user-info hidden"></div>
-            <!-- admin tab button - REMOVED from header -->
-            <!-- <button id="adminButton" class="admin-tab">admin</button> -->
-            <!-- Logout button -->
-            <button id="logoutButton" class="logout-button hidden">
-                Log Out
+            <!-- Admin tab button - REMOVED, now a card -->
+            <!-- The admin button is now a card in the home-grid, so this element is hidden -->
+            <button id="adminButton" class="admin-tab hidden">
+                Admin
             </button>
         </div>
 
@@ -734,7 +582,7 @@
                 <!-- Company Logo moved to the left and placed before text content -->
                 <!-- The logo image source has been corrected to a standard URL format. -->
                 <!-- The onerror attribute provides a fallback placeholder image if the main image fails to load. -->
-                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/90x90/A0522D/FFFFFF?text=Logo';">
+                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/80x80/A0522D/FFFFFF?text=Logo';">
                 <div class="banner-text-content">
                     <h1>PAXTON LLC CRM</h1>
                     <div class="subtitle">Medical Team Affairs</div>
@@ -764,15 +612,15 @@
                 <div class="main-card" data-page="price-list">
                     <div class="main-card-icon">💲</div>
                     <div class="main-card-title">Price List</div>
-                    <div class="main-card-subtitle">products pricing information.</div>
+                    <div class="main-card-subtitle">Products pricing information.</div>
                 </div>
-                <!-- admin Panel Card - NEWLY ADDED -->
-                <div class="main-card" data-page="admin" id="adminPanelCard">
+                <!-- Admin Panel Card - NEW -->
+                <div class="main-card" data-page="admin">
                     <div class="main-card-icon">⚙️</div>
-                    <div class="main-card-title">admin Panel</div>
+                    <div class="main-card-title">Admin Panel</div>
                     <div class="main-card-subtitle">Manage users and system settings.</div>
                 </div>
-                <!-- Coming Soon Card (disabled by default, will be enabled based on user role if applicable) -->
+                <!-- Coming Soon Card (disabled) -->
                 <div class="main-card disabled">
                     <div class="main-card-icon">⏳</div>
                     <div class="main-card-title">Coming Soon</div>
@@ -862,21 +710,21 @@
             </div>
         </div>
 
-        <!-- admin Full Page View -->
+        <!-- Admin Full Page View -->
         <div id="adminView" class="full-page-view hidden">
-            <div class="loading" id="loadingadmin">
+            <div class="loading" id="loadingAdmin">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading admin Panel...</div>
+                <div class="loading-text">Loading Admin Panel...</div>
             </div>
-            <div class="error-state" id="erroradmin">
+            <div class="error-state" id="errorAdmin">
                 <div class="error-icon">⚠️</div>
-                <div class="error-title">admin Page Not Found</div>
-                <div class="error-text">The admin file could not be loaded. Please check its path.</div>
+                <div class="error-title">Admin Page Not Found</div>
+                <div class="error-text">The Admin file could not be loaded. Please check its path.</div>
             </div>
             <div class="iframe-container-fpv">
                 <iframe src="" class="hidden"></iframe>
                 <div class="demo-content">
-                    <h2>admin Panel</h2>
+                    <h2>Admin Panel</h2>
                     <p>This would be your administrative interface for user management and system settings. Currently showing demo content since the external file is not available.</p>
                 </div>
             </div>
@@ -884,165 +732,95 @@
 
     </div>
 
-    <script type="module">
-        // Supabase configuration
-        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
-        const { createClient } = supabase;
-        const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+    <script>
+        // Store the ID of the currently active full-page view
         let currentActiveViewId = null;
 
+        // Global variables for swipe detection
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let currentSwipeView = null; // To keep track of which view has swipe listeners attached
+
         /**
-         * Displays a message in the login error message area.
-         * @param {string} message - The message to display.
-         * @param {boolean} isError - True if it's an error message, false otherwise.
+         * Handles the touchstart event to record initial touch coordinates.
+         * @param {TouchEvent} event - The touchstart event object.
          */
-        function displayLoginMessage(message, isError = true) {
-            const errorMessageElement = document.getElementById('loginErrorMessage');
-            errorMessageElement.textContent = message;
-            errorMessageElement.style.color = isError ? 'var(--primary-red)' : 'var(--coffee-dark)';
+        function handleTouchStart(event) {
+            touchStartX = event.touches[0].clientX;
+            touchStartY = event.touches[0].clientY;
         }
 
         /**
-         * Handles the login attempt.
+         * Handles the touchmove event. (Currently empty as preventDefault is not used for simple navigation)
+         * @param {TouchEvent} event - The touchmove event object.
          */
-        async function handleLogin() {
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const loginButton = document.getElementById('loginButton');
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            displayLoginMessage('');
-            loginButton.disabled = true;
-            loginButton.textContent = 'Logging In...';
-
-            if (!username || !password) {
-                displayLoginMessage('Please enter both username and password.');
-                loginButton.disabled = false;
-                loginButton.textContent = 'Log In';
-                return;
-            }
-
-            try {
-                const { data, error } = await client
-                    .from('users')
-                    .select('title')
-                    .eq('username', username)
-                    .eq('password', password);
-
-                console.log('Supabase response data:', data);
-                console.log('Supabase response error:', error);
-
-                if (error) {
-                    console.error('Supabase login error:', error.message);
-                    displayLoginMessage('An error occurred during login. Please try again.');
-                    loginButton.disabled = false;
-                    loginButton.textContent = 'Log In';
-                    return;
-                }
-
-                if (data && data.length > 0) {
-                    const userTitle = data[0].title;
-                    sessionStorage.setItem('userTitle', userTitle);
-                    sessionStorage.setItem('username', username); // Store username
-                    displayLoginMessage('Login successful!', false);
-                    showApp(userTitle, username); // Pass username to showApp
-                } else {
-                    displayLoginMessage('Invalid username or password.');
-                }
-            } catch (err) {
-                console.error('Unexpected login error:', err);
-                displayLoginMessage('An unexpected error occurred. Please try again.');
-            } finally {
-                loginButton.disabled = false;
-                loginButton.textContent = 'Log In';
-            }
+        function handleTouchMove(event) {
+            // No action needed here for a simple swipe-to-go-back gesture
+            // If preventing default scrolling was required, logic would go here
         }
 
         /**
-         * Shows the main application container and hides the login view.
-         * Enables/disables cards based on the user's title.
-         * @param {string} userTitle - The title of the logged-in user.
-         * @param {string} username - The username of the logged-in user.
+         * Handles the touchend event to detect a swipe gesture and trigger navigation.
+         * @param {TouchEvent} event - The touchend event object.
          */
-        function showApp(userTitle, username) {
-            console.log(`User logged in as: ${username} (${userTitle})`);
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('appContainer').classList.remove('hidden');
-            document.getElementById('homeView').classList.remove('hidden'); // Ensure home view is visible
+        function handleTouchEnd(event) {
+            // If no touch was started or coordinates are reset, exit
+            if (touchStartX === 0 && touchStartY === 0) return;
 
-            const userInfoElement = document.getElementById('userInfo');
-            const logoutButton = document.getElementById('logoutButton');
-            const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
-            const adminPanelCard = document.getElementById('adminPanelCard'); // Get the new admin panel card
+            const touchEndX = event.changedTouches[0].clientX;
+            const touchEndY = event.changedTouches[0].clientY;
 
-            // Display user info and logout button
-            userInfoElement.textContent = `Welcome, ${username} (${userTitle})`;
-            userInfoElement.classList.remove('hidden');
-            logoutButton.classList.remove('hidden');
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
 
-            // Reset visibility for all cards first
-            document.querySelectorAll('.main-card').forEach(card => {
-                card.classList.remove('disabled');
-            });
+            const minSwipeDistance = 75; // Minimum horizontal distance for a swipe to be registered
+            const maxVerticalDeviation = 50; // Maximum allowed vertical movement for a horizontal swipe
 
-            // Apply role-based visibility
-            if (userTitle === 'Medical Representative') {
-                if (adminPanelCard) {
-                    adminPanelCard.classList.add('disabled');
-                }
-                if (dashboardCard) {
-                    dashboardCard.classList.add('disabled');
-                }
-            } else if (userTitle === 'District Manager') {
-                if (adminPanelCard) {
-                    adminPanelCard.classList.add('disabled');
-                }
-                // Dashboard remains enabled for District Manager
-            } else if (userTitle === 'admin') {
-                // admin sees everything, no changes needed from default (all enabled)
-            } else {
-                // Default for unknown roles: disable admin and dashboard for safety
-                if (adminPanelCard) {
-                    adminPanelCard.classList.add('disabled');
-                }
-                if (dashboardCard) {
-                    dashboardCard.classList.add('disabled');
-                }
+            // Check for a rightward swipe (positive deltaX) with minimal vertical deviation
+            if (deltaX > minSwipeDistance && Math.abs(deltaY) < maxVerticalDeviation) {
+                console.log('Right swipe detected! Going back to home.');
+                showHome();
             }
 
-            // Removed auto-navigation based on user title.
-            // All users will now land on the home page after login.
+            // Reset touch coordinates after the gesture ends
+            touchStartX = 0;
+            touchStartY = 0;
         }
 
         /**
-         * Handles logging out the user.
+         * Attaches swipe event listeners to a given view element.
+         * @param {HTMLElement} viewElement - The full-page view element to attach listeners to.
          */
-        function handleLogout() {
-            sessionStorage.removeItem('userTitle');
-            sessionStorage.removeItem('username');
-            console.log('User logged out.');
-            
-            // Hide app container and show login view
-            document.getElementById('appContainer').classList.add('hidden');
-            document.getElementById('loginView').classList.remove('hidden');
+        function attachSwipeListeners(viewElement) {
+            if (!viewElement) return;
 
-            // Clear username/password fields for next login
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            displayLoginMessage(''); // Clear any login messages
+            // Remove existing listeners from the previously active view to prevent duplicates
+            if (currentSwipeView && currentSwipeView !== viewElement) {
+                removeSwipeListeners(currentSwipeView);
+            }
 
-            // Hide user info and logout button
-            document.getElementById('userInfo').classList.add('hidden');
-            document.getElementById('logoutButton').classList.add('hidden');
-            
-            // Ensure home view is shown on logout, and all cards are reset to default disabled state
-            showHome(); // This will hide full-page views and show home.
-            document.querySelectorAll('.main-card').forEach(card => {
-                card.classList.add('disabled'); // Disable all cards on logout
-            });
+            currentSwipeView = viewElement; // Set the current view with listeners
+
+            // Add event listeners for touch gestures (passive: true for performance)
+            viewElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+            viewElement.addEventListener('touchmove', handleTouchMove, { passive: true });
+            viewElement.addEventListener('touchend', handleTouchEnd, { passive: true });
+            console.log(`Swipe listeners attached to: ${viewElement.id}`);
+        }
+
+        /**
+         * Removes swipe event listeners from a given view element.
+         * @param {HTMLElement} viewElement - The full-page view element to remove listeners from.
+         */
+        function removeSwipeListeners(viewElement) {
+            if (!viewElement || !currentSwipeView || viewElement !== currentSwipeView) return;
+
+            // Remove the event listeners
+            viewElement.removeEventListener('touchstart', handleTouchStart);
+            viewElement.removeEventListener('touchmove', handleTouchMove);
+            viewElement.removeEventListener('touchend', handleTouchEnd);
+            console.log(`Swipe listeners removed from: ${viewElement.id}`);
+            currentSwipeView = null; // Clear the reference
         }
 
         /**
@@ -1052,11 +830,7 @@
             console.log('Showing home view');
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
-            const userInfoElement = document.getElementById('userInfo');
-            const logoutButton = document.getElementById('logoutButton');
-            const adminPanelCard = document.getElementById('adminPanelCard');
-            const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
-            
+
             if (homeView) {
                 homeView.classList.remove('hidden');
             }
@@ -1065,40 +839,16 @@
                 backButton.classList.add('hidden');
             }
 
-            // Re-apply role-based visibility for admin panel card and dashboard when returning to home
-            const userTitle = sessionStorage.getItem('userTitle');
-            if (userTitle === 'Medical Representative') {
-                if (adminPanelCard) adminPanelCard.classList.add('disabled');
-                if (dashboardCard) dashboardCard.classList.add('disabled');
-            } else if (userTitle === 'District Manager') {
-                if (adminPanelCard) adminPanelCard.classList.add('disabled');
-                if (dashboardCard) dashboardCard.classList.remove('disabled');
-            } else if (userTitle === 'admin') {
-                if (adminPanelCard) adminPanelCard.classList.remove('disabled');
-                if (dashboardCard) dashboardCard.classList.remove('disabled');
-            } else {
-                // Not logged in, disable all cards
-                document.querySelectorAll('.main-card').forEach(card => {
-                    card.classList.add('disabled');
-                });
-            }
-
-            // Show user info and logout button if logged in
-            if (userTitle) {
-                userInfoElement.classList.remove('hidden');
-                logoutButton.classList.remove('hidden');
-            } else {
-                userInfoElement.classList.add('hidden');
-                logoutButton.classList.add('hidden');
-            }
-
-
             // Hide the currently active full-page view, if any
             if (currentActiveViewId) {
                 const activeView = document.getElementById(currentActiveViewId);
                 if (activeView) {
                     activeView.classList.remove('active');
+                    // Remove swipe listeners when hiding a view
+                    removeSwipeListeners(activeView);
+                    // Add hidden class after transition to allow CSS transition to complete
                     setTimeout(() => activeView.classList.add('hidden'), 300);
+                    // Also hide the iframe and show demo content if it was an iframe view
                     const iframe = activeView.querySelector('iframe');
                     const demoContent = activeView.querySelector('.demo-content');
                     if (iframe) iframe.classList.add('hidden');
@@ -1114,13 +864,13 @@
          */
         function loadPage(page) {
             console.log(`Attempting to load page: ${page}`);
-            
+            // Configuration for each page, including view ID, display name, and file name
             const pageConfig = {
                 'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
                 'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
                 'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
                 'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
-                'admin': { viewId: 'adminView', displayName: 'admin', fileName: 'admin users.html' }
+                'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
             };
 
             const config = pageConfig[page];
@@ -1131,19 +881,21 @@
 
             const { viewId, displayName, fileName } = config;
 
+            // Get references to main UI elements
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
             const targetView = document.getElementById(viewId);
-            const userInfoElement = document.getElementById('userInfo');
-            const logoutButton = document.getElementById('logoutButton');
 
+            // Initialize variables for elements inside targetView
             let loadingOverlay = null;
             let errorState = null;
             let iframeContainer = null;
             let iframe = null;
             let demoContent = null;
 
+            // Ensure targetView exists before querying its children
             if (targetView) {
+                // Using querySelector with classes as they are unique within each full-page-view
                 loadingOverlay = targetView.querySelector('.loading'); 
                 errorState = targetView.querySelector('.error-state'); 
                 iframeContainer = targetView.querySelector('.iframe-container-fpv');
@@ -1153,7 +905,8 @@
                 }
             }
 
-            if (!homeView || !backButton || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent || !userInfoElement || !logoutButton) {
+            // Basic validation to ensure all required elements exist
+            if (!homeView || !backButton || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
                 console.error('Error: One or more required DOM elements not found for page loading. Debug details:');
                 console.error('  homeView:', homeView);
                 console.error('  backButton:', backButton);
@@ -1163,104 +916,93 @@
                 console.error('  iframeContainer:', iframeContainer);
                 console.error('  iframe:', iframe);
                 console.error('  demoContent:', demoContent);
-                console.error('  userInfoElement:', userInfoElement);
-                console.error('  logoutButton:', logoutButton);
-                return;
+                return; // Exit if elements are missing
             }
 
+            // --- Execution continues here if all elements are found ---
             console.log(`All required DOM elements found for page: ${page}. Proceeding to load.`);
 
+            // Hide the home view and show the back button
             homeView.classList.add('hidden');
-            backButton.classList.remove('hidden');
-            // User info and logout buttons remain visible in the header.
-            console.log(`Header button visibility set for page: ${page}.`);
+            backButton.classList.remove('hidden'); // This line makes the back button visible
+            console.log(`Back button visibility set for page: ${page}.`);
 
+
+            // If there's a currently active full-page view and it's different from the target, hide it
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
+                    // Remove swipe listeners from the previous view when switching
+                    removeSwipeListeners(prevActiveView);
+                    // Delay adding 'hidden' to allow CSS transition to complete
                     setTimeout(() => prevActiveView.classList.add('hidden'), 300);
                 }
             }
 
+            // Set the new active view ID
             currentActiveViewId = viewId;
 
+            // Show the target full-page view with a slight delay for transition effect
             targetView.classList.remove('hidden');
-            setTimeout(() => targetView.classList.add('active'), 10);
+            setTimeout(() => {
+                targetView.classList.add('active');
+                attachSwipeListeners(targetView); // Attach swipe listeners to the newly active view
+            }, 10);
 
+            // Show the loading spinner and hide any previous error state
             loadingOverlay.classList.add('show');
             errorState.classList.remove('show');
 
+            // Hide the demo content and show the iframe before loading new content
             demoContent.classList.add('hidden');
             iframe.classList.remove('hidden');
 
+            // Set the iframe's source and attach event listeners for loading status
             iframe.src = fileName;
 
             iframe.onload = function() {
                 console.log(`${displayName} iframe loaded successfully from ${fileName}.`);
-                loadingOverlay.classList.remove('show');
-                errorState.classList.remove('show');
+                loadingOverlay.classList.remove('show'); // Hide spinner
+                errorState.classList.remove('show');     // Hide error
             };
 
             iframe.onerror = function() {
                 console.error(`Failed to load ${displayName} iframe from ${fileName}. Displaying demo content.`);
-                loadingOverlay.classList.remove('show');
-                errorState.classList.add('show');
-                demoContent.classList.remove('hidden');
-                iframe.classList.add('hidden');
+                loadingOverlay.classList.remove('show'); // Hide spinner
+                errorState.classList.add('show');        // Show error message
+                demoContent.classList.remove('hidden');  // Show demo content as fallback
+                iframe.classList.add('hidden');          // Hide the broken iframe
             };
         }
 
+        // Initialize the application when DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing application');
             
-            const userTitle = sessionStorage.getItem('userTitle');
-            const username = sessionStorage.getItem('username');
-
-            if (userTitle && username) {
-                showApp(userTitle, username);
-            } else {
-                document.getElementById('loginView').classList.remove('hidden');
-                document.getElementById('appContainer').classList.add('hidden');
-                // Ensure cards are disabled if not logged in
-                document.querySelectorAll('.main-card').forEach(card => {
-                    card.classList.add('disabled');
-                });
-            }
-
-            document.getElementById('loginButton').addEventListener('click', handleLogin);
-            document.getElementById('logoutButton').addEventListener('click', handleLogout); // Attach logout listener
-
-            document.getElementById('password').addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    handleLogin();
-                }
-            });
-            document.getElementById('username').addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    document.getElementById('password').focus();
-                }
-            });
-
-            // This listener now handles all main cards, including the new admin Panel card
+            // Add click event listeners to all main navigation cards
             document.querySelectorAll('.main-card').forEach(card => {
                 card.addEventListener('click', function() {
-                    const page = this.dataset.page;
-                    const currentUserTitle = sessionStorage.getItem('userTitle');
-                    // Only load the page if it's not disabled AND user is logged in
-                    if (currentUserTitle && page && !this.classList.contains('disabled')) {
+                    const page = this.dataset.page; // Get the 'data-page' attribute
+                    // Only load the page if it's not disabled
+                    if (page && !this.classList.contains('disabled')) {
                         loadPage(page);
-                    } else if (!currentUserTitle) {
-                        displayLoginMessage('Please log in to access this feature.', true);
                     } else if (this.classList.contains('disabled')) {
-                        console.log(`Card for page "${page}" is disabled for your role.`);
+                        console.log(`Card for page "${page}" is disabled.`);
                     }
                 });
             });
 
+            // The Admin button in the header is removed as it's now a card.
+            // The event listener for the old admin button is no longer needed.
+
+            // Add click event listener to the Back button
             document.getElementById('backButton').addEventListener('click', function() {
                 showHome();
             });
+
+            // Ensure the home view is visible on initial load (redundant but safe)
+            showHome();
         });
     </script>
 </body>
