@@ -6,14 +6,13 @@
   <title>User Management</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* General styles */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Inter', sans-serif; /* Changed to Inter for consistency */
       background: #91C8E4;
       color: #334155;
       line-height: 1.6;
@@ -28,8 +27,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      /* Always visible now as login is removed */
-      display: flex;
+      display: none;
     }
     .header-content {
       max-width: 1200px;
@@ -355,74 +353,21 @@
       border-radius: 12px;
       border: 2px dashed #e2e8f0;
     }
-    /* Login Box Styles - No longer needed, but keeping for reference if user changes mind */
-    .login-container {
-      display: none; /* Always hidden now */
-      justify-content: center;
-      align-items: center;
-      min-height: calc(100vh - 80px);
-      padding: 20px;
+    /* Login Required Message */
+    .login-required-message {
+        text-align: center;
+        padding: 40px;
+        font-size: 1.2rem;
+        color: #555;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-top: 50px;
     }
-    .login-card {
-      width: 100%;
-      max-width: 350px;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-      text-align: center;
-    }
-    .login-card h2 {
-      margin-bottom: 20px;
-      color: #1e293b;
-      font-size: clamp(1.3rem, 4vw, 1.8rem);
-    }
-    .login-message {
-      margin-bottom: 15px;
-    }
-    /* Auto-login message and spinner styles */
-    .auto-login-message {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      padding: 20px;
-      font-size: 1.1em;
-      color: #3b82f6;
-    }
-    .spinner {
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-left-color: #3b82f6;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Logout Button */
-    .logout-btn {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: clamp(0.875rem, 2vw, 1rem);
-      font-weight: 500;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-    }
-    .logout-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+    .login-required-message i {
+        font-size: 2rem;
+        color: #4361ee;
+        margin-bottom: 15px;
     }
     /* Modal Styles */
     .modal {
@@ -555,11 +500,11 @@
         <div class="stat-badge">
           <span id="totalUsers">0</span> Users
         </div>
-        <!-- Logout button removed -->
+        <button id="logoutButton" class="logout-btn">Logout</button>
       </div>
     </div>
   </div>
-  <div id="appContent">
+  <div id="appContent" style="display: none;">
     <div class="container">
       <div id="message"></div>
       <div class="main-content">
@@ -606,6 +551,7 @@
       </div>
     </div>
   </div>
+  <!-- Removed Login Box -->
   <!-- Custom Confirmation Modal -->
   <div id="confirmationModal" class="modal">
     <div class="modal-content">
@@ -622,48 +568,71 @@
       </div>
     </div>
   </div>
+
+  <!-- Message to display if user is not logged in -->
+  <div id="loginRequiredMessage" class="container login-required-message hidden">
+      <i class="fas fa-info-circle"></i>
+      <p>Please log in as an administrator via the main application page to access User Management.</p>
+  </div>
+
   <script>
-    // Supabase client initialization
+    // Supabase client
     const { createClient } = supabase;
     const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
+    // Corrected Supabase API key to match the one from reps crm.txt
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
-
     let users = [];
     let activeEditId = null;
     let confirmCallback = null;
-
     // DOM Elements
     const messageDiv = document.getElementById('message');
+    // const loginMessageDiv = document.getElementById('loginMessage'); // Removed
     const appContent = document.getElementById('appContent');
-    // Removed login-related DOM elements
+    // const loginContainer = document.getElementById('loginContainer'); // Removed
+    // const loginForm = document.getElementById('loginForm'); // Removed
+    // const usernameInput = document.getElementById('username'); // Removed
+    // const passwordInput = document.getElementById('password'); // Removed
+    const logoutButton = document.getElementById('logoutButton');
     const confirmationModal = document.getElementById('confirmationModal');
     const modalMessage = document.getElementById('modalMessage');
     const modalConfirmBtn = document.getElementById('modalConfirmBtn');
     const headerBanner = document.querySelector('.header-banner');
+    const loginRequiredMessage = document.getElementById('loginRequiredMessage'); // New element
 
-    // Function to show custom message (for user feedback)
-    function showMessage(text, type = 'success', isLogin = false) {
-      const messageContainer = messageDiv;
+    // Helper function to get/set/remove localStorage items
+    function setLocalStorageItem(name, value) {
+        localStorage.setItem(name, JSON.stringify(value));
+    }
+
+    function getLocalStorageItem(name) {
+        const item = localStorage.getItem(name);
+        return item ? JSON.parse(item) : null;
+    }
+
+    function removeLocalStorageItem(name) {
+        localStorage.removeItem(name);
+    }
+
+    // Function to show custom message
+    function showMessage(text, type = 'success') { /* Removed isLogin parameter */
+      const messageContainer = messageDiv; /* Always use messageDiv */
       messageContainer.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
       setTimeout(() => {
         messageContainer.innerHTML = '';
       }, 5000);
     }
-
-    // Function to show custom confirmation modal (replaces alert/confirm)
+    // Function to show custom confirmation modal
     function showConfirmationModal(message, callback) {
       modalMessage.textContent = message;
       confirmCallback = callback;
       confirmationModal.style.display = 'flex';
     }
-
     // Function to close custom confirmation modal
     function closeModal() {
       confirmationModal.style.display = 'none';
       confirmCallback = null;
     }
-
     // Event listener for modal confirm button
     modalConfirmBtn.onclick = () => {
       if (confirmCallback) {
@@ -671,8 +640,7 @@
       }
       closeModal();
     };
-
-    // Helper to get title class for styling based on user's title
+    // Helper to get title class for styling
     function getTitleClass(title) {
       if (!title) return 'title-default';
       const titleLower = title.toLowerCase();
@@ -682,28 +650,24 @@
       if (titleLower.includes('admin')) return 'title-admin';
       return 'title-default';
     }
-
-    // Update total user count display in the header
+    // Update total user count display
     function updateUserCount() {
       document.getElementById('totalUsers').textContent = users.length;
     }
-
-    // Load users from Supabase database
+    // Load users from Supabase
     async function loadUsers() {
       try {
-        // Fetch all users and order them by ID
         const { data, error } = await supabaseClient.from('users').select('*').order('id');
         if (error) throw error;
-        users = data; // Store fetched users
-        updateUserCount(); // Update the count displayed in the header
-        displayUsers(); // Render users in the UI
+        users = data;
+        updateUserCount();
+        displayUsers();
       } catch (err) {
         showMessage('Failed to load users: ' + err.message, 'error');
         document.getElementById('usersList').innerHTML = '<div class="alert alert-error">Failed to load users.</div>';
       }
     }
-
-    // Display users in the list section of the UI
+    // Display users in the list
     function displayUsers() {
       const usersList = document.getElementById('usersList');
       if (!users.length) {
@@ -763,116 +727,87 @@
           `).join('')}
         </div>`;
     }
-
-    // Toggle user action panel visibility (for edit/delete buttons)
+    // Toggle user action panel visibility
     function toggleUserActions(userId) {
       const actionsDiv = document.getElementById(`userActions${userId}`);
       const isActive = actionsDiv.classList.contains('active');
-      // Close all other open action panels
       document.querySelectorAll('.user-actions.active').forEach(el => {
         el.classList.remove('active');
       });
-      // Open the clicked panel if it wasn't active
       if (!isActive) {
         actionsDiv.classList.add('active');
       }
     }
-
-    // Add new user form submission handler
+    // Add new user form submission
     document.getElementById('addUserForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('newUsername').value.trim();
       const password = document.getElementById('newPassword').value.trim();
       const title = document.getElementById('newTitle').value.trim();
-
       if (!username || !password || !title) return showMessage('Username, password, and title are required', 'error');
-
       try {
-        // Insert new user data into Supabase 'users' table
         const { error } = await supabaseClient
           .from('users')
           .insert([{ username, password, title }]);
-
         if (error) throw error;
-
         showMessage('User added successfully!');
-        e.target.reset(); // Clear form fields
-        loadUsers(); // Reload users to update the list
+        e.target.reset();
+        loadUsers();
       } catch (err) {
         showMessage('Error adding user: ' + err.message, 'error');
       }
     });
-
-    // Function to show the edit form for a specific user
+    // Edit user functionality
     function editUser(userId) {
-      // Hide all other edit forms
       document.querySelectorAll('.edit-form').forEach(form => {
         form.style.display = 'none';
       });
-      // Display the edit form for the selected user
       document.getElementById(`editForm${userId}`).style.display = 'block';
-      activeEditId = userId; // Keep track of the user being edited
+      activeEditId = userId;
     }
-
-    // Function to cancel the edit operation and hide the form
+    // Cancel edit operation
     function cancelEdit(userId) {
       document.getElementById(`editForm${userId}`).style.display = 'none';
       activeEditId = null;
     }
-
-    // Function to save changes to a user
+    // Save user changes
     async function saveUser(userId) {
       const username = document.getElementById(`editUsername${userId}`).value.trim();
       const title = document.getElementById(`editTitle${userId}`).value.trim();
-      const password = document.getElementById(`editPassword${userId}`).value.trim(); // New password (optional)
-
+      const password = document.getElementById(`editPassword${userId}`).value.trim();
       if (!username || !title) return showMessage('Username and title are required', 'error');
-
       try {
         const updateData = { username, title };
-        if (password) updateData.password = password; // Only update password if provided
-
-        // Update user data in Supabase
+        if (password) updateData.password = password;
         const { error } = await supabaseClient.from('users').update(updateData).eq('id', userId);
-
         if (error) throw error;
-
         showMessage('User updated successfully!');
-        cancelEdit(userId); // Hide the edit form
-        loadUsers(); // Reload users to reflect changes
+        cancelEdit(userId);
+        loadUsers();
       } catch (err) {
         showMessage('Update failed: ' + err.message, 'error');
       }
     }
-
-    // Function to delete a user
+    // Delete user functionality
     async function deleteUser(userId) {
       const user = users.find(user => user.id === userId);
-      // Prevent admin users from being deleted via the front end
       if (user && user.title === 'admin') {
         showMessage('Admin users cannot be deleted from the front end.', 'error');
         return;
       }
-
-      // Show confirmation modal before deleting
       showConfirmationModal('Are you sure you want to delete this user? This action cannot be undone.', async (confirmed) => {
-        if (!confirmed) return; // If user cancels, do nothing
-
+        if (!confirmed) return;
         try {
-          // Delete user from Supabase
           const { error } = await supabaseClient.from('users').delete().eq('id', userId);
-
           if (error) throw error;
-
           showMessage('User deleted successfully!');
-          loadUsers(); // Reload users to update the list
+          loadUsers();
         } catch (err) {
           showMessage('Delete failed: ' + err.message, 'error');
         }
       });
     }
-
-    // Close user actions when clicking outside the user item or modal
+    // Close user actions when clicking outside
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.user-item') && !e.target.closest('.modal-content')) {
         document.querySelectorAll('.user-actions.active').forEach(el => {
@@ -880,18 +815,34 @@
         });
       }
     });
+    // Removed Admin Login Functionality - now handled by index.html
+    
+    // Logout Functionality (modified to use localStorage)
+    logoutButton.addEventListener('click', () => {
+      removeLocalStorageItem('isAdminLoggedIn');
+      showMessage('Logged out successfully.', 'success');
+      renderApp(); // Re-render to show login required message
+    });
 
-    // Renders the appropriate view (now always the admin content)
+    // Render the appropriate view based on login status (modified to use localStorage)
     function renderApp() {
-      // Since the login box is removed, we assume the user is always "logged in" as admin
-      // and directly display the app content.
-      appContent.style.display = 'block';
-      headerBanner.style.display = 'flex';
-      // logoutButton.style.display = 'inline-flex'; // Removed as button is gone
-      loadUsers(); // Load user data for the admin interface
+      const isAdminLoggedIn = getLocalStorageItem('isAdminLoggedIn') === 'true'; // Check localStorage
+      if (isAdminLoggedIn) {
+        // loginContainer.style.display = 'none'; // Removed
+        appContent.style.display = 'block';
+        headerBanner.style.display = 'flex';
+        logoutButton.style.display = 'inline-flex';
+        loginRequiredMessage.classList.add('hidden'); // Hide login required message
+        loadUsers();
+      } else {
+        // loginContainer.style.display = 'flex'; // Removed
+        appContent.style.display = 'none';
+        headerBanner.style.display = 'none';
+        logoutButton.style.display = 'none';
+        loginRequiredMessage.classList.remove('hidden'); // Show login required message
+      }
     }
-
-    // Initialize the application view when the DOM is fully loaded
+    // Initialize on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', () => {
       renderApp();
     });
