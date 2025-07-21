@@ -1497,15 +1497,24 @@
 
             // Check session storage on initial load
             if (sessionStorage.getItem('isLoggedIn') === 'true') {
-                userData = JSON.parse(sessionStorage.getItem('userData'));
-                console.log('Session found. User is logged in.', userData);
-                const lastActivePage = sessionStorage.getItem('lastActivePage');
-                if (lastActivePage) {
-                    // If a last active page is stored, try to load it
-                    loadPage(lastActivePage);
-                } else {
-                    // Otherwise, show the home page
-                    showHome(); 
+                try {
+                    userData = JSON.parse(sessionStorage.getItem('userData'));
+                    if (!userData || !userData.name || !userData.title) {
+                        // If userData is missing or malformed, treat as not logged in
+                        console.warn('Malformed or missing user data in session storage. Redirecting to login.');
+                        showLogin();
+                        return; // Stop further execution
+                    }
+                    console.log('Session found. User is logged in.', userData);
+                    const lastActivePage = sessionStorage.getItem('lastActivePage');
+                    if (lastActivePage) {
+                        loadPage(lastActivePage);
+                    } else {
+                        showHome(); 
+                    }
+                } catch (e) {
+                    console.error('Error parsing user data from session storage:', e);
+                    showLogin(); // Fallback to login if parsing fails
                 }
             } else {
                 console.log('No session found. Showing login view.');
