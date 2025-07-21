@@ -328,7 +328,7 @@
             transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
             transform: translateY(10px); /* Initial slight offset for animation */
             opacity: 0; /* Start hidden */
-            height: calc(100vh - 120px); /* Calculate height to fill screen minus header/padding */
+            /* Removed fixed height calculation, let flex-grow handle it */
         }
 
         .full-page-view.active {
@@ -661,7 +661,8 @@
                 font-size: 1.2rem;
             }
             .full-page-view {
-                height: calc(100vh - 90px); /* Adjust height for mobile header */
+                /* height: calc(100vh - 90px); */ /* Adjusted height for mobile header */
+                flex-grow: 1; /* Let flexbox handle height */
             }
             .login-card {
                 padding: 20px; /* Further adjusted padding */
@@ -1028,6 +1029,7 @@
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('backButton').classList.add('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
+            document.getElementById('userInfoCard').classList.add('hidden'); // Ensure user info card is hidden on login page
 
             // Hide any active full-page view
             if (currentActiveViewId) {
@@ -1051,8 +1053,6 @@
             sessionStorage.removeItem('bypassDashboardLogin');
             sessionStorage.removeItem('crmUserData');
 
-            // Update user info card (to hide it and clear content)
-            updateUserInfoCard(); // This will hide the card as isLoggedIn is false
             // Reset card states on logout/show login
             resetHomeCards();
         }
@@ -1071,6 +1071,7 @@
             const loginView = document.getElementById('loginView'); // Get login view
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
+            const userInfoCard = document.getElementById('userInfoCard'); // Get user info card
             
             if (homeView) {
                 homeView.classList.remove('hidden');
@@ -1089,6 +1090,11 @@
                 logoutButton.classList.remove('hidden');
             }
 
+            // Show user info card when on home page
+            if (userInfoCard) {
+                userInfoCard.classList.remove('hidden');
+            }
+
             // Hide the currently active full-page view, if any
             if (currentActiveViewId) {
                 const activeView = document.getElementById(currentActiveViewId);
@@ -1105,8 +1111,8 @@
                 currentActiveViewId = null;
             }
 
-            // Update user info card (show it on home page)
-            updateUserInfoCard(); // This will now correctly show the card
+            // Update user info card content
+            updateUserInfoCard(); 
             // Apply role-based card restrictions when showing home
             applyRoleBasedCardRestrictions();
         }
@@ -1148,9 +1154,7 @@
             const displayUserTitle = document.getElementById('displayUserTitle');
             const displayUserArea = document.getElementById('displayUserArea');
 
-            // The user info card should only be visible when logged in and on the home view.
-            // The 'hidden' class on userInfoCard is managed by showHome() and loadPage().
-            // This function only updates its content.
+            // This function only updates the content. Visibility is handled by showHome/loadPage/showLogin.
             if (isLoggedIn && currentUsername && currentUserRole) {
                 displayUsername.textContent = currentUsername;
                 displayUserTitle.textContent = currentUserRole;
@@ -1162,10 +1166,8 @@
                     displayUserArea.classList.add('hidden');
                     displayUserArea.textContent = '';
                 }
-                // The visibility of userInfoCard itself is handled by showHome() and loadPage()
-                // userInfoCard.classList.remove('hidden'); // Removed this line
             } else {
-                userInfoCard.classList.add('hidden'); // Ensure it's hidden if not logged in
+                // If not logged in, ensure content is cleared
                 displayUsername.textContent = '';
                 displayUserTitle.textContent = '';
                 displayUserArea.textContent = '';
@@ -1424,10 +1426,7 @@
             } catch (err) {
                 console.error('Login process error:', err);
                 errorMessageElement.textContent = 'An unexpected error occurred. Please try again later.';
-            } finally {
-                // Ensure user info card is updated regardless of login success/failure
-                // updateUserInfoCard(); // Removed from here, called by showHome()
-            }
+            } 
         }
 
         /**
