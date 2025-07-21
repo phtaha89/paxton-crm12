@@ -2377,12 +2377,14 @@
                 }
                 const csvText = await response.text();
                 allGoogleSheetData = parseCSV(csvText);
+
                 const districtManagers = new Set();
                 allGoogleSheetData.forEach(row => {
                     if (row['District Manager']) {
                         districtManagers.add(row['District Manager'].trim());
                     }
                 });
+
                 const usernameSelect = $('#username');
                 usernameSelect.empty();
                 usernameSelect.append($('<option>', { value: '', text: 'Select District Manager' }));
@@ -2401,7 +2403,6 @@
             let username;
             let password = $('#password').val();
             const loginError = $('#login-error');
-
             loginError.text('');
 
             if (isAdminLogin) {
@@ -2436,32 +2437,53 @@
                         .eq('password', password)
                         .single();
                 }
-                
-                const { data, error } = await query; 
 
-                if (error && error.code !== 'PGRST116') {
+                const { data, error } = await query;
+
+                if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
                     throw error;
                 }
 
                 if (data) {
                     loggedInUserRole = data.title;
                     loggedInUserDM = data.username;
-                    
                     localStorage.setItem('loggedInUsername', data.username);
                     localStorage.setItem('loggedInUserRole', data.title);
 
                     const dmGovernorates = new Set();
+                    let medicalRepNameForCRM = null; // To store the medical rep name if DM logs in
+
                     allGoogleSheetData.forEach(row => {
-                        if (row['District Manager'] === loggedInUserDM && row['area']) {
-                            dmGovernorates.add(row['area'].trim());
+                        if (row['District Manager'] === loggedInUserDM && row['Governorate']) {
+                            dmGovernorates.add(row['Governorate'].trim());
+                        }
+                        // If the logged-in user is a DM, find the first associated medical rep
+                        // This assumes a DM might be associated with multiple reps, picking one for CRM bypass
+                        if (loggedInUserRole === 'District Manager' && row['District Manager'] === loggedInUserDM && row['medical rep']) {
+                             // Prioritize a medical rep that is not "الجيزة"
+                            if (!medicalRepNameForCRM && !row['medical rep'].includes("الجيزة")) {
+                                medicalRepNameForCRM = row['medical rep'].trim();
+                            }
                         }
                     });
+
                     loggedInUserGovernorates = Array.from(dmGovernorates);
                     localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
 
+                    // Store user data in sessionStorage for CRM iframe
+                    const userDataForCRM = {
+                        name: medicalRepNameForCRM || loggedInUserDM, // Use medical rep name if available, else DM name
+                        area: loggedInUserGovernorates.length > 0 ? loggedInUserGovernorates[0] : 'N/A', // Or derive area if needed
+                        districtManager: loggedInUserDM,
+                        governorate: loggedInUserGovernorates.length > 0 ? loggedInUserGovernorates.join(', ') : 'N/A'
+                    };
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('userData', JSON.stringify(userDataForCRM));
+
+
                     $('#login-page').hide();
                     $('#dashboard-content').show();
-                    initializeCommonDashboard(); 
+                    initializeCommonDashboard();
                 } else {
                     loginError.text('Invalid username or password.');
                 }
