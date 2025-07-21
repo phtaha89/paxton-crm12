@@ -7,24 +7,24 @@
     <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS Variables for a fresh, professional color palette */
+        /* CSS Variables for easier theme management and consistency */
         :root {
-            --primary-blue: #4299E1; /* A vibrant, professional blue */
-            --primary-blue-dark: #3182CE; /* Darker shade for hover */
-            --secondary-green: #48BB78; /* A fresh green for accents */
-            --secondary-green-dark: #38A169;
-            --text-dark: #2D3748; /* Dark gray for main text */
-            --text-light: #718096; /* Lighter gray for secondary text */
-            --bg-light: #F7FAFC; /* Very light background */
-            --bg-medium: #EDF2F7; /* Slightly darker background for contrast */
-            --white: #FFFFFF;
-            --border-color: #E2E8F0; /* Light gray for borders */
+            --coffee-light: #8B5E3C; /* Light coffee/tan */
+            --coffee-dark: #6F4E37;  /* Rich coffee brown */
+            --coffee-gradient-start: #4A2C2A; /* Darker, almost black coffee */
+            --coffee-gradient-end: #8B5E3C;    /* Matches coffee-light */
+
+            --primary-red: #ef4444;
+            --primary-red-dark: #dc2626;
+            --text-color-dark: #374151;
+            --text-color-light: #6b7280;
+            --bg-light: #f9fafb;
+            --bg-medium: #f0f2f5;
+            --white: #ffffff;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
-            --border-radius-sm: 8px;
-            --border-radius-md: 12px;
-            --border-radius-lg: 16px;
+            --border-radius: 12px;
         }
 
         /* Base styles for all elements */
@@ -45,16 +45,16 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            color: var(--text-dark);
+            color: var(--text-color-dark);
             -webkit-font-smoothing: antialiased; /* Smoother text rendering */
             -moz-osx-font-smoothing: grayscale;
         }
 
         /* Main container for the application, taking full available width and height */
         .container {
-            max-width: 1400px; /* Optimal max-width for professional look */
+            max-width: 1600px; /* Increased max-width for more spacious layout */
             margin: 0 auto;
-            padding: 20px; /* Decreased padding for more compact look */
+            padding: 20px;
             width: 100%;
             flex-grow: 1; /* Allows container to expand and fill space */
             display: flex;
@@ -64,85 +64,74 @@
         /* Header styling with flexbox for alignment */
         .header {
             display: flex;
-            align-items: center; /* Align items vertically in the center */
+            justify-content: flex-end; /* Aligns admin tab to the right by default */
+            align-items: center;
             background: var(--white);
-            padding: 10px 25px; /* Decreased padding for header elements */
-            border-radius: var(--border-radius-md);
+            padding: 6px 25px; /* Made header slimmer */
+            border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 20px; /* Decreased margin below header */
+            margin-bottom: 20px;
             position: relative;
             z-index: 100; /* Ensures header is always on top */
+            gap: 15px; /* Space between buttons */
         }
 
-        /* Back button styling - Now on the left */
-        .back-button {
-            background: var(--border-color); /* Neutral background for back/logout */
-            color: var(--text-dark);
-            padding: 9px 18px; /* Decreased padding */
-            border-radius: var(--border-radius-sm);
+        /* Admin tab button styling - No longer in header, but keeping style for reference if needed elsewhere */
+        .admin-tab {
+            background: var(--primary-red);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.9rem; /* Decreased font size */
+            font-size: 0.95rem;
+            border: none;
+            transition: all 0.25s ease; /* Smooth transition for hover effects */
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px; /* Space between text and icon */
+        }
+
+        .admin-tab:hover {
+            background: var(--primary-red-dark);
+            transform: translateY(-2px); /* Slight lift effect */
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.25); /* Enhanced shadow on hover */
+        }
+        
+        /* Back button styling, similar to admin tab but with primary coffee color */
+        .back-button {
+            background: var(--coffee-light); /* Changed to coffee color */
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
             border: none;
             transition: all 0.25s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-right: 15px; /* Space between back button and user info */
+            margin-right: auto; /* Pushes the button to the left */
         }
 
         .back-button:hover {
-            background: #CBD5E0; /* Slightly darker gray on hover */
+            background: var(--coffee-dark); /* Changed to darker coffee color */
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        /* User Info Card Styling - Positioned on the left */
-        .user-info-card {
-            background: var(--primary-blue); /* Primary blue for user card */
-            color: var(--white);
-            padding: 8px 15px; /* Decreased padding */
-            border-radius: var(--border-radius-sm);
-            font-size: 0.9rem; /* Decreased font size */
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: var(--shadow-sm);
-            flex-shrink: 0; /* Prevent shrinking */
-        }
-
-        .user-info-card .user-icon {
-            font-size: 1.2rem; /* Decreased icon size */
-        }
-
-        .user-info-card .user-name {
-            font-weight: 600;
-            font-size: 1rem; /* Decreased font size */
-        }
-
-        .user-info-card .user-title,
-        .user-info-card .user-area {
-            font-size: 0.8rem; /* Decreased font size */
-            opacity: 0.9;
-        }
-
-        /* Button group on the right of the header */
-        .header-buttons {
-            display: flex;
-            gap: 15px; /* Space between buttons (only logout now) */
-            margin-left: auto; /* Pushes buttons to the right */
+            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
         }
 
         /* Logout button styling */
         .logout-button {
-            background: var(--border-color); /* Neutral background for back/logout */
-            color: var(--text-dark);
-            padding: 9px 18px; /* Decreased padding */
-            border-radius: var(--border-radius-sm);
+            background: #6b7280; /* Gray color for logout */
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.9rem; /* Decreased font size */
+            font-size: 0.95rem;
             border: none;
             transition: all 0.25s ease;
             text-decoration: none;
@@ -152,9 +141,9 @@
         }
 
         .logout-button:hover {
-            background: #CBD5E0; /* Slightly darker gray on hover */
+            background: #4b5563; /* Darker gray on hover */
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 6px 15px rgba(107, 114, 128, 0.25);
         }
 
         /* Utility class to hide elements */
@@ -162,21 +151,21 @@
             display: none !important;
         }
 
-        /* Banner styling with gradient and subtle animation */
+        /* Banner styling with gradient and shine animation */
         .banner {
-            background: linear-gradient(135deg, var(--primary-blue-dark), var(--primary-blue)); /* Blue gradient */
+            background: linear-gradient(135deg, var(--coffee-gradient-start), var(--coffee-gradient-end)); /* Changed to coffee gradient */
             color: white;
-            padding: 25px 35px; /* Decreased padding */
-            margin-bottom: 25px; /* Decreased margin */
-            border-radius: var(--border-radius-lg);
+            padding: 25px 40px; /* Made banner slimmer */
+            margin-bottom: 30px; /* Increased margin below banner */
+            border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 25px; /* Decreased gap */
+            flex-shrink: 0; /* Prevents banner from shrinking */
+            display: flex; /* Use flexbox for horizontal alignment of logo and text */
+            flex-direction: row; /* Always row for logo and text */
+            align-items: center; /* Vertically align items */
+            gap: 30px; /* Space between logo and text */
         }
 
         .banner::before {
@@ -186,9 +175,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.08), transparent); /* Softer shine */
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
             transform: translateX(-100%);
-            animation: shine 3s infinite;
+            animation: shine 3s infinite; /* Shine animation for visual flair */
         }
 
         @keyframes shine {
@@ -198,31 +187,31 @@
 
         /* Company Logo styling within the banner */
         .company-logo {
-            max-width: 90px; /* Decreased logo size */
+            max-width: 90px; /* Adjust size as needed */
             height: auto;
-            border-radius: var(--border-radius-sm);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            z-index: 1;
-            flex-shrink: 0;
+            border-radius: 8px; /* Slightly rounded corners for the logo */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Subtle shadow */
+            z-index: 1; /* Ensure logo is above shine effect */
+            flex-shrink: 0; /* Prevent logo from shrinking */
         }
 
         .banner-text-content {
-            flex-grow: 1;
-            text-align: left;
+            flex-grow: 1; /* Allows text content to take remaining space */
+            text-align: left; /* Ensure text is left-aligned within its container */
         }
 
         .banner h1 {
-            font-size: 2.8rem; /* Decreased main title size */
+            font-size: 3.5rem; /* Larger main title */
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px; /* Reduced margin below title */
             position: relative;
             z-index: 1;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            text-shadow: 0 3px 6px rgba(0,0,0,0.2);
         }
 
         .banner .subtitle {
-            font-size: 1.1rem; /* Decreased subtitle size */
-            opacity: 0.95;
+            font-size: 1.3rem; /* Larger subtitle */
+            opacity: 0.98;
             font-weight: 400;
             position: relative;
             z-index: 1;
@@ -231,22 +220,22 @@
         /* Home view grid for navigation cards */
         .home-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax for cards */
-            gap: 20px; /* Decreased spacing */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid columns */
+            gap: 25px; /* Space between grid items */
             padding: 20px 0;
-            flex-grow: 1;
-            align-content: start;
+            flex-grow: 1; /* Allows grid to expand */
+            align-content: start; /* Aligns content to the start of the grid */
         }
 
         /* Styling for each navigation card */
         .main-card {
             background: var(--white);
-            padding: 30px; /* Decreased padding for cards */
-            border-radius: var(--border-radius-md);
+            padding: 30px;
+            border-radius: var(--border-radius);
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition for hover */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -254,7 +243,7 @@
             min-height: 180px; /* Ensures consistent card height */
             position: relative;
             overflow: hidden;
-            border: 1px solid var(--border-color);
+            border: 1px solid #e2e8f0; /* Subtle border */
         }
 
         /* Pseudo-element for hover effect on cards */
@@ -265,7 +254,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom right, rgba(66, 153, 225, 0.05), transparent 50%); /* Blue tint on hover */
+            background: linear-gradient(to bottom right, rgba(139, 94, 60, 0.03), transparent 50%); /* Adjusted shadow color */
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -275,115 +264,115 @@
         }
 
         .main-card:hover {
-            transform: translateY(-6px); /* More pronounced lift effect */
-            box-shadow: var(--shadow-lg);
-            border-color: var(--primary-blue); /* Highlight border on hover */
+            transform: translateY(-5px); /* Lift effect on hover */
+            box-shadow: var(--shadow-lg); /* Larger shadow on hover */
+            border-color: var(--coffee-light); /* Highlight border on hover */
         }
 
         /* Disabled card styling */
         .main-card.disabled {
-            opacity: 0.5;
+            opacity: 0.6;
             cursor: not-allowed;
             background: var(--bg-light);
             box-shadow: var(--shadow-sm);
-            border-color: #CBD5E0;
+            border-color: #cbd5e1;
         }
 
         .main-card.disabled:hover {
-            transform: none;
+            transform: none; /* No lift for disabled cards */
             box-shadow: var(--shadow-sm);
-            border-color: #CBD5E0;
+            border-color: #cbd5e1;
         }
 
         /* Icon styling for cards */
         .main-card-icon {
-            font-size: 3.5rem; /* Decreased icon size */
-            margin-bottom: 20px;
-            color: var(--primary-blue);
-            line-height: 1;
+            font-size: 3.5rem; /* Larger icon size */
+            margin-bottom: 15px;
+            color: var(--coffee-light); /* Changed to coffee color */
+            line-height: 1; /* Ensures icon is vertically centered */
         }
 
         .main-card.disabled .main-card-icon {
-            color: var(--text-light);
+            color: var(--text-color-light); /* Muted icon for disabled cards */
         }
 
         /* Title styling for cards */
         .main-card-title {
-            font-size: 1.4rem; /* Decreased title size */
+            font-size: 1.5rem; /* Larger title size */
             font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 8px;
+            color: var(--text-color-dark);
+            margin-bottom: 5px;
         }
 
         .main-card.disabled .main-card-title {
-            color: var(--text-light);
+            color: var(--text-color-light);
         }
 
         /* Subtitle styling for cards */
         .main-card-subtitle {
-            font-size: 0.95rem; /* Decreased font size */
-            color: var(--text-light);
-            line-height: 1.5;
+            font-size: 0.95rem;
+            color: var(--text-color-light);
+            line-height: 1.4;
         }
         
         /* Full page view container */
         .full-page-view {
             background: var(--white);
-            border-radius: var(--border-radius-lg);
+            border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
-            flex-grow: 1;
+            flex-grow: 1; /* Allows full page view to fill available space */
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            transform: translateY(15px); /* Initial slight offset for animation */
-            opacity: 0;
-            height: calc(100vh - 140px); /* Adjusted height to fit better */
+            overflow: hidden; /* Ensures content within iframe doesn't overflow */
+            transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
+            transform: translateY(10px); /* Initial slight offset for animation */
+            opacity: 0; /* Start hidden */
+            height: calc(100vh - 120px); /* Calculate height to fill screen minus header/padding */
         }
 
         .full-page-view.active {
-            opacity: 1;
-            transform: translateY(0);
-            display: flex;
+            opacity: 1; /* Fully visible */
+            transform: translateY(0); /* Move to final position */
+            display: flex; /* Ensure it's a flex container when active */
         }
 
         /* Iframe container within full page view */
         .iframe-container-fpv {
-            flex-grow: 1;
+            flex-grow: 1; /* Allows iframe to take all available space */
             position: relative;
             width: 100%;
             height: 100%;
             border: none;
-            display: block;
-            background: var(--white);
+            display: block; /* Removes extra space below iframe */
+            background: var(--white); /* Fallback background */
         }
 
         .full-page-view iframe {
             width: 100%;
             height: 100%;
             border: none;
-            display: block;
-            background: var(--white);
+            display: block; /* Removes extra space below iframe */
+            background: var(--white); /* Fallback background */
         }
 
         /* Error state styling */
         .error-state {
-            display: none;
+            display: none; /* Hidden by default */
             padding: 60px 40px;
             text-align: center;
-            color: #E53E3E; /* Red for errors */
-            position: absolute;
+            color: var(--primary-red);
+            position: absolute; /* Overlay on top of iframe */
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 5;
+            z-index: 5; /* Above iframe, below loading */
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-radius: var(--border-radius-lg);
+            border-radius: var(--border-radius);
         }
 
         .error-state.show {
@@ -391,35 +380,35 @@
         }
 
         .error-icon {
-            font-size: 3rem; /* Decreased icon size */
-            margin-bottom: 25px;
+            font-size: 3rem;
+            margin-bottom: 20px;
         }
 
         .error-title {
-            font-size: 1.6rem; /* Decreased font size */
+            font-size: 1.5rem;
             font-weight: 600;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .error-text {
-            color: var(--text-light);
-            font-size: 1rem; /* Decreased font size */
+            color: var(--text-color-light);
+            font-size: 1rem;
         }
 
         /* Loading overlay styling */
         .loading {
-            display: none;
+            display: none; /* Hidden by default */
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 10;
+            z-index: 10; /* Highest z-index */
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            border-radius: var(--border-radius-lg);
+            border-radius: var(--border-radius);
         }
 
         .loading.show {
@@ -427,19 +416,18 @@
         }
 
         .spinner {
-            width: 40px; /* Decreased spinner size */
-            height: 40px; /* Decreased spinner size */
-            border: 4px solid #E2E8F0; /* Decreased border width */
-            border-top: 4px solid var(--primary-blue); /* Decreased border width */
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid var(--coffee-light); /* Changed to coffee color */
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 25px;
+            animation: spin 1s linear infinite; /* Spinner animation */
+            margin-bottom: 20px;
         }
 
         .loading-text {
-            color: var(--text-light);
+            color: var(--text-color-light);
             font-weight: 500;
-            font-size: 1rem; /* Decreased font size */
         }
 
         @keyframes spin {
@@ -450,45 +438,45 @@
         /* Status indicator in banner */
         .status-indicator {
             position: absolute;
-            top: 25px;
-            right: 25px;
-            width: 10px; /* Decreased size */
-            height: 10px; /* Decreased size */
+            top: 20px;
+            right: 20px;
+            width: 10px; /* Slightly larger */
+            height: 10px;
             border-radius: 50%;
-            background: var(--secondary-green); /* Green for online status */
-            box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.3);
+            background: #10b981; /* Green color */
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); /* Larger pulse shadow */
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.15); }
+            50% { opacity: 0.6; transform: scale(1.1); }
         }
 
         /* Demo styles for missing pages */
         .demo-content {
-            padding: 50px;
+            padding: 40px;
             text-align: center;
-            color: var(--text-dark);
-            width: 100%;
-            height: 100%;
-            display: flex;
+            color: var(--text-color-dark);
+            width: 100%; /* Ensure demo content takes full width */
+            height: 100%; /* Ensure demo content takes full height */
+            display: flex; /* Use flexbox for centering text */
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
         .demo-content h2 {
-            color: var(--primary-blue-dark);
-            margin-bottom: 25px;
-            font-size: 2rem; /* Decreased font size */
+            color: var(--coffee-dark);
+            margin-bottom: 20px;
+            font-size: 2rem;
         }
 
         .demo-content p {
-            color: var(--text-light);
-            font-size: 1.1rem; /* Decreased font size */
-            line-height: 1.7;
-            max-width: 700px;
+            color: var(--text-color-light);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 600px; /* Limit width for readability */
         }
 
         /* Login View Styles */
@@ -498,226 +486,316 @@
             justify-content: center;
             align-items: center;
             flex-grow: 1;
-            padding: 24px;
-            background: var(--bg-medium);
+            padding: 20px;
+            background: var(--bg-medium); /* Match body background */
         }
 
         .login-card {
             background: var(--white);
-            padding: 35px; /* Decreased padding */
-            border-radius: var(--border-radius-lg);
+            padding: 30px; /* Reduced padding */
+            border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
             text-align: center;
             width: 100%;
-            max-width: 380px; /* Decreased max-width for login card */
+            max-width: 350px; /* Reduced max width for the login card */
             display: flex;
             flex-direction: column;
-            gap: 20px; /* Increased gap */
+            gap: 15px; /* Reduced gap */
         }
 
-        .login-card .company-logo-login {
-            max-width: 70px; /* Decreased logo size */
+        .login-card .company-logo-login { /* Specific style for logo in login card */
+            max-width: 70px; /* Smaller logo */
             height: auto;
-            border-radius: var(--border-radius-sm);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin: 0 auto 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 0 auto 15px auto; /* Center and add margin below */
         }
 
         .login-card h2 {
-            font-size: 1.8rem; /* Decreased font size */
-            color: var(--primary-blue-dark);
-            margin-bottom: 10px;
+            font-size: 1.8rem; /* Reduced font size */
+            color: var(--coffee-dark);
+            margin-bottom: 5px; /* Reduced margin */
         }
 
         .login-card p {
-            font-size: 0.95rem; /* Decreased font size */
-            color: var(--text-light);
-            margin-bottom: 20px;
+            font-size: 0.95rem; /* Reduced font size */
+            color: var(--text-color-light);
+            margin-bottom: 15px; /* Reduced margin */
         }
 
         .login-form {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px; /* Reduced gap */
         }
 
         .login-input {
             width: 100%;
-            padding: 10px 12px; /* Decreased padding */
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            font-size: 0.95rem; /* Decreased font size */
-            color: var(--text-dark);
+            padding: 10px 12px; /* Reduced padding */
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem; /* Reduced font size */
+            color: var(--text-color-dark);
             background-color: var(--bg-light);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .login-input:focus {
             outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.25);
+            border-color: var(--coffee-light);
+            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
         }
 
         .login-button {
-            background: var(--primary-blue);
+            background: var(--coffee-light);
             color: var(--white);
-            padding: 10px 18px; /* Decreased padding */
-            border-radius: var(--border-radius-sm);
+            padding: 10px 15px; /* Reduced padding */
+            border-radius: 8px;
             border: none;
-            font-size: 1rem; /* Decreased font size */
+            font-size: 1rem; /* Reduced font size */
             font-weight: 600;
             cursor: pointer;
             transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .login-button:hover {
-            background: var(--primary-blue-dark);
+            background: var(--coffee-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(66, 153, 225, 0.25);
+            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25);
         }
 
         .login-error-message {
-            color: #E53E3E;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            min-height: 1.2em;
+            color: var(--primary-red);
+            font-size: 0.85rem; /* Reduced font size */
+            margin-top: 8px; /* Reduced margin */
+            min-height: 1.2em; /* Reserve space to prevent layout shift */
         }
 
-        /* Styles for the new modal/overlay for CRM login */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 15px;
+            }
+            .banner {
+                padding: 25px 30px; /* Slightly more compact */
+                gap: 20px;
+            }
+            .banner h1 {
+                font-size: 3rem;
+            }
+            .banner .subtitle {
+                font-size: 1.1rem;
+            }
+            .company-logo {
+                max-width: 80px; /* Adjust size for medium screens */
+            }
+            .home-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+            .main-card-icon {
+                font-size: 3rem;
+            }
+            .main-card-title {
+                font-size: 1.3rem;
+            }
+            .login-card {
+                padding: 25px; /* Adjusted padding */
+                max-width: 320px; /* Further reduced max-width */
+            }
+            .login-card .company-logo-login {
+                max-width: 60px; /* Smaller logo on medium screens */
+            }
+            .login-card h2 {
+                font-size: 1.6rem; /* Adjusted font size */
+            }
+            .login-card p {
+                font-size: 0.9rem; /* Adjusted font size */
+            }
+            .login-input, .login-button {
+                font-size: 0.9rem; /* Adjusted font size */
+            }
         }
 
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: var(--white);
-            padding: 30px;
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-lg);
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-            transform: translateY(-20px);
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .modal-overlay.show .modal-content {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .modal-content h3 {
-            font-size: 1.6rem;
-            color: var(--primary-blue-dark);
-            margin-bottom: 20px;
-        }
-
-        .modal-content .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .modal-content label {
-            display: block;
-            font-size: 0.9rem;
-            color: var(--text-dark);
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .modal-content select,
-        .modal-content input[type="password"] {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-sm);
-            font-size: 0.95rem;
-            color: var(--text-dark);
-            background-color: var(--bg-light);
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .modal-content select:focus,
-        .modal-content input[type="password"]:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.25);
-        }
-
-        .modal-content .modal-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .modal-content .modal-button {
-            padding: 10px 20px;
-            border-radius: var(--border-radius-sm);
-            border: none;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.25s ease, transform 0.25s ease;
-        }
-
-        .modal-content .modal-button.primary {
-            background: var(--primary-blue);
-            color: var(--white);
-        }
-
-        .modal-content .modal-button.primary:hover {
-            background: var(--primary-blue-dark);
-            transform: translateY(-1px);
-        }
-
-        .modal-content .modal-button.secondary {
-            background: var(--border-color);
-            color: var(--text-dark);
-        }
-
-        .modal-content .modal-button.secondary:hover {
-            background: #CBD5E0;
-            transform: translateY(-1px);
-        }
-
-        .modal-error-message {
-            color: #E53E3E;
-            font-size: 0.85rem;
-            margin-top: 10px;
-            min-height: 1.2em;
-        }
-
-        /* Responsive adjustments for modal */
         @media (max-width: 768px) {
-            .modal-content {
+            .container {
+                padding: 10px;
+            }
+            .header {
+                flex-direction: row; /* Keep buttons in a row */
+                justify-content: space-between; /* Space out buttons */
+                padding: 8px 15px; /* Slimmer header on mobile */
+            }
+            .admin-tab, .back-button, .logout-button {
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+            .banner {
+                /* Maintain row direction for logo and text */
+                padding: 20px 15px; /* Adjust padding for mobile row layout */
+                margin-bottom: 20px;
+                gap: 15px; /* Adjust gap for mobile row layout */
+            }
+            .company-logo {
+                max-width: 60px; /* Even smaller on mobile to allow space for text */
+            }
+            .banner h1 {
+                font-size: 2rem; /* Reduced font size for mobile row layout */
+                margin-bottom: 4px; /* Reduced margin */
+            }
+            .banner .subtitle {
+                font-size: 0.9rem; /* Reduced font size for mobile */
+            }
+            .home-grid {
+                grid-template-columns: 1fr; /* Single column on very small screens */
+                gap: 15px;
+            }
+            .main-card {
+                min-height: 150px;
                 padding: 25px;
             }
-            .modal-content h3 {
-                font-size: 1.4rem;
+            .main-card-icon {
+                font-size: 2.8rem;
             }
-            .modal-content select,
-            .modal-content input[type="password"],
-            .modal-content .modal-button {
-                font-size: 0.9rem;
-                padding: 8px 15px;
+            .main-card-title {
+                font-size: 1.2rem;
+            }
+            .full-page-view {
+                height: calc(100vh - 90px); /* Adjust height for mobile header */
+            }
+            .login-card {
+                padding: 20px; /* Further adjusted padding */
+                max-width: 280px; /* Further reduced max-width for mobile */
+            }
+            .login-card .company-logo-login {
+                max-width: 50px; /* Even smaller logo on mobile */
+                margin-bottom: 10px;
+            }
+            .login-card h2 {
+                font-size: 1.5rem; /* Adjusted font size */
+            }
+            .login-card p {
+                font-size: 0.85rem;
+            }
+            .login-input, .login-button {
+                font-size: 0.85rem; /* Adjusted font size */
+                padding: 8px 10px; /* Adjusted padding */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .banner {
+                padding: 15px 10px;
+                gap: 10px;
+            }
+            .company-logo {
+                max-width: 50px;
+            }
+            .banner h1 {
+                font-size: 1.6rem;
+            }
+            .banner .subtitle {
+                font-size: 0.8rem;
+            }
+            .admin-tab, .back-button, .logout-button {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            .login-card {
+                padding: 15px; /* Smallest padding */
+                max-width: 250px; /* Smallest max-width */
+            }
+            .login-card .company-logo-login {
+                max-width: 40px; /* Smallest logo */
+                margin-bottom: 8px;
+            }
+            .login-card h2 {
+                font-size: 1.3rem;
+            }
+            .login-card p {
+                font-size: 0.8rem;
+            }
+            .login-input, .login-button {
+                font-size: 0.8rem;
+                padding: 6px 8px;
+            }
+        }
+
+        /* User Info Card Styling */
+        .user-info-card {
+            display: flex; /* Use flexbox for horizontal alignment */
+            flex-direction: column; /* Stack name and title vertically */
+            align-items: flex-start; /* Align text to the left */
+            margin-right: auto; /* Pushes the card to the left, next to back button */
+            padding: 5px 10px;
+            border-radius: 8px;
+            background-color: var(--bg-light); /* Light background for contrast */
+            box-shadow: var(--shadow-sm);
+            font-size: 0.85rem; /* Small font size */
+            color: var(--text-color-dark);
+            gap: 2px; /* Small gap between lines */
+            transition: all 0.2s ease;
+        }
+
+        .user-info-card.hidden {
+            display: none !important;
+        }
+
+        .user-info-text {
+            white-space: nowrap; /* Prevent text from wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Add ellipsis if text overflows */
+            max-width: 150px; /* Limit width for small display */
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--coffee-dark);
+        }
+
+        .user-title {
+            font-weight: 400;
+            color: var(--text-color-light);
+            font-size: 0.75rem; /* Even smaller for title */
+        }
+
+        .user-area {
+            font-weight: 500;
+            color: #4CAF50; /* Green for area */
+            font-size: 0.75rem; /* Even smaller for area */
+        }
+
+        /* Adjust header to accommodate the new card */
+        .header {
+            justify-content: space-between; /* Distribute items with space between them */
+            align-items: center;
+        }
+
+        /* Ensure back button still aligns left if user info card is hidden */
+        .back-button {
+            margin-right: 15px; /* Add some space if user info card is not there */
+        }
+
+        /* Adjust media queries for the new card */
+        @media (max-width: 768px) {
+            .user-info-card {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+                max-width: 100px; /* Further limit width on smaller screens */
+            }
+            .user-title, .user-area {
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-info-card {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+                max-width: 80px; /* Even smaller on very small screens */
+            }
+            .user-title, .user-area {
+                font-size: 0.6rem;
             }
         }
     </style>
@@ -725,33 +803,27 @@
 <body>
     <div class="container">
         <div class="header">
-            <!-- Back button, initially hidden - Now positioned on the far left -->
+            <!-- Back button, initially hidden -->
             <button id="backButton" class="back-button hidden">
                 &#x2190; Back to Home
             </button>
-            <!-- User Info Card - Now positioned after the back button on the left -->
+            <!-- User Info Card - NEWLY ADDED -->
             <div id="userInfoCard" class="user-info-card hidden">
-                <span class="user-icon">👤</span>
-                <div class="user-details">
-                    <span id="userName" class="user-name"></span>
-                    <span id="userTitle" class="user-title"></span>
-                    <span id="userArea" class="user-area"></span>
-                </div>
+                <span id="displayUsername" class="user-info-text user-name"></span>
+                <span id="displayUserTitle" class="user-info-text user-title"></span>
+                <span id="displayUserArea" class="user-info-text user-area hidden"></span>
             </div>
-            <!-- Button group on the right (now only logout) -->
-            <div class="header-buttons">
-                <!-- Logout button, initially hidden -->
-                <button id="logoutButton" class="logout-button hidden">
-                    Logout
-                </button>
-            </div>
+            <!-- Logout button, initially hidden -->
+            <button id="logoutButton" class="logout-button hidden">
+                Logout
+            </button>
         </div>
 
-        <!-- Login View: This section will display the main login form -->
+        <!-- Login View: This section will display the login form -->
         <div id="loginView" class="login-view">
             <div class="login-card">
                 <!-- Company Logo for Login Card -->
-                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo-login" onerror="this.onerror=null;this.src='https://placehold.co/70x70/4299E1/FFFFFF?text=Logo';">
+                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo-login" onerror="this.onerror=null;this.src='https://placehold.co/70x70/A0522D/FFFFFF?text=Logo';">
                 <h2>Paxton LLC CRM</h2>
                 <p>Please log in to access the system.</p>
                 <form id="loginForm" class="login-form">
@@ -768,7 +840,9 @@
             <div class="banner">
                 <div class="status-indicator"></div>
                 <!-- Company Logo moved to the left and placed before text content -->
-                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/90x90/4299E1/FFFFFF?text=Logo';">
+                <!-- The logo image source has been corrected to a standard URL format. -->
+                <!-- The onerror attribute provides a fallback placeholder image if the main image fails to load. -->
+                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/90x90/A0522D/FFFFFF?text=Logo';">
                 <div class="banner-text-content">
                     <h1>PAXTON LLC CRM</h1>
                     <div class="subtitle">Medical Team Affairs</div>
@@ -788,19 +862,19 @@
                     <div class="main-card-title">Dashboard</div>
                     <div class="main-card-subtitle">View key performance indicators and analytics.</div>
                 </div>
-                <!-- UPA Codes Card -->
+                <!-- UPA Codes Card - This card is fully clickable and functions like the CRM card. -->
                 <div class="main-card" data-page="upa-codes">
                     <div class="main-card-icon">🏥</div>
                     <div class="main-card-title">UPA Codes</div>
                     <div class="main-card-subtitle">Access UPA Codes and affairs.</div>
                 </div>
-                <!-- Price List Card -->
+                <!-- Price List Card - This card is fully clickable and functions like the CRM card. -->
                 <div class="main-card" data-page="price-list">
                     <div class="main-card-icon">💲</div>
                     <div class="main-card-title">Price List</div>
                     <div class="main-card-subtitle">products pricing information.</div>
                 </div>
-                <!-- Admin Panel Card -->
+                <!-- Admin Panel Card - NEWLY ADDED -->
                 <div class="main-card" data-page="admin">
                     <div class="main-card-icon">⚙️</div>
                     <div class="main-card-title">Admin Panel</div>
@@ -900,7 +974,7 @@
         <div id="adminView" class="full-page-view hidden">
             <div class="loading" id="loadingAdmin">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading Admin...</div>
+                <div class="loading-text">Loading Admin Panel...</div>
             </div>
             <div class="error-state" id="errorAdmin">
                 <div class="error-icon">⚠️</div>
@@ -918,28 +992,6 @@
 
     </div>
 
-    <!-- CRM Medical Rep Login Modal -->
-    <div id="crmMedRepLoginModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h3>Medical Representative Login</h3>
-            <div class="form-group">
-                <label for="medRepSelect">Select Medical Representative:</label>
-                <select id="medRepSelect">
-                    <!-- Options will be dynamically loaded here -->
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="medRepPassword">Password:</label>
-                <input type="password" id="medRepPassword" placeholder="Enter password">
-            </div>
-            <div class="modal-error-message" id="medRepLoginErrorMessage"></div>
-            <div class="modal-buttons">
-                <button class="modal-button secondary" id="cancelMedRepLogin">Cancel</button>
-                <button class="modal-button primary" id="submitMedRepLogin">Login</button>
-            </div>
-        </div>
-    </div>
-
     <script type="module">
         // Import Supabase client
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -949,35 +1001,30 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Store the ID of the currently active full-page view
+        // Global state variables for login status and user information
         let currentActiveViewId = null;
-        let userData = null; // Stores the logged-in user's data (including title)
-        let allMedicalReps = []; // To store the list of medical representatives
+        let isLoggedIn = false; // Tracks user login status
+        let currentUserRole = null; // Stores the role of the logged-in user
+        let currentUsername = null; // Stores the username of the logged-in user
+        let currentUserArea = null; // Stores the area of the logged-in Medical Representative
 
-        // Page configurations
-        const pageConfig = {
-            'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
-            'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
-            'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
-            'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
-            'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
-        };
+        // Google Sheet URL for Medical Representative areas
+        const MEDICAL_REP_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
         /**
          * Shows the login view and hides all other views.
          */
         function showLogin() {
             console.log('Showing login view');
-            sessionStorage.removeItem('isLoggedIn'); // Clear login state
-            sessionStorage.removeItem('userData'); // Clear user data
-            sessionStorage.removeItem('lastActivePage'); // Clear last active page
-            userData = null; // Also clear in-memory data
+            isLoggedIn = false;
+            currentUserRole = null; // Clear user role on logout/show login
+            currentUsername = null; // Clear username on logout/show login
+            currentUserArea = null; // Clear user area on logout/show login
 
             document.getElementById('loginView').classList.remove('hidden');
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('backButton').classList.add('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
-            document.getElementById('userInfoCard').classList.add('hidden'); // Hide user info card
 
             // Hide any active full-page view
             if (currentActiveViewId) {
@@ -996,30 +1043,37 @@
             document.getElementById('loginErrorMessage').textContent = '';
             document.getElementById('usernameInput').value = '';
             document.getElementById('passwordInput').value = '';
-            hideMedRepLoginModal(); // Ensure modal is hidden on logout
+
+            // Clear sessionStorage related to specific page logins
+            sessionStorage.removeItem('bypassDashboardLogin');
+            sessionStorage.removeItem('crmUserData');
+
+            // Update user info card (to hide it and clear content)
+            updateUserInfoCard();
+            // Reset card states on logout/show login
+            resetHomeCards();
         }
 
         /**
          * Shows the home view and hides any active full-page view.
-         * Also updates card visibility based on user role and displays user info.
+         * Only proceeds if the user is logged in.
          */
         function showHome() {
-            if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+            if (!isLoggedIn) {
                 showLogin(); // Redirect to login if not logged in
                 return;
             }
             console.log('Showing home view');
             const homeView = document.getElementById('homeView');
-            const loginView = document.getElementById('loginView');
+            const loginView = document.getElementById('loginView'); // Get login view
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
-            const userInfoCard = document.getElementById('userInfoCard');
             
             if (homeView) {
                 homeView.classList.remove('hidden');
             }
             
-            if (loginView) {
+            if (loginView) { // Hide login view when showing home
                 loginView.classList.add('hidden');
             }
 
@@ -1027,12 +1081,9 @@
                 backButton.classList.add('hidden');
             }
 
+            // Show logout button when returning to home view
             if (logoutButton) {
                 logoutButton.classList.remove('hidden');
-            }
-
-            if (userInfoCard) {
-                userInfoCard.classList.remove('hidden'); // Show user info card
             }
 
             // Hide the currently active full-page view, if any
@@ -1040,7 +1091,9 @@
                 const activeView = document.getElementById(currentActiveViewId);
                 if (activeView) {
                     activeView.classList.remove('active');
+                    // Delay adding 'hidden' to allow CSS transition to complete
                     setTimeout(() => activeView.classList.add('hidden'), 300);
+                    // Also hide the iframe and show demo content if it was an iframe view
                     const iframe = activeView.querySelector('iframe');
                     const demoContent = activeView.querySelector('.demo-content');
                     if (iframe) iframe.classList.add('hidden');
@@ -1048,52 +1101,39 @@
                 }
                 currentActiveViewId = null;
             }
-            updateNavigationAccess(); // Update card visibility based on role
-            updateUserInfoCard(); // Update user info display
-            hideMedRepLoginModal(); // Ensure modal is hidden when returning to home
+
+            // Update user info card
+            updateUserInfoCard();
+            // Apply role-based card restrictions when showing home
+            applyRoleBasedCardRestrictions();
         }
 
         /**
-         * Updates the visibility and enabled state of navigation cards based on the user's role.
+         * Fetches the Medical Representative's area from the Google Sheet.
+         * @param {string} username - The username of the Medical Representative.
+         * @returns {Promise<string|null>} The area string or null if not found/error.
          */
-        function updateNavigationAccess() {
-            // Normalize userTitle to match the lowercase, hyphenated format used in switch cases
-            const userTitle = userData ? userData.title.toLowerCase().replace(/\s/g, '-') : null;
-            const mainCards = document.querySelectorAll('.main-card');
-
-            mainCards.forEach(card => {
-                const page = card.dataset.page;
-                let isDisabled = false;
-
-                switch (userTitle) {
-                    case 'medical-representative': // Updated to match normalized title
-                        // Medical Reps can only access CRM, UPA Codes, Price List
-                        if (page === 'dashboard' || page === 'admin') {
-                            isDisabled = true;
-                        }
-                        break;
-                    case 'district-manager': // Updated to match normalized title
-                        // District Managers can access everything except Admin Panel
-                        if (page === 'admin') {
-                            isDisabled = true;
-                        }
-                        break;
-                    case 'admin':
-                        // Admins can access everything
-                        isDisabled = false;
-                        break;
-                    default:
-                        // If no user or unknown role, disable all except login (handled by showLogin)
-                        isDisabled = true;
-                        break;
+        async function fetchUserArea(username) {
+            try {
+                const response = await fetch(MEDICAL_REP_SHEET_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                const csvText = await response.text();
+                const rows = csvText.split('\n').map(row => row.trim()).filter(row => row.length > 0);
 
-                if (isDisabled) {
-                    card.classList.add('disabled');
-                } else {
-                    card.classList.remove('disabled');
+                // Assuming username is in column A (index 0) and Area is in column E (index 4)
+                for (const row of rows) {
+                    const columns = row.split(','); // Simple split, might need more robust CSV parsing for complex cases
+                    if (columns.length > 4 && columns[0].trim() === username) {
+                        return columns[4].trim(); // Column E is index 4
+                    }
                 }
-            });
+                return null; // Username not found
+            } catch (error) {
+                console.error('Error fetching or parsing user area:', error);
+                return null;
+            }
         }
 
         /**
@@ -1101,170 +1141,112 @@
          */
         function updateUserInfoCard() {
             const userInfoCard = document.getElementById('userInfoCard');
-            const userNameSpan = document.getElementById('userName');
-            const userTitleSpan = document.getElementById('userTitle');
-            const userAreaSpan = document.getElementById('userArea');
+            const displayUsername = document.getElementById('displayUsername');
+            const displayUserTitle = document.getElementById('displayUserTitle');
+            const displayUserArea = document.getElementById('displayUserArea');
 
-            if (userData) {
-                userNameSpan.textContent = userData.name || 'N/A';
-                userTitleSpan.textContent = userData.title ? userData.title.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'N/A'; // Capitalize each word
-                
-                // Only display area if it exists and is not empty/N/A
-                if (userData.area && userData.area.trim() !== '' && userData.area.trim().toLowerCase() !== 'n/a') {
-                    userAreaSpan.textContent = userData.area;
-                    userAreaSpan.classList.remove('hidden');
-                } else {
-                    userAreaSpan.classList.add('hidden');
-                }
-                
+            if (isLoggedIn && currentUsername && currentUserRole) {
                 userInfoCard.classList.remove('hidden');
+                displayUsername.textContent = currentUsername;
+                displayUserTitle.textContent = currentUserRole;
+
+                if (currentUserRole === 'Medical Representative' && currentUserArea) {
+                    displayUserArea.textContent = `Area: ${currentUserArea}`;
+                    displayUserArea.classList.remove('hidden');
+                } else {
+                    displayUserArea.classList.add('hidden');
+                    displayUserArea.textContent = '';
+                }
             } else {
                 userInfoCard.classList.add('hidden');
+                displayUsername.textContent = '';
+                displayUserTitle.textContent = '';
+                displayUserArea.textContent = '';
+                displayUserArea.classList.add('hidden');
             }
         }
 
         /**
-         * Shows the Medical Rep Login Modal.
+         * Resets all main cards to their default (enabled, visible) state.
          */
-        function showMedRepLoginModal() {
-            document.getElementById('crmMedRepLoginModal').classList.add('show');
-            document.getElementById('medRepLoginErrorMessage').textContent = ''; // Clear any previous errors
-            document.getElementById('medRepPassword').value = ''; // Clear password field
-            populateMedicalRepDropdown();
-        }
-
-        /**
-         * Hides the Medical Rep Login Modal.
-         */
-        function hideMedRepLoginModal() {
-            document.getElementById('crmMedRepLoginModal').classList.remove('show');
-        }
-
-        /**
-         * Populates the medical representative dropdown from the fetched allMedicalReps array.
-         */
-        function populateMedicalRepDropdown() {
-            const selectElement = document.getElementById('medRepSelect');
-            selectElement.innerHTML = '<option value="">Select Medical Rep</option>'; // Default option
-            allMedicalReps.forEach(rep => {
-                const option = document.createElement('option');
-                option.value = rep.username;
-                option.textContent = rep.name;
-                selectElement.appendChild(option);
+        function resetHomeCards() {
+            document.querySelectorAll('.main-card').forEach(card => {
+                card.classList.remove('disabled');
+                card.classList.remove('hidden');
             });
         }
 
         /**
-         * Handles the submission of the Medical Rep Login Modal.
-         * @param {Event} event - The form submission event.
+         * Applies role-based restrictions to the main navigation cards.
          */
-        async function handleMedRepLogin(event) {
-            event.preventDefault(); // Prevent default form submission
-            const selectedUsername = document.getElementById('medRepSelect').value;
-            const password = document.getElementById('medRepPassword').value;
-            const errorMessageElement = document.getElementById('medRepLoginErrorMessage');
-            errorMessageElement.textContent = '';
+        function applyRoleBasedCardRestrictions() {
+            // Always reset first to ensure correct state if roles change or user logs out/in
+            resetHomeCards();
 
-            if (!selectedUsername || !password) {
-                errorMessageElement.textContent = 'Please select a medical representative and enter a password.';
-                return;
-            }
+            const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
+            const adminCard = document.querySelector('.main-card[data-page="admin"]');
 
-            try {
-                // Find the selected medical rep from the fetched list
-                const selectedRep = allMedicalReps.find(rep => rep.username === selectedUsername);
-
-                if (selectedRep && selectedRep.password === password) {
-                    console.log(`Medical Rep Login successful for: ${selectedUsername}`);
-                    // Temporarily set userData to the selected medical rep for CRM access
-                    // This is a simplified approach; in a real app, you might re-authenticate or generate a temporary token.
-                    const tempUserData = {
-                        name: selectedRep.name,
-                        title: 'medical-representative', // Force this role for CRM access
-                        area: selectedRep.area,
-                        districtManager: selectedRep.districtManager,
-                        governorate: selectedRep.governorate
-                    };
-                    // Store this temporary user data in session storage for the CRM page to pick up
-                    sessionStorage.setItem('isLoggedIn', 'true'); // Keep main session logged in
-                    sessionStorage.setItem('userData', JSON.stringify(tempUserData)); // Overwrite with temp data
-                    sessionStorage.setItem('lastActivePage', 'crm'); // Ensure CRM page is loaded
-
-                    hideMedRepLoginModal();
-                    loadPage('crm'); // Load the CRM page
-                } else {
-                    errorMessageElement.textContent = 'Invalid medical representative or password.';
+            if (currentUserRole === 'Medical Representative') {
+                if (dashboardCard) {
+                    dashboardCard.classList.add('disabled');
                 }
-            } catch (error) {
-                console.error('Error during medical rep login:', error);
-                errorMessageElement.textContent = 'An error occurred during login. Please try again.';
+                if (adminCard) {
+                    adminCard.classList.add('hidden');
+                }
+            } else if (currentUserRole === 'District Manager') {
+                if (adminCard) {
+                    adminCard.classList.add('hidden');
+                }
             }
+            // For 'admin' role or any other role, cards remain enabled/visible by default due to resetHomeCards()
         }
-
 
         /**
          * Loads a specific page view into an iframe.
-         * Only proceeds if the user is logged in and has permission.
+         * Only proceeds if the user is logged in.
          * @param {string} page - The page identifier (e.g., 'crm', 'dashboard').
          */
-        async function loadPage(page) {
-            if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+        function loadPage(page) {
+            if (!isLoggedIn) {
                 showLogin(); // Redirect to login if not logged in
                 return;
             }
+            console.log(`Attempting to load page: ${page}`);
+            
+            // Configuration for each page, including view ID, display name, and file name
+            const pageConfig = {
+                'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
+                'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
+                'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
+                'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
+                'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
+            };
 
-            // Normalize userTitle before permission check
-            const userTitle = userData ? userData.title.toLowerCase().replace(/\s/g, '-') : null;
             const config = pageConfig[page];
-
             if (!config) {
                 console.error(`Error: Unknown page identifier: ${page}`);
                 return;
             }
 
-            // Special handling for CRM, Admin, and Dashboard access
-            if (page === 'crm' && userTitle !== 'medical-representative') {
-                showMedRepLoginModal();
-                return; // Stop loading the page directly
-            } else if (page === 'admin' && userTitle !== 'admin') {
-                const errorMessageElement = document.getElementById('loginErrorMessage');
-                errorMessageElement.textContent = `Access Denied: Only Admins can access the ${config.displayName}.`;
-                errorMessageElement.style.display = 'block';
-                setTimeout(() => {
-                    errorMessageElement.textContent = '';
-                    errorMessageElement.style.display = 'none';
-                }, 5000);
-                console.warn(`Access Denied: User role "${userData.title}" attempted to access "${page}".`);
-                return;
-            } else if (page === 'dashboard' && !['district-manager', 'admin'].includes(userTitle)) {
-                const errorMessageElement = document.getElementById('loginErrorMessage');
-                errorMessageElement.textContent = `Access Denied: Only District Managers and Admins can access the ${config.displayName}.`;
-                errorMessageElement.style.display = 'block';
-                setTimeout(() => {
-                    errorMessageElement.textContent = '';
-                    errorMessageElement.style.display = 'none';
-                }, 5000);
-                console.warn(`Access Denied: User role "${userData.title}" attempted to access "${page}".`);
-                return;
-            }
-
-            console.log(`Attempting to load page: ${page}`);
-            
             const { viewId, displayName, fileName } = config;
 
+            // Get references to main UI elements
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
-            const userInfoCard = document.getElementById('userInfoCard');
+            const userInfoCard = document.getElementById('userInfoCard'); // Get user info card
             const targetView = document.getElementById(viewId);
 
+            // Initialize variables for elements inside targetView
             let loadingOverlay = null;
             let errorState = null;
             let iframeContainer = null;
             let iframe = null;
             let demoContent = null;
 
+            // Ensure targetView exists before querying its children
             if (targetView) {
+                // Using querySelector with classes as they are unique within each full-page-view
                 loadingOverlay = targetView.querySelector('.loading'); 
                 errorState = targetView.querySelector('.error-state'); 
                 iframeContainer = targetView.querySelector('.iframe-container-fpv');
@@ -1274,179 +1256,103 @@
                 }
             }
 
+            // Basic validation to ensure all required elements exist
             if (!homeView || !backButton || !logoutButton || !userInfoCard || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
-                console.error('Error: One or more required DOM elements not found for page loading.');
-                return;
+                console.error('Error: One or more required DOM elements not found for page loading. Debug details:');
+                console.error('  homeView:', homeView);
+                console.error('  backButton:', backButton);
+                console.error('  logoutButton:', logoutButton);
+                console.error('  userInfoCard:', userInfoCard); // Log user info card
+                console.error('  targetView:', targetView);
+                console.error('  loadingOverlay:', loadingOverlay);
+                console.error('  errorState:', errorState);
+                console.error('  iframeContainer:', iframeContainer);
+                console.error('  iframe:', iframe);
+                console.error('  demoContent:', demoContent);
+                return; // Exit if elements are missing
             }
+
+            // --- Session Management Logic based on user role and page clicked ---
+            // Clear previous session storage values to prevent unintended auto-logins
+            sessionStorage.removeItem('bypassDashboardLogin');
+            sessionStorage.removeItem('crmUserData');
+
+            if (page === 'dashboard') {
+                // If Dashboard is clicked and user is District Manager or admin, bypass login
+                if (currentUserRole === 'District Manager' || currentUserRole === 'admin') {
+                    sessionStorage.setItem('bypassDashboardLogin', 'true');
+                    console.log('Dashboard: Bypass login enabled for', currentUserRole);
+                } else {
+                    console.log('Dashboard: No bypass login for', currentUserRole);
+                }
+            } else if (page === 'crm') {
+                // If CRM is clicked and user is Medical Representative, pass session data
+                if (currentUserRole === 'Medical Representative') {
+                    // Pass username or other relevant session data to CRM page
+                    sessionStorage.setItem('crmUserData', JSON.stringify({ username: currentUsername, area: currentUserArea }));
+                    console.log('CRM: User data passed for Medical Representative:', currentUsername, 'Area:', currentUserArea);
+                } else {
+                    // For other roles, do NOT use automatic login session for CRM
+                    console.log('CRM: No automatic login session for', currentUserRole);
+                }
+            }
+            // --- End Session Management Logic ---
 
             console.log(`All required DOM elements found for page: ${page}. Proceeding to load.`);
 
+            // Hide the home view, show the back button, and hide the logout button
             homeView.classList.add('hidden');
-            backButton.classList.remove('hidden');
-            logoutButton.classList.add('hidden');
-            userInfoCard.classList.add('hidden'); // Hide user info card when a specific page is loaded
+            backButton.classList.remove('hidden'); // This line makes the back button visible
+            logoutButton.classList.add('hidden'); // Hide logout button when navigating to a page
+            userInfoCard.classList.add('hidden'); // Hide user info card when navigating away from home
             console.log(`Button visibility set for page: ${page}.`);
 
-            // Store the current page in sessionStorage
-            sessionStorage.setItem('lastActivePage', page);
 
+            // If there's a currently active full-page view and it's different from the target, hide it
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
+                    // Delay adding 'hidden' to allow CSS transition to complete
                     setTimeout(() => prevActiveView.classList.add('hidden'), 300);
                 }
             }
 
+            // Set the new active view ID
             currentActiveViewId = viewId;
 
+            // Show the target full-page view with a slight delay for transition effect
             targetView.classList.remove('hidden');
             setTimeout(() => targetView.classList.add('active'), 10);
 
+            // Show the loading spinner and hide any previous error state
             loadingOverlay.classList.add('show');
             errorState.classList.remove('show');
 
+            // Hide the demo content and show the iframe before loading new content
             demoContent.classList.add('hidden');
             iframe.classList.remove('hidden');
 
-            // Set the iframe's source. This will trigger a reload if already loaded.
+            // Set the iframe's source and attach event listeners for loading status
             iframe.src = fileName;
-
-            // Wait for the iframe to signal it's ready before sending data
-            const messageListener = (event) => {
-                // Ensure the message is from the correct iframe and type
-                if (event.data && event.data.type === 'crmIframeReady' && event.source === iframe.contentWindow) {
-                    console.log(`${displayName} iframe at ${fileName} is ready. Sending user data.`);
-                    // Determine which user data to send based on the page and current user's role
-                    let dataToSend = userData; // Default to current logged-in user's data
-
-                    if (page === 'crm' && userTitle !== 'medical-representative') {
-                        // If CRM is accessed via the medical rep modal, userData would have been temporarily set
-                        // We need to ensure the correct medical rep's data is sent to the CRM iframe
-                        dataToSend = JSON.parse(sessionStorage.getItem('userData')); // Get the potentially overwritten userData
-                    } else if ((page === 'admin' && userTitle === 'admin') || (page === 'dashboard' && ['district-manager', 'admin'].includes(userTitle))) {
-                        // For Admin/Dashboard, send the main logged-in user's data
-                        dataToSend = userData;
-                    }
-                    
-                    iframe.contentWindow.postMessage({ type: 'setUserData', userData: dataToSend }, '*');
-                    window.removeEventListener('message', messageListener); // Remove listener after sending
-                }
-            };
-            window.addEventListener('message', messageListener);
 
             iframe.onload = function() {
                 console.log(`${displayName} iframe loaded successfully from ${fileName}.`);
-                loadingOverlay.classList.remove('show');
-                errorState.classList.remove('show');
+                loadingOverlay.classList.remove('show'); // Hide spinner
+                errorState.classList.remove('show');     // Hide error
             };
 
             iframe.onerror = function() {
                 console.error(`Failed to load ${displayName} iframe from ${fileName}. Displaying demo content.`);
-                loadingOverlay.classList.remove('show');
-                errorState.classList.add('show');
-                demoContent.classList.remove('hidden');
-                iframe.classList.add('hidden');
+                loadingOverlay.classList.remove('show'); // Hide spinner
+                errorState.classList.add('show');        // Show error message
+                demoContent.classList.remove('hidden');  // Show demo content as fallback
+                iframe.classList.add('hidden');          // Hide the broken iframe
             };
         }
 
         /**
-         * Fetches medical representative data from Google Sheet.
-         * @param {string} username - The username to search for.
-         * @returns {Promise<Object|null>} The medical rep data or null if not found.
-         */
-        async function fetchMedicalRepData(username) {
-            const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
-            try {
-                console.log(`Attempting to fetch Google Sheet data for user: ${username}`);
-                const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) {
-                    console.error('Failed to fetch Google Sheet data. Status:', response.status, 'Status Text:', response.statusText);
-                    throw new Error('Failed to fetch Google Sheet data');
-                }
-                const csvText = await response.text();
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(',').map(h => h.trim());
-                
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const values = line.split(',').map(v => v.trim());
-                    const row = headers.reduce((obj, header, index) => {
-                        obj[header] = values[index] || '';
-                        return obj;
-                    }, {});
-
-                    // Assuming 'medical rep' is the username and 'password' is a column in your sheet
-                    // You would need to add a 'password' column to your Google Sheet for this to work
-                    if (row['medical rep'] === username) {
-                        console.log(`Found medical rep data for ${username}:`, row);
-                        return {
-                            username: row['medical rep'], // Add username for dropdown value
-                            name: row['medical rep'],
-                            area: row['area'], // Column E
-                            districtManager: row['District Manager'], // Column B
-                            governorate: row['Governorate'],
-                            password: row['password'] || '' // Assuming a 'password' column exists
-                        };
-                    }
-                }
-                console.warn(`Medical rep data not found in Google Sheet for username: ${username}`);
-                return null; // User not found in Google Sheet
-            } catch (error) {
-                console.error('Error fetching medical rep data from Google Sheet:', error);
-                return null;
-            }
-        }
-
-        /**
-         * Fetches all medical representatives for the dropdown.
-         */
-        async function fetchAllMedicalReps() {
-            const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
-            try {
-                console.log('Fetching all medical representatives from Google Sheet...');
-                const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) {
-                    console.error('Failed to fetch all medical rep data. Status:', response.status, 'Status Text:', response.statusText);
-                    return [];
-                }
-                const csvText = await response.text();
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(',').map(h => h.trim());
-                const reps = [];
-                
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const values = line.split(',').map(v => v.trim());
-                    const row = headers.reduce((obj, header, index) => {
-                        obj[header] = values[index] || '';
-                        return obj;
-                    }, {});
-
-                    if (row['medical rep']) {
-                        reps.push({
-                            username: row['medical rep'],
-                            name: row['medical rep'],
-                            area: row['area'],
-                            districtManager: row['District Manager'],
-                            governorate: row['Governorate'],
-                            password: row['password'] || '' // Assuming a 'password' column exists
-                        });
-                    }
-                }
-                console.log('Fetched medical representatives:', reps);
-                return reps;
-            } catch (error) {
-                console.error('Error fetching all medical rep data:', error);
-                return [];
-            }
-        }
-
-
-        /**
-         * Handles user login by querying Supabase and fetching medical rep data.
+         * Handles user login by querying Supabase.
          * @param {Event} event - The form submission event.
          */
         async function handleLogin(event) {
@@ -1463,80 +1369,50 @@
             }
 
             try {
-                console.log(`Attempting Supabase login for username: ${username}`);
                 // Query the 'users' table to find a matching username and password
+                // NOTE: In a production environment, passwords should NEVER be stored or
+                // compared as plain text. Always use secure hashing (e.g., bcrypt)
+                // and Supabase's built-in authentication for better security.
                 const { data, error } = await supabase
                     .from('users')
                     .select('*')
                     .eq('username', username)
-                    .eq('password', password);
+                    .eq('password', password); // Direct comparison for demo purposes
 
                 if (error) {
-                    console.error('Supabase query error during login:', error.message);
+                    console.error('Supabase query error:', error.message);
                     errorMessageElement.textContent = 'An error occurred during login. Please try again.';
                     return;
                 }
 
                 if (data && data.length > 0) {
                     // User found and credentials match
-                    const user = data[0];
-                    console.log('Supabase user found:', user);
-                    let fetchedGoogleSheetData = null; // Renamed for clarity
-                    
-                    // Normalize the title from Supabase for consistent comparison
-                    const normalizedTitle = user.title.toLowerCase().replace(/\s/g, '-');
-                    console.log(`Normalized user title: ${normalizedTitle}`);
+                    isLoggedIn = true;
+                    currentUserRole = data[0].title; // Store the user's role/title
+                    currentUsername = data[0].username; // Store the user's username
 
-                    // Initialize userData with basic info from Supabase
-                    userData = {
-                        username: user.username, // Store username for central login access
-                        password: user.password, // Store password for central login access
-                        name: user.username,
-                        title: normalizedTitle,
-                        area: 'N/A', // Default to N/A
-                        districtManager: 'N/A', // Default to N/A
-                        governorate: 'N/A' // Default to N/A
-                    };
-
-                    if (normalizedTitle === 'medical-representative' || normalizedTitle === 'district-manager') {
-                        // For medical reps and district managers, attempt to fetch data from Google Sheet
-                        fetchedGoogleSheetData = await fetchMedicalRepData(username);
-                        if (fetchedGoogleSheetData) {
-                            // If data is found, update userData with details from Google Sheet
-                            userData.name = fetchedGoogleSheetData.name;
-                            userData.area = fetchedGoogleSheetData.area;
-                            userData.districtManager = fetchedGoogleSheetData.districtManager;
-                            userData.governorate = fetchedGoogleSheetData.governorate;
-                            // Do NOT overwrite username/password from Supabase with Google Sheet data here
-                        } else {
-                            console.warn(`Google Sheet data missing for user: ${username} with title: ${user.title}. Proceeding with default values for area/manager.`);
+                    // If Medical Representative, fetch their area
+                    if (currentUserRole === 'Medical Representative') {
+                        currentUserArea = await fetchUserArea(currentUsername);
+                        if (!currentUserArea) {
+                            console.warn(`Area not found for Medical Representative: ${currentUsername}`);
                         }
-                    } else if (normalizedTitle === 'admin') {
-                        // For admin, basic data is already set above, no Google Sheet fetch needed
-                        console.log('Admin user logged in. Basic data used.');
                     } else {
-                        console.warn(`Unsupported user title found in Supabase: '${user.title}' for user: ${username}`);
-                        errorMessageElement.textContent = `Login failed: Unsupported user role '${user.title}'.`;
-                        sessionStorage.removeItem('isLoggedIn');
-                        sessionStorage.removeItem('userData');
-                        sessionStorage.removeItem('lastActivePage');
-                        return; // Exit if role is not supported
+                        currentUserArea = null; // Ensure area is null for other roles
                     }
 
-                    // Now that userData is fully populated (or defaulted), store it and proceed
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    sessionStorage.setItem('userData', JSON.stringify(userData));
-                    console.log('Login successful for user:', username, 'Role:', user.title, 'Full Data:', userData);
+                    console.log('Login successful for user:', currentUsername, 'Role:', currentUserRole, 'Area:', currentUserArea);
                     showHome(); // Redirect to home page
-                    
                 } else {
                     // No user found or credentials do not match
-                    console.warn(`Login failed: Invalid username or password for ${username}`);
                     errorMessageElement.textContent = 'Invalid username or password.';
                 }
             } catch (err) {
-                console.error('An unexpected error occurred during login process:', err);
+                console.error('Login process error:', err);
                 errorMessageElement.textContent = 'An unexpected error occurred. Please try again later.';
+            } finally {
+                // Ensure user info card is updated regardless of login success/failure
+                updateUserInfoCard();
             }
         }
 
@@ -1545,26 +1421,23 @@
          */
         function handleLogout() {
             console.log('User logged out.');
-            showLogin(); // Redirect to login page
+            showLogin(); // Redirect to login page, which also clears session data
         }
 
         // Initialize the application when DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing application');
             
-            // Fetch all medical reps once on load for the dropdown
-            allMedicalReps = await fetchAllMedicalReps();
-
             // Add click event listeners to all main navigation cards
             document.querySelectorAll('.main-card').forEach(card => {
                 card.addEventListener('click', function() {
                     const page = this.dataset.page; // Get the 'data-page' attribute
                     // Only load the page if it's not disabled and user is logged in
-                    if (sessionStorage.getItem('isLoggedIn') === 'true' && page && !this.classList.contains('disabled')) {
+                    if (isLoggedIn && page && !this.classList.contains('disabled')) {
                         loadPage(page);
                     } else if (this.classList.contains('disabled')) {
                         console.log(`Card for page "${page}" is disabled.`);
-                    } else {
+                    } else if (!isLoggedIn) {
                         showLogin(); // Prompt login if not logged in
                     }
                 });
@@ -1581,61 +1454,8 @@
             // Add event listener for the logout button
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
 
-            // Add event listeners for the CRM Medical Rep Login Modal
-            document.getElementById('submitMedRepLogin').addEventListener('click', handleMedRepLogin);
-            document.getElementById('cancelMedRepLogin').addEventListener('click', hideMedRepLoginModal);
-
-
-            // Check session storage on initial load
-            if (sessionStorage.getItem('isLoggedIn') === 'true') {
-                try {
-                    userData = JSON.parse(sessionStorage.getItem('userData'));
-                    if (!userData || !userData.name || !userData.title) {
-                        // If userData is missing or malformed, treat as not logged in
-                        console.warn('Malformed or missing user data in session storage. Redirecting to login.');
-                        showLogin();
-                        return; // Stop further execution
-                    }
-                    console.log('Session found. User is logged in.', userData);
-                    const lastActivePage = sessionStorage.getItem('lastActivePage');
-                    if (lastActivePage) {
-                        // Re-evaluate permissions on refresh before loading the page
-                        const userTitle = userData.title.toLowerCase().replace(/\s/g, '-');
-                        const config = pageConfig[lastActivePage];
-                        let hasPermission = false;
-
-                        switch (userTitle) {
-                            case 'medical-representative':
-                                hasPermission = (lastActivePage === 'crm' || lastActivePage === 'upa-codes' || lastActivePage === 'price-list');
-                                break;
-                            case 'district-manager':
-                                hasPermission = (lastActivePage !== 'admin');
-                                break;
-                            case 'admin':
-                                hasPermission = true;
-                                break;
-                            default:
-                                hasPermission = false;
-                                break;
-                        }
-
-                        if (hasPermission) {
-                            loadPage(lastActivePage);
-                        } else {
-                            console.warn(`Access Denied on refresh: User role "${userData.title}" does not have permission for "${lastActivePage}". Showing home.`);
-                            showHome(); // Redirect to home if no permission for last page
-                        }
-                    } else {
-                        showHome(); 
-                    }
-                } catch (e) {
-                    console.error('Error parsing user data from session storage:', e);
-                    showLogin(); // Fallback to login if parsing fails
-                }
-            } else {
-                console.log('No session found. Showing login view.');
-                showLogin(); // Otherwise, show login
-            }
+            // Initially show the login view
+            showLogin();
         });
     </script>
 </body>
