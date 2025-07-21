@@ -679,7 +679,7 @@
                 font-size: 0.85rem;
             }
             .login-input, .login-button {
-                font-size: 0.85rem; /* Adjusted font size */
+                font-size: 0.85rem;
                 padding: 8px 10px; /* Adjusted padding */
             }
         }
@@ -1007,6 +1007,7 @@
         let isLoggedIn = false; // Tracks user login status
         let currentUserRole = null; // Stores the role of the logged-in user
         let currentUsername = null; // Stores the username of the logged-in user
+        let currentUserPassword = null; // Stores the password of the logged-in user (NEW)
         let currentUserArea = null; // Stores the area of the logged-in Medical Representative
 
         // Google Sheet URL for Medical Representative areas
@@ -1020,6 +1021,7 @@
             isLoggedIn = false;
             currentUserRole = null; // Clear user role on logout/show login
             currentUsername = null; // Clear username on logout/show login
+            currentUserPassword = null; // Clear password on logout/show login (NEW)
             currentUserArea = null; // Clear user area on logout/show login
 
             // Clear session storage on explicit logout or when login view is shown
@@ -1052,6 +1054,7 @@
             // Clear sessionStorage related to specific page logins
             sessionStorage.removeItem('bypassDashboardLogin');
             sessionStorage.removeItem('crmUserData');
+            sessionStorage.removeItem('dashboardUserData'); // Clear dashboard data too (NEW)
 
             // Reset card states on logout/show login
             resetHomeCards();
@@ -1283,23 +1286,33 @@
 
             // --- Session Management Logic based on user role and page clicked ---
             // Clear previous session storage values to prevent unintended auto-logins
-            sessionStorage.removeItem('bypassDashboardLogin');
             sessionStorage.removeItem('crmUserData');
+            sessionStorage.removeItem('dashboardUserData'); // Clear dashboard data (NEW)
 
             if (page === 'dashboard') {
-                // If Dashboard is clicked and user is District Manager or admin, bypass login
+                // If Dashboard is clicked and user is District Manager or admin, pass login data
                 if (currentUserRole === 'District Manager' || currentUserRole === 'admin') {
-                    sessionStorage.setItem('bypassDashboardLogin', 'true');
-                    console.log('Dashboard: Bypass login enabled for', currentUserRole);
+                    // Pass username, password, and role for dashboard auto-login
+                    sessionStorage.setItem('dashboardUserData', JSON.stringify({
+                        username: currentUsername,
+                        password: currentUserPassword, // Pass password (NEW)
+                        role: currentUserRole
+                    }));
+                    console.log('Dashboard: User data passed for auto-login:', currentUsername, 'Role:', currentUserRole);
                 } else {
-                    console.log('Dashboard: No bypass login for', currentUserRole);
+                    console.log('Dashboard: No auto-login data for', currentUserRole);
                 }
             } else if (page === 'crm') {
-                // If CRM is clicked and user is Medical Representative, pass session data
+                // If CRM is clicked and user is Medical Representative, pass login data
                 if (currentUserRole === 'Medical Representative') {
-                    // Pass username or other relevant session data to CRM page
-                    sessionStorage.setItem('crmUserData', JSON.stringify({ username: currentUsername, area: currentUserArea }));
-                    console.log('CRM: User data passed for Medical Representative:', currentUsername, 'Area:', currentUserArea);
+                    // Pass username, password, title, and area for CRM auto-login
+                    sessionStorage.setItem('crmUserData', JSON.stringify({
+                        username: currentUsername,
+                        password: currentUserPassword, // Pass password (NEW)
+                        title: currentUserRole, // Use 'title' to match common user object properties
+                        area: currentUserArea
+                    }));
+                    console.log('CRM: User data passed for Medical Representative auto-login:', currentUsername, 'Area:', currentUserArea);
                 } else {
                     // For other roles, do NOT use automatic login session for CRM
                     console.log('CRM: No automatic login session for', currentUserRole);
@@ -1399,6 +1412,7 @@
                     isLoggedIn = true;
                     currentUserRole = data[0].title; // Store the user's role/title
                     currentUsername = data[0].username; // Store the user's username
+                    currentUserPassword = password; // Store the password (NEW) - SECURITY CONCERN: Storing plaintext password in sessionStorage is not recommended for production.
 
                     // If Medical Representative, fetch their area
                     if (currentUserRole === 'Medical Representative') {
@@ -1413,6 +1427,7 @@
                     // Store login data in sessionStorage for persistence across refreshes
                     sessionStorage.setItem('loggedInUser', JSON.stringify({
                         username: currentUsername,
+                        password: currentUserPassword, // Store password (NEW)
                         role: currentUserRole,
                         area: currentUserArea
                     }));
@@ -1448,6 +1463,7 @@
                     isLoggedIn = true;
                     currentUsername = userData.username;
                     currentUserRole = userData.role;
+                    currentUserPassword = userData.password; // Retrieve password (NEW)
                     currentUserArea = userData.area; // This might be null for non-MRs, which is fine
 
                     console.log('Session restored for user:', currentUsername, 'Role:', currentUserRole, 'Area:', currentUserArea);
