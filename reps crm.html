@@ -2234,6 +2234,7 @@
                 localStorage.removeItem(name);
             }
 
+            // Function to show alerts within this CRM page
             function showLoginAlert(message, type) {
                 const alert = document.createElement('div');
                 alert.className = `alert alert-${type}`;
@@ -2417,6 +2418,29 @@
             const requestSection = document.getElementById('requestSection');
             const weeklyPlanSection = document.getElementById('weeklyPlanSection');
 
+            // Listen for messages from the parent window (index.html)
+            window.addEventListener('message', async (event) => {
+                // Ensure the message is from a trusted origin if possible, or validate content
+                if (event.data && event.data.type === 'setUserData') {
+                    const receivedUserData = event.data.userData;
+                    console.log('CRM received user data from parent:', receivedUserData);
+                    if (receivedUserData && receivedUserData.name) {
+                        currentMedRep = receivedUserData;
+                        await initializeCrmApp(currentMedRep);
+                    } else {
+                        console.warn('Received invalid user data from parent. Showing local login.');
+                        loginPage.classList.remove('hidden');
+                        mainAppContainer.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Inform the parent window that the iframe is ready to receive data
+            if (window.parent) {
+                window.parent.postMessage({ type: 'crmIframeReady' }, '*');
+            }
+
+
             loginBtn.addEventListener('click', async () => {
                 const selectedRep = medRepLoginSelect.value;
                 const password = passwordInput.value;
@@ -2461,32 +2485,11 @@
                             districtManager: repData['District Manager'],
                             governorate: repData['Governorate']
                         };
-                        setLocalStorageItem('currentUser', currentMedRep);
+                        // Also store in sessionStorage for consistency with index.html
+                        sessionStorage.setItem('isLoggedIn', 'true');
+                        sessionStorage.setItem('userData', JSON.stringify(currentMedRep));
 
-                        medRepNameElement.textContent = currentMedRep.name;
-                        medRepAreaElement.textContent = currentMedRep.area;
-                        medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
-                        
-                        // Display all governorates for the District Manager
-                        const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
-                        if (dmGovernorates && dmGovernorates.size > 0) {
-                            medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
-                        } else {
-                            medRepGovElement.textContent = `Governorate: N/A`;
-                        }
-
-                        loginPage.classList.add('hidden');
-                        mainAppContainer.classList.remove('hidden');
-
-                        formManager.initializeRepSpecificData(currentMedRep.name);
-                        dashboardManager.initializeDashboardForRep(currentMedRep.name);
-                        requestFormManager.initialize(currentMedRep.name);
-                        weeklyPlanManager.initialize(currentMedRep.name);
-
-                        // Default to showing CRM Form section, but no specific internal form.
-                        showMainSection('crm');
-                        // No specific internal form is shown by default after login.
-                        // The user will need to click on a CRM sub-tab (HCPs, Pharmacy, etc.) to see a form.
+                        await initializeCrmApp(currentMedRep);
                     }
                 } catch (error) {
                     console.error('Error during login:', error);
@@ -2495,7 +2498,11 @@
             });
 
             logoutBtn.addEventListener('click', () => {
-                removeLocalStorageItem('currentUser');
+                // Clear both localStorage (if used) and sessionStorage
+                removeLocalStorageItem('currentUser'); // For reps crm.html's own local storage
+                sessionStorage.removeItem('isLoggedIn'); // For index.html's session
+                sessionStorage.removeItem('userData'); // For index.html's session
+
                 mainAppContainer.classList.add('hidden');
                 loginPage.classList.remove('hidden');
                 passwordInput.value = '';
@@ -2504,8 +2511,32 @@
                 dashboardManager.resetDashboard();
                 requestFormManager.resetForm();
                 weeklyPlanManager.reset();
-                fetchAllData();
+                fetchAllData(); // Re-fetch data for a clean state
             });
+
+            // Function to initialize the CRM app after successful login
+            async function initializeCrmApp(repData) {
+                medRepNameElement.textContent = repData.name;
+                medRepAreaElement.textContent = repData.area;
+                medRepDMElement.textContent = `District Manager: ${repData.districtManager || 'N/A'}`;
+                
+                const dmGovernorates = districtManagersGovernorates.get(repData.districtManager);
+                if (dmGovernorates && dmGovernorates.size > 0) {
+                    medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
+                } else {
+                    medRepGovElement.textContent = `Governorate: N/A`;
+                }
+
+                loginPage.classList.add('hidden');
+                mainAppContainer.classList.remove('hidden');
+
+                formManager.initializeRepSpecificData(repData.name);
+                dashboardManager.initializeDashboardForRep(repData.name);
+                requestFormManager.initialize(repData.name);
+                weeklyPlanManager.initialize(repData.name);
+                
+                showMainSection('crm'); // Default to showing CRM Form section
+            }
 
             // --- Main Section Tab Management ---
             const mainTabButtons = document.querySelectorAll('.main-tab-group .tab-button');
@@ -3953,8 +3984,7 @@
                     }
                     let queryUrl = REQUESTS_URL;
                     let filters = [`customerType=eq.Personal`, `medRep=eq.${personalName}`];
-                    const fullQueryUrl = `${queryUrl}?${filters.join('&')}&order=date.desc`;
-
+                    const fullQueryUrl = `${queryUrl}?${filters.join('&')}`;
                     try {
                         const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY);
                         
@@ -4454,7 +4484,7 @@
                     const day = this.elements.dayFilter.value;
 
                     if (!day) {
-                        this.showMessage('Please select a day first.', 'error');
+                        this.showMessage('Please select a Day first.', 'error');
                         this.elements.eventTime.selectedIndex = 0;
                         return;
                     }
@@ -4620,30 +4650,26 @@
             // Expose removeFromWeeklyPlan globally for inline onclick
             window.removeFromWeeklyPlan = weeklyPlanManager.removeFromWeeklyPlan.bind(weeklyPlanManager);
 
+            // Initial load logic: Check sessionStorage first
             await fetchAllData();
-            const savedUser = getLocalStorageItem('currentUser');
-            if (savedUser) {
-                currentMedRep = savedUser;
-                medRepNameElement.textContent = currentMedRep.name;
-                medRepAreaElement.textContent = currentMedRep.area;
-                medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
-                
-                const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
-                if (dmGovernorates && dmGovernorates.size > 0) {
-                    medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
-                } else {
-                    medRepGovElement.textContent = `Governorate: N/A`;
+            const sessionLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const sessionUserData = sessionStorage.getItem('userData');
+
+            if (sessionLoggedIn === 'true' && sessionUserData) {
+                try {
+                    currentMedRep = JSON.parse(sessionUserData);
+                    console.log('Session found in sessionStorage. Initializing CRM with:', currentMedRep);
+                    await initializeCrmApp(currentMedRep);
+                } catch (e) {
+                    console.error('Error parsing session user data:', e);
+                    // Fallback to local login if session data is corrupted
+                    loginPage.classList.remove('hidden');
+                    mainAppContainer.classList.add('hidden');
                 }
-
-                loginPage.classList.add('hidden');
-                mainAppContainer.classList.remove('hidden');
-
-                formManager.initializeRepSpecificData(currentMedRep.name);
-                dashboardManager.initializeDashboardForRep(currentMedRep.name);
-                requestFormManager.initialize(currentMedRep.name);
-                weeklyPlanManager.initialize(currentMedRep.name);
-                
-                showMainSection('crm');
+            } else {
+                console.log('No session found in sessionStorage. Showing local login view.');
+                loginPage.classList.remove('hidden');
+                mainAppContainer.classList.add('hidden');
             }
             
         });
