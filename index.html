@@ -583,220 +583,141 @@
             min-height: 1.2em;
         }
 
-        /* Responsive adjustments for smaller screens */
-        @media (max-width: 1024px) {
-            .container {
-                padding: 18px;
-            }
-            .header {
-                padding: 9px 18px;
-            }
-            .user-info-card {
-                padding: 7px 14px;
-                font-size: 0.85rem;
-            }
-            .user-info-card .user-icon {
-                font-size: 1.1rem;
-            }
-            .user-info-card .user-name {
-                font-size: 0.95rem;
-            }
-            .user-info-card .user-title,
-            .user-info-card .user-area {
-                font-size: 0.75rem;
-            }
-            .back-button, .logout-button {
-                padding: 8px 16px;
-                font-size: 0.85rem;
-            }
-            .banner {
-                padding: 22px 28px;
-                gap: 20px;
-            }
-            .banner h1 {
-                font-size: 2.5rem;
-            }
-            .banner .subtitle {
-                font-size: 1rem;
-            }
-            .company-logo {
-                max-width: 80px;
-            }
-            .home-grid {
-                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                gap: 18px;
-            }
-            .main-card {
-                padding: 28px;
-                min-height: 170px;
-            }
-            .main-card-icon {
-                font-size: 3.2rem;
-            }
-            .main-card-title {
-                font-size: 1.3rem;
-            }
-            .main-card-subtitle {
-                font-size: 0.9rem;
-            }
-            .full-page-view {
-                height: calc(100vh - 130px);
-            }
-            .login-card {
-                padding: 30px;
-                max-width: 350px;
-            }
-            .login-card .company-logo-login {
-                max-width: 65px;
-            }
-            .login-card h2 {
-                font-size: 1.7rem;
-            }
+        /* Styles for the new modal/overlay for CRM login */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-content h3 {
+            font-size: 1.6rem;
+            color: var(--primary-blue-dark);
+            margin-bottom: 20px;
+        }
+
+        .modal-content .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .modal-content label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .modal-content select,
+        .modal-content input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .modal-content select:focus,
+        .modal-content input[type="password"]:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.25);
+        }
+
+        .modal-content .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-content .modal-button {
+            padding: 10px 20px;
+            border-radius: var(--border-radius-sm);
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.25s ease, transform 0.25s ease;
+        }
+
+        .modal-content .modal-button.primary {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .modal-content .modal-button.primary:hover {
+            background: var(--primary-blue-dark);
+            transform: translateY(-1px);
+        }
+
+        .modal-content .modal-button.secondary {
+            background: var(--border-color);
+            color: var(--text-dark);
+        }
+
+        .modal-content .modal-button.secondary:hover {
+            background: #CBD5E0;
+            transform: translateY(-1px);
+        }
+
+        .modal-error-message {
+            color: #E53E3E;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            min-height: 1.2em;
+        }
+
+        /* Responsive adjustments for modal */
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
+            .modal-content {
+                padding: 25px;
             }
-            .header {
-                flex-direction: column; /* Stack items vertically */
-                align-items: flex-start; /* Align items to the start */
-                padding: 12px 18px;
-                gap: 12px; /* Space between stacked items */
+            .modal-content h3 {
+                font-size: 1.4rem;
             }
-            .back-button {
-                margin-right: 0; /* Remove right margin when stacked */
-                width: 100%; /* Full width when stacked */
-                justify-content: center; /* Center content horizontally */
-                margin-bottom: 5px; /* Add small margin below button */
-            }
-            .user-info-card {
-                width: 100%; /* Full width when stacked */
-                justify-content: center; /* Center content horizontally */
-                margin-bottom: 8px; /* Add margin below card */
-            }
-            .header-buttons {
-                width: 100%; /* Full width for buttons */
-                justify-content: space-around; /* Distribute buttons */
-                margin-left: 0; /* Remove auto-margin */
-            }
-            .logout-button {
-                flex-grow: 1; /* Allow buttons to grow */
-                text-align: center;
-                justify-content: center; /* Center text and icon */
-            }
-            .banner {
-                padding: 18px 22px;
-                flex-direction: column; /* Stack logo and text vertically */
-                gap: 18px;
-                text-align: center;
-            }
-            .company-logo {
-                max-width: 75px;
-            }
-            .banner-text-content {
-                text-align: center; /* Center text when stacked */
-            }
-            .banner h1 {
-                font-size: 2rem;
-            }
-            .banner .subtitle {
-                font-size: 0.95rem;
-            }
-            .home-grid {
-                grid-template-columns: 1fr; /* Single column on mobile */
-                gap: 16px;
-            }
-            .main-card {
-                min-height: 150px;
-                padding: 22px;
-            }
-            .main-card-icon {
-                font-size: 2.8rem;
-            }
-            .main-card-title {
-                font-size: 1.2rem;
-            }
-            .full-page-view {
-                height: calc(100vh - 120px); /* Adjust height for mobile header */
-            }
-            .login-card {
-                padding: 28px;
-                max-width: 320px;
-            }
-            .login-card .company-logo-login {
-                max-width: 55px;
-            }
-            .login-card h2 {
-                font-size: 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-            .header {
-                padding: 10px 12px;
-                gap: 8px;
-            }
-            .user-info-card {
-                font-size: 0.8rem;
-                padding: 6px 10px;
-            }
-            .user-info-card .user-icon {
-                font-size: 1rem;
-            }
-            .user-info-card .user-name {
+            .modal-content select,
+            .modal-content input[type="password"],
+            .modal-content .modal-button {
                 font-size: 0.9rem;
-            }
-            .user-info-card .user-title,
-            .user-info-card .user-area {
-                font-size: 0.7rem;
-            }
-            .back-button, .logout-button {
-                padding: 7px 14px;
-                font-size: 0.8rem;
-            }
-            .banner {
-                padding: 15px 18px;
-                gap: 12px;
-            }
-            .company-logo {
-                max-width: 60px;
-            }
-            .banner h1 {
-                font-size: 1.6rem;
-            }
-            .banner .subtitle {
-                font-size: 0.85rem;
-            }
-            .main-card {
-                min-height: 130px;
-                padding: 18px;
-            }
-            .main-card-icon {
-                font-size: 2.2rem;
-            }
-            .main-card-title {
-                font-size: 1rem;
-            }
-            .main-card-subtitle {
-                font-size: 0.8rem;
-            }
-            .login-card {
-                padding: 22px;
-                max-width: 280px;
-            }
-            .login-card .company-logo-login {
-                max-width: 45px;
-            }
-            .login-card h2 {
-                font-size: 1.3rem;
-            }
-            .login-input, .login-button {
-                font-size: 0.85rem;
-                padding: 9px 10px;
+                padding: 8px 15px;
             }
         }
     </style>
@@ -826,7 +747,7 @@
             </div>
         </div>
 
-        <!-- Login View: This section will display the login form -->
+        <!-- Login View: This section will display the main login form -->
         <div id="loginView" class="login-view">
             <div class="login-card">
                 <!-- Company Logo for Login Card -->
@@ -997,6 +918,28 @@
 
     </div>
 
+    <!-- CRM Medical Rep Login Modal -->
+    <div id="crmMedRepLoginModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Medical Representative Login</h3>
+            <div class="form-group">
+                <label for="medRepSelect">Select Medical Representative:</label>
+                <select id="medRepSelect">
+                    <!-- Options will be dynamically loaded here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="medRepPassword">Password:</label>
+                <input type="password" id="medRepPassword" placeholder="Enter password">
+            </div>
+            <div class="modal-error-message" id="medRepLoginErrorMessage"></div>
+            <div class="modal-buttons">
+                <button class="modal-button secondary" id="cancelMedRepLogin">Cancel</button>
+                <button class="modal-button primary" id="submitMedRepLogin">Login</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // Import Supabase client
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -1009,6 +952,7 @@
         // Store the ID of the currently active full-page view
         let currentActiveViewId = null;
         let userData = null; // Stores the logged-in user's data (including title)
+        let allMedicalReps = []; // To store the list of medical representatives
 
         // Page configurations
         const pageConfig = {
@@ -1052,6 +996,7 @@
             document.getElementById('loginErrorMessage').textContent = '';
             document.getElementById('usernameInput').value = '';
             document.getElementById('passwordInput').value = '';
+            hideMedRepLoginModal(); // Ensure modal is hidden on logout
         }
 
         /**
@@ -1105,6 +1050,7 @@
             }
             updateNavigationAccess(); // Update card visibility based on role
             updateUserInfoCard(); // Update user info display
+            hideMedRepLoginModal(); // Ensure modal is hidden when returning to home
         }
 
         /**
@@ -1177,13 +1123,91 @@
             }
         }
 
+        /**
+         * Shows the Medical Rep Login Modal.
+         */
+        function showMedRepLoginModal() {
+            document.getElementById('crmMedRepLoginModal').classList.add('show');
+            document.getElementById('medRepLoginErrorMessage').textContent = ''; // Clear any previous errors
+            document.getElementById('medRepPassword').value = ''; // Clear password field
+            populateMedicalRepDropdown();
+        }
+
+        /**
+         * Hides the Medical Rep Login Modal.
+         */
+        function hideMedRepLoginModal() {
+            document.getElementById('crmMedRepLoginModal').classList.remove('show');
+        }
+
+        /**
+         * Populates the medical representative dropdown from the fetched allMedicalReps array.
+         */
+        function populateMedicalRepDropdown() {
+            const selectElement = document.getElementById('medRepSelect');
+            selectElement.innerHTML = '<option value="">Select Medical Rep</option>'; // Default option
+            allMedicalReps.forEach(rep => {
+                const option = document.createElement('option');
+                option.value = rep.username;
+                option.textContent = rep.name;
+                selectElement.appendChild(option);
+            });
+        }
+
+        /**
+         * Handles the submission of the Medical Rep Login Modal.
+         * @param {Event} event - The form submission event.
+         */
+        async function handleMedRepLogin(event) {
+            event.preventDefault(); // Prevent default form submission
+            const selectedUsername = document.getElementById('medRepSelect').value;
+            const password = document.getElementById('medRepPassword').value;
+            const errorMessageElement = document.getElementById('medRepLoginErrorMessage');
+            errorMessageElement.textContent = '';
+
+            if (!selectedUsername || !password) {
+                errorMessageElement.textContent = 'Please select a medical representative and enter a password.';
+                return;
+            }
+
+            try {
+                // Find the selected medical rep from the fetched list
+                const selectedRep = allMedicalReps.find(rep => rep.username === selectedUsername);
+
+                if (selectedRep && selectedRep.password === password) {
+                    console.log(`Medical Rep Login successful for: ${selectedUsername}`);
+                    // Temporarily set userData to the selected medical rep for CRM access
+                    // This is a simplified approach; in a real app, you might re-authenticate or generate a temporary token.
+                    const tempUserData = {
+                        name: selectedRep.name,
+                        title: 'medical-representative', // Force this role for CRM access
+                        area: selectedRep.area,
+                        districtManager: selectedRep.districtManager,
+                        governorate: selectedRep.governorate
+                    };
+                    // Store this temporary user data in session storage for the CRM page to pick up
+                    sessionStorage.setItem('isLoggedIn', 'true'); // Keep main session logged in
+                    sessionStorage.setItem('userData', JSON.stringify(tempUserData)); // Overwrite with temp data
+                    sessionStorage.setItem('lastActivePage', 'crm'); // Ensure CRM page is loaded
+
+                    hideMedRepLoginModal();
+                    loadPage('crm'); // Load the CRM page
+                } else {
+                    errorMessageElement.textContent = 'Invalid medical representative or password.';
+                }
+            } catch (error) {
+                console.error('Error during medical rep login:', error);
+                errorMessageElement.textContent = 'An error occurred during login. Please try again.';
+            }
+        }
+
 
         /**
          * Loads a specific page view into an iframe.
          * Only proceeds if the user is logged in and has permission.
          * @param {string} page - The page identifier (e.g., 'crm', 'dashboard').
          */
-        function loadPage(page) {
+        async function loadPage(page) {
             if (sessionStorage.getItem('isLoggedIn') !== 'true') {
                 showLogin(); // Redirect to login if not logged in
                 return;
@@ -1198,35 +1222,31 @@
                 return;
             }
 
-            // Permission check based on user role
-            let hasPermission = false;
-            switch (userTitle) {
-                case 'medical-representative': // Updated to match normalized title
-                    hasPermission = (page === 'crm' || page === 'upa-codes' || page === 'price-list');
-                    break;
-                case 'district-manager': // Updated to match normalized title
-                    hasPermission = (page !== 'admin');
-                    break;
-                case 'admin':
-                    hasPermission = true;
-                    break;
-                default:
-                    hasPermission = false; // No permission for unknown roles
-                    break;
-            }
-
-            if (!hasPermission) {
-                const errorMessageElement = document.getElementById('loginErrorMessage'); // Re-using this for general messages
-                errorMessageElement.textContent = `Access Denied: Your role (${userData.title ? userData.title.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Unknown'}) does not have permission to access the ${config.displayName}.`;
-                errorMessageElement.style.display = 'block'; // Make sure it's visible
+            // Special handling for CRM, Admin, and Dashboard access
+            if (page === 'crm' && userTitle !== 'medical-representative') {
+                showMedRepLoginModal();
+                return; // Stop loading the page directly
+            } else if (page === 'admin' && userTitle !== 'admin') {
+                const errorMessageElement = document.getElementById('loginErrorMessage');
+                errorMessageElement.textContent = `Access Denied: Only Admins can access the ${config.displayName}.`;
+                errorMessageElement.style.display = 'block';
                 setTimeout(() => {
                     errorMessageElement.textContent = '';
                     errorMessageElement.style.display = 'none';
-                }, 5000); // Hide message after 5 seconds
+                }, 5000);
                 console.warn(`Access Denied: User role "${userData.title}" attempted to access "${page}".`);
-                return; // Prevent loading the page
+                return;
+            } else if (page === 'dashboard' && !['district-manager', 'admin'].includes(userTitle)) {
+                const errorMessageElement = document.getElementById('loginErrorMessage');
+                errorMessageElement.textContent = `Access Denied: Only District Managers and Admins can access the ${config.displayName}.`;
+                errorMessageElement.style.display = 'block';
+                setTimeout(() => {
+                    errorMessageElement.textContent = '';
+                    errorMessageElement.style.display = 'none';
+                }, 5000);
+                console.warn(`Access Denied: User role "${userData.title}" attempted to access "${page}".`);
+                return;
             }
-
 
             console.log(`Attempting to load page: ${page}`);
             
@@ -1297,8 +1317,19 @@
                 // Ensure the message is from the correct iframe and type
                 if (event.data && event.data.type === 'crmIframeReady' && event.source === iframe.contentWindow) {
                     console.log(`${displayName} iframe at ${fileName} is ready. Sending user data.`);
-                    // Send user data to the iframe
-                    iframe.contentWindow.postMessage({ type: 'setUserData', userData: userData }, '*');
+                    // Determine which user data to send based on the page and current user's role
+                    let dataToSend = userData; // Default to current logged-in user's data
+
+                    if (page === 'crm' && userTitle !== 'medical-representative') {
+                        // If CRM is accessed via the medical rep modal, userData would have been temporarily set
+                        // We need to ensure the correct medical rep's data is sent to the CRM iframe
+                        dataToSend = JSON.parse(sessionStorage.getItem('userData')); // Get the potentially overwritten userData
+                    } else if ((page === 'admin' && userTitle === 'admin') || (page === 'dashboard' && ['district-manager', 'admin'].includes(userTitle))) {
+                        // For Admin/Dashboard, send the main logged-in user's data
+                        dataToSend = userData;
+                    }
+                    
+                    iframe.contentWindow.postMessage({ type: 'setUserData', userData: dataToSend }, '*');
                     window.removeEventListener('message', messageListener); // Remove listener after sending
                 }
             };
@@ -1346,13 +1377,17 @@
                         return obj;
                     }, {});
 
+                    // Assuming 'medical rep' is the username and 'password' is a column in your sheet
+                    // You would need to add a 'password' column to your Google Sheet for this to work
                     if (row['medical rep'] === username) {
                         console.log(`Found medical rep data for ${username}:`, row);
                         return {
+                            username: row['medical rep'], // Add username for dropdown value
                             name: row['medical rep'],
                             area: row['area'], // Column E
                             districtManager: row['District Manager'], // Column B
-                            governorate: row['Governorate']
+                            governorate: row['Governorate'],
+                            password: row['password'] || '' // Assuming a 'password' column exists
                         };
                     }
                 }
@@ -1361,6 +1396,51 @@
             } catch (error) {
                 console.error('Error fetching medical rep data from Google Sheet:', error);
                 return null;
+            }
+        }
+
+        /**
+         * Fetches all medical representatives for the dropdown.
+         */
+        async function fetchAllMedicalReps() {
+            const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+            try {
+                console.log('Fetching all medical representatives from Google Sheet...');
+                const response = await fetch(GOOGLE_SHEET_URL);
+                if (!response.ok) {
+                    console.error('Failed to fetch all medical rep data. Status:', response.status, 'Status Text:', response.statusText);
+                    return [];
+                }
+                const csvText = await response.text();
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                const reps = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const values = line.split(',').map(v => v.trim());
+                    const row = headers.reduce((obj, header, index) => {
+                        obj[header] = values[index] || '';
+                        return obj;
+                    }, {});
+
+                    if (row['medical rep']) {
+                        reps.push({
+                            username: row['medical rep'],
+                            name: row['medical rep'],
+                            area: row['area'],
+                            districtManager: row['District Manager'],
+                            governorate: row['Governorate'],
+                            password: row['password'] || '' // Assuming a 'password' column exists
+                        });
+                    }
+                }
+                console.log('Fetched medical representatives:', reps);
+                return reps;
+            } catch (error) {
+                console.error('Error fetching all medical rep data:', error);
+                return [];
             }
         }
 
@@ -1409,6 +1489,8 @@
 
                     // Initialize userData with basic info from Supabase
                     userData = {
+                        username: user.username, // Store username for central login access
+                        password: user.password, // Store password for central login access
                         name: user.username,
                         title: normalizedTitle,
                         area: 'N/A', // Default to N/A
@@ -1425,6 +1507,7 @@
                             userData.area = fetchedGoogleSheetData.area;
                             userData.districtManager = fetchedGoogleSheetData.districtManager;
                             userData.governorate = fetchedGoogleSheetData.governorate;
+                            // Do NOT overwrite username/password from Supabase with Google Sheet data here
                         } else {
                             console.warn(`Google Sheet data missing for user: ${username} with title: ${user.title}. Proceeding with default values for area/manager.`);
                         }
@@ -1466,9 +1549,12 @@
         }
 
         // Initialize the application when DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM loaded, initializing application');
             
+            // Fetch all medical reps once on load for the dropdown
+            allMedicalReps = await fetchAllMedicalReps();
+
             // Add click event listeners to all main navigation cards
             document.querySelectorAll('.main-card').forEach(card => {
                 card.addEventListener('click', function() {
@@ -1495,6 +1581,11 @@
             // Add event listener for the logout button
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
 
+            // Add event listeners for the CRM Medical Rep Login Modal
+            document.getElementById('submitMedRepLogin').addEventListener('click', handleMedRepLogin);
+            document.getElementById('cancelMedRepLogin').addEventListener('click', hideMedRepLoginModal);
+
+
             // Check session storage on initial load
             if (sessionStorage.getItem('isLoggedIn') === 'true') {
                 try {
@@ -1508,7 +1599,32 @@
                     console.log('Session found. User is logged in.', userData);
                     const lastActivePage = sessionStorage.getItem('lastActivePage');
                     if (lastActivePage) {
-                        loadPage(lastActivePage);
+                        // Re-evaluate permissions on refresh before loading the page
+                        const userTitle = userData.title.toLowerCase().replace(/\s/g, '-');
+                        const config = pageConfig[lastActivePage];
+                        let hasPermission = false;
+
+                        switch (userTitle) {
+                            case 'medical-representative':
+                                hasPermission = (lastActivePage === 'crm' || lastActivePage === 'upa-codes' || lastActivePage === 'price-list');
+                                break;
+                            case 'district-manager':
+                                hasPermission = (lastActivePage !== 'admin');
+                                break;
+                            case 'admin':
+                                hasPermission = true;
+                                break;
+                            default:
+                                hasPermission = false;
+                                break;
+                        }
+
+                        if (hasPermission) {
+                            loadPage(lastActivePage);
+                        } else {
+                            console.warn(`Access Denied on refresh: User role "${userData.title}" does not have permission for "${lastActivePage}". Showing home.`);
+                            showHome(); // Redirect to home if no permission for last page
+                        }
                     } else {
                         showHome(); 
                     }
