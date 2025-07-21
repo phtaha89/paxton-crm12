@@ -7,24 +7,24 @@
     <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS Variables for easier theme management and consistency */
+        /* CSS Variables for a fresh, professional color palette */
         :root {
-            --coffee-light: #8B5E3C; /* Light coffee/tan */
-            --coffee-dark: #6F4E37;  /* Rich coffee brown */
-            --coffee-gradient-start: #4A2C2A; /* Darker, almost black coffee */
-            --coffee-gradient-end: #8B5E3C;    /* Matches coffee-light */
-
-            --primary-red: #ef4444;
-            --primary-red-dark: #dc2626;
-            --text-color-dark: #374151;
-            --text-color-light: #6b7280;
-            --bg-light: #f9fafb;
-            --bg-medium: #f0f2f5;
-            --white: #ffffff;
+            --primary-blue: #4299E1; /* A vibrant, professional blue */
+            --primary-blue-dark: #3182CE; /* Darker shade for hover */
+            --secondary-green: #48BB78; /* A fresh green for accents */
+            --secondary-green-dark: #38A169;
+            --text-dark: #2D3748; /* Dark gray for main text */
+            --text-light: #718096; /* Lighter gray for secondary text */
+            --bg-light: #F7FAFC; /* Very light background */
+            --bg-medium: #EDF2F7; /* Slightly darker background for contrast */
+            --white: #FFFFFF;
+            --border-color: #E2E8F0; /* Light gray for borders */
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
-            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
         }
 
         /* Base styles for all elements */
@@ -45,16 +45,16 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            color: var(--text-color-dark);
+            color: var(--text-dark);
             -webkit-font-smoothing: antialiased; /* Smoother text rendering */
             -moz-osx-font-smoothing: grayscale;
         }
 
         /* Main container for the application, taking full available width and height */
         .container {
-            max-width: 1600px; /* Increased max-width for more spacious layout */
+            max-width: 1400px; /* Optimal max-width for professional look */
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px; /* Decreased padding for more compact look */
             width: 100%;
             flex-grow: 1; /* Allows container to expand and fill space */
             display: flex;
@@ -64,74 +64,85 @@
         /* Header styling with flexbox for alignment */
         .header {
             display: flex;
-            justify-content: flex-end; /* Aligns admin tab to the right by default */
-            align-items: center;
+            align-items: center; /* Align items vertically in the center */
             background: var(--white);
-            padding: 6px 25px; /* Made header slimmer */
-            border-radius: var(--border-radius);
+            padding: 10px 25px; /* Decreased padding for header elements */
+            border-radius: var(--border-radius-md);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 20px;
+            margin-bottom: 20px; /* Decreased margin below header */
             position: relative;
             z-index: 100; /* Ensures header is always on top */
-            gap: 15px; /* Space between buttons */
         }
 
-        /* Admin tab button styling - No longer in header, but keeping style for reference if needed elsewhere */
-        .admin-tab {
-            background: var(--primary-red);
-            color: var(--white);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.95rem;
-            border: none;
-            transition: all 0.25s ease; /* Smooth transition for hover effects */
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px; /* Space between text and icon */
-        }
-
-        .admin-tab:hover {
-            background: var(--primary-red-dark);
-            transform: translateY(-2px); /* Slight lift effect */
-            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.25); /* Enhanced shadow on hover */
-        }
-        
-        /* Back button styling, similar to admin tab but with primary coffee color */
+        /* Back button styling - Now on the left */
         .back-button {
-            background: var(--coffee-light); /* Changed to coffee color */
-            color: var(--white);
-            padding: 10px 20px;
-            border-radius: 8px;
+            background: var(--border-color); /* Neutral background for back/logout */
+            color: var(--text-dark);
+            padding: 9px 18px; /* Decreased padding */
+            border-radius: var(--border-radius-sm);
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem; /* Decreased font size */
             border: none;
             transition: all 0.25s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-right: auto; /* Pushes the button to the left */
+            margin-right: 15px; /* Space between back button and user info */
         }
 
         .back-button:hover {
-            background: var(--coffee-dark); /* Changed to darker coffee color */
+            background: #CBD5E0; /* Slightly darker gray on hover */
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* User Info Card Styling - Positioned on the left */
+        .user-info-card {
+            background: var(--primary-blue); /* Primary blue for user card */
+            color: var(--white);
+            padding: 8px 15px; /* Decreased padding */
+            border-radius: var(--border-radius-sm);
+            font-size: 0.9rem; /* Decreased font size */
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .user-info-card .user-icon {
+            font-size: 1.2rem; /* Decreased icon size */
+        }
+
+        .user-info-card .user-name {
+            font-weight: 600;
+            font-size: 1rem; /* Decreased font size */
+        }
+
+        .user-info-card .user-title,
+        .user-info-card .user-area {
+            font-size: 0.8rem; /* Decreased font size */
+            opacity: 0.9;
+        }
+
+        /* Button group on the right of the header */
+        .header-buttons {
+            display: flex;
+            gap: 15px; /* Space between buttons (only logout now) */
+            margin-left: auto; /* Pushes buttons to the right */
         }
 
         /* Logout button styling */
         .logout-button {
-            background: #6b7280; /* Gray color for logout */
-            color: var(--white);
-            padding: 10px 20px;
-            border-radius: 8px;
+            background: var(--border-color); /* Neutral background for back/logout */
+            color: var(--text-dark);
+            padding: 9px 18px; /* Decreased padding */
+            border-radius: var(--border-radius-sm);
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem; /* Decreased font size */
             border: none;
             transition: all 0.25s ease;
             text-decoration: none;
@@ -141,9 +152,9 @@
         }
 
         .logout-button:hover {
-            background: #4b5563; /* Darker gray on hover */
+            background: #CBD5E0; /* Slightly darker gray on hover */
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(107, 114, 128, 0.25);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
         /* Utility class to hide elements */
@@ -151,21 +162,21 @@
             display: none !important;
         }
 
-        /* Banner styling with gradient and shine animation */
+        /* Banner styling with gradient and subtle animation */
         .banner {
-            background: linear-gradient(135deg, var(--coffee-gradient-start), var(--coffee-gradient-end)); /* Changed to coffee gradient */
+            background: linear-gradient(135deg, var(--primary-blue-dark), var(--primary-blue)); /* Blue gradient */
             color: white;
-            padding: 25px 40px; /* Made banner slimmer */
-            margin-bottom: 30px; /* Increased margin below banner */
-            border-radius: var(--border-radius);
+            padding: 25px 35px; /* Decreased padding */
+            margin-bottom: 25px; /* Decreased margin */
+            border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
-            flex-shrink: 0; /* Prevents banner from shrinking */
-            display: flex; /* Use flexbox for horizontal alignment of logo and text */
-            flex-direction: row; /* Always row for logo and text */
-            align-items: center; /* Vertically align items */
-            gap: 30px; /* Space between logo and text */
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 25px; /* Decreased gap */
         }
 
         .banner::before {
@@ -175,9 +186,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.08), transparent); /* Softer shine */
             transform: translateX(-100%);
-            animation: shine 3s infinite; /* Shine animation for visual flair */
+            animation: shine 3s infinite;
         }
 
         @keyframes shine {
@@ -187,31 +198,31 @@
 
         /* Company Logo styling within the banner */
         .company-logo {
-            max-width: 90px; /* Adjust size as needed */
+            max-width: 90px; /* Decreased logo size */
             height: auto;
-            border-radius: 8px; /* Slightly rounded corners for the logo */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Subtle shadow */
-            z-index: 1; /* Ensure logo is above shine effect */
-            flex-shrink: 0; /* Prevent logo from shrinking */
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1;
+            flex-shrink: 0;
         }
 
         .banner-text-content {
-            flex-grow: 1; /* Allows text content to take remaining space */
-            text-align: left; /* Ensure text is left-aligned within its container */
+            flex-grow: 1;
+            text-align: left;
         }
 
         .banner h1 {
-            font-size: 3.5rem; /* Larger main title */
+            font-size: 2.8rem; /* Decreased main title size */
             font-weight: 700;
-            margin-bottom: 8px; /* Reduced margin below title */
+            margin-bottom: 10px;
             position: relative;
             z-index: 1;
-            text-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
 
         .banner .subtitle {
-            font-size: 1.3rem; /* Larger subtitle */
-            opacity: 0.98;
+            font-size: 1.1rem; /* Decreased subtitle size */
+            opacity: 0.95;
             font-weight: 400;
             position: relative;
             z-index: 1;
@@ -220,22 +231,22 @@
         /* Home view grid for navigation cards */
         .home-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid columns */
-            gap: 25px; /* Space between grid items */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjusted minmax for cards */
+            gap: 20px; /* Decreased spacing */
             padding: 20px 0;
-            flex-grow: 1; /* Allows grid to expand */
-            align-content: start; /* Aligns content to the start of the grid */
+            flex-grow: 1;
+            align-content: start;
         }
 
         /* Styling for each navigation card */
         .main-card {
             background: var(--white);
-            padding: 30px;
-            border-radius: var(--border-radius);
+            padding: 30px; /* Decreased padding for cards */
+            border-radius: var(--border-radius-md);
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition for hover */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -243,7 +254,7 @@
             min-height: 180px; /* Ensures consistent card height */
             position: relative;
             overflow: hidden;
-            border: 1px solid #e2e8f0; /* Subtle border */
+            border: 1px solid var(--border-color);
         }
 
         /* Pseudo-element for hover effect on cards */
@@ -254,7 +265,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom right, rgba(139, 94, 60, 0.03), transparent 50%); /* Adjusted shadow color */
+            background: linear-gradient(to bottom right, rgba(66, 153, 225, 0.05), transparent 50%); /* Blue tint on hover */
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -264,115 +275,115 @@
         }
 
         .main-card:hover {
-            transform: translateY(-5px); /* Lift effect on hover */
-            box-shadow: var(--shadow-lg); /* Larger shadow on hover */
-            border-color: var(--coffee-light); /* Highlight border on hover */
+            transform: translateY(-6px); /* More pronounced lift effect */
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-blue); /* Highlight border on hover */
         }
 
         /* Disabled card styling */
         .main-card.disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
             background: var(--bg-light);
             box-shadow: var(--shadow-sm);
-            border-color: #cbd5e1;
+            border-color: #CBD5E0;
         }
 
         .main-card.disabled:hover {
-            transform: none; /* No lift for disabled cards */
+            transform: none;
             box-shadow: var(--shadow-sm);
-            border-color: #cbd5e1;
+            border-color: #CBD5E0;
         }
 
         /* Icon styling for cards */
         .main-card-icon {
-            font-size: 3.5rem; /* Larger icon size */
-            margin-bottom: 15px;
-            color: var(--coffee-light); /* Changed to coffee color */
-            line-height: 1; /* Ensures icon is vertically centered */
+            font-size: 3.5rem; /* Decreased icon size */
+            margin-bottom: 20px;
+            color: var(--primary-blue);
+            line-height: 1;
         }
 
         .main-card.disabled .main-card-icon {
-            color: var(--text-color-light); /* Muted icon for disabled cards */
+            color: var(--text-light);
         }
 
         /* Title styling for cards */
         .main-card-title {
-            font-size: 1.5rem; /* Larger title size */
+            font-size: 1.4rem; /* Decreased title size */
             font-weight: 600;
-            color: var(--text-color-dark);
-            margin-bottom: 5px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
         }
 
         .main-card.disabled .main-card-title {
-            color: var(--text-color-light);
+            color: var(--text-light);
         }
 
         /* Subtitle styling for cards */
         .main-card-subtitle {
-            font-size: 0.95rem;
-            color: var(--text-color-light);
-            line-height: 1.4;
+            font-size: 0.95rem; /* Decreased font size */
+            color: var(--text-light);
+            line-height: 1.5;
         }
         
         /* Full page view container */
         .full-page-view {
             background: var(--white);
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-lg);
-            flex-grow: 1; /* Allows full page view to fill available space */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden; /* Ensures content within iframe doesn't overflow */
-            transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
-            transform: translateY(10px); /* Initial slight offset for animation */
-            opacity: 0; /* Start hidden */
-            height: calc(100vh - 120px); /* Calculate height to fill screen minus header/padding */
+            overflow: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(15px); /* Initial slight offset for animation */
+            opacity: 0;
+            height: calc(100vh - 140px); /* Adjusted height to fit better */
         }
 
         .full-page-view.active {
-            opacity: 1; /* Fully visible */
-            transform: translateY(0); /* Move to final position */
-            display: flex; /* Ensure it's a flex container when active */
+            opacity: 1;
+            transform: translateY(0);
+            display: flex;
         }
 
         /* Iframe container within full page view */
         .iframe-container-fpv {
-            flex-grow: 1; /* Allows iframe to take all available space */
+            flex-grow: 1;
             position: relative;
             width: 100%;
             height: 100%;
             border: none;
-            display: block; /* Removes extra space below iframe */
-            background: var(--white); /* Fallback background */
+            display: block;
+            background: var(--white);
         }
 
         .full-page-view iframe {
             width: 100%;
             height: 100%;
             border: none;
-            display: block; /* Removes extra space below iframe */
-            background: var(--white); /* Fallback background */
+            display: block;
+            background: var(--white);
         }
 
         /* Error state styling */
         .error-state {
-            display: none; /* Hidden by default */
+            display: none;
             padding: 60px 40px;
             text-align: center;
-            color: var(--primary-red);
-            position: absolute; /* Overlay on top of iframe */
+            color: #E53E3E; /* Red for errors */
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 5; /* Above iframe, below loading */
+            z-index: 5;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-lg);
         }
 
         .error-state.show {
@@ -380,35 +391,35 @@
         }
 
         .error-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 3rem; /* Decreased icon size */
+            margin-bottom: 25px;
         }
 
         .error-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem; /* Decreased font size */
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .error-text {
-            color: var(--text-color-light);
-            font-size: 1rem;
+            color: var(--text-light);
+            font-size: 1rem; /* Decreased font size */
         }
 
         /* Loading overlay styling */
         .loading {
-            display: none; /* Hidden by default */
+            display: none;
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 10; /* Highest z-index */
+            z-index: 10;
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-lg);
         }
 
         .loading.show {
@@ -416,18 +427,19 @@
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid var(--coffee-light); /* Changed to coffee color */
+            width: 40px; /* Decreased spinner size */
+            height: 40px; /* Decreased spinner size */
+            border: 4px solid #E2E8F0; /* Decreased border width */
+            border-top: 4px solid var(--primary-blue); /* Decreased border width */
             border-radius: 50%;
-            animation: spin 1s linear infinite; /* Spinner animation */
-            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 25px;
         }
 
         .loading-text {
-            color: var(--text-color-light);
+            color: var(--text-light);
             font-weight: 500;
+            font-size: 1rem; /* Decreased font size */
         }
 
         @keyframes spin {
@@ -438,45 +450,45 @@
         /* Status indicator in banner */
         .status-indicator {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 10px; /* Slightly larger */
-            height: 10px;
+            top: 25px;
+            right: 25px;
+            width: 10px; /* Decreased size */
+            height: 10px; /* Decreased size */
             border-radius: 50%;
-            background: #10b981; /* Green color */
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); /* Larger pulse shadow */
+            background: var(--secondary-green); /* Green for online status */
+            box-shadow: 0 0 0 4px rgba(72, 187, 120, 0.3);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.1); }
+            50% { opacity: 0.7; transform: scale(1.15); }
         }
 
         /* Demo styles for missing pages */
         .demo-content {
-            padding: 40px;
+            padding: 50px;
             text-align: center;
-            color: var(--text-color-dark);
-            width: 100%; /* Ensure demo content takes full width */
-            height: 100%; /* Ensure demo content takes full height */
-            display: flex; /* Use flexbox for centering text */
+            color: var(--text-dark);
+            width: 100%;
+            height: 100%;
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
         .demo-content h2 {
-            color: var(--coffee-dark);
-            margin-bottom: 20px;
-            font-size: 2rem;
+            color: var(--primary-blue-dark);
+            margin-bottom: 25px;
+            font-size: 2rem; /* Decreased font size */
         }
 
         .demo-content p {
-            color: var(--text-color-light);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            max-width: 600px; /* Limit width for readability */
+            color: var(--text-light);
+            font-size: 1.1rem; /* Decreased font size */
+            line-height: 1.7;
+            max-width: 700px;
         }
 
         /* Login View Styles */
@@ -486,173 +498,218 @@
             justify-content: center;
             align-items: center;
             flex-grow: 1;
-            padding: 20px;
-            background: var(--bg-medium); /* Match body background */
+            padding: 24px;
+            background: var(--bg-medium);
         }
 
         .login-card {
             background: var(--white);
-            padding: 30px; /* Reduced padding */
-            border-radius: var(--border-radius);
+            padding: 35px; /* Decreased padding */
+            border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-lg);
             text-align: center;
             width: 100%;
-            max-width: 350px; /* Reduced max width for the login card */
+            max-width: 380px; /* Decreased max-width for login card */
             display: flex;
             flex-direction: column;
-            gap: 15px; /* Reduced gap */
+            gap: 20px; /* Increased gap */
         }
 
-        .login-card .company-logo-login { /* Specific style for logo in login card */
-            max-width: 70px; /* Smaller logo */
+        .login-card .company-logo-login {
+            max-width: 70px; /* Decreased logo size */
             height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin: 0 auto 15px auto; /* Center and add margin below */
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin: 0 auto 20px auto;
         }
 
         .login-card h2 {
-            font-size: 1.8rem; /* Reduced font size */
-            color: var(--coffee-dark);
-            margin-bottom: 5px; /* Reduced margin */
+            font-size: 1.8rem; /* Decreased font size */
+            color: var(--primary-blue-dark);
+            margin-bottom: 10px;
         }
 
         .login-card p {
-            font-size: 0.95rem; /* Reduced font size */
-            color: var(--text-color-light);
-            margin-bottom: 15px; /* Reduced margin */
+            font-size: 0.95rem; /* Decreased font size */
+            color: var(--text-light);
+            margin-bottom: 20px;
         }
 
         .login-form {
             display: flex;
             flex-direction: column;
-            gap: 10px; /* Reduced gap */
+            gap: 15px;
         }
 
         .login-input {
             width: 100%;
-            padding: 10px 12px; /* Reduced padding */
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.9rem; /* Reduced font size */
-            color: var(--text-color-dark);
+            padding: 10px 12px; /* Decreased padding */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.95rem; /* Decreased font size */
+            color: var(--text-dark);
             background-color: var(--bg-light);
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .login-input:focus {
             outline: none;
-            border-color: var(--coffee-light);
-            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.25);
         }
 
         .login-button {
-            background: var(--coffee-light);
+            background: var(--primary-blue);
             color: var(--white);
-            padding: 10px 15px; /* Reduced padding */
-            border-radius: 8px;
+            padding: 10px 18px; /* Decreased padding */
+            border-radius: var(--border-radius-sm);
             border: none;
-            font-size: 1rem; /* Reduced font size */
+            font-size: 1rem; /* Decreased font size */
             font-weight: 600;
             cursor: pointer;
             transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
         }
 
         .login-button:hover {
-            background: var(--coffee-dark);
+            background: var(--primary-blue-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25);
+            box-shadow: 0 6px 15px rgba(66, 153, 225, 0.25);
         }
 
         .login-error-message {
-            color: var(--primary-red);
-            font-size: 0.85rem; /* Reduced font size */
-            margin-top: 8px; /* Reduced margin */
-            min-height: 1.2em; /* Reserve space to prevent layout shift */
+            color: #E53E3E;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            min-height: 1.2em;
         }
 
         /* Responsive adjustments for smaller screens */
         @media (max-width: 1024px) {
             .container {
-                padding: 15px;
+                padding: 18px;
+            }
+            .header {
+                padding: 9px 18px;
+            }
+            .user-info-card {
+                padding: 7px 14px;
+                font-size: 0.85rem;
+            }
+            .user-info-card .user-icon {
+                font-size: 1.1rem;
+            }
+            .user-info-card .user-name {
+                font-size: 0.95rem;
+            }
+            .user-info-card .user-title,
+            .user-info-card .user-area {
+                font-size: 0.75rem;
+            }
+            .back-button, .logout-button {
+                padding: 8px 16px;
+                font-size: 0.85rem;
             }
             .banner {
-                padding: 25px 30px; /* Slightly more compact */
+                padding: 22px 28px;
                 gap: 20px;
             }
             .banner h1 {
-                font-size: 3rem;
+                font-size: 2.5rem;
             }
             .banner .subtitle {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
             .company-logo {
-                max-width: 80px; /* Adjust size for medium screens */
+                max-width: 80px;
             }
             .home-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 18px;
+            }
+            .main-card {
+                padding: 28px;
+                min-height: 170px;
             }
             .main-card-icon {
-                font-size: 3rem;
+                font-size: 3.2rem;
             }
             .main-card-title {
                 font-size: 1.3rem;
             }
+            .main-card-subtitle {
+                font-size: 0.9rem;
+            }
+            .full-page-view {
+                height: calc(100vh - 130px);
+            }
             .login-card {
-                padding: 25px; /* Adjusted padding */
-                max-width: 320px; /* Further reduced max-width */
+                padding: 30px;
+                max-width: 350px;
             }
             .login-card .company-logo-login {
-                max-width: 60px; /* Smaller logo on medium screens */
+                max-width: 65px;
             }
             .login-card h2 {
-                font-size: 1.6rem; /* Adjusted font size */
-            }
-            .login-card p {
-                font-size: 0.9rem; /* Adjusted font size */
-            }
-            .login-input, .login-button {
-                font-size: 0.9rem; /* Adjusted font size */
+                font-size: 1.7rem;
             }
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 15px;
             }
             .header {
-                flex-direction: row; /* Keep buttons in a row */
-                justify-content: space-between; /* Space out buttons */
-                padding: 8px 15px; /* Slimmer header on mobile */
+                flex-direction: column; /* Stack items vertically */
+                align-items: flex-start; /* Align items to the start */
+                padding: 12px 18px;
+                gap: 12px; /* Space between stacked items */
             }
-            .admin-tab, .back-button, .logout-button {
-                padding: 8px 15px;
-                font-size: 0.85rem;
+            .back-button {
+                margin-right: 0; /* Remove right margin when stacked */
+                width: 100%; /* Full width when stacked */
+                justify-content: center; /* Center content horizontally */
+                margin-bottom: 5px; /* Add small margin below button */
+            }
+            .user-info-card {
+                width: 100%; /* Full width when stacked */
+                justify-content: center; /* Center content horizontally */
+                margin-bottom: 8px; /* Add margin below card */
+            }
+            .header-buttons {
+                width: 100%; /* Full width for buttons */
+                justify-content: space-around; /* Distribute buttons */
+                margin-left: 0; /* Remove auto-margin */
+            }
+            .logout-button {
+                flex-grow: 1; /* Allow buttons to grow */
+                text-align: center;
+                justify-content: center; /* Center text and icon */
             }
             .banner {
-                /* Maintain row direction for logo and text */
-                padding: 20px 15px; /* Adjust padding for mobile row layout */
-                margin-bottom: 20px;
-                gap: 15px; /* Adjust gap for mobile row layout */
+                padding: 18px 22px;
+                flex-direction: column; /* Stack logo and text vertically */
+                gap: 18px;
+                text-align: center;
             }
             .company-logo {
-                max-width: 60px; /* Even smaller on mobile to allow space for text */
+                max-width: 75px;
+            }
+            .banner-text-content {
+                text-align: center; /* Center text when stacked */
             }
             .banner h1 {
-                font-size: 2rem; /* Reduced font size for mobile row layout */
-                margin-bottom: 4px; /* Reduced margin */
+                font-size: 2rem;
             }
             .banner .subtitle {
-                font-size: 0.9rem; /* Reduced font size for mobile */
+                font-size: 0.95rem;
             }
             .home-grid {
-                grid-template-columns: 1fr; /* Single column on very small screens */
-                gap: 15px;
+                grid-template-columns: 1fr; /* Single column on mobile */
+                gap: 16px;
             }
             .main-card {
                 min-height: 150px;
-                padding: 25px;
+                padding: 22px;
             }
             .main-card-icon {
                 font-size: 2.8rem;
@@ -661,63 +718,85 @@
                 font-size: 1.2rem;
             }
             .full-page-view {
-                height: calc(100vh - 90px); /* Adjust height for mobile header */
+                height: calc(100vh - 120px); /* Adjust height for mobile header */
             }
             .login-card {
-                padding: 20px; /* Further adjusted padding */
-                max-width: 280px; /* Further reduced max-width for mobile */
+                padding: 28px;
+                max-width: 320px;
             }
             .login-card .company-logo-login {
-                max-width: 50px; /* Even smaller logo on mobile */
-                margin-bottom: 10px;
+                max-width: 55px;
             }
             .login-card h2 {
-                font-size: 1.5rem; /* Adjusted font size */
-            }
-            .login-card p {
-                font-size: 0.85rem; /* Adjusted font size */
-            }
-            .login-input, .login-button {
-                font-size: 0.85rem;
-                padding: 8px 10px;
+                font-size: 1.5rem;
             }
         }
 
         @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            .header {
+                padding: 10px 12px;
+                gap: 8px;
+            }
+            .user-info-card {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+            .user-info-card .user-icon {
+                font-size: 1rem;
+            }
+            .user-info-card .user-name {
+                font-size: 0.9rem;
+            }
+            .user-info-card .user-title,
+            .user-info-card .user-area {
+                font-size: 0.7rem;
+            }
+            .back-button, .logout-button {
+                padding: 7px 14px;
+                font-size: 0.8rem;
+            }
             .banner {
-                padding: 15px 10px;
-                gap: 10px;
+                padding: 15px 18px;
+                gap: 12px;
             }
             .company-logo {
-                max-width: 50px;
+                max-width: 60px;
             }
             .banner h1 {
                 font-size: 1.6rem;
             }
             .banner .subtitle {
-                font-size: 0.8rem;
+                font-size: 0.85rem;
             }
-            .admin-tab, .back-button, .logout-button {
+            .main-card {
+                min-height: 130px;
+                padding: 18px;
+            }
+            .main-card-icon {
+                font-size: 2.2rem;
+            }
+            .main-card-title {
+                font-size: 1rem;
+            }
+            .main-card-subtitle {
                 font-size: 0.8rem;
-                padding: 6px 12px;
             }
             .login-card {
-                padding: 15px; /* Smallest padding */
-                max-width: 250px; /* Smallest max-width */
+                padding: 22px;
+                max-width: 280px;
             }
             .login-card .company-logo-login {
-                max-width: 40px; /* Smallest logo */
-                margin-bottom: 8px;
+                max-width: 45px;
             }
             .login-card h2 {
                 font-size: 1.3rem;
             }
-            .login-card p {
-                font-size: 0.8rem;
-            }
             .login-input, .login-button {
-                font-size: 0.8rem;
-                padding: 6px 8px;
+                font-size: 0.85rem;
+                padding: 9px 10px;
             }
         }
     </style>
@@ -725,22 +804,33 @@
 <body>
     <div class="container">
         <div class="header">
-            <!-- Back button, initially hidden -->
+            <!-- Back button, initially hidden - Now positioned on the far left -->
             <button id="backButton" class="back-button hidden">
                 &#x2190; Back to Home
             </button>
-            <!-- Admin tab button - REMOVED from header -->
-            <!-- Logout button, initially hidden -->
-            <button id="logoutButton" class="logout-button hidden">
-                Logout
-            </button>
+            <!-- User Info Card - Now positioned after the back button on the left -->
+            <div id="userInfoCard" class="user-info-card hidden">
+                <span class="user-icon">👤</span>
+                <div class="user-details">
+                    <span id="userName" class="user-name"></span>
+                    <span id="userTitle" class="user-title"></span>
+                    <span id="userArea" class="user-area"></span>
+                </div>
+            </div>
+            <!-- Button group on the right (now only logout) -->
+            <div class="header-buttons">
+                <!-- Logout button, initially hidden -->
+                <button id="logoutButton" class="logout-button hidden">
+                    Logout
+                </button>
+            </div>
         </div>
 
         <!-- Login View: This section will display the login form -->
         <div id="loginView" class="login-view">
             <div class="login-card">
                 <!-- Company Logo for Login Card -->
-                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo-login" onerror="this.onerror=null;this.src='https://placehold.co/70x70/A0522D/FFFFFF?text=Logo';">
+                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo-login" onerror="this.onerror=null;this.src='https://placehold.co/70x70/4299E1/FFFFFF?text=Logo';">
                 <h2>Paxton LLC CRM</h2>
                 <p>Please log in to access the system.</p>
                 <form id="loginForm" class="login-form">
@@ -757,9 +847,7 @@
             <div class="banner">
                 <div class="status-indicator"></div>
                 <!-- Company Logo moved to the left and placed before text content -->
-                <!-- The logo image source has been corrected to a standard URL format. -->
-                <!-- The onerror attribute provides a fallback placeholder image if the main image fails to load. -->
-                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/90x90/A0522D/FFFFFF?text=Logo';">
+                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/90x90/4299E1/FFFFFF?text=Logo';">
                 <div class="banner-text-content">
                     <h1>PAXTON LLC CRM</h1>
                     <div class="subtitle">Medical Team Affairs</div>
@@ -779,19 +867,19 @@
                     <div class="main-card-title">Dashboard</div>
                     <div class="main-card-subtitle">View key performance indicators and analytics.</div>
                 </div>
-                <!-- UPA Codes Card - This card is fully clickable and functions like the CRM card. -->
+                <!-- UPA Codes Card -->
                 <div class="main-card" data-page="upa-codes">
                     <div class="main-card-icon">🏥</div>
                     <div class="main-card-title">UPA Codes</div>
                     <div class="main-card-subtitle">Access UPA Codes and affairs.</div>
                 </div>
-                <!-- Price List Card - This card is fully clickable and functions like the CRM card. -->
+                <!-- Price List Card -->
                 <div class="main-card" data-page="price-list">
                     <div class="main-card-icon">💲</div>
                     <div class="main-card-title">Price List</div>
                     <div class="main-card-subtitle">products pricing information.</div>
                 </div>
-                <!-- Admin Panel Card - NEWLY ADDED -->
+                <!-- Admin Panel Card -->
                 <div class="main-card" data-page="admin">
                     <div class="main-card-icon">⚙️</div>
                     <div class="main-card-title">Admin Panel</div>
@@ -891,7 +979,7 @@
         <div id="adminView" class="full-page-view hidden">
             <div class="loading" id="loadingAdmin">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading Admin Panel...</div>
+                <div class="loading-text">Loading Admin...</div>
             </div>
             <div class="error-state" id="errorAdmin">
                 <div class="error-icon">⚠️</div>
@@ -938,12 +1026,14 @@
             console.log('Showing login view');
             sessionStorage.removeItem('isLoggedIn'); // Clear login state
             sessionStorage.removeItem('userData'); // Clear user data
+            sessionStorage.removeItem('lastActivePage'); // Clear last active page
             userData = null; // Also clear in-memory data
 
             document.getElementById('loginView').classList.remove('hidden');
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('backButton').classList.add('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
+            document.getElementById('userInfoCard').classList.add('hidden'); // Hide user info card
 
             // Hide any active full-page view
             if (currentActiveViewId) {
@@ -966,7 +1056,7 @@
 
         /**
          * Shows the home view and hides any active full-page view.
-         * Also updates card visibility based on user role.
+         * Also updates card visibility based on user role and displays user info.
          */
         function showHome() {
             if (sessionStorage.getItem('isLoggedIn') !== 'true') {
@@ -978,6 +1068,7 @@
             const loginView = document.getElementById('loginView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
+            const userInfoCard = document.getElementById('userInfoCard');
             
             if (homeView) {
                 homeView.classList.remove('hidden');
@@ -995,6 +1086,10 @@
                 logoutButton.classList.remove('hidden');
             }
 
+            if (userInfoCard) {
+                userInfoCard.classList.remove('hidden'); // Show user info card
+            }
+
             // Hide the currently active full-page view, if any
             if (currentActiveViewId) {
                 const activeView = document.getElementById(currentActiveViewId);
@@ -1009,6 +1104,7 @@
                 currentActiveViewId = null;
             }
             updateNavigationAccess(); // Update card visibility based on role
+            updateUserInfoCard(); // Update user info display
         }
 
         /**
@@ -1054,6 +1150,33 @@
             });
         }
 
+        /**
+         * Updates the user information card in the header.
+         */
+        function updateUserInfoCard() {
+            const userInfoCard = document.getElementById('userInfoCard');
+            const userNameSpan = document.getElementById('userName');
+            const userTitleSpan = document.getElementById('userTitle');
+            const userAreaSpan = document.getElementById('userArea');
+
+            if (userData) {
+                userNameSpan.textContent = userData.name || 'N/A';
+                userTitleSpan.textContent = userData.title ? userData.title.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'N/A'; // Capitalize each word
+                
+                // Only display area if it exists and is not empty/N/A
+                if (userData.area && userData.area.trim() !== '' && userData.area.trim().toLowerCase() !== 'n/a') {
+                    userAreaSpan.textContent = userData.area;
+                    userAreaSpan.classList.remove('hidden');
+                } else {
+                    userAreaSpan.classList.add('hidden');
+                }
+                
+                userInfoCard.classList.remove('hidden');
+            } else {
+                userInfoCard.classList.add('hidden');
+            }
+        }
+
 
         /**
          * Loads a specific page view into an iframe.
@@ -1094,7 +1217,7 @@
 
             if (!hasPermission) {
                 const errorMessageElement = document.getElementById('loginErrorMessage'); // Re-using this for general messages
-                errorMessageElement.textContent = `Access Denied: Your role (${userData.title || 'Unknown'}) does not have permission to access the ${config.displayName}.`;
+                errorMessageElement.textContent = `Access Denied: Your role (${userData.title ? userData.title.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') : 'Unknown'}) does not have permission to access the ${config.displayName}.`;
                 errorMessageElement.style.display = 'block'; // Make sure it's visible
                 setTimeout(() => {
                     errorMessageElement.textContent = '';
@@ -1112,6 +1235,7 @@
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
+            const userInfoCard = document.getElementById('userInfoCard');
             const targetView = document.getElementById(viewId);
 
             let loadingOverlay = null;
@@ -1130,7 +1254,7 @@
                 }
             }
 
-            if (!homeView || !backButton || !logoutButton || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
+            if (!homeView || !backButton || !logoutButton || !userInfoCard || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
                 console.error('Error: One or more required DOM elements not found for page loading.');
                 return;
             }
@@ -1140,7 +1264,11 @@
             homeView.classList.add('hidden');
             backButton.classList.remove('hidden');
             logoutButton.classList.add('hidden');
+            userInfoCard.classList.add('hidden'); // Hide user info card when a specific page is loaded
             console.log(`Button visibility set for page: ${page}.`);
+
+            // Store the current page in sessionStorage
+            sessionStorage.setItem('lastActivePage', page);
 
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
@@ -1222,8 +1350,8 @@
                         console.log(`Found medical rep data for ${username}:`, row);
                         return {
                             name: row['medical rep'],
-                            area: row['area'],
-                            districtManager: row['District Manager'],
+                            area: row['area'], // Column E
+                            districtManager: row['District Manager'], // Column B
                             governorate: row['Governorate']
                         };
                     }
@@ -1273,43 +1401,51 @@
                     // User found and credentials match
                     const user = data[0];
                     console.log('Supabase user found:', user);
-                    let fetchedUserData = null;
+                    let fetchedGoogleSheetData = null; // Renamed for clarity
                     
                     // Normalize the title from Supabase for consistent comparison
                     const normalizedTitle = user.title.toLowerCase().replace(/\s/g, '-');
                     console.log(`Normalized user title: ${normalizedTitle}`);
 
+                    // Initialize userData with basic info from Supabase
+                    userData = {
+                        name: user.username,
+                        title: normalizedTitle,
+                        area: 'N/A', // Default to N/A
+                        districtManager: 'N/A', // Default to N/A
+                        governorate: 'N/A' // Default to N/A
+                    };
+
                     if (normalizedTitle === 'medical-representative' || normalizedTitle === 'district-manager') {
-                        // For medical reps and district managers, fetch data from Google Sheet
-                        fetchedUserData = await fetchMedicalRepData(username);
-                        if (fetchedUserData) {
-                            fetchedUserData.title = normalizedTitle; // Add the normalized title
+                        // For medical reps and district managers, attempt to fetch data from Google Sheet
+                        fetchedGoogleSheetData = await fetchMedicalRepData(username);
+                        if (fetchedGoogleSheetData) {
+                            // If data is found, update userData with details from Google Sheet
+                            userData.name = fetchedGoogleSheetData.name;
+                            userData.area = fetchedGoogleSheetData.area;
+                            userData.districtManager = fetchedGoogleSheetData.districtManager;
+                            userData.governorate = fetchedGoogleSheetData.governorate;
                         } else {
-                            console.warn(`Google Sheet data missing for user: ${username} with title: ${user.title}`);
+                            console.warn(`Google Sheet data missing for user: ${username} with title: ${user.title}. Proceeding with default values for area/manager.`);
                         }
                     } else if (normalizedTitle === 'admin') {
-                        // For admin, create a dummy data object with the title
-                        fetchedUserData = { name: 'Admin', title: 'admin', area: 'N/A', districtManager: 'N/A', governorate: 'N/A' };
-                        console.log('Admin user logged in. Dummy data created.');
+                        // For admin, basic data is already set above, no Google Sheet fetch needed
+                        console.log('Admin user logged in. Basic data used.');
                     } else {
                         console.warn(`Unsupported user title found in Supabase: '${user.title}' for user: ${username}`);
                         errorMessageElement.textContent = `Login failed: Unsupported user role '${user.title}'.`;
                         sessionStorage.removeItem('isLoggedIn');
                         sessionStorage.removeItem('userData');
+                        sessionStorage.removeItem('lastActivePage');
                         return; // Exit if role is not supported
                     }
 
-                    if (fetchedUserData) {
-                        sessionStorage.setItem('isLoggedIn', 'true');
-                        sessionStorage.setItem('userData', JSON.stringify(fetchedUserData));
-                        userData = fetchedUserData; // Update in-memory userData
-                        console.log('Login successful for user:', username, 'Role:', user.title, 'Full Data:', userData);
-                        showHome(); // Redirect to home page
-                    } else {
-                        errorMessageElement.textContent = 'User data not found in Google Sheet for this user. Please contact support.';
-                        sessionStorage.removeItem('isLoggedIn');
-                        sessionStorage.removeItem('userData');
-                    }
+                    // Now that userData is fully populated (or defaulted), store it and proceed
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('userData', JSON.stringify(userData));
+                    console.log('Login successful for user:', username, 'Role:', user.title, 'Full Data:', userData);
+                    showHome(); // Redirect to home page
+                    
                 } else {
                     // No user found or credentials do not match
                     console.warn(`Login failed: Invalid username or password for ${username}`);
@@ -1363,7 +1499,14 @@
             if (sessionStorage.getItem('isLoggedIn') === 'true') {
                 userData = JSON.parse(sessionStorage.getItem('userData'));
                 console.log('Session found. User is logged in.', userData);
-                showHome(); // Show home if session exists and update card access
+                const lastActivePage = sessionStorage.getItem('lastActivePage');
+                if (lastActivePage) {
+                    // If a last active page is stored, try to load it
+                    loadPage(lastActivePage);
+                } else {
+                    // Otherwise, show the home page
+                    showHome(); 
+                }
             } else {
                 console.log('No session found. Showing login view.');
                 showLogin(); // Otherwise, show login
