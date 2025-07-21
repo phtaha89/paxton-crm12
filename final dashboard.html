@@ -2369,133 +2369,146 @@
         const PAGE_SIZE = 1000; 
 
         // --- LOGIN LOGIC ---
-        async function fetchDistrictManagersForLogin() {
-            try {
-                const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch district managers from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
-                }
-                const csvText = await response.text();
-                allGoogleSheetData = parseCSV(csvText);
+function isUserLoggedIn() {
+    return sessionStorage.getItem('isLoggedIn') === 'true';
+}
 
-                const districtManagers = new Set();
-                allGoogleSheetData.forEach(row => {
-                    if (row['District Manager']) {
-                        districtManagers.add(row['District Manager'].trim());
+function loadDashboardIfLoggedIn() {
+    if (isUserLoggedIn()) {
+        // User is already logged in, bypass the login and load the dashboard
+        $('#login-page').hide();
+        $('#dashboard-content').show();
+        if (typeof initializeCommonDashboard === 'function') {
+            initializeCommonDashboard();
+        }
+    } else {
+        // User is not logged in, prompt for login
+        showLogin();
+    }
+}
+
+// Modify the event listener for the dashboard card
+document.querySelectorAll('.main-card[data-page="dashboard"]').forEach(card => {
+    card.addEventListener('click', loadDashboardIfLoggedIn);
+});
+
+async function fetchDistrictManagersForLogin() {
+    try {
+        const response = await fetch(GOOGLE_SHEET_URL);
+        if (!response.ok) {
+            throw new Error('Failed to fetch district managers from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
+        }
+        const csvText = await response.text();
+        allGoogleSheetData = parseCSV(csvText);
+        const districtManagers = new Set();
+        allGoogleSheetData.forEach(row => {
+            if (row['District Manager']) {
+                districtManagers.add(row['District Manager'].trim());
+            }
+        });
+        const usernameSelect = $('#username');
+        usernameSelect.empty();
+        usernameSelect.append($('<option>', { value: '', text: 'Select District Manager' }));
+        Array.from(districtManagers).sort().forEach(dm => {
+            usernameSelect.append($('<option>', { value: dm, text: dm }));
+        });
+    } catch (error) {
+        console.error('Error fetching district managers for login:', error);
+        $('#login-error').text('Failed to load district managers. Please check the console for details, ensure the Google Sheet URL is correct, and that the sheet is published to the web as a CSV.');
+    }
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const isAdminLogin = $('#adminLoginToggle').is(':checked');
+    let username;
+    let password = $('#password').val();
+    const loginError = $('#login-error');
+    loginError.text('');
+    if (isAdminLogin) {
+        username = $('#adminUsername').val();
+        if (!username || !password) {
+            loginError.text('Please enter admin username and password.');
+            return;
+        }
+    } else {
+        username = $('#username').val();
+        if (!username || !password) {
+            loginError.text('Please select a username and enter a password.');
+            return;
+        }
+    }
+    try {
+        let query;
+        if (isAdminLogin) {
+            query = supabaseClient
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .eq('title', 'admin')
+                .single();
+        } else {
+            query = supabaseClient
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .single();
+        }
+
+        const { data, error } = await query;
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
+            throw error;
+        }
+        if (data) {
+            loggedInUserRole = data.title;
+            loggedInUserDM = data.username;
+
+            localStorage.setItem('loggedInUsername', data.username);
+            localStorage.setItem('loggedInUserRole', data.title);
+            const dmGovernorates = new Set();
+            let medicalRepNameForCRM = null; // To store the medical rep name if DM logs in
+            allGoogleSheetData.forEach(row => {
+                if (row['District Manager'] === loggedInUserDM && row['Governorate']) {
+                    dmGovernorates.add(row['Governorate'].trim());
+                }
+                // If the logged-in user is a DM, find the first associated medical rep
+                if (loggedInUserRole === 'District Manager' && row['District Manager'] === loggedInUserDM && row['medical rep']) {
+                    // Prioritize a medical rep that is not "الجيزة"
+                    if (!medicalRepNameForCRM && !row['medical rep'].includes("الجيزة")) {
+                        medicalRepNameForCRM = row['medical rep'].trim();
                     }
-                });
-
-                const usernameSelect = $('#username');
-                usernameSelect.empty();
-                usernameSelect.append($('<option>', { value: '', text: 'Select District Manager' }));
-                Array.from(districtManagers).sort().forEach(dm => {
-                    usernameSelect.append($('<option>', { value: dm, text: dm }));
-                });
-            } catch (error) {
-                console.error('Error fetching district managers for login:', error);
-                $('#login-error').text('Failed to load district managers. Please check the console for details, ensure the Google Sheet URL is correct, and that the sheet is published to the web as a CSV.');
+                }
+            });
+            loggedInUserGovernorates = Array.from(dmGovernorates);
+            localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
+            // Store user data in sessionStorage for CRM iframe
+            const userDataForCRM = {
+                name: medicalRepNameForCRM || loggedInUserDM, // Use medical rep name if available, else DM name
+                area: loggedInUserGovernorates.length > 0 ? loggedInUserGovernorates[0] : 'N/A', // Or derive area if needed
+                districtManager: loggedInUserDM,
+                governorate: loggedInUserGovernorates.length > 0 ? loggedInUserGovernorates.join(', ') : 'N/A'
+            };
+            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('userData', JSON.stringify(userDataForCRM));
+            $('#login-page').hide();
+            $('#dashboard-content').show();
+            if (typeof initializeCommonDashboard === 'function') {
+                initializeCommonDashboard();
             }
+        } else {
+            loginError.text('Invalid username or password.');
         }
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const isAdminLogin = $('#adminLoginToggle').is(':checked');
-            let username;
-            let password = $('#password').val();
-            const loginError = $('#login-error');
-            loginError.text('');
-
-            if (isAdminLogin) {
-                username = $('#adminUsername').val();
-                if (!username || !password) {
-                    loginError.text('Please enter admin username and password.');
-                    return;
-                }
-            } else {
-                username = $('#username').val();
-                if (!username || !password) {
-                    loginError.text('Please select a username and enter a password.');
-                    return;
-                }
-            }
-
-            try {
-                let query;
-                if (isAdminLogin) {
-                    query = supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password', password)
-                        .eq('title', 'admin')
-                        .single();
-                } else {
-                    query = supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password', password)
-                        .single();
-                }
-
-                const { data, error } = await query;
-
-                if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
-                    throw error;
-                }
-
-                if (data) {
-                    loggedInUserRole = data.title;
-                    loggedInUserDM = data.username;
-                    localStorage.setItem('loggedInUsername', data.username);
-                    localStorage.setItem('loggedInUserRole', data.title);
-
-                    const dmGovernorates = new Set();
-                    let medicalRepNameForCRM = null; // To store the medical rep name if DM logs in
-
-                    allGoogleSheetData.forEach(row => {
-                        if (row['District Manager'] === loggedInUserDM && row['Governorate']) {
-                            dmGovernorates.add(row['Governorate'].trim());
-                        }
-                        // If the logged-in user is a DM, find the first associated medical rep
-                        // This assumes a DM might be associated with multiple reps, picking one for CRM bypass
-                        if (loggedInUserRole === 'District Manager' && row['District Manager'] === loggedInUserDM && row['medical rep']) {
-                             // Prioritize a medical rep that is not "الجيزة"
-                            if (!medicalRepNameForCRM && !row['medical rep'].includes("الجيزة")) {
-                                medicalRepNameForCRM = row['medical rep'].trim();
-                            }
-                        }
-                    });
-
-                    loggedInUserGovernorates = Array.from(dmGovernorates);
-                    localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
-
-                    // Store user data in sessionStorage for CRM iframe
-                    const userDataForCRM = {
-                        name: medicalRepNameForCRM || loggedInUserDM, // Use medical rep name if available, else DM name
-                        area: loggedInUserGovernorates.length > 0 ? loggedInUserGovernorates[0] : 'N/A', // Or derive area if needed
-                        districtManager: loggedInUserDM,
-                        governorate: loggedInUserGovernorates.length > 0 ? loggedInUserGovernorates.join(', ') : 'N/A'
-                    };
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    sessionStorage.setItem('userData', JSON.stringify(userDataForCRM));
-
-
-                    $('#login-page').hide();
-                    $('#dashboard-content').show();
-                    initializeCommonDashboard();
-                } else {
-                    loginError.text('Invalid username or password.');
-                }
-            } catch (err) {
-                console.error('Login error:', err);
-                if (err.message.includes("Invalid API key")) {
-                    loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
-                } else {
-                    loginError.text('An error occurred during login. Please try again.');
-                }
-            }
+    } catch (err) {
+        console.error('Login error:', err);
+        if (err.message.includes("Invalid API key")) {
+            loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
+        } else {
+            loginError.text('An error occurred during login. Please try again.');
         }
+    }
+}
 
         // --- Common Dashboard Initialization ---
         function initializeCommonDashboard() {
