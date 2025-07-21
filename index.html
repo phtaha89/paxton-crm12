@@ -328,7 +328,7 @@
             transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
             transform: translateY(10px); /* Initial slight offset for animation */
             opacity: 0; /* Start hidden */
-            /* Removed fixed height calculation, let flex-grow handle it */
+            height: calc(100vh - 120px); /* Calculate height to fill screen minus header/padding */
         }
 
         .full-page-view.active {
@@ -661,8 +661,7 @@
                 font-size: 1.2rem;
             }
             .full-page-view {
-                /* height: calc(100vh - 90px); */ /* Adjusted height for mobile header */
-                flex-grow: 1; /* Let flexbox handle height */
+                height: calc(100vh - 90px); /* Adjust height for mobile header */
             }
             .login-card {
                 padding: 20px; /* Further adjusted padding */
@@ -676,11 +675,11 @@
                 font-size: 1.5rem; /* Adjusted font size */
             }
             .login-card p {
-                font-size: 0.85rem;
+                font-size: 0.85rem; /* Adjusted font size */
             }
             .login-input, .login-button {
                 font-size: 0.85rem;
-                padding: 8px 10px; /* Adjusted padding */
+                padding: 8px 10px;
             }
         }
 
@@ -721,84 +720,6 @@
                 padding: 6px 8px;
             }
         }
-
-        /* User Info Card Styling */
-        .user-info-card {
-            display: flex; /* Use flexbox for horizontal alignment */
-            flex-direction: column; /* Stack name and title vertically */
-            align-items: flex-start; /* Align text to the left */
-            margin-right: auto; /* Pushes the card to the left, next to back button */
-            padding: 5px 10px;
-            border-radius: 8px;
-            background-color: var(--bg-light); /* Light background for contrast */
-            box-shadow: var(--shadow-sm);
-            font-size: 0.85rem; /* Small font size */
-            color: var(--text-color-dark);
-            gap: 2px; /* Small gap between lines */
-            transition: all 0.2s ease;
-        }
-
-        .user-info-card.hidden {
-            display: none !important;
-        }
-
-        .user-info-text {
-            white-space: nowrap; /* Prevent text from wrapping */
-            overflow: hidden;
-            text-overflow: ellipsis; /* Add ellipsis if text overflows */
-            max-width: 150px; /* Limit width for small display */
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: var(--coffee-dark);
-        }
-
-        .user-title {
-            font-weight: 400;
-            color: var(--text-color-light);
-            font-size: 0.75rem; /* Even smaller for title */
-        }
-
-        .user-area {
-            font-weight: 500;
-            color: #4CAF50; /* Green for area */
-            font-size: 0.75rem; /* Even smaller for area */
-        }
-
-        /* Adjust header to accommodate the new card */
-        .header {
-            justify-content: space-between; /* Distribute items with space between them */
-            align-items: center;
-        }
-
-        /* Ensure back button still aligns left if user info card is hidden */
-        .back-button {
-            margin-right: 15px; /* Add some space if user info card is not there */
-        }
-
-        /* Adjust media queries for the new card */
-        @media (max-width: 768px) {
-            .user-info-card {
-                font-size: 0.75rem;
-                padding: 4px 8px;
-                max-width: 100px; /* Further limit width on smaller screens */
-            }
-            .user-title, .user-area {
-                font-size: 0.65rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .user-info-card {
-                font-size: 0.7rem;
-                padding: 3px 6px;
-                max-width: 80px; /* Even smaller on very small screens */
-            }
-            .user-title, .user-area {
-                font-size: 0.6rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -808,12 +729,7 @@
             <button id="backButton" class="back-button hidden">
                 &#x2190; Back to Home
             </button>
-            <!-- User Info Card - NEWLY ADDED -->
-            <div id="userInfoCard" class="user-info-card hidden">
-                <span id="displayUsername" class="user-info-text user-name"></span>
-                <span id="displayUserTitle" class="user-info-text user-title"></span>
-                <span id="displayUserArea" class="user-info-text user-area hidden"></span>
-            </div>
+            <!-- Admin tab button - REMOVED from header -->
             <!-- Logout button, initially hidden -->
             <button id="logoutButton" class="logout-button hidden">
                 Logout
@@ -1002,36 +918,32 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Global state variables for login status and user information
+        // Store the ID of the currently active full-page view
         let currentActiveViewId = null;
-        let isLoggedIn = false; // Tracks user login status
-        let currentUserRole = null; // Stores the role of the logged-in user
-        let currentUsername = null; // Stores the username of the logged-in user
-        let currentUserPassword = null; // Stores the password of the logged-in user (NEW)
-        let currentUserArea = null; // Stores the area of the logged-in Medical Representative
+        let userData = null; // Stores the logged-in user's data (including title)
 
-        // Google Sheet URL for Medical Representative areas
-        const MEDICAL_REP_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+        // Page configurations
+        const pageConfig = {
+            'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
+            'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
+            'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
+            'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
+            'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
+        };
 
         /**
          * Shows the login view and hides all other views.
          */
         function showLogin() {
             console.log('Showing login view');
-            isLoggedIn = false;
-            currentUserRole = null; // Clear user role on logout/show login
-            currentUsername = null; // Clear username on logout/show login
-            currentUserPassword = null; // Clear password on logout/show login (NEW)
-            currentUserArea = null; // Clear user area on logout/show login
-
-            // Clear session storage on explicit logout or when login view is shown
-            sessionStorage.removeItem('loggedInUser');
+            sessionStorage.removeItem('isLoggedIn'); // Clear login state
+            sessionStorage.removeItem('userData'); // Clear user data
+            userData = null; // Also clear in-memory data
 
             document.getElementById('loginView').classList.remove('hidden');
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('backButton').classList.add('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
-            document.getElementById('userInfoCard').classList.add('hidden'); // Ensure user info card is hidden on login page
 
             // Hide any active full-page view
             if (currentActiveViewId) {
@@ -1050,37 +962,28 @@
             document.getElementById('loginErrorMessage').textContent = '';
             document.getElementById('usernameInput').value = '';
             document.getElementById('passwordInput').value = '';
-
-            // Clear sessionStorage related to specific page logins
-            sessionStorage.removeItem('bypassDashboardLogin');
-            sessionStorage.removeItem('crmUserData');
-            sessionStorage.removeItem('dashboardUserData'); // Clear dashboard data too (NEW)
-
-            // Reset card states on logout/show login
-            resetHomeCards();
         }
 
         /**
          * Shows the home view and hides any active full-page view.
-         * Only proceeds if the user is logged in.
+         * Also updates card visibility based on user role.
          */
         function showHome() {
-            if (!isLoggedIn) {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true') {
                 showLogin(); // Redirect to login if not logged in
                 return;
             }
             console.log('Showing home view');
             const homeView = document.getElementById('homeView');
-            const loginView = document.getElementById('loginView'); // Get login view
+            const loginView = document.getElementById('loginView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
-            const userInfoCard = document.getElementById('userInfoCard'); // Get user info card
             
             if (homeView) {
                 homeView.classList.remove('hidden');
             }
             
-            if (loginView) { // Hide login view when showing home
+            if (loginView) {
                 loginView.classList.add('hidden');
             }
 
@@ -1088,14 +991,8 @@
                 backButton.classList.add('hidden');
             }
 
-            // Show logout button when returning to home view
             if (logoutButton) {
                 logoutButton.classList.remove('hidden');
-            }
-
-            // Show user info card when on home page
-            if (userInfoCard) {
-                userInfoCard.classList.remove('hidden');
             }
 
             // Hide the currently active full-page view, if any
@@ -1103,9 +1000,7 @@
                 const activeView = document.getElementById(currentActiveViewId);
                 if (activeView) {
                     activeView.classList.remove('active');
-                    // Delay adding 'hidden' to allow CSS transition to complete
                     setTimeout(() => activeView.classList.add('hidden'), 300);
-                    // Also hide the iframe and show demo content if it was an iframe view
                     const iframe = activeView.querySelector('iframe');
                     const demoContent = activeView.querySelector('.demo-content');
                     if (iframe) iframe.classList.add('hidden');
@@ -1113,152 +1008,119 @@
                 }
                 currentActiveViewId = null;
             }
-
-            // Update user info card content
-            updateUserInfoCard(); 
-            // Apply role-based card restrictions when showing home
-            applyRoleBasedCardRestrictions();
+            updateNavigationAccess(); // Update card visibility based on role
         }
 
         /**
-         * Fetches the Medical Representative's area from the Google Sheet.
-         * @param {string} username - The username of the Medical Representative.
-         * @returns {Promise<string|null>} The area string or null if not found/error.
+         * Updates the visibility and enabled state of navigation cards based on the user's role.
          */
-        async function fetchUserArea(username) {
-            try {
-                const response = await fetch(MEDICAL_REP_SHEET_URL);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+        function updateNavigationAccess() {
+            // Normalize userTitle to match the lowercase, hyphenated format used in switch cases
+            const userTitle = userData ? userData.title.toLowerCase().replace(/\s/g, '-') : null;
+            const mainCards = document.querySelectorAll('.main-card');
+
+            mainCards.forEach(card => {
+                const page = card.dataset.page;
+                let isDisabled = false;
+
+                switch (userTitle) {
+                    case 'medical-representative': // Updated to match normalized title
+                        // Medical Reps can only access CRM, UPA Codes, Price List
+                        if (page === 'dashboard' || page === 'admin') {
+                            isDisabled = true;
+                        }
+                        break;
+                    case 'district-manager': // Updated to match normalized title
+                        // District Managers can access everything except Admin Panel
+                        if (page === 'admin') {
+                            isDisabled = true;
+                        }
+                        break;
+                    case 'admin':
+                        // Admins can access everything
+                        isDisabled = false;
+                        break;
+                    default:
+                        // If no user or unknown role, disable all except login (handled by showLogin)
+                        isDisabled = true;
+                        break;
                 }
-                const csvText = await response.text();
-                const rows = csvText.split('\n').map(row => row.trim()).filter(row => row.length > 0);
 
-                // Assuming username is in column A (index 0) and Area is in column E (index 4)
-                for (const row of rows) {
-                    const columns = row.split(','); // Simple split, might need more robust CSV parsing for complex cases
-                    if (columns.length > 4 && columns[0].trim() === username) {
-                        return columns[4].trim(); // Column E is index 4
-                    }
-                }
-                return null; // Username not found
-            } catch (error) {
-                console.error('Error fetching or parsing user area:', error);
-                return null;
-            }
-        }
-
-        /**
-         * Updates the user information card in the header.
-         */
-        function updateUserInfoCard() {
-            const userInfoCard = document.getElementById('userInfoCard');
-            const displayUsername = document.getElementById('displayUsername');
-            const displayUserTitle = document.getElementById('displayUserTitle');
-            const displayUserArea = document.getElementById('displayUserArea');
-
-            // This function only updates the content. Visibility is handled by showHome/loadPage/showLogin.
-            if (isLoggedIn && currentUsername && currentUserRole) {
-                displayUsername.textContent = currentUsername;
-                displayUserTitle.textContent = currentUserRole;
-
-                if (currentUserRole === 'Medical Representative' && currentUserArea) {
-                    displayUserArea.textContent = `Area: ${currentUserArea}`;
-                    displayUserArea.classList.remove('hidden');
+                if (isDisabled) {
+                    card.classList.add('disabled');
                 } else {
-                    displayUserArea.classList.add('hidden');
-                    displayUserArea.textContent = '';
+                    card.classList.remove('disabled');
                 }
-            } else {
-                // If not logged in, ensure content is cleared
-                displayUsername.textContent = '';
-                displayUserTitle.textContent = '';
-                displayUserArea.textContent = '';
-                displayUserArea.classList.add('hidden');
-            }
-        }
-
-        /**
-         * Resets all main cards to their default (enabled, visible) state.
-         */
-        function resetHomeCards() {
-            document.querySelectorAll('.main-card').forEach(card => {
-                card.classList.remove('disabled');
-                card.classList.remove('hidden');
             });
         }
 
-        /**
-         * Applies role-based restrictions to the main navigation cards.
-         */
-        function applyRoleBasedCardRestrictions() {
-            // Always reset first to ensure correct state if roles change or user logs out/in
-            resetHomeCards();
-
-            const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
-            const adminCard = document.querySelector('.main-card[data-page="admin"]');
-
-            if (currentUserRole === 'Medical Representative') {
-                if (dashboardCard) {
-                    dashboardCard.classList.add('disabled');
-                }
-                if (adminCard) {
-                    adminCard.classList.add('hidden');
-                }
-            } else if (currentUserRole === 'District Manager') {
-                if (adminCard) {
-                    adminCard.classList.add('hidden');
-                }
-            }
-            // For 'admin' role or any other role, cards remain enabled/visible by default due to resetHomeCards()
-        }
 
         /**
          * Loads a specific page view into an iframe.
-         * Only proceeds if the user is logged in.
+         * Only proceeds if the user is logged in and has permission.
          * @param {string} page - The page identifier (e.g., 'crm', 'dashboard').
          */
         function loadPage(page) {
-            if (!isLoggedIn) {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true') {
                 showLogin(); // Redirect to login if not logged in
                 return;
             }
-            console.log(`Attempting to load page: ${page}`);
-            
-            // Configuration for each page, including view ID, display name, and file name
-            const pageConfig = {
-                'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
-                'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
-                'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
-                'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
-                'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
-            };
 
+            // Normalize userTitle before permission check
+            const userTitle = userData ? userData.title.toLowerCase().replace(/\s/g, '-') : null;
             const config = pageConfig[page];
+
             if (!config) {
                 console.error(`Error: Unknown page identifier: ${page}`);
                 return;
             }
 
+            // Permission check based on user role
+            let hasPermission = false;
+            switch (userTitle) {
+                case 'medical-representative': // Updated to match normalized title
+                    hasPermission = (page === 'crm' || page === 'upa-codes' || page === 'price-list');
+                    break;
+                case 'district-manager': // Updated to match normalized title
+                    hasPermission = (page !== 'admin');
+                    break;
+                case 'admin':
+                    hasPermission = true;
+                    break;
+                default:
+                    hasPermission = false; // No permission for unknown roles
+                    break;
+            }
+
+            if (!hasPermission) {
+                const errorMessageElement = document.getElementById('loginErrorMessage'); // Re-using this for general messages
+                errorMessageElement.textContent = `Access Denied: Your role (${userData.title || 'Unknown'}) does not have permission to access the ${config.displayName}.`;
+                errorMessageElement.style.display = 'block'; // Make sure it's visible
+                setTimeout(() => {
+                    errorMessageElement.textContent = '';
+                    errorMessageElement.style.display = 'none';
+                }, 5000); // Hide message after 5 seconds
+                console.warn(`Access Denied: User role "${userData.title}" attempted to access "${page}".`);
+                return; // Prevent loading the page
+            }
+
+
+            console.log(`Attempting to load page: ${page}`);
+            
             const { viewId, displayName, fileName } = config;
 
-            // Get references to main UI elements
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
-            const userInfoCard = document.getElementById('userInfoCard'); // Get user info card
             const targetView = document.getElementById(viewId);
 
-            // Initialize variables for elements inside targetView
             let loadingOverlay = null;
             let errorState = null;
             let iframeContainer = null;
             let iframe = null;
             let demoContent = null;
 
-            // Ensure targetView exists before querying its children
             if (targetView) {
-                // Using querySelector with classes as they are unique within each full-page-view
                 loadingOverlay = targetView.querySelector('.loading'); 
                 errorState = targetView.querySelector('.error-state'); 
                 iframeContainer = targetView.querySelector('.iframe-container-fpv');
@@ -1268,113 +1130,115 @@
                 }
             }
 
-            // Basic validation to ensure all required elements exist
-            if (!homeView || !backButton || !logoutButton || !userInfoCard || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
-                console.error('Error: One or more required DOM elements not found for page loading. Debug details:');
-                console.error('  homeView:', homeView);
-                console.error('  backButton:', backButton);
-                console.error('  logoutButton:', logoutButton);
-                console.error('  userInfoCard:', userInfoCard); // Log user info card
-                console.error('  targetView:', targetView);
-                console.error('  loadingOverlay:', loadingOverlay);
-                console.error('  errorState:', errorState);
-                console.error('  iframeContainer:', iframeContainer);
-                console.error('  iframe:', iframe);
-                console.error('  demoContent:', demoContent);
-                return; // Exit if elements are missing
+            if (!homeView || !backButton || !logoutButton || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
+                console.error('Error: One or more required DOM elements not found for page loading.');
+                return;
             }
-
-            // --- Session Management Logic based on user role and page clicked ---
-            // Clear previous session storage values to prevent unintended auto-logins
-            sessionStorage.removeItem('crmUserData');
-            sessionStorage.removeItem('dashboardUserData'); // Clear dashboard data (NEW)
-
-            if (page === 'dashboard') {
-                // If Dashboard is clicked and user is District Manager or admin, pass login data
-                if (currentUserRole === 'District Manager' || currentUserRole === 'admin') {
-                    // Pass username, password, and role for dashboard auto-login
-                    sessionStorage.setItem('dashboardUserData', JSON.stringify({
-                        username: currentUsername,
-                        password: currentUserPassword, // Pass password (NEW)
-                        role: currentUserRole
-                    }));
-                    console.log('Dashboard: User data passed for auto-login:', currentUsername, 'Role:', currentUserRole);
-                } else {
-                    console.log('Dashboard: No auto-login data for', currentUserRole);
-                }
-            } else if (page === 'crm') {
-                // If CRM is clicked and user is Medical Representative, pass login data
-                if (currentUserRole === 'Medical Representative') {
-                    // Pass username, password, title, and area for CRM auto-login
-                    sessionStorage.setItem('crmUserData', JSON.stringify({
-                        username: currentUsername,
-                        password: currentUserPassword, // Pass password (NEW)
-                        title: currentUserRole, // Use 'title' to match common user object properties
-                        area: currentUserArea
-                    }));
-                    console.log('CRM: User data passed for Medical Representative auto-login:', currentUsername, 'Area:', currentUserArea);
-                } else {
-                    // For other roles, do NOT use automatic login session for CRM
-                    console.log('CRM: No automatic login session for', currentUserRole);
-                }
-            }
-            // --- End Session Management Logic ---
 
             console.log(`All required DOM elements found for page: ${page}. Proceeding to load.`);
 
-            // Hide the home view, show the back button, and hide the logout button
             homeView.classList.add('hidden');
-            backButton.classList.remove('hidden'); // This line makes the back button visible
-            logoutButton.classList.add('hidden'); // Hide logout button when navigating to a page
-            userInfoCard.classList.add('hidden'); // Hide user info card when navigating away from home
+            backButton.classList.remove('hidden');
+            logoutButton.classList.add('hidden');
             console.log(`Button visibility set for page: ${page}.`);
 
-
-            // If there's a currently active full-page view and it's different from the target, hide it
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
-                    // Delay adding 'hidden' to allow CSS transition to complete
                     setTimeout(() => prevActiveView.classList.add('hidden'), 300);
                 }
             }
 
-            // Set the new active view ID
             currentActiveViewId = viewId;
 
-            // Show the target full-page view with a slight delay for transition effect
             targetView.classList.remove('hidden');
             setTimeout(() => targetView.classList.add('active'), 10);
 
-            // Show the loading spinner and hide any previous error state
             loadingOverlay.classList.add('show');
             errorState.classList.remove('show');
 
-            // Hide the demo content and show the iframe before loading new content
             demoContent.classList.add('hidden');
             iframe.classList.remove('hidden');
 
-            // Set the iframe's source and attach event listeners for loading status
+            // Set the iframe's source. This will trigger a reload if already loaded.
             iframe.src = fileName;
+
+            // Wait for the iframe to signal it's ready before sending data
+            const messageListener = (event) => {
+                // Ensure the message is from the correct iframe and type
+                if (event.data && event.data.type === 'crmIframeReady' && event.source === iframe.contentWindow) {
+                    console.log(`${displayName} iframe at ${fileName} is ready. Sending user data.`);
+                    // Send user data to the iframe
+                    iframe.contentWindow.postMessage({ type: 'setUserData', userData: userData }, '*');
+                    window.removeEventListener('message', messageListener); // Remove listener after sending
+                }
+            };
+            window.addEventListener('message', messageListener);
 
             iframe.onload = function() {
                 console.log(`${displayName} iframe loaded successfully from ${fileName}.`);
-                loadingOverlay.classList.remove('show'); // Hide spinner
-                errorState.classList.remove('show');     // Hide error
+                loadingOverlay.classList.remove('show');
+                errorState.classList.remove('show');
             };
 
             iframe.onerror = function() {
                 console.error(`Failed to load ${displayName} iframe from ${fileName}. Displaying demo content.`);
-                loadingOverlay.classList.remove('show'); // Hide spinner
-                errorState.classList.add('show');        // Show error message
-                demoContent.classList.remove('hidden');  // Show demo content as fallback
-                iframe.classList.add('hidden');          // Hide the broken iframe
+                loadingOverlay.classList.remove('show');
+                errorState.classList.add('show');
+                demoContent.classList.remove('hidden');
+                iframe.classList.add('hidden');
             };
         }
 
         /**
-         * Handles user login by querying Supabase.
+         * Fetches medical representative data from Google Sheet.
+         * @param {string} username - The username to search for.
+         * @returns {Promise<Object|null>} The medical rep data or null if not found.
+         */
+        async function fetchMedicalRepData(username) {
+            const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+            try {
+                console.log(`Attempting to fetch Google Sheet data for user: ${username}`);
+                const response = await fetch(GOOGLE_SHEET_URL);
+                if (!response.ok) {
+                    console.error('Failed to fetch Google Sheet data. Status:', response.status, 'Status Text:', response.statusText);
+                    throw new Error('Failed to fetch Google Sheet data');
+                }
+                const csvText = await response.text();
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',').map(h => h.trim());
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!line) continue;
+                    const values = line.split(',').map(v => v.trim());
+                    const row = headers.reduce((obj, header, index) => {
+                        obj[header] = values[index] || '';
+                        return obj;
+                    }, {});
+
+                    if (row['medical rep'] === username) {
+                        console.log(`Found medical rep data for ${username}:`, row);
+                        return {
+                            name: row['medical rep'],
+                            area: row['area'],
+                            districtManager: row['District Manager'],
+                            governorate: row['Governorate']
+                        };
+                    }
+                }
+                console.warn(`Medical rep data not found in Google Sheet for username: ${username}`);
+                return null; // User not found in Google Sheet
+            } catch (error) {
+                console.error('Error fetching medical rep data from Google Sheet:', error);
+                return null;
+            }
+        }
+
+
+        /**
+         * Handles user login by querying Supabase and fetching medical rep data.
          * @param {Event} event - The form submission event.
          */
         async function handleLogin(event) {
@@ -1391,57 +1255,70 @@
             }
 
             try {
+                console.log(`Attempting Supabase login for username: ${username}`);
                 // Query the 'users' table to find a matching username and password
-                // NOTE: In a production environment, passwords should NEVER be stored or
-                // compared as plain text. Always use secure hashing (e.g., bcrypt)
-                // and Supabase's built-in authentication for better security.
                 const { data, error } = await supabase
                     .from('users')
                     .select('*')
                     .eq('username', username)
-                    .eq('password', password); // Direct comparison for demo purposes
+                    .eq('password', password);
 
                 if (error) {
-                    console.error('Supabase query error:', error.message);
+                    console.error('Supabase query error during login:', error.message);
                     errorMessageElement.textContent = 'An error occurred during login. Please try again.';
                     return;
                 }
 
                 if (data && data.length > 0) {
                     // User found and credentials match
-                    isLoggedIn = true;
-                    currentUserRole = data[0].title; // Store the user's role/title
-                    currentUsername = data[0].username; // Store the user's username
-                    currentUserPassword = password; // Store the password (NEW) - SECURITY CONCERN: Storing plaintext password in sessionStorage is not recommended for production.
+                    const user = data[0];
+                    console.log('Supabase user found:', user);
+                    let fetchedUserData = null;
+                    
+                    // Normalize the title from Supabase for consistent comparison
+                    const normalizedTitle = user.title.toLowerCase().replace(/\s/g, '-');
+                    console.log(`Normalized user title: ${normalizedTitle}`);
 
-                    // If Medical Representative, fetch their area
-                    if (currentUserRole === 'Medical Representative') {
-                        currentUserArea = await fetchUserArea(currentUsername);
-                        if (!currentUserArea) {
-                            console.warn(`Area not found for Medical Representative: ${currentUsername}`);
+                    if (normalizedTitle === 'medical-representative' || normalizedTitle === 'district-manager') {
+                        // For medical reps and district managers, fetch data from Google Sheet
+                        fetchedUserData = await fetchMedicalRepData(username);
+                        if (fetchedUserData) {
+                            fetchedUserData.title = normalizedTitle; // Add the normalized title
+                        } else {
+                            console.warn(`Google Sheet data missing for user: ${username} with title: ${user.title}`);
                         }
+                    } else if (normalizedTitle === 'admin') {
+                        // For admin, create a dummy data object with the title
+                        fetchedUserData = { name: 'Admin', title: 'admin', area: 'N/A', districtManager: 'N/A', governorate: 'N/A' };
+                        console.log('Admin user logged in. Dummy data created.');
                     } else {
-                        currentUserArea = null; // Ensure area is null for other roles
+                        console.warn(`Unsupported user title found in Supabase: '${user.title}' for user: ${username}`);
+                        errorMessageElement.textContent = `Login failed: Unsupported user role '${user.title}'.`;
+                        sessionStorage.removeItem('isLoggedIn');
+                        sessionStorage.removeItem('userData');
+                        return; // Exit if role is not supported
                     }
 
-                    // Store login data in sessionStorage for persistence across refreshes
-                    sessionStorage.setItem('loggedInUser', JSON.stringify({
-                        username: currentUsername,
-                        password: currentUserPassword, // Store password (NEW)
-                        role: currentUserRole,
-                        area: currentUserArea
-                    }));
-
-                    console.log('Login successful for user:', currentUsername, 'Role:', currentUserRole, 'Area:', currentUserArea);
-                    showHome(); // Redirect to home page
+                    if (fetchedUserData) {
+                        sessionStorage.setItem('isLoggedIn', 'true');
+                        sessionStorage.setItem('userData', JSON.stringify(fetchedUserData));
+                        userData = fetchedUserData; // Update in-memory userData
+                        console.log('Login successful for user:', username, 'Role:', user.title, 'Full Data:', userData);
+                        showHome(); // Redirect to home page
+                    } else {
+                        errorMessageElement.textContent = 'User data not found in Google Sheet for this user. Please contact support.';
+                        sessionStorage.removeItem('isLoggedIn');
+                        sessionStorage.removeItem('userData');
+                    }
                 } else {
                     // No user found or credentials do not match
+                    console.warn(`Login failed: Invalid username or password for ${username}`);
                     errorMessageElement.textContent = 'Invalid username or password.';
                 }
             } catch (err) {
-                console.error('Login process error:', err);
+                console.error('An unexpected error occurred during login process:', err);
                 errorMessageElement.textContent = 'An unexpected error occurred. Please try again later.';
-            } 
+            }
         }
 
         /**
@@ -1449,33 +1326,7 @@
          */
         function handleLogout() {
             console.log('User logged out.');
-            showLogin(); // Redirect to login page, which also clears session data
-        }
-
-        /**
-         * Attempts to restore user session from sessionStorage on page load.
-         */
-        async function restoreSession() {
-            const storedUser = sessionStorage.getItem('loggedInUser');
-            if (storedUser) {
-                try {
-                    const userData = JSON.parse(storedUser);
-                    isLoggedIn = true;
-                    currentUsername = userData.username;
-                    currentUserRole = userData.role;
-                    currentUserPassword = userData.password; // Retrieve password (NEW)
-                    currentUserArea = userData.area; // This might be null for non-MRs, which is fine
-
-                    console.log('Session restored for user:', currentUsername, 'Role:', currentUserRole, 'Area:', currentUserArea);
-                    showHome(); // Show home view with restored session
-                } catch (e) {
-                    console.error('Error parsing stored user data:', e);
-                    showLogin(); // Fallback to login if data is corrupted
-                }
-            } else {
-                console.log('No stored session found, showing login.');
-                showLogin(); // No stored session, show login page
-            }
+            showLogin(); // Redirect to login page
         }
 
         // Initialize the application when DOM is fully loaded
@@ -1487,11 +1338,11 @@
                 card.addEventListener('click', function() {
                     const page = this.dataset.page; // Get the 'data-page' attribute
                     // Only load the page if it's not disabled and user is logged in
-                    if (isLoggedIn && page && !this.classList.contains('disabled')) {
+                    if (sessionStorage.getItem('isLoggedIn') === 'true' && page && !this.classList.contains('disabled')) {
                         loadPage(page);
                     } else if (this.classList.contains('disabled')) {
                         console.log(`Card for page "${page}" is disabled.`);
-                    } else if (!isLoggedIn) {
+                    } else {
                         showLogin(); // Prompt login if not logged in
                     }
                 });
@@ -1508,8 +1359,15 @@
             // Add event listener for the logout button
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
 
-            // Attempt to restore session or show login initially
-            restoreSession();
+            // Check session storage on initial load
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                userData = JSON.parse(sessionStorage.getItem('userData'));
+                console.log('Session found. User is logged in.', userData);
+                showHome(); // Show home if session exists and update card access
+            } else {
+                console.log('No session found. Showing login view.');
+                showLogin(); // Otherwise, show login
+            }
         });
     </script>
 </body>
