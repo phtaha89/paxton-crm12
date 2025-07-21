@@ -675,7 +675,7 @@
                 font-size: 1.5rem; /* Adjusted font size */
             }
             .login-card p {
-                font-size: 0.85rem; /* Adjusted font size */
+                font-size: 0.85rem;
             }
             .login-input, .login-button {
                 font-size: 0.85rem;
@@ -1192,53 +1192,7 @@
         }
 
         /**
-         * Fetches medical representative data from Google Sheet.
-         * @param {string} username - The username to search for.
-         * @returns {Promise<Object|null>} The medical rep data or null if not found.
-         */
-        async function fetchMedicalRepData(username) {
-            const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
-            try {
-                console.log(`Attempting to fetch Google Sheet data for user: ${username}`);
-                const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) {
-                    console.error('Failed to fetch Google Sheet data. Status:', response.status, 'Status Text:', response.statusText);
-                    throw new Error('Failed to fetch Google Sheet data');
-                }
-                const csvText = await response.text();
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(',').map(h => h.trim());
-                
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue;
-                    const values = line.split(',').map(v => v.trim());
-                    const row = headers.reduce((obj, header, index) => {
-                        obj[header] = values[index] || '';
-                        return obj;
-                    }, {});
-
-                    if (row['medical rep'] === username) {
-                        console.log(`Found medical rep data for ${username}:`, row);
-                        return {
-                            name: row['medical rep'],
-                            area: row['area'],
-                            districtManager: row['District Manager'],
-                            governorate: row['Governorate']
-                        };
-                    }
-                }
-                console.warn(`Medical rep data not found in Google Sheet for username: ${username}`);
-                return null; // User not found in Google Sheet
-            } catch (error) {
-                console.error('Error fetching medical rep data from Google Sheet:', error);
-                return null;
-            }
-        }
-
-
-        /**
-         * Handles user login by querying Supabase and fetching medical rep data.
+         * Handles user login by querying Supabase and fetching user data.
          * @param {Event} event - The form submission event.
          */
         async function handleLogin(event) {
@@ -1259,7 +1213,7 @@
                 // Query the 'users' table to find a matching username and password
                 const { data, error } = await supabase
                     .from('users')
-                    .select('*')
+                    .select('*') // Select all columns to get title, area, districtManager, governorate
                     .eq('username', username)
                     .eq('password', password);
 
@@ -1280,13 +1234,16 @@
                     console.log(`Normalized user title: ${normalizedTitle}`);
 
                     if (normalizedTitle === 'medical-representative' || normalizedTitle === 'district-manager') {
-                        // For medical reps and district managers, fetch data from Google Sheet
-                        fetchedUserData = await fetchMedicalRepData(username);
-                        if (fetchedUserData) {
-                            fetchedUserData.title = normalizedTitle; // Add the normalized title
-                        } else {
-                            console.warn(`Google Sheet data missing for user: ${username} with title: ${user.title}`);
-                        }
+                        // For medical reps and district managers, use data directly from Supabase
+                        // Assuming your 'users' table in Supabase has 'name', 'area', 'districtManager', 'governorate' columns
+                        fetchedUserData = {
+                            name: user.username, // Or user.name if you have a 'name' column
+                            title: normalizedTitle,
+                            area: user.area || 'N/A', // Use 'N/A' if field is missing in Supabase
+                            districtManager: user.districtManager || 'N/A',
+                            governorate: user.governorate || 'N/A'
+                        };
+                        console.log('Medical Rep/District Manager logged in. Data from Supabase:', fetchedUserData);
                     } else if (normalizedTitle === 'admin') {
                         // For admin, create a dummy data object with the title
                         fetchedUserData = { name: 'Admin', title: 'admin', area: 'N/A', districtManager: 'N/A', governorate: 'N/A' };
@@ -1306,7 +1263,8 @@
                         console.log('Login successful for user:', username, 'Role:', user.title, 'Full Data:', userData);
                         showHome(); // Redirect to home page
                     } else {
-                        errorMessageElement.textContent = 'User data not found in Google Sheet for this user. Please contact support.';
+                        // This else block should ideally not be reached if Supabase query is successful
+                        errorMessageElement.textContent = 'User data could not be processed. Please contact support.';
                         sessionStorage.removeItem('isLoggedIn');
                         sessionStorage.removeItem('userData');
                     }
