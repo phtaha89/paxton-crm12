@@ -986,22 +986,6 @@
             localStorage.removeItem('currentPage'); // Remove current page from local storage
             loggedInUser = null; // Reset loggedInUser variable
             currentActiveViewId = null; // Reset current view
-
-            // Explicitly reset all full-page views and their iframes
-            document.querySelectorAll('.full-page-view').forEach(view => {
-                view.classList.add('hidden'); // Ensure the view is hidden
-                view.classList.remove('active'); // Ensure active state is removed
-                const iframe = view.querySelector('iframe');
-                const demoContent = view.querySelector('.demo-content');
-                if (iframe) {
-                    iframe.src = ''; // Clear iframe source
-                    iframe.classList.add('hidden'); // Hide iframe
-                }
-                if (demoContent) {
-                    demoContent.classList.remove('hidden'); // Show demo content as fallback
-                }
-            });
-
             console.log('Showing login page.');
         }
 
@@ -1138,9 +1122,33 @@
 
         /**
          * Handles user logout. Clears session and returns to login page.
+         * This function now also clears the content of all iframes.
          */
         function handleLogout() {
-            console.log('User logged out.');
+            console.log('User logged out. Clearing iframe states.');
+
+            // Get all full-page-view elements
+            const fullPageViewElements = document.querySelectorAll('.full-page-view');
+
+            fullPageViewElements.forEach(view => {
+                const iframe = view.querySelector('iframe');
+                if (iframe) {
+                    // Set iframe src to about:blank to clear its content and state
+                    iframe.src = 'about:blank';
+                    console.log(`Cleared iframe src for view: ${view.id}`);
+                    // Also hide the iframe and show demo content if it's currently active
+                    const demoContent = view.querySelector('.demo-content');
+                    if (demoContent) {
+                        iframe.classList.add('hidden');
+                        demoContent.classList.remove('hidden');
+                    }
+                    // Ensure the view itself is hidden and not active
+                    view.classList.remove('active');
+                    view.classList.add('hidden');
+                }
+            });
+
+            // Now proceed with the standard logout process
             showLoginPage(); // Go back to the login page
         }
 
@@ -1183,8 +1191,6 @@
                         const demoContent = activeView.querySelector('.demo-content');
                         if (iframe) iframe.classList.add('hidden');
                         if (demoContent) demoContent.classList.remove('hidden');
-                        // IMPORTANT: Clear the iframe src when hiding a view
-                        if (iframe) iframe.src = ''; 
                     }, 300);
                 }
                 currentActiveViewId = null; // Reset current active view
@@ -1266,12 +1272,7 @@
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
                     // Delay adding 'hidden' to allow CSS transition to complete
-                    setTimeout(() => {
-                        prevActiveView.classList.add('hidden');
-                        // IMPORTANT: Clear the iframe src when hiding a view
-                        const prevIframe = prevActiveView.querySelector('iframe');
-                        if (prevIframe) prevIframe.src = ''; 
-                    }, 300);
+                    setTimeout(() => prevActiveView.classList.add('hidden'), 300);
                 }
             }
 
@@ -1290,10 +1291,9 @@
             demoContent.classList.add('hidden');
             iframe.classList.remove('hidden');
 
-            // IMPORTANT: Set iframe src to empty string before setting the new source
-            // This forces the iframe to reload its content completely, preventing stale data.
-            iframe.src = ''; 
-            localStorage.setItem('currentPage', page); // Store the page to load in localStorage
+            // Crucial fix for refresh: Store the page to load in localStorage
+            // This ensures that if the user refreshes, they return to the same iframe page.
+            localStorage.setItem('currentPage', page);
             iframe.src = fileName; // Set the iframe's source
 
             iframe.onload = function() {
