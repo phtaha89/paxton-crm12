@@ -2319,78 +2319,73 @@
 
     <script>
         // Supabase and Google Sheet URLs - Consolidated
-        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/';
-        const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c'; 
-        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/';
+const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
-        // Supabase Client
-        const supabaseClient = supabase.createClient('https://plmevfyxpngzymvzvkzn.supabase.co', SUPABASE_API_KEY);
+// Supabase Client
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_API_KEY);
 
-        // Global variables to store fetched data
-        let allMedicalRepsData = {};
-        let allVisitsData = [];
-        let allGoogleSheetData = [];
-        let medicalRepsForDailyReport = [];
+// Listen for messages from the parent window
+window.addEventListener('message', (event) => {
+    // Verify the origin of the message for security
+    if (event.origin !== 'https://your-main-app-domain.com') return;
 
-        // Global variables for Lists Dashboard
-        let listsGoogleData = [];
-        let listsVisitCounts = {};
-        let listsBricks = new Set();
-        let listsSelectedBricks = [];
-        let listsFilteredHCPs = [];
+    if (event.data && event.data.type === 'loggedInUser') {
+        const userData = event.data.user;
+        console.log('Received user data in iframe:', userData);
 
-        // Global variables for Requests Dashboard
-        let requests_districtManagers = new Set();
-        let requests_medicalReps = new Map();
-        let requests_areasByMedRep = new Map();
-        let requests_allRequests = [];
+        // Use the received user data to log in or customize the iframe content
+        handleLoginWithUserData(userData);
+    }
+});
 
-        // Global variables for Weekly Plan Dashboard
-        let weeklyPlan = {
-            Saturday: { am: [], pm: [] },
-            Sunday: { am: [], pm: [] },
-            Monday: { am: [], pm: [] },
-            Tuesday: { am: [], pm: [] },
-            Wednesday: { am: [], pm: [] },
-            Thursday: { am: [], pm: [] }
-        };
-        let weeklyPlanSelectedVisitIds = []; // Renamed to avoid conflict
+// Function to handle login with received user data
+async function handleLoginWithUserData(userData) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('username', userData.username)
+            .eq('password', userData.password)
+            .single();
 
-        // Global user role and DM information
-        let loggedInUserRole = null;
-        let loggedInUserDM = null;
-        let loggedInUserGovernorates = [];
-
-        // State for visits table view (normal, leaves, archived)
-        let currentVisitsTableView = 'normal';
-        let archivedVisitsData = [];
-
-        // Pagination constant
-        const PAGE_SIZE = 1000; 
-
-        // --- LOGIN LOGIC ---
-function isUserLoggedIn() {
-    return sessionStorage.getItem('isLoggedIn') === 'true';
-}
-
-function loadDashboardIfLoggedIn() {
-    if (isUserLoggedIn()) {
-        // User is already logged in, bypass the login and load the dashboard
-        $('#login-page').hide();
-        $('#dashboard-content').show();
-        if (typeof initializeCommonDashboard === 'function') {
-            initializeCommonDashboard();
+        if (error && error.code !== 'PGRST116') {
+            throw error;
         }
-    } else {
-        // User is not logged in, prompt for login
-        showLogin();
+
+        if (data) {
+            loggedInUserRole = data.title;
+            loggedInUserDM = data.username;
+
+            localStorage.setItem('loggedInUsername', data.username);
+            localStorage.setItem('loggedInUserRole', data.title);
+
+            const dmGovernorates = new Set();
+            allGoogleSheetData.forEach(row => {
+                if (row['District Manager'] === loggedInUserDM && row['area']) {
+                    dmGovernorates.add(row['area'].trim());
+                }
+            });
+
+            loggedInUserGovernorates = Array.from(dmGovernorates);
+            localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
+
+            $('#login-page').hide();
+            $('#dashboard-content').show();
+            initializeCommonDashboard();
+        } else {
+            console.error('Invalid username or password.');
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        if (err.message.includes("Invalid API key")) {
+            showAlertDialog('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
+        } else {
+            showAlertDialog('An error occurred during login. Please try again.');
+        }
     }
 }
-
-// Modify the event listener for the dashboard card
-document.querySelectorAll('.main-card[data-page="dashboard"]').forEach(card => {
-    card.addEventListener('click', loadDashboardIfLoggedIn);
-});
 
 async function fetchDistrictManagersForLogin() {
     try {
@@ -2458,7 +2453,7 @@ async function handleLogin(e) {
         }
 
         const { data, error } = await query;
-        if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
+        if (error && error.code !== 'PGRST116') {
             throw error;
         }
         if (data) {
@@ -2468,35 +2463,16 @@ async function handleLogin(e) {
             localStorage.setItem('loggedInUsername', data.username);
             localStorage.setItem('loggedInUserRole', data.title);
             const dmGovernorates = new Set();
-            let medicalRepNameForCRM = null; // To store the medical rep name if DM logs in
             allGoogleSheetData.forEach(row => {
-                if (row['District Manager'] === loggedInUserDM && row['Governorate']) {
-                    dmGovernorates.add(row['Governorate'].trim());
-                }
-                // If the logged-in user is a DM, find the first associated medical rep
-                if (loggedInUserRole === 'District Manager' && row['District Manager'] === loggedInUserDM && row['medical rep']) {
-                    // Prioritize a medical rep that is not "الجيزة"
-                    if (!medicalRepNameForCRM && !row['medical rep'].includes("الجيزة")) {
-                        medicalRepNameForCRM = row['medical rep'].trim();
-                    }
+                if (row['District Manager'] === loggedInUserDM && row['area']) {
+                    dmGovernorates.add(row['area'].trim());
                 }
             });
             loggedInUserGovernorates = Array.from(dmGovernorates);
             localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
-            // Store user data in sessionStorage for CRM iframe
-            const userDataForCRM = {
-                name: medicalRepNameForCRM || loggedInUserDM, // Use medical rep name if available, else DM name
-                area: loggedInUserGovernorates.length > 0 ? loggedInUserGovernorates[0] : 'N/A', // Or derive area if needed
-                districtManager: loggedInUserDM,
-                governorate: loggedInUserGovernorates.length > 0 ? loggedInUserGovernorates.join(', ') : 'N/A'
-            };
-            sessionStorage.setItem('isLoggedIn', 'true');
-            sessionStorage.setItem('userData', JSON.stringify(userDataForCRM));
             $('#login-page').hide();
             $('#dashboard-content').show();
-            if (typeof initializeCommonDashboard === 'function') {
-                initializeCommonDashboard();
-            }
+            initializeCommonDashboard();
         } else {
             loginError.text('Invalid username or password.');
         }
@@ -2509,6 +2485,7 @@ async function handleLogin(e) {
         }
     }
 }
+
 
         // --- Common Dashboard Initialization ---
         function initializeCommonDashboard() {
