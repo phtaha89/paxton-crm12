@@ -4647,20 +4647,63 @@
             }
             
         });
-        window.addEventListener('message', function(event) {
-    // IMPORTANT: Verify the origin of the message for security!
-    // if (event.origin !== 'https://phtaha89.github.io/paxton-crm12') return;
+        // IMPORTANT: Replace 'YOUR_IFRAME_USERNAME_INPUT_ID' and 'YOUR_IFRAME_PASSWORD_INPUT_ID'
+    // with the actual IDs of the username and password input fields within your iframe's login form.
+    const usernameInputId = 'username'; // Example: if your iframe's username input has id="username"
+    const passwordInputId = 'password'; // Example: if your iframe's password input has id="password"
+    const loginButtonId = 'loginButton'; // Example: if your iframe's login button has id="loginButton"
 
-    if (event.data.type === 'loggedInUser') {
-        const user = event.data.user;
-        console.log('Received user data in iframe:', user);
-        // Now use user.username and user.password to perform automatic login
-        // e.g., fill login form fields and submit programmatically
-        document.getElementById('usernameInput').value = user.username;
-        document.getElementById('passwordInput').value = user.password;
-        document.getElementById('loginForm').submit(); // Or trigger your login function
-    }
-});
+    // Listen for messages from the parent window (index.html)
+    window.addEventListener('message', function(event) {
+        // --- SECURITY WARNING ---
+        // In a production environment, ALWAYS verify the origin of the message
+        // to prevent cross-site scripting (XSS) attacks.
+        // Replace 'YOUR_PARENT_APP_ORIGIN' with the actual origin (e.g., 'https://your-main-app-domain.com')
+        if (event.origin !== 'https://phtaha89.github.io') { // Updated origin
+            console.warn('Message received from untrusted origin:', event.origin);
+            return;
+        }
+        // --- END SECURITY WARNING ---
+
+        // Check if the message type is 'loggedInUser'
+        if (event.data && event.data.type === 'loggedInUser' && event.data.user) {
+            const user = event.data.user;
+            console.log('Iframe received user data for auto-login:', user.username);
+
+            const usernameField = document.getElementById(usernameInputId);
+            const passwordField = document.getElementById(passwordInputId);
+            const loginButton = document.getElementById(loginButtonId);
+
+            if (usernameField && passwordField) {
+                usernameField.value = user.username;
+                passwordField.value = user.password; // WARNING: Passing plain text passwords is insecure.
+
+                // Attempt to log in automatically
+                if (loginButton) {
+                    console.log('Attempting to click login button in iframe...');
+                    loginButton.click(); // Simulate a click on the login button
+                } else {
+                    // If there's no login button, you might have a login function to call directly
+                    // Example: if your iframe has a function like 'performLogin(username, password)'
+                    // if (typeof window.performLogin === 'function') {
+                    //     window.performLogin(user.username, user.password);
+                    // } else {
+                        console.warn('No login button or auto-login function found in iframe. Manual login might be required.');
+                    // }
+                }
+            } else {
+                console.error('Iframe login input fields not found. Please check their IDs.');
+            }
+        }
+    });
+
+    // Optional: Add a small delay to ensure DOM is ready in the iframe before trying to access elements
+    // This might be useful if the iframe's content loads slightly after the message is sent.
+    // window.onload = function() {
+    //     console.log('Iframe content loaded.');
+    //     // You might want to re-send the postMessage from the parent if the iframe loads late,
+    //     // or ensure the parent sends it after the iframe's onload event.
+    // };
         
     </script>
 </body>
