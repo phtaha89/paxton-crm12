@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #3C2414 0%, #5D4037 50%, #6D4C41 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3C2414;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #3C2414, #5D4037);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .product-icon {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(45deg, #3C2414, #5D4037);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+        
+        .product-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .pdf-thumbnail {
+            width: 100%;
+            height: 180px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .pdf-thumbnail:hover {
+            border-color: #3C2414;
+            transform: scale(1.02);
+        }
+        
+        .pdf-thumbnail iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            pointer-events: none;
+        }
+        
+        .pdf-placeholder {
+            text-align: center;
+            color: #999;
+            font-size: 11px;
+        }
+        
+        .pdf-placeholder .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+        
+        .view-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #3C2414, #5D4037);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #4A2C17, #6D4C41);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .btn-secondary:hover {
+            background: #e9ecef;
+            border-color: #ced4da;
+        }
+        
+        .status-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+        
+        .status-indicator.pending {
+            background: #ffc107;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 11px;
+            color: #999;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                font-size: 13px;
+            }
+            
+            .container {
+                padding: 15px;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 15px;
+            }
+            
+            .product-card {
+                padding: 15px;
+            }
+            
+            .pdf-thumbnail {
+                height: 150px;
+            }
+            
+            .product-title {
+                font-size: 15px;
+            }
+            
+            .product-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .view-buttons {
+                flex-direction: column;
+            }
+            
+            .pdf-thumbnail {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Products Knowledge</h1>
+            <p>Access comprehensive product manuals and documentation</p>
+        </div>
+        
+        <div class="products-grid">
+            <!-- Taurolock -->
+            <div class="product-card">
+                <div class="status-indicator"></div>
+                <div class="product-header">
+                    <div class="product-icon">T</div>
+                    <h3 class="product-title">Taurolock</h3>
+                </div>
+                <div class="pdf-thumbnail" onclick="openPDF('taurolock')">
+                    <!-- Replace with your Google Drive PDF embed link -->
+                    <iframe src="https://drive.google.com/file/d/1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ/preview" allow="autoplay"></iframe>
+                    <div class="pdf-placeholder" style="display: none;">
+                        <div class="icon">📄</div>
+                        <div>Click to view PDF</div>
+                    </div>
+                </div>
+                <div class="view-buttons">
+                    <a href="https://drive.google.com/file/d/1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ/view" target="_blank" class="btn btn-primary">View Full PDF</a>
+                    <a href="https://drive.google.com/uc?export=download&id=1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ" class="btn btn-secondary">Download</a>
+                </div>
+            </div>
+            
+            <!-- Exit Pro -->
+            <div class="product-card">
+                <div class="status-indicator"></div>
+                <div class="product-header">
+                    <div class="product-icon">E</div>
+                    <h3 class="product-title">Exit Pro</h3>
+                </div>
+                <div class="pdf-thumbnail" onclick="openPDF('exitpro')">
+                    <!-- Replace with your Google Drive PDF embed link -->
+                    <iframe src="https://drive.google.com/file/d/1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp/preview" allow="autoplay"></iframe>
+                    <div class="pdf-placeholder" style="display: none;">
+                        <div class="icon">📄</div>
+                        <div>Click to view PDF</div>
+                    </div>
+                </div>
+                <div class="view-buttons">
+                    <a href="https://drive.google.com/file/d/1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp/view" target="_blank" class="btn btn-primary">View Full PDF</a>
+                    <a href="https://drive.google.com/uc?export=download&id=1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp" class="btn btn-secondary">Download</a>
+                </div>
+            </div>
+            
+            <!-- Shower Guard -->
+            <div class="product-card">
+                <div class="status-indicator"></div>
+                <div class="product-header">
+                    <div class="product-icon">S</div>
+                    <h3 class="product-title">Shower Guard</h3>
+                </div>
+                <div class="pdf-thumbnail" onclick="openPDF('showerguard')">
+                    <!-- Replace with your Google Drive PDF embed link -->
+                    <iframe src="https://drive.google.com/file/d/1jyCC59cHXfF_z00FMCJIHexswCMeSGih/preview" allow="autoplay"></iframe>
+                    <div class="pdf-placeholder" style="display: none;">
+                        <div class="icon">📄</div>
+                        <div>Click to view PDF</div>
+                    </div>
+                </div>
+                <div class="view-buttons">
+                    <a href="https://drive.google.com/file/d/1jyCC59cHXfF_z00FMCJIHexswCMeSGih/view" target="_blank" class="btn btn-primary">View Full PDF</a>
+                    <a href="https://drive.google.com/uc?export=download&id=1jyCC59cHXfF_z00FMCJIHexswCMeSGih" class="btn btn-secondary">Download</a>
+                </div>
+            </div>
+            
+            <!-- Diafix -->
+            <div class="product-card">
+                <div class="status-indicator"></div>
+                <div class="product-header">
+                    <div class="product-icon">D</div>
+                    <h3 class="product-title">Diafix</h3>
+                </div>
+                <div class="pdf-thumbnail" onclick="openPDF('diafix')">
+                    <!-- Replace with your Google Drive PDF embed link -->
+                    <iframe src="https://drive.google.com/file/d/1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr/preview" allow="autoplay"></iframe>
+                    <div class="pdf-placeholder" style="display: none;">
+                        <div class="icon">📄</div>
+                        <div>Click to view PDF</div>
+                    </div>
+                </div>
+                <div class="view-buttons">
+                    <a href="https://drive.google.com/file/d/1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr/view" target="_blank" class="btn btn-primary">View Full PDF</a>
+                    <a href="https://drive.google.com/uc?export=download&id=1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr" class="btn btn-secondary">Download</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Designed by DrTahaDesigns • Last Updated: July 2025</p>
+        </div>
+    </div>
+    
+    <script>
+        function openPDF(product) {
+            // Define your Google Drive file IDs for each product
+            const fileIds = {
+                'taurolock': '1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ',
+                'exitpro': '1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp',
+                'showerguard': '1jyCC59cHXfF_z00FMCJIHexswCMeSGih',
+                'diafix': '1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr'
+            };
+            
+            const fileId = fileIds[product];
+            if (fileId) {
+                window.open(`https://drive.google.com/file/d/${fileId}/view`, '_blank');
+            }
+        }
+        
+        // Handle iframe loading errors and show placeholder
+        document.addEventListener('DOMContentLoaded', function() {
+            const iframes = document.querySelectorAll('.pdf-thumbnail iframe');
+            iframes.forEach(iframe => {
+                iframe.onerror = function() {
+                    this.style.display = 'none';
+                    this.nextElementSibling.style.display = 'block';
+                };
+            });
+        });
+    </script>
+</body>
+</html>
