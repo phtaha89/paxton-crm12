@@ -986,6 +986,15 @@
             localStorage.removeItem('currentPage'); // Remove current page from local storage
             loggedInUser = null; // Reset loggedInUser variable
             currentActiveViewId = null; // Reset current view
+
+            // IMPORTANT: Clear iframe sources to prevent stale data from previous sessions
+            document.querySelectorAll('.full-page-view iframe').forEach(iframe => {
+                iframe.src = ''; // Set src to empty to unload content
+                iframe.classList.add('hidden'); // Hide iframe
+                const demoContent = iframe.closest('.iframe-container-fpv').querySelector('.demo-content');
+                if (demoContent) demoContent.classList.remove('hidden'); // Show demo content
+            });
+
             console.log('Showing login page.');
         }
 
@@ -1167,6 +1176,8 @@
                         const demoContent = activeView.querySelector('.demo-content');
                         if (iframe) iframe.classList.add('hidden');
                         if (demoContent) demoContent.classList.remove('hidden');
+                        // IMPORTANT: Clear the iframe src when hiding a view
+                        if (iframe) iframe.src = ''; 
                     }, 300);
                 }
                 currentActiveViewId = null; // Reset current active view
@@ -1248,7 +1259,12 @@
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
                     // Delay adding 'hidden' to allow CSS transition to complete
-                    setTimeout(() => prevActiveView.classList.add('hidden'), 300);
+                    setTimeout(() => {
+                        prevActiveView.classList.add('hidden');
+                        // IMPORTANT: Clear the iframe src when hiding a view
+                        const prevIframe = prevActiveView.querySelector('iframe');
+                        if (prevIframe) prevIframe.src = ''; 
+                    }, 300);
                 }
             }
 
@@ -1267,9 +1283,10 @@
             demoContent.classList.add('hidden');
             iframe.classList.remove('hidden');
 
-            // Crucial fix for refresh: Store the page to load in localStorage
-            // This ensures that if the user refreshes, they return to the same iframe page.
-            localStorage.setItem('currentPage', page);
+            // IMPORTANT: Set iframe src to empty string before setting the new source
+            // This forces the iframe to reload its content completely, preventing stale data.
+            iframe.src = ''; 
+            localStorage.setItem('currentPage', page); // Store the page to load in localStorage
             iframe.src = fileName; // Set the iframe's source
 
             iframe.onload = function() {
