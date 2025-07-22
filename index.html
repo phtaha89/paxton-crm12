@@ -101,7 +101,7 @@
             color: var(--text-color-light);
         }
 
-        /* admin tab button styling */
+        /* Admin tab button styling */
         .admin-tab {
             background: var(--primary-red);
             color: var(--white);
@@ -768,9 +768,9 @@
             <button id="backButton" class="back-button hidden">
                 &#x2190; Back to Home
             </button>
-            <!-- admin tab button - REMOVED as per user request to use the card instead -->
+            <!-- Admin tab button - REMOVED as per user request to use the card instead -->
             <!-- <button id="adminButton" class="admin-tab">
-                admin
+                Admin
             </button> -->
             <!-- Logout button -->
             <button id="logoutButton" class="logout-button">
@@ -1278,18 +1278,11 @@
                 loadingOverlay.classList.remove('show'); // Hide spinner
                 errorState.classList.remove('show');     // Hide error
 
-                // Centralized login simulation for CRM and Dashboard
+                // Send a postMessage to the iframe if a user is logged in and it's CRM or Dashboard
                 if (loggedInUser && (page === 'crm' || page === 'dashboard')) {
-                    const demoContentElement = targetView.querySelector('.demo-content');
-                    if (demoContentElement) {
-                        demoContentElement.innerHTML = `
-                            <h2>Welcome to ${displayName}!</h2>
-                            <p>Login bypassed. You are logged in as: <strong>${loggedInUser.username}</strong> (${loggedInUser.title}).</p>
-                            <p>This content simulates the automatic loading of your data based on your role.</p>
-                        `;
-                        demoContentElement.classList.remove('hidden'); // Show the updated demo content
-                        iframe.classList.add('hidden'); // Hide the actual iframe to show demo content
-                    }
+                    console.log(`Sending login data to ${displayName} iframe via postMessage.`);
+                    // Send the loggedInUser object. You might want to send a token instead of raw password in a real app.
+                    iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*'); // IMPORTANT: Replace '*' with the actual origin of your iframe content for security!
                 }
             };
 
