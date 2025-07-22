@@ -160,7 +160,6 @@
             transition: all 0.25s ease;
             text-decoration: none;
             display: inline-flex;
-            align-items: center;
             gap: 8px;
         }
 
@@ -1281,7 +1280,7 @@
                 // Send a postMessage to the iframe if a user is logged in and it's CRM or Dashboard
                 // The demo content is now always hidden if the iframe loads successfully.
                 if (loggedInUser && (page === 'crm' || page === 'dashboard')) {
-                    console.log(`Sending login data to ${displayName} iframe via postMessage.`);
+                    console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
                     // Send the loggedInUser object. You might want to send a token instead of raw password in a real app.
                     iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*'); // IMPORTANT: Replace '*' with the actual origin of your iframe content for security!
                 }
