@@ -2317,175 +2317,163 @@
         </div>
     </div>
 
-    <script>
+        <script>
         // Supabase and Google Sheet URLs - Consolidated
-const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/';
-const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
-const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/';
+        const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c'; 
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
-// Supabase Client
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_API_KEY);
+        // Supabase Client
+        const supabaseClient = supabase.createClient('https://plmevfyxpngzymvzvkzn.supabase.co', SUPABASE_API_KEY);
 
-// Listen for messages from the parent window
-window.addEventListener('message', (event) => {
-    // Verify the origin of the message for security
-    if (event.origin !== 'https://phtaha89.github.io/paxton-crm12/') return;
+        // Global variables to store fetched data
+        let allMedicalRepsData = {};
+        let allVisitsData = [];
+        let allGoogleSheetData = [];
+        let medicalRepsForDailyReport = [];
 
-    if (event.data && event.data.type === 'loggedInUser') {
-        const userData = event.data.user;
-        console.log('Received user data in iframe:', userData);
+        // Global variables for Lists Dashboard
+        let listsGoogleData = [];
+        let listsVisitCounts = {};
+        let listsBricks = new Set();
+        let listsSelectedBricks = [];
+        let listsFilteredHCPs = [];
 
-        // Use the received user data to log in or customize the iframe content
-        handleLoginWithUserData(userData);
-    }
-});
+        // Global variables for Requests Dashboard
+        let requests_districtManagers = new Set();
+        let requests_medicalReps = new Map();
+        let requests_areasByMedRep = new Map();
+        let requests_allRequests = [];
 
-// Function to handle login with received user data
-async function handleLoginWithUserData(userData) {
-    try {
-        const { data, error } = await supabaseClient
-            .from('users')
-            .select('*')
-            .eq('username', userData.username)
-            .eq('password', userData.password)
-            .single();
+        // Global variables for Weekly Plan Dashboard
+        let weeklyPlan = {
+            Saturday: { am: [], pm: [] },
+            Sunday: { am: [], pm: [] },
+            Monday: { am: [], pm: [] },
+            Tuesday: { am: [], pm: [] },
+            Wednesday: { am: [], pm: [] },
+            Thursday: { am: [], pm: [] }
+        };
+        let weeklyPlanSelectedVisitIds = []; // Renamed to avoid conflict
 
-        if (error && error.code !== 'PGRST116') {
-            throw error;
-        }
+        // Global user role and DM information
+        let loggedInUserRole = null;
+        let loggedInUserDM = null;
+        let loggedInUserGovernorates = [];
 
-        if (data) {
-            loggedInUserRole = data.title;
-            loggedInUserDM = data.username;
+        // State for visits table view (normal, leaves, archived)
+        let currentVisitsTableView = 'normal';
+        let archivedVisitsData = [];
 
-            localStorage.setItem('loggedInUsername', data.username);
-            localStorage.setItem('loggedInUserRole', data.title);
+        // Pagination constant
+        const PAGE_SIZE = 1000; 
 
-            const dmGovernorates = new Set();
-            allGoogleSheetData.forEach(row => {
-                if (row['District Manager'] === loggedInUserDM && row['area']) {
-                    dmGovernorates.add(row['area'].trim());
+        // --- LOGIN LOGIC ---
+        async function fetchDistrictManagersForLogin() {
+            try {
+                const response = await fetch(GOOGLE_SHEET_URL);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch district managers from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
                 }
-            });
-
-            loggedInUserGovernorates = Array.from(dmGovernorates);
-            localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
-
-            $('#login-page').hide();
-            $('#dashboard-content').show();
-            initializeCommonDashboard();
-        } else {
-            console.error('Invalid username or password.');
-        }
-    } catch (err) {
-        console.error('Login error:', err);
-        if (err.message.includes("Invalid API key")) {
-            showAlertDialog('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
-        } else {
-            showAlertDialog('An error occurred during login. Please try again.');
-        }
-    }
-}
-
-async function fetchDistrictManagersForLogin() {
-    try {
-        const response = await fetch(GOOGLE_SHEET_URL);
-        if (!response.ok) {
-            throw new Error('Failed to fetch district managers from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
-        }
-        const csvText = await response.text();
-        allGoogleSheetData = parseCSV(csvText);
-        const districtManagers = new Set();
-        allGoogleSheetData.forEach(row => {
-            if (row['District Manager']) {
-                districtManagers.add(row['District Manager'].trim());
+                const csvText = await response.text();
+                allGoogleSheetData = parseCSV(csvText);
+                const districtManagers = new Set();
+                allGoogleSheetData.forEach(row => {
+                    if (row['District Manager']) {
+                        districtManagers.add(row['District Manager'].trim());
+                    }
+                });
+                const usernameSelect = $('#username');
+                usernameSelect.empty();
+                usernameSelect.append($('<option>', { value: '', text: 'Select District Manager' }));
+                Array.from(districtManagers).sort().forEach(dm => {
+                    usernameSelect.append($('<option>', { value: dm, text: dm }));
+                });
+            } catch (error) {
+                console.error('Error fetching district managers for login:', error);
+                $('#login-error').text('Failed to load district managers. Please check the console for details, ensure the Google Sheet URL is correct, and that the sheet is published to the web as a CSV.');
             }
-        });
-        const usernameSelect = $('#username');
-        usernameSelect.empty();
-        usernameSelect.append($('<option>', { value: '', text: 'Select District Manager' }));
-        Array.from(districtManagers).sort().forEach(dm => {
-            usernameSelect.append($('<option>', { value: dm, text: dm }));
-        });
-    } catch (error) {
-        console.error('Error fetching district managers for login:', error);
-        $('#login-error').text('Failed to load district managers. Please check the console for details, ensure the Google Sheet URL is correct, and that the sheet is published to the web as a CSV.');
-    }
-}
-
-async function handleLogin(e) {
-    e.preventDefault();
-    const isAdminLogin = $('#adminLoginToggle').is(':checked');
-    let username;
-    let password = $('#password').val();
-    const loginError = $('#login-error');
-    loginError.text('');
-    if (isAdminLogin) {
-        username = $('#adminUsername').val();
-        if (!username || !password) {
-            loginError.text('Please enter admin username and password.');
-            return;
-        }
-    } else {
-        username = $('#username').val();
-        if (!username || !password) {
-            loginError.text('Please select a username and enter a password.');
-            return;
-        }
-    }
-    try {
-        let query;
-        if (isAdminLogin) {
-            query = supabaseClient
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password)
-                .eq('title', 'admin')
-                .single();
-        } else {
-            query = supabaseClient
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password)
-                .single();
         }
 
-        const { data, error } = await query;
-        if (error && error.code !== 'PGRST116') {
-            throw error;
-        }
-        if (data) {
-            loggedInUserRole = data.title;
-            loggedInUserDM = data.username;
+        async function handleLogin(e) {
+            e.preventDefault();
+            const isAdminLogin = $('#adminLoginToggle').is(':checked');
+            let username;
+            let password = $('#password').val();
+            const loginError = $('#login-error');
 
-            localStorage.setItem('loggedInUsername', data.username);
-            localStorage.setItem('loggedInUserRole', data.title);
-            const dmGovernorates = new Set();
-            allGoogleSheetData.forEach(row => {
-                if (row['District Manager'] === loggedInUserDM && row['area']) {
-                    dmGovernorates.add(row['area'].trim());
+            loginError.text('');
+
+            if (isAdminLogin) {
+                username = $('#adminUsername').val();
+                if (!username || !password) {
+                    loginError.text('Please enter admin username and password.');
+                    return;
                 }
-            });
-            loggedInUserGovernorates = Array.from(dmGovernorates);
-            localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
-            $('#login-page').hide();
-            $('#dashboard-content').show();
-            initializeCommonDashboard();
-        } else {
-            loginError.text('Invalid username or password.');
-        }
-    } catch (err) {
-        console.error('Login error:', err);
-        if (err.message.includes("Invalid API key")) {
-            loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
-        } else {
-            loginError.text('An error occurred during login. Please try again.');
-        }
-    }
-}
+            } else {
+                username = $('#username').val();
+                if (!username || !password) {
+                    loginError.text('Please select a username and enter a password.');
+                    return;
+                }
+            }
 
+            try {
+                let query;
+                if (isAdminLogin) {
+                    query = supabaseClient
+                        .from('users')
+                        .select('*')
+                        .eq('username', username)
+                        .eq('password', password)
+                        .eq('title', 'admin')
+                        .single();
+                } else {
+                    query = supabaseClient
+                        .from('users')
+                        .select('*')
+                        .eq('username', username)
+                        .eq('password', password)
+                        .single();
+                }
+                
+                const { data, error } = await query; 
+
+                if (error && error.code !== 'PGRST116') {
+                    throw error;
+                }
+
+                if (data) {
+                    loggedInUserRole = data.title;
+                    loggedInUserDM = data.username;
+                    
+                    localStorage.setItem('loggedInUsername', data.username);
+                    localStorage.setItem('loggedInUserRole', data.title);
+
+                    const dmGovernorates = new Set();
+                    allGoogleSheetData.forEach(row => {
+                        if (row['District Manager'] === loggedInUserDM && row['area']) {
+                            dmGovernorates.add(row['area'].trim());
+                        }
+                    });
+                    loggedInUserGovernorates = Array.from(dmGovernorates);
+                    localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
+
+                    $('#login-page').hide();
+                    $('#dashboard-content').show();
+                    initializeCommonDashboard(); 
+                } else {
+                    loginError.text('Invalid username or password.');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                if (err.message.includes("Invalid API key")) {
+                    loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
+                } else {
+                    loginError.text('An error occurred during login. Please try again.');
+                }
+            }
+        }
 
         // --- Common Dashboard Initialization ---
         function initializeCommonDashboard() {
@@ -4194,7 +4182,7 @@ if (isFullDayEvent) {
                 const hcpNameLower = visit.hcp_name ? visit.hcp_name.toLowerCase() : '';
 
                 let section = 'PM Activity'; // Default
-
+                
                 const isFullDayEvent = specialty === 'event(full day)';
                 const isLeaveHCP = leaveTypes.some(leave => hcpNameLower.includes(leave));
                 const isPharmacySpecialty = specialty === 'pharmacy';
@@ -5304,6 +5292,22 @@ Thank you.`;
 
         // --- Document Ready / Initial Load ---
         $(document).ready(function() {
+            // Add the new window.addEventListener here
+            window.addEventListener('message', (event) => {
+                // IMPORTANT: Verify the origin of the message for security!
+                // For example: if (event.origin !== 'https://phtaha89.github.io/paxton-crm12/') return;
+
+                if (event.data && event.data.type === 'loggedInUser') {
+                    const userData = event.data.user;
+                    console.log('Received user data in iframe:', userData);
+                    // Now use userData.username and userData.title to log in or customize the iframe content
+                    // Example: Call your Supabase login function within this iframe with userData
+                    // supabase.auth.signInWithPassword({ email: userData.username, password: userData.password });
+                    // Or update UI elements directly:
+                    // document.getElementById('welcomeMessage').textContent = `Welcome, ${userData.username}!`;
+                }
+            });
+
             $('#adminLoginToggle').on('change', function() {
                 if ($(this).is(':checked')) {
                     $('#dmSelectGroup').hide();
