@@ -987,12 +987,19 @@
             loggedInUser = null; // Reset loggedInUser variable
             currentActiveViewId = null; // Reset current view
 
-            // IMPORTANT: Clear iframe sources to prevent stale data from previous sessions
-            document.querySelectorAll('.full-page-view iframe').forEach(iframe => {
-                iframe.src = ''; // Set src to empty to unload content
-                iframe.classList.add('hidden'); // Hide iframe
-                const demoContent = iframe.closest('.iframe-container-fpv').querySelector('.demo-content');
-                if (demoContent) demoContent.classList.remove('hidden'); // Show demo content
+            // Explicitly reset all full-page views and their iframes
+            document.querySelectorAll('.full-page-view').forEach(view => {
+                view.classList.add('hidden'); // Ensure the view is hidden
+                view.classList.remove('active'); // Ensure active state is removed
+                const iframe = view.querySelector('iframe');
+                const demoContent = view.querySelector('.demo-content');
+                if (iframe) {
+                    iframe.src = ''; // Clear iframe source
+                    iframe.classList.add('hidden'); // Hide iframe
+                }
+                if (demoContent) {
+                    demoContent.classList.remove('hidden'); // Show demo content as fallback
+                }
             });
 
             console.log('Showing login page.');
