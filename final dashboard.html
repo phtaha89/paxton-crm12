@@ -2317,7 +2317,7 @@
         </div>
     </div>
 
-        <script>
+    <script>
         // Supabase and Google Sheet URLs - Consolidated
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/';
         const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c'; 
@@ -4182,7 +4182,7 @@ if (isFullDayEvent) {
                 const hcpNameLower = visit.hcp_name ? visit.hcp_name.toLowerCase() : '';
 
                 let section = 'PM Activity'; // Default
-                
+
                 const isFullDayEvent = specialty === 'event(full day)';
                 const isLeaveHCP = leaveTypes.some(leave => hcpNameLower.includes(leave));
                 const isPharmacySpecialty = specialty === 'pharmacy';
@@ -5292,22 +5292,6 @@ Thank you.`;
 
         // --- Document Ready / Initial Load ---
         $(document).ready(function() {
-            // Add the new window.addEventListener here
-            window.addEventListener('message', (event) => {
-                // IMPORTANT: Verify the origin of the message for security!
-                // For example: if (event.origin !== 'https://phtaha89.github.io/paxton-crm12/') return;
-
-                if (event.data && event.data.type === 'loggedInUser') {
-                    const userData = event.data.user;
-                    console.log('Received user data in iframe:', userData);
-                    // Now use userData.username and userData.title to log in or customize the iframe content
-                    // Example: Call your Supabase login function within this iframe with userData
-                    // supabase.auth.signInWithPassword({ email: userData.username, password: userData.password });
-                    // Or update UI elements directly:
-                    // document.getElementById('welcomeMessage').textContent = `Welcome, ${userData.username}!`;
-                }
-            });
-
             $('#adminLoginToggle').on('change', function() {
                 if ($(this).is(':checked')) {
                     $('#dmSelectGroup').hide();
@@ -5323,6 +5307,20 @@ Thank you.`;
                     $('#loginTitle').html('<i class=""></i> Dashboard 🔐');
                 }
             });
+            window.addEventListener('message', function(event) {
+    // IMPORTANT: Verify the origin of the message for security!
+    // if (event.origin !== 'https://phtaha89.github.io/paxton-crm12') return;
+
+    if (event.data.type === 'loggedInUser') {
+        const user = event.data.user;
+        console.log('Received user data in iframe:', user);
+        // Now use user.username and user.password to perform automatic login
+        // e.g., fill login form fields and submit programmatically
+        document.getElementById('usernameInput').value = user.username;
+        document.getElementById('passwordInput').value = user.password;
+        document.getElementById('loginForm').submit(); // Or trigger your login function
+    }
+});
 
             fetchDistrictManagersForLogin().then(() => {
                 const loggedInUser = localStorage.getItem('loggedInUsername');
