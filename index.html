@@ -1106,7 +1106,7 @@
                 }
 
                 // If credentials are valid, set the loggedInUser and store in local storage
-                loggedInUser = { username: data.username, title: data.title };
+                loggedInUser = { username: data.username, title: data.title, password: data.password }; // Added password to loggedInUser
                 localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser)); // Persist user info
                 
                 // After successful login, always go to home first, then check for last page
@@ -1305,7 +1305,9 @@
                 // The demo content is now always hidden if the iframe loads successfully.
                 if (loggedInUser && (page === 'crm' || page === 'dashboard')) {
                     console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
-                    // Send the loggedInUser object. You might want to send a token instead of raw password in a real app.
+                    // Send the loggedInUser object.
+                    // WARNING: Sending plain text passwords via postMessage is INSECURE.
+                    // In a production environment, use secure token-based authentication (e.g., JWT).
                     iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*'); // IMPORTANT: Replace '*' with the actual origin of your iframe content for security!
                 }
             };
