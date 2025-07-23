@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Documentation</title>
+    <title>Product Documentation Hub</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for icons -->
@@ -20,16 +20,15 @@
             padding: 1rem; /* Responsive padding */
         }
 
-        .product-card {
-            transition: all 0.3s ease-in-out;
+        .product-card, .video-card {
+            /* Removed transition for animations */
         }
 
-        .product-card:hover {
-            transform: translateY(-0.25rem) scale(1.01);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        .product-card:hover, .video-card:hover {
+            /* Removed transform and box-shadow on hover for animations */
         }
 
-        .pdf-thumbnail {
+        .pdf-thumbnail, .video-thumbnail {
             position: relative;
             overflow: hidden;
             border: 2px solid #e0e0e0;
@@ -39,11 +38,11 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            /* Removed transition for animations */
             height: 12rem; /* Fixed height for consistency */
         }
 
-        .pdf-thumbnail:hover {
+        .pdf-thumbnail:hover, .video-thumbnail:hover {
             border-color: #3C2414;
         }
 
@@ -52,9 +51,10 @@
             height: 100%;
             border: none;
             pointer-events: none; /* Prevent interaction with iframe content */
+            display: none; /* Hidden by default, shown if content loads */
         }
 
-        .pdf-placeholder {
+        .pdf-placeholder, .video-placeholder {
             text-align: center;
             color: #999;
             font-size: 0.8rem;
@@ -62,28 +62,60 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            display: none; /* Hidden by default, shown on error */
+            display: block; /* Visible by default */
         }
 
-        .pdf-placeholder .icon {
+        .pdf-placeholder .icon, .video-placeholder .icon {
             font-size: 2rem;
             margin-bottom: 0.5rem;
             color: #ccc;
         }
 
+        /* Toggle Button Styles */
+        .toggle-container {
+            display: flex;
+            background-color: #e0e0e0;
+            border-radius: 9999px; /* Fully rounded */
+            padding: 0.25rem;
+            width: fit-content;
+            margin: 0 auto 1.5rem auto; /* Center and add bottom margin */
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-button {
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            color: #6B7280; /* Gray text for inactive */
+            cursor: pointer;
+            /* Removed transition for animations */
+            flex-grow: 1; /* Allow buttons to grow */
+            text-align: center;
+        }
+
+        .toggle-button.active {
+            background-color: #3C2414; /* Active background */
+            color: #ffffff; /* White text for active */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
         /* Responsive adjustments for smaller screens */
         @media (max-width: 768px) {
-            .product-card {
+            .product-card, .video-card {
                 padding: 1rem;
             }
-            .pdf-thumbnail {
+            .pdf-thumbnail, .video-thumbnail {
                 height: 10rem; /* Slightly smaller on mobile */
             }
         }
 
         @media (max-width: 480px) {
-            .pdf-thumbnail {
+            .pdf-thumbnail, .video-thumbnail {
                 height: 8rem; /* Even smaller on very small screens */
+            }
+            .toggle-button {
+                padding: 0.5rem 1rem; /* Smaller padding on very small screens */
+                font-size: 0.875rem; /* Smaller font size */
             }
         }
     </style>
@@ -95,7 +127,14 @@
             <p class="text-gray-600 text-sm">Access comprehensive product manuals and documentation</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Toggle Button for Brochures/Videos -->
+        <nav class="toggle-container">
+            <button id="brochures-btn" class="toggle-button active">Brochures</button>
+            <button id="videos-btn" class="toggle-button">Videos</button>
+        </nav>
+
+        <!-- Brochures Section (Initially Visible) -->
+        <div id="brochures-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
             <!-- Product Card: Taurolock -->
             <div class="product-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
@@ -177,18 +216,102 @@
             </div>
         </div>
 
+        <!-- Videos Section (Initially Hidden) -->
+        <div id="videos-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6 hidden">
+            <!-- Video Card: Taurolock Video -->
+            <div class="video-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
+                <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
+                <div class="flex items-center mb-4">
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">T</div>
+                    <h3 class="text-lg font-semibold text-gray-800">Taurolock Video</h3>
+                </div>
+                <div class="video-thumbnail" onclick="openVideo('taurolock-video')">
+                    <!-- Placeholder image for video thumbnail -->
+                    <img src="https://placehold.co/320x180/3C2414/ffffff?text=Taurolock+Video" alt="Taurolock Video Thumbnail" class="w-full h-full object-cover rounded-md">
+                    <div class="video-placeholder">
+                        <div class="icon"><i class="fas fa-video"></i></div>
+                        <div>Click to watch video</div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <a href="https://drive.google.com/file/d/1234567890/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-center">Watch Video</a>
+                </div>
+            </div>
+
+            <!-- Video Card: Exit Pro Video -->
+            <div class="video-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
+                <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
+                <div class="flex items-center mb-4">
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">E</div>
+                    <h3 class="text-lg font-semibold text-gray-800">Exit Pro Video</h3>
+                </div>
+                <div class="video-thumbnail" onclick="openVideo('exitpro-video')">
+                    <!-- Placeholder image for video thumbnail -->
+                    <img src="https://placehold.co/320x180/3C2414/ffffff?text=Exit+Pro+Video" alt="Exit Pro Video Thumbnail" class="w-full h-full object-cover rounded-md">
+                    <div class="video-placeholder">
+                        <div class="icon"><i class="fas fa-video"></i></div>
+                        <div>Click to watch video</div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <a href="https://drive.google.com/file/d/14KcKzLF5hl3P_5T1j30jc1JTM4G89ppD/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-center">Watch Video</a>
+                </div>
+            </div>
+
+            <!-- Video Card: Shower Guard Video -->
+            <div class="video-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
+                <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
+                <div class="flex items-center mb-4">
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">S</div>
+                    <h3 class="text-lg font-semibold text-gray-800">Shower Guard Video</h3>
+                </div>
+                <div class="video-thumbnail" onclick="openVideo('showerguard-video')">
+                    <!-- Placeholder image for video thumbnail -->
+                    <img src="https://placehold.co/320x180/3C2414/ffffff?text=Shower+Guard+Video" alt="Shower Guard Video Thumbnail" class="w-full h-full object-cover rounded-md">
+                    <div class="video-placeholder">
+                        <div class="icon"><i class="fas fa-video"></i></div>
+                        <div>Click to watch video</div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <a href="https://drive.google.com/file/d/1fqgQHVQE9GSDKaEd7UDoBJ682Dj2fowP/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-center">Watch Video</a>
+                </div>
+            </div>
+
+            <!-- Video Card: Diafix Video -->
+            <div class="video-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
+                <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
+                <div class="flex items-center mb-4">
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">D</div>
+                    <h3 class="text-lg font-semibold text-gray-800">Diafix Video</h3>
+                </div>
+                <div class="video-thumbnail" onclick="openVideo('diafix-video')">
+                    <!-- Placeholder image for video thumbnail -->
+                    <img src="https://placehold.co/320x180/3C2414/ffffff?text=Diafix+Video" alt="Diafix Video Thumbnail" class="w-full h-full object-cover rounded-md">
+                    <div class="video-placeholder">
+                        <div class="icon"><i class="fas fa-video"></i></div>
+                        <div>Click to watch video</div>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <a href="https://drive.google.com/file/d/1DF5G1p4O4aoc9YwkkhHOtRJqazeVIDx2/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-center">Watch Video</a>
+                </div>
+            </div>
+        </div>
+
         <footer class="text-center pt-6 mt-6 border-t border-gray-200 text-xs text-gray-500">
             <p>Designed by DrTahaDesigns • Last Updated: July 2025</p>
         </footer>
     </div>
 
     <script>
+        // Function to open PDF in a new tab
         function openPDF(product) {
             const fileIds = {
-                'taurolock': '1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ',
+                'taurolock': '1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ', // Placeholder: Replace with actual Taurolock PDF ID
                 'exitpro': '1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp',
                 'showerguard': '1jyCC59cHXfF_z00FMCJIHexswCMeSGih',
-                'diafix': '1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr'
+                'diafix': '1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr' // Placeholder: Replace with actual Diafix PDF ID
             };
 
             const fileId = fileIds[product];
@@ -197,45 +320,77 @@
             }
         }
 
-        // Handle iframe loading errors and show placeholder
+        // Function to open video in a new tab
+        function openVideo(productVideo) {
+            const videoLinks = {
+                'taurolock-video': 'https://drive.google.com/file/d/1234567890/view', // Placeholder: Replace with actual Taurolock video URL
+                'exitpro-video': 'https://drive.google.com/file/d/14KcKzLF5hl3P_5T1j30jc1JTM4G89ppD/view',
+                'showerguard-video': 'https://drive.google.com/file/d/1fqgQHVQE9GSDKaEd7UDoBJ682Dj2fowP/view',
+                'diafix-video': 'https://drive.google.com/file/d/1DF5G1p4O4aoc9YwkkhHOtRJqazeVIDx2/view'
+            };
+
+            const videoUrl = videoLinks[productVideo];
+            if (videoUrl) {
+                window.open(videoUrl, '_blank');
+            }
+        }
+
+        // Handle iframe loading errors and show placeholder for PDFs
         document.addEventListener('DOMContentLoaded', function() {
-            const iframes = document.querySelectorAll('.pdf-thumbnail iframe');
-            iframes.forEach(iframe => {
-                // Use a timeout to check if the iframe content has loaded
+            const pdfIframes = document.querySelectorAll('.pdf-thumbnail iframe');
+            pdfIframes.forEach(iframe => {
+                const placeholder = iframe.nextElementSibling; // Get the next sibling, which is the placeholder
+
+                // Initially hide the iframe and show the placeholder
+                iframe.style.display = 'none';
+                placeholder.style.display = 'block';
+
                 const checkLoad = setTimeout(() => {
-                    try {
-                        // Attempt to access contentDocument; if it throws an error, it's likely a loading issue or cross-origin restriction
-                        if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
-                            // Content loaded successfully
-                        } else {
-                            // Content not loaded or error, show placeholder
-                            iframe.style.display = 'none';
-                            iframe.nextElementSibling.style.display = 'block';
-                        }
-                    } catch (e) {
-                        // Cross-origin error or other loading issue, show placeholder
-                        iframe.style.display = 'none';
-                        iframe.nextElementSibling.style.display = 'block';
+                    // If after timeout, iframe still not loaded, ensure placeholder is visible
+                    if (iframe.style.display === 'none') {
+                        placeholder.style.display = 'block';
                     }
                 }, 3000); // Give it 3 seconds to load
 
                 iframe.onload = function() {
                     clearTimeout(checkLoad); // Clear timeout if loaded successfully
-                    // Optional: You can still hide the placeholder if it was previously shown
-                    if (this.nextElementSibling) {
-                        this.nextElementSibling.style.display = 'none';
-                    }
+                    this.style.display = 'block'; // Show iframe
+                    placeholder.style.display = 'none'; // Hide placeholder
                 };
 
-                // Fallback for immediate errors (though cross-origin errors might not trigger this)
                 iframe.onerror = function() {
                     clearTimeout(checkLoad);
-                    this.style.display = 'none';
-                    this.nextElementSibling.style.display = 'block';
+                    this.style.display = 'none'; // Keep iframe hidden
+                    placeholder.style.display = 'block'; // Ensure placeholder is visible
                 };
             });
+
+            // Toggle functionality for Brochures/Videos sections
+            const brochuresBtn = document.getElementById('brochures-btn');
+            const videosBtn = document.getElementById('videos-btn');
+            const brochuresSection = document.getElementById('brochures-section');
+            const videosSection = document.getElementById('videos-section');
+
+            function showSection(sectionToShow) {
+                if (sectionToShow === 'brochures') {
+                    brochuresSection.classList.remove('hidden');
+                    videosSection.classList.add('hidden');
+                    brochuresBtn.classList.add('active');
+                    videosBtn.classList.remove('active');
+                } else {
+                    videosSection.classList.remove('hidden');
+                    brochuresSection.classList.add('hidden');
+                    videosBtn.classList.add('active');
+                    brochuresBtn.classList.remove('active');
+                }
+            }
+
+            brochuresBtn.addEventListener('click', () => showSection('brochures'));
+            videosBtn.addEventListener('click', () => showSection('videos'));
+
+            // Initial state: show brochures
+            showSection('brochures');
         });
     </script>
 </body>
 </html>
-
