@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
-    <!--Google Fonts: Inter for a modern, clean look-->
+    <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!--Supabase CDN for database interaction-->
+    <!-- Supabase CDN for database interaction -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* CSS Variables for easier theme management and consistency */
@@ -15,6 +15,7 @@
             --coffee-dark: #6F4E37;  /* Rich coffee brown */
             --coffee-gradient-start: #4A2C2A; /* Darker, almost black coffee */
             --coffee-gradient-end: #8B5E3C;    /* Matches coffee-light */
+
             --primary-red: #ef4444;
             --primary-red-dark: #dc2626;
             --text-color-dark: #374151;
@@ -27,653 +28,729 @@
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
             --border-radius: 12px;
         }
+
         /* Base styles for all elements */
         * {
-            Margin: 0;
-            Padding: 0;
-            Box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
         /* Body and HTML for full height layout */
-        Html, body {
-            Height: 100%;
+        html, body {
+            height: 100%;
         }
-        Body {
-            Font-family: ‘Inter’, -apple-system, BlinkMacSystemFont, ‘Segoe UI’, Roboto, sans-serif;
-            Background: var(--bg-medium);
-            Min-height: 100vh;
-            Display: flex;
-            Flex-direction: column;
-            Color: var(--text-color-dark);
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-medium);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-color-dark);
             -webkit-font-smoothing: antialiased; /* Smoother text rendering */
             -moz-osx-font-smoothing: grayscale;
         }
+
         /* Main container for the application, taking full available width and height */
         .container {
-            Max-width: 1600px; /* Increased max-width for more spacious layout */
-            Margin: 0 auto;
-            Padding: 20px;
-            Width: 100%;
-            Flex-grow: 1; /* Allows container to expand and fill space */
-            Display: flex;
-            Flex-direction: column;
+            max-width: 1600px; /* Increased max-width for more spacious layout */
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            flex-grow: 1; /* Allows container to expand and fill space */
+            display: flex;
+            flex-direction: column;
         }
+
         /* Header styling with flexbox for alignment */
         .header {
-            Display: flex;
-            Justify-content: space-between; /* Distribute items */
-            Align-items: center;
-            Background: var(--white);
-            Padding: 6px 25px; /* Made header slimmer */
-            Border-radius: var(--border-radius);
-            Box-shadow: var(--shadow-sm);
-            Margin-bottom: 20px;
-            Position: relative;
+            display: flex;
+            justify-content: space-between; /* Distribute items */
+            align-items: center;
+            background: var(--white);
+            padding: 6px 25px; /* Made header slimmer */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+            position: relative;
             z-index: 100; /* Ensures header is always on top */
             gap: 15px; /* Space between buttons */
         }
+
         /* User card styling */
         .user-card {
-            Display: flex;
-            Flex-direction: column;
-            Align-items: flex-start;
-            Margin-right: auto; /* Pushes it to the left */
-            Padding: 5px 10px;
-            Border-radius: 8px;
-            Background-color: var(--bg-light);
-            Box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-right: auto; /* Pushes it to the left */
+            padding: 5px 10px;
+            border-radius: 8px;
+            background-color: var(--bg-light);
+            box-shadow: var(--shadow-sm);
         }
+
         .user-card .username {
-            Font-size: 0.9rem;
-            Font-weight: 600;
-            Color: var(--text-color-dark);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-color-dark);
         }
+
         .user-card .title {
-            Font-size: 0.75rem;
-            Color: var(--text-color-light);
+            font-size: 0.75rem;
+            color: var(--text-color-light);
         }
+
+        .user-card .area-governorate { /* New style for area/governorate */
+            font-size: 0.75rem;
+            color: var(--text-color-light);
+            margin-top: 2px;
+        }
+
         /* Admin tab button styling */
         .admin-tab {
-            Background: var(--primary-red);
-            Color: var(--white);
-            Padding: 10px 20px;
-            Border-radius: 8px;
-            Cursor: pointer;
-            Font-weight: 500;
-            Font-size: 0.95rem;
-            Border: none;
-            Transition: all 0.25s ease; /* Smooth transition for hover effects */
-            Text-decoration: none;
-            Display: inline-flex;
-            Align-items: center;
-            Gap: 8px; /* Space between text and icon */
+            background: var(--primary-red);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: none;
+            transition: all 0.25s ease; /* Smooth transition for hover effects */
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px; /* Space between text and icon */
         }
+
         .admin-tab:hover {
-            Background: var(--primary-red-dark);
-            Transform: translateY(-2px); /* Slight lift effect */
-            Box-shadow: 0 6px 15px rgba(239, 68, 68, 0.25); /* Enhanced shadow on hover */
+            background: var(--primary-red-dark);
+            transform: translateY(-2px); /* Slight lift effect */
+            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.25); /* Enhanced shadow on hover */
         }
         
         /* Back button styling, similar to admin tab but with primary coffee color */
         .back-button {
-            Background: var(--coffee-light); /* Changed to coffee color */
-            Color: var(--white);
-            Padding: 10px 20px;
-            Border-radius: 8px;
-            Cursor: pointer;
-            Font-weight: 500;
-            Font-size: 0.95rem;
-            Border: none;
-            Transition: all 0.25s ease;
-            Text-decoration: none;
-            Display: inline-flex;
-            Align-items: center;
-            Gap: 8px;
+            background: var(--coffee-light); /* Changed to coffee color */
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: none;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
+
         .back-button:hover {
-            Background: var(--coffee-dark); /* Changed to darker coffee color */
-            Transform: translateY(-2px);
-            Box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
+            background: var(--coffee-dark); /* Changed to darker coffee color */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
         }
+
         /* Logout button styling */
         .logout-button {
-            Background: #6b7280; /* Grey color */
-            Color: var(--white);
-            Padding: 10px 20px;
-            Border-radius: 8px;
-            Cursor: pointer;
-            Font-weight: 500;
-            Font-size: 0.95rem;
-            Border: none;
-            Transition: all 0.25s ease;
-            Text-decoration: none;
-            Display: inline-flex;
-            Gap: 8px;
+            background: #6b7280; /* Grey color */
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border: none;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-flex;
+            gap: 8px;
         }
+
         .logout-button:hover {
-            Background: #4b5563; /* Darker grey */
-            Transform: translateY(-2px);
-            Box-shadow: 0 6px 15px rgba(107, 114, 128, 0.25);
+            background: #4b5563; /* Darker grey */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(107, 114, 128, 0.25);
         }
+
+
         /* Utility class to hide elements */
         .hidden {
-            Display: none !important;
+            display: none !important;
         }
+
         /* Banner styling with gradient and shine animation */
         .banner {
-            Background: linear-gradient(135deg, var(--coffee-gradient-start), var(--coffee-gradient-end)); /* Changed to coffee gradient */
-            Color: white;
-            Padding: 20px 30px; /* Decreased padding for PC view */
-            Margin-bottom: 25px; /* Slightly reduced margin below banner */
-            Border-radius: var(--border-radius);
-            Box-shadow: var(--shadow-lg);
-            Position: relative;
-            Overflow: hidden;
-            Flex-shrink: 0; /* Prevents banner from shrinking */
-            Display: flex; /* Use flexbox for horizontal alignment of logo and text */
-            Flex-direction: row; /* Always row for logo and text */
-            Align-items: center; /* Vertically align items */
-            Gap: 25px; /* Slightly reduced space between logo and text */
+            background: linear-gradient(135deg, var(--coffee-gradient-start), var(--coffee-gradient-end)); /* Changed to coffee gradient */
+            color: white;
+            padding: 20px 30px; /* Decreased padding for PC view */
+            margin-bottom: 25px; /* Slightly reduced margin below banner */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0; /* Prevents banner from shrinking */
+            display: flex; /* Use flexbox for horizontal alignment of logo and text */
+            flex-direction: row; /* Always row for logo and text */
+            align-items: center; /* Vertically align items */
+            gap: 25px; /* Slightly reduced space between logo and text */
         }
+
         .banner::before {
-            Content: '';
-            Position: absolute;
-            Top: 0;
-            Left: 0;
-            Right: 0;
-            Bottom: 0;
-            Background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            Transform: translateX(-100%);
-            Animation: shine 3s infinite; /* Shine animation for visual flair */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            animation: shine 3s infinite; /* Shine animation for visual flair */
         }
+
         @keyframes shine {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
+
         /* Company Logo styling within the banner */
         .company-logo {
-            Max-width: 80px; /* Slightly reduced size */
-            Height: auto;
-            Border-radius: 8px; /* Slightly rounded corners for the logo */
-            Box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Subtle shadow */
+            max-width: 80px; /* Slightly reduced size */
+            height: auto;
+            border-radius: 8px; /* Slightly rounded corners for the logo */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Subtle shadow */
             z-index: 1; /* Ensure logo is above shine effect */
             flex-shrink: 0; /* Prevent logo from shrinking */
         }
+
         .banner-text-content {
-            Flex-grow: 1; /* Allows text content to take remaining space */
-            Text-align: left; /* Ensure text is left-aligned within its container */
+            flex-grow: 1; /* Allows text content to take remaining space */
+            text-align: left; /* Ensure text is left-aligned within its container */
         }
+
         .banner h1 {
-            Font-size: 3rem; /* Reduced main title font size */
-            Font-weight: 700;
-            Margin-bottom: 6px; /* Reduced margin below title */
-            Position: relative;
+            font-size: 3rem; /* Reduced main title font size */
+            font-weight: 700;
+            margin-bottom: 6px; /* Reduced margin below title */
+            position: relative;
             z-index: 1;
             text-shadow: 0 3px 6px rgba(0,0,0,0.2);
         }
+
         .banner .subtitle {
-            Font-size: 1.15rem; /* Reduced subtitle font size */
-            Opacity: 0.98;
-            Font-weight: 400;
-            Position: relative;
+            font-size: 1.15rem; /* Reduced subtitle font size */
+            opacity: 0.98;
+            font-weight: 400;
+            position: relative;
             z-index: 1;
         }
+
         /* Home view grid for navigation cards */
         .home-grid {
-            Display: grid;
-            Grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid columns */
-            Gap: 25px; /* Space between grid items */
-            Padding: 20px 0;
-            Flex-grow: 1; /* Allows grid to expand */
-            Align-content: start; /* Aligns content to the start of the grid */
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid columns */
+            gap: 25px; /* Space between grid items */
+            padding: 20px 0;
+            flex-grow: 1; /* Allows grid to expand */
+            align-content: start; /* Aligns content to the start of the grid */
         }
+
         /* Styling for each navigation card */
         .main-card {
-            Background: var(--white);
-            Padding: 25px; /* Decreased padding */
-            Border-radius: var(--border-radius);
-            Box-shadow: var(--shadow-md);
-            Cursor: pointer;
-            Text-align: center;
-            Transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition for hover */
-            Display: flex;
-            Flex-direction: column;
-            Justify-content: center;
-            Align-items: center;
-            Min-height: 160px; /* Decreased min-height */
-            Position: relative;
-            Overflow: hidden;
-            Border: 1px solid #e2e8f0; /* Subtle border */
+            background: var(--white);
+            padding: 25px; /* Decreased padding */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition for hover */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 160px; /* Decreased min-height */
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e2e8f0; /* Subtle border */
         }
+
         /* Pseudo-element for hover effect on cards */
         .main-card::before {
-            Content: '';
-            Position: absolute;
-            Top: 0;
-            Left: 0;
-            Right: 0;
-            Bottom: 0;
-            Background: linear-gradient(to bottom right, rgba(139, 94, 60, 0.03), transparent 50%); /* Adjusted shadow color */
-            Opacity: 0;
-            Transition: opacity 0.3s ease;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom right, rgba(139, 94, 60, 0.03), transparent 50%); /* Adjusted shadow color */
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
+
         .main-card:hover::before {
-            Opacity: 1;
+            opacity: 1;
         }
+
         .main-card:hover {
-            Transform: translateY(-5px); /* Lift effect on hover */
-            Box-shadow: var(--shadow-lg); /* Larger shadow on hover */
-            Border-color: var(--coffee-light); /* Highlight border on hover */
+            transform: translateY(-5px); /* Lift effect on hover */
+            box-shadow: var(--shadow-lg); /* Larger shadow on hover */
+            border-color: var(--coffee-light); /* Highlight border on hover */
         }
+
         /* Disabled card styling */
         .main-card.disabled {
-            Opacity: 0.6;
-            Cursor: not-allowed;
-            Background: var(--bg-light);
-            Box-shadow: var(--shadow-sm);
-            Border-color: #cbd5e1;
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: var(--bg-light);
+            box-shadow: var(--shadow-sm);
+            border-color: #cbd5e1;
         }
+
         .main-card.disabled:hover {
-            Transform: none; /* No lift for disabled cards */
-            Box-shadow: var(--shadow-sm);
-            Border-color: #cbd5e1;
+            transform: none; /* No lift for disabled cards */
+            box-shadow: var(--shadow-sm);
+            border-color: #cbd5e1;
         }
+
         /* Icon styling for cards */
         .main-card-icon {
-            Font-size: 3rem; /* Reduced icon size */
-            Margin-bottom: 12px; /* Reduced margin */
-            Color: var(--coffee-light); /* Changed to coffee color */
-            Line-height: 1; /* Ensures icon is vertically centered */
+            font-size: 3rem; /* Reduced icon size */
+            margin-bottom: 12px; /* Reduced margin */
+            color: var(--coffee-light); /* Changed to coffee color */
+            line-height: 1; /* Ensures icon is vertically centered */
         }
+
         .main-card.disabled .main-card-icon {
-            Color: var(--text-color-light); /* Muted icon for disabled cards */
+            color: var(--text-color-light); /* Muted icon for disabled cards */
         }
+
         /* Title styling for cards */
         .main-card-title {
-            Font-size: 1.4rem; /* Reduced title size */
-            Font-weight: 600;
-            Color: var(--text-color-dark);
-            Margin-bottom: 4px; /* Reduced margin */
+            font-size: 1.4rem; /* Reduced title size */
+            font-weight: 600;
+            color: var(--text-color-dark);
+            margin-bottom: 4px; /* Reduced margin */
         }
+
         .main-card.disabled .main-card-title {
-            Color: var(--text-color-light);
+            color: var(--text-color-light);
         }
+
         /* Subtitle styling for cards */
         .main-card-subtitle {
-            Font-size: 0.9rem; /* Slightly reduced subtitle font size */
-            Color: var(--text-color-light);
-            Line-height: 1.4;
+            font-size: 0.9rem; /* Slightly reduced subtitle font size */
+            color: var(--text-color-light);
+            line-height: 1.4;
         }
         
         /* Full page view container */
         .full-page-view {
-            Background: var(--white);
-            Border-radius: var(--border-radius);
-            Box-shadow: var(--shadow-lg);
-            Flex-grow: 1; /* Allows full page view to fill available space */
-            Display: flex;
-            Flex-direction: column;
-            Position: relative;
-            Overflow: hidden; /* Ensures content within iframe doesn’t overflow */
-            Transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
-            Transform: translateY(10px); /* Initial slight offset for animation */
-            Opacity: 0; /* Start hidden */
-            Height: calc(100vh - 120px); /* Calculate height to fill screen minus header/padding */
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            flex-grow: 1; /* Allows full page view to fill available space */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden; /* Ensures content within iframe doesn't overflow */
+            transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
+            transform: translateY(10px); /* Initial slight offset for animation */
+            opacity: 0; /* Start hidden */
+            height: calc(100vh - 120px); /* Calculate height to fill screen minus header/padding */
         }
+
         .full-page-view.active {
-            Opacity: 1; /* Fully visible */
-            Transform: translateY(0); /* Move to final position */
-            Display: flex; /* Ensure it’s a flex container when active */
+            opacity: 1; /* Fully visible */
+            transform: translateY(0); /* Move to final position */
+            display: flex; /* Ensure it's a flex container when active */
         }
+
         /* Iframe container within full page view */
         .iframe-container-fpv {
-            Flex-grow: 1; /* Allows iframe to take all available space */
-            Position: relative;
-            Width: 100%;
-            Height: 100%;
-            Border: none;
-            Display: block; /* Removes extra space below iframe */
-            Background: var(--white); /* Fallback background */
+            flex-grow: 1; /* Allows iframe to take all available space */
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block; /* Removes extra space below iframe */
+            background: var(--white); /* Fallback background */
         }
+
         .full-page-view iframe {
-            Width: 100%;
-            Height: 100%;
-            Border: none;
-            Display: block; /* Removes extra space below iframe */
-            Background: var(--white); /* Fallback background */
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block; /* Removes extra space below iframe */
+            background: var(--white); /* Fallback background */
         }
+
         /* Error state styling */
         .error-state {
-            Display: none; /* Hidden by default */
-            Padding: 60px 40px;
-            Text-align: center;
-            Color: var(--primary-red);
-            Position: absolute; /* Overlay on top of iframe */
-            Top: 0;
-            Left: 0;
-            Right: 0;
-            Bottom: 0;
-            Background: rgba(255, 255, 255, 0.95);
+            display: none; /* Hidden by default */
+            padding: 60px 40px;
+            text-align: center;
+            color: var(--primary-red);
+            position: absolute; /* Overlay on top of iframe */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
             z-index: 5; /* Above iframe, below loading */
             flex-direction: column;
             justify-content: center;
             align-items: center;
             border-radius: var(--border-radius);
         }
+
         .error-state.show {
-            Display: flex;
+            display: flex;
         }
+
         .error-icon {
-            Font-size: 3rem;
-            Margin-bottom: 20px;
+            font-size: 3rem;
+            margin-bottom: 20px;
         }
+
         .error-title {
-            Font-size: 1.5rem;
-            Font-weight: 600;
-            Margin-bottom: 10px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
+
         .error-text {
-            Color: var(--text-color-light);
-            Font-size: 1rem;
+            color: var(--text-color-light);
+            font-size: 1rem;
         }
+
         /* Loading overlay styling */
         .loading {
-            Display: none; /* Hidden by default */
-            Position: absolute;
-            Top: 0;
-            Left: 0;
-            Right: 0;
-            Bottom: 0;
-            Background: rgba(255, 255, 255, 0.95);
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
             z-index: 10; /* Highest z-index */
             justify-content: center;
             align-items: center;
             flex-direction: column;
             border-radius: var(--border-radius);
         }
+
         .loading.show {
-            Display: flex;
+            display: flex;
         }
+
         .spinner {
-            Width: 40px;
-            Height: 40px;
-            Border: 4px solid #f3f4f6;
-            Border-top: 4px solid var(--coffee-light); /* Changed to coffee color */
-            Border-radius: 50%;
-            Animation: spin 1s linear infinite; /* Spinner animation */
-            Margin-bottom: 20px;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid var(--coffee-light); /* Changed to coffee color */
+            border-radius: 50%;
+            animation: spin 1s linear infinite; /* Spinner animation */
+            margin-bottom: 20px;
         }
+
         .loading-text {
-            Color: var(--text-color-light);
-            Font-weight: 500;
+            color: var(--text-color-light);
+            font-weight: 500;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
         /* Status indicator in banner */
         .status-indicator {
-            Position: absolute;
-            Top: 20px;
-            Right: 20px;
-            Width: 10px; /* Slightly larger */
-            Height: 10px;
-            Border-radius: 50%;
-            Background: #10b981; /* Green color */
-            Box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); /* Larger pulse shadow */
-            Animation: pulse 2s infinite;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 10px; /* Slightly larger */
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981; /* Green color */
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); /* Larger pulse shadow */
+            animation: pulse 2s infinite;
         }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.6; transform: scale(1.1); }
         }
+
         /* Demo styles for missing pages */
         .demo-content {
-            Padding: 40px;
-            Text-align: center;
-            Color: var(--text-color-dark);
-            Width: 100%; /* Ensure demo content takes full width */
-            Height: 100%; /* Ensure demo content takes full height */
-            Display: flex; /* Use flexbox for centering text */
-            Flex-direction: column;
-            Justify-content: center;
-            Align-items: center;
+            padding: 40px;
+            text-align: center;
+            color: var(--text-color-dark);
+            width: 100%; /* Ensure demo content takes full width */
+            height: 100%; /* Ensure demo content takes full height */
+            display: flex; /* Use flexbox for centering text */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
+
         .demo-content h2 {
-            Color: var(--coffee-dark);
-            Margin-bottom: 20px;
-            Font-size: 2rem;
+            color: var(--coffee-dark);
+            margin-bottom: 20px;
+            font-size: 2rem;
         }
+
         .demo-content p {
-            Color: var(--text-color-light);
-            Font-size: 1.1rem;
-            Line-height: 1.6;
-            Max-width: 600px; /* Limit width for readability */
+            color: var(--text-color-light);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            max-width: 600px; /* Limit width for readability */
         }
+
         /* Login Page Styles */
         .login-container {
-            Display: flex;
-            Justify-content: center;
-            Align-items: center;
-            Min-height: 100vh;
-            Background: var(--bg-medium);
-            Position: absolute;
-            Top: 0;
-            Left: 0;
-            Width: 100%;
-            Height: 100%;
-            z-index: 1000; /* Ensure it’s on top */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--bg-medium);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000; /* Ensure it's on top */
         }
+
         .login-box {
-            Background: var(--white);
-            Padding: 30px; /* Decreased padding */
-            Border-radius: var(--border-radius);
-            Box-shadow: var(--shadow-lg);
-            Text-align: center;
-            Width: 100%;
-            Max-width: 350px; /* Made smaller */
-            Animation: fadeIn 0.5s ease-out;
+            background: var(--white);
+            padding: 30px; /* Decreased padding */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            width: 100%;
+            max-width: 350px; /* Made smaller */
+            animation: fadeIn 0.5s ease-out;
         }
+
         .login-box .login-logo {
-            Max-width: 70px; /* Smaller logo for login box */
-            Margin-bottom: 20px;
-            Border-radius: 8px;
-            Box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 70px; /* Smaller logo for login box */
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+
         @keyframes fadeIn {
-            From { opacity: 0; transform: translateY(-20px); }
-            To { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
         .login-box h2 {
-            Font-size: 1.8rem; /* Slightly smaller font size */
-            Color: var(--coffee-dark);
-            Margin-bottom: 25px; /* Adjusted margin */
-            Font-weight: 700;
+            font-size: 1.8rem; /* Slightly smaller font size */
+            color: var(--coffee-dark);
+            margin-bottom: 25px; /* Adjusted margin */
+            font-weight: 700;
         }
+
         .login-box .input-group {
-            Margin-bottom: 15px; /* Decreased margin */
-            Text-align: left;
+            margin-bottom: 15px; /* Decreased margin */
+            text-align: left;
         }
+
         .login-box label {
-            Display: block;
-            Margin-bottom: 6px; /* Decreased margin */
-            Font-weight: 500;
-            Color: var(--text-color-dark);
-            Font-size: 0.9rem; /* Decreased font size */
+            display: block;
+            margin-bottom: 6px; /* Decreased margin */
+            font-weight: 500;
+            color: var(--text-color-dark);
+            font-size: 0.9rem; /* Decreased font size */
         }
+
         .login-box input[type="text"],
         .login-box input[type="password"] {
-            Width: 100%;
-            Padding: 10px 12px; /* Decreased padding */
-            Border: 1px solid #e2e8f0;
-            Border-radius: 8px;
-            Font-size: 0.95rem; /* Decreased font size */
-            Color: var(--text-color-dark);
-            Transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            padding: 10px 12px; /* Decreased padding */
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem; /* Decreased font size */
+            color: var(--text-color-dark);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
+
         .login-box input[type="text"]:focus,
         .login-box input[type="password"]:focus {
-            Outline: none;
-            Border-color: var(--coffee-light);
-            Box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
+            outline: none;
+            border-color: var(--coffee-light);
+            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
         }
+
         .login-box button {
-            Width: 100%;
-            Padding: 12px 20px;
-            Background: var(--coffee-light);
-            Color: var(--white);
-            Border: none;
-            Border-radius: 8px;
-            Font-size: 1.1rem;
-            Font-weight: 600;
-            Cursor: pointer;
-            Transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--coffee-light);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
         }
+
         .login-box button:hover {
-            Background: var(--coffee-dark);
-            Transform: translateY(-2px);
-            Box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25);
+            background: var(--coffee-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25);
         }
+
         .login-box .error-message {
-            Color: var(--primary-red);
-            Margin-top: 15px;
-            Font-size: 0.9rem;
-            Font-weight: 500;
-            Display: none; /* Hidden by default */
+            color: var(--primary-red);
+            margin-top: 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: none; /* Hidden by default */
         }
+
         /* Responsive adjustments for smaller screens */
         @media (max-width: 1024px) {
             .container {
-                Padding: 15px;
+                padding: 15px;
             }
             .banner {
-                Padding: 25px 30px; /* Slightly more compact */
-                Gap: 20px;
+                padding: 25px 30px; /* Slightly more compact */
+                gap: 20px;
             }
             .banner h1 {
-                Font-size: 3rem;
+                font-size: 3rem;
             }
             .banner .subtitle {
-                Font-size: 1.1rem;
+                font-size: 1.1rem;
             }
             .company-logo {
-                Max-width: 80px; /* Adjust size for medium screens */
+                max-width: 80px; /* Adjust size for medium screens */
             }
             .home-grid {
-                Grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                Gap: 20px;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
             }
             .main-card-icon {
-                Font-size: 3rem;
+                font-size: 3rem;
             }
             .main-card-title {
-                Font-size: 1.3rem;
+                font-size: 1.3rem;
             }
         }
+
         @media (max-width: 768px) {
             .container {
-                Padding: 10px;
+                padding: 10px;
             }
             .header {
-                Flex-direction: row; /* Keep buttons in a row */
-                Justify-content: space-between; /* Space out buttons */
-                Padding: 8px 15px; /* Slimmer header on mobile */
+                flex-direction: row; /* Keep buttons in a row */
+                justify-content: space-between; /* Space out buttons */
+                padding: 8px 15px; /* Slimmer header on mobile */
             }
             .admin-tab, .back-button, .logout-button {
-                Padding: 8px 15px;
-                Font-size: 0.85rem;
+                padding: 8px 15px;
+                font-size: 0.85rem;
             }
             .banner {
                 /* Maintain row direction for logo and text */
-                Padding: 20px 15px; /* Adjust padding for mobile row layout */
-                Margin-bottom: 20px;
-                Gap: 15px; /* Adjust gap for mobile row layout */
+                padding: 20px 15px; /* Adjust padding for mobile row layout */
+                margin-bottom: 20px;
+                gap: 15px; /* Adjust gap for mobile row layout */
             }
             .company-logo {
-                Max-width: 60px; /* Even smaller on mobile to allow space for text */
+                max-width: 60px; /* Even smaller on mobile to allow space for text */
             }
             .banner h1 {
-                Font-size: 2rem; /* Reduced font size for mobile row layout */
-                Margin-bottom: 4px; /* Reduced margin */
+                font-size: 2rem; /* Reduced font size for mobile row layout */
+                margin-bottom: 4px; /* Reduced margin */
             }
             .banner .subtitle {
-                Font-size: 0.9rem; /* Reduced font size for mobile */
+                font-size: 0.9rem; /* Reduced font size for mobile */
             }
             .home-grid {
-                Grid-template-columns: 1fr; /* Single column on very small screens */
-                Gap: 15px;
+                grid-template-columns: 1fr; /* Single column on very small screens */
+                gap: 15px;
             }
             .main-card {
-                Min-height: 150px;
-                Padding: 25px;
+                min-height: 150px;
+                padding: 25px;
             }
             .main-card-icon {
-                Font-size: 2.8rem;
+                font-size: 2.8rem;
             }
             .main-card-title {
-                Font-size: 1.2rem;
+                font-size: 1.2rem;
             }
             .full-page-view {
-                Height: calc(100vh - 90px); /* Adjust height for mobile header */
+                height: calc(100vh - 90px); /* Adjust height for mobile header */
             }
             .login-box {
-                Padding: 25px 15px; /* Further decreased padding for mobile */
-                Margin: 0 15px; /* Adjusted margin */
-                Max-width: 300px; /* Even smaller on mobile */
+                padding: 25px 15px; /* Further decreased padding for mobile */
+                margin: 0 15px; /* Adjusted margin */
+                max-width: 300px; /* Even smaller on mobile */
             }
             .login-box .login-logo {
-                Max-width: 60px; /* Smaller logo on mobile */
-                Margin-bottom: 15px;
+                max-width: 60px; /* Smaller logo on mobile */
+                margin-bottom: 15px;
             }
             .login-box h2 {
-                Font-size: 1.6rem;
-                Margin-bottom: 18px;
+                font-size: 1.6rem;
+                margin-bottom: 18px;
             }
             .login-box label {
-                Font-size: 0.85rem;
+                font-size: 0.85rem;
             }
             .login-box input[type="text"],
             .login-box input[type="password"] {
-                Padding: 8px 10px;
-                Font-size: 0.9rem;
+                padding: 8px 10px;
+                font-size: 0.9rem;
             }
         }
+
         @media (max-width: 480px) {
             .banner {
-                Padding: 15px 10px;
-                Gap: 10px;
+                padding: 15px 10px;
+                gap: 10px;
             }
             .company-logo {
-                Max-width: 50px;
+                max-width: 50px;
             }
             .banner h1 {
-                Font-size: 1.6rem;
+                font-size: 1.6rem;
             }
             .banner .subtitle {
-                Font-size: 0.8rem;
+                font-size: 0.8rem;
             }
             .admin-tab, .back-button, .logout-button {
-                Font-size: 0.8rem;
-                Padding: 6px 12px;
+                font-size: 0.8rem;
+                padding: 6px 12px;
             }
             .user-card {
-                Padding: 3px 8px;
+                padding: 3px 8px;
             }
             .user-card .username {
-                Font-size: 0.8rem;
+                font-size: 0.8rem;
             }
             .user-card .title {
-                Font-size: 0.7rem;
+                font-size: 0.7rem;
+            }
+            .user-card .area-governorate { /* Responsive adjustment for area/governorate */
+                font-size: 0.65rem;
             }
         }
     </style>
 </head>
 <body>
-    <!--Login Page-->
+    <!-- Login Page -->
     <div id="loginPage" class="login-container">
         <div class="login-box">
-            <!--Paxton Logo for Login Box-->
+            <!-- Paxton Logo for Login Box -->
             <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="login-logo" onerror="this.onerror=null;this.src='https://placehold.co/70x70/A0522D/FFFFFF?text=Logo';">
-            <h2>PAXTON LLC CRM</h2> <!--Changed title as requested-->
+            <h2>PAXTON LLC CRM</h2> <!-- Changed title as requested -->
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" placeholder="Enter your username">
@@ -686,94 +763,99 @@
             <div id="loginError" class="error-message">Invalid username or password.</div>
         </div>
     </div>
-    <!--Main Application Content (hidden until login)-->
+
+    <!-- Main Application Content (hidden until login) -->
     <div id="appContent" class="container hidden">
         <div class="header">
-            <!--User Card-->
+            <!-- User Card -->
             <div id="userCard" class="user-card hidden">
                 <span class="username"></span>
                 <span class="title"></span>
+                <span class="area-governorate"></span> <!-- New span for area/Governorate -->
             </div>
-            <!--Back button, initially hidden-->
+            <!-- Back button, initially hidden -->
             <button id="backButton" class="back-button hidden">
                 &#x2190; Back to Home
             </button>
-            <!--Admin tab button – REMOVED as per user request to use the card instead-->
+            <!-- Admin tab button - REMOVED as per user request to use the card instead -->
             <!-- <button id="adminButton" class="admin-tab">
                 Admin
             </button> -->
-            <!--Logout button-->
+            <!-- Logout button -->
             <button id="logoutButton" class="logout-button">
                 Logout
             </button>
         </div>
-        <!--Home View: This section will display the main navigation cards-->
+
+        <!-- Home View: This section will display the main navigation cards -->
         <div id="homeView" class="home-view">
             <div class="banner">
                 <div class="status-indicator"></div>
-                <!--Company Logo moved to the left and placed before text content-->
-                <!--The logo image source has been corrected to a standard URL format.-->
-                <!--The onerror attribute provides a fallback placeholder image if the main image fails to load.-->
+                <!-- Company Logo moved to the left and placed before text content -->
+                <!-- The logo image source has been corrected to a standard URL format. -->
+                <!-- The onerror attribute provides a fallback placeholder image if the main image fails to load. -->
                 <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/90x90/A0522D/FFFFFF?text=Logo';">
                 <div class="banner-text-content">
                     <h1>PAXTON LLC CRM</h1>
                     <div class="subtitle">Medical Team Affairs</div>
                 </div>
             </div>
+
             <div class="home-grid">
-                <!--CRM Card-->
+                <!-- CRM Card -->
                 <div class="main-card" data-page="crm">
-                    <div class="main-card-icon"> 📊 </div>
+                    <div class="main-card-icon">📊</div>
                     <div class="main-card-title">CRM</div>
                     <div class="main-card-subtitle">Hcps related affairs.</div>
                 </div>
-                <!--Dashboard Card-->
+                <!-- Dashboard Card -->
                 <div class="main-card" data-page="dashboard">
-                    <div class="main-card-icon"> 📈 </div>
+                    <div class="main-card-icon">📈</div>
                     <div class="main-card-title">Dashboard</div>
                     <div class="main-card-subtitle">View key performance indicators and analytics.</div>
                 </div>
-                <!--UPA Codes Card – This card is fully clickable and functions like the CRM card.-->
+                <!-- UPA Codes Card - This card is fully clickable and functions like the CRM card. -->
                 <div class="main-card" data-page="upa-codes">
-                    <div class="main-card-icon"> 🏥 </div>
+                    <div class="main-card-icon">🏥</div>
                     <div class="main-card-title">UPA Codes</div>
                     <div class="main-card-subtitle">Access UPA Codes and affairs.</div>
                 </div>
-                <!--Price List Card – This card is fully clickable and functions like the CRM card.-->
+                <!-- Price List Card - This card is fully clickable and functions like the CRM card. -->
                 <div class="main-card" data-page="price-list">
-                    <div class="main-card-icon"> 💲 </div>
+                    <div class="main-card-icon">💲</div>
                     <div class="main-card-title">Price List</div>
                     <div class="main-card-subtitle">products pricing information.</div>
                 </div>
-                <!--Products Knowledge Card – New card added-->
+                <!-- Products Knowledge Card - New card added -->
                 <div class="main-card" data-page="products-knowledge">
-                    <div class="main-card-icon"> 📚 </div>
+                    <div class="main-card-icon">📚</div>
                     <div class="main-card-title">Products Knowledge</div>
                     <div class="main-card-subtitle">Detailed information about our products.</div>
                 </div>
-                <!--admin Card – Now the primary way to access admin for allowed roles-->
+                <!-- Admin Card - Now the primary way to access admin for allowed roles -->
                 <div id="adminCard" class="main-card" data-page="admin">
-                    <div class="main-card-icon"> ⚙️</div>
-                    <div class="main-card-title">admin Panel</div>
+                    <div class="main-card-icon">⚙️</div>
+                    <div class="main-card-title">Admin Panel</div>
                     <div class="main-card-subtitle">Manage users and system settings.</div>
                 </div>
-                <!--Coming Soon Card (disabled)-->
+                <!-- Coming Soon Card (disabled) -->
                 <div class="main-card disabled">
-                    <div class="main-card-icon"> ⏳ </div>
+                    <div class="main-card-icon">⏳</div>
                     <div class="main-card-title">Coming Soon</div>
                     <div class="main-card-subtitle">Exciting new features are on their way!</div>
                 </div>
             </div>
         </div>
-        <!--Full Page Views: Each will contain its own iframe and loading/error states-->
-        <!--CRM Full Page View-->
+
+        <!-- Full Page Views: Each will contain its own iframe and loading/error states -->
+        <!-- CRM Full Page View -->
         <div id="crmView" class="full-page-view hidden">
             <div class="loading" id="loadingCrm">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading CRM…</div>
+                <div class="loading-text">Loading CRM...</div>
             </div>
             <div class="error-state" id="errorCrm">
-                <div class="error-icon"> ⚠️</div>
+                <div class="error-icon">⚠️</div>
                 <div class="error-title">CRM Page Not Found</div>
                 <div class="error-text">The CRM file could not be loaded. Please check its path.</div>
             </div>
@@ -785,14 +867,15 @@
                 </div>
             </div>
         </div>
-        <!--Dashboard Full Page View-->
+
+        <!-- Dashboard Full Page View -->
         <div id="dashboardView" class="full-page-view hidden">
             <div class="loading" id="loadingDashboard">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading Dashboard…</div>
+                <div class="loading-text">Loading Dashboard...</div>
             </div>
             <div class="error-state" id="errorDashboard">
-                <div class="error-icon"> ⚠️</div>
+                <div class="error-icon">⚠️</div>
                 <div class="error-title">Dashboard Page Not Found</div>
                 <div class="error-text">The Dashboard file could not be loaded. Please check its path.</div>
             </div>
@@ -804,14 +887,15 @@
                 </div>
             </div>
         </div>
-        <!--UPA Codes Full Page View-->
+
+        <!-- UPA Codes Full Page View -->
         <div id="upaCodesView" class="full-page-view hidden">
             <div class="loading" id="loadingUpaCodes">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading UPA Codes…</div>
+                <div class="loading-text">Loading UPA Codes...</div>
             </div>
             <div class="error-state" id="errorUpaCodes">
-                <div class="error-icon"> ⚠️</div>
+                <div class="error-icon">⚠️</div>
                 <div class="error-title">UPA Codes Page Not Found</div>
                 <div class="error-text">The UPA Codes file could not be loaded. Please check its path.</div>
             </div>
@@ -823,14 +907,15 @@
                 </div>
             </div>
         </div>
-        <!--Price List Full Page View-->
+
+        <!-- Price List Full Page View -->
         <div id="priceListView" class="full-page-view hidden">
             <div class="loading" id="loadingPriceList">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading Price List…</div>
+                <div class="loading-text">Loading Price List...</div>
             </div>
             <div class="error-state" id="errorPriceList">
-                <div class="error-icon"> ⚠️</div>
+                <div class="error-icon">⚠️</div>
                 <div class="error-title">Price List Page Not Found</div>
                 <div class="error-text">The Price List file could not be loaded. Please check its path.</div>
             </div>
@@ -842,14 +927,15 @@
                 </div>
             </div>
         </div>
-        <!--Products Knowledge Full Page View – New view added-->
+
+        <!-- Products Knowledge Full Page View - New view added -->
         <div id="productsKnowledgeView" class="full-page-view hidden">
             <div class="loading" id="loadingProductsKnowledge">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading Products Knowledge…</div>
+                <div class="loading-text">Loading Products Knowledge...</div>
             </div>
             <div class="error-state" id="errorProductsKnowledge">
-                <div class="error-icon"> ⚠️</div>
+                <div class="error-icon">⚠️</div>
                 <div class="error-title">Products Knowledge Page Not Found</div>
                 <div class="error-text">The Products Knowledge file could not be loaded. Please check its path.</div>
             </div>
@@ -861,35 +947,165 @@
                 </div>
             </div>
         </div>
-        <!--admin Full Page View-->
+
+        <!-- Admin Full Page View -->
         <div id="adminView" class="full-page-view hidden">
-            <div class="loading" id="loadingadmin">
+            <div class="loading" id="loadingAdmin">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading admin Panel…</div>
+                <div class="loading-text">Loading Admin Panel...</div>
             </div>
-            <div class="error-state" id="erroradmin">
-                <div class="error-icon"> ⚠️</div>
-                <div class="error-title">admin Page Not Found</div>
-                <div class="error-text">The admin file could not be loaded. Please check its path.</div>
+            <div class="error-state" id="errorAdmin">
+                <div class="error-icon">⚠️</div>
+                <div class="error-title">Admin Page Not Found</div>
+                <div class="error-text">The Admin file could not be loaded. Please check its path.</div>
             </div>
             <div class="iframe-container-fpv">
                 <iframe src="" class="hidden"></iframe>
                 <div class="demo-content">
-                    <h2>admin Panel</h2>
+                    <h2>Admin Panel</h2>
                     <p>This would be your administrative interface for user management and system settings. Currently showing demo content since the external file is not available.</p>
                 </div>
             </div>
         </div>
+
     </div>
+
     <script>
         // Supabase configuration from your provided keys
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+
         // Initialize Supabase client
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // Global variables to manage application state
         let currentActiveViewId = null; // Stores the ID of the currently active full-page view
-        let loggedInUser = null; // Stores user data: { username, title }
+        // Stores user data: { username, title, area, governorate }
+        let loggedInUser = null; 
+        let googleSheetData = []; // Global variable to store parsed Google Sheet data
+
+        // Google Sheet URL for area and governorate data
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+
+        /**
+         * Fetches and parses the Google Sheet CSV data.
+         * Dynamically maps columns based on header names and user's specified indices.
+         */
+        async function fetchGoogleSheetData() {
+            try {
+                const response = await fetch(GOOGLE_SHEET_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const csvText = await response.text();
+                console.log('Raw Google Sheet CSV text:', csvText); // Log raw CSV text
+
+                const lines = csvText.split('\n');
+                if (lines.length < 2) { // Ensure there's at least a header and one data row
+                    console.warn('Google Sheet CSV is empty or only has headers.');
+                    googleSheetData = [];
+                    return;
+                }
+
+                // Assuming the first row is the header
+                const headerRow = lines[0].split(',').map(h => h.trim());
+                console.log('Google Sheet headers:', headerRow); // Log headers
+
+                const dataRows = lines.slice(1);
+
+                // Dynamically find column indices based on header names for robustness
+                // Fallback to hardcoded indices if header names are not found, based on user's column letters
+                const getColumnIndex = (headers, possibleNames, fallbackIndex) => {
+                    for (const name of possibleNames) {
+                        const index = headers.indexOf(name);
+                        if (index !== -1) return index;
+                    }
+                    return fallbackIndex; // Use fallback index if no header name matches
+                };
+
+                // User specified:
+                // Column B: District Manager (Name) -> index 1
+                // Column C: Governorate -> index 2
+                // Column D: Medical Representative (Name) -> index 3
+                // Column E: area -> index 4
+                // Column A: General Name (assuming for other roles like Admin) -> index 0
+
+                const dmNameColIndex = getColumnIndex(headerRow, ['District Manager', 'DistrictManager', 'DM Name'], 1);
+                const mrNameColIndex = getColumnIndex(headerRow, ['Medical Representative', 'MedicalRep', 'MR Name'], 3);
+                const governorateColIndex = getColumnIndex(headerRow, ['Governorate'], 2);
+                const areaColIndex = getColumnIndex(headerRow, ['area'], 4); // This is configured to look for 'area' and defaults to index 4 (Column E)
+                const generalNameColIndex = getColumnIndex(headerRow, ['Name', 'GeneralName'], 0);
+
+
+                let tempSheetData = {}; // To store consolidated data by username
+
+                dataRows.forEach((row, rowIndex) => {
+                    const columns = row.split(',').map(col => col.trim());
+                    
+                    let sheetUsername = '';
+                    let sheetTitle = ''; 
+
+                    const dmName = columns[dmNameColIndex];
+                    const mrName = columns[mrNameColIndex];
+                    const generalName = columns[generalNameColIndex];
+
+                    const currentGovernorate = columns[governorateColIndex];
+                    const currentarea = columns[areaColIndex]; // This is where 'area' is read from
+
+                    // Determine the primary username and title from the sheet row
+                    // Prioritize specific roles (DM, MR) for username and title
+                    if (dmName && dmName !== '') {
+                        sheetUsername = dmName;
+                        sheetTitle = 'District Manager';
+                    } else if (mrName && mrName !== '') {
+                        sheetUsername = mrName;
+                        sheetTitle = 'Medical Representative';
+                    } else {
+                        // Fallback for other roles (e.g., Admin) whose name might be in Column A
+                        sheetUsername = generalName;
+                        // The title for generalName users (like Admin) will be primarily from Supabase
+                        // We leave sheetTitle empty or generic here, and let Supabase title take precedence for Admin.
+                    }
+
+                    if (sheetUsername) {
+                        const lowerCaseUsername = sheetUsername.toLowerCase();
+                        if (!tempSheetData[lowerCaseUsername]) { 
+                            tempSheetData[lowerCaseUsername] = {
+                                username: sheetUsername,
+                                title: sheetTitle, // This title is from the sheet, Supabase title will override
+                                governorates: new Set(), // Use Set to store unique governorates
+                                areas: new Set() // Use Set to store unique areas
+                            };
+                        }
+                        if (currentGovernorate) {
+                            currentGovernorate.split(',').forEach(g => { // Split by comma for multiple
+                                if (g.trim()) tempSheetData[lowerCaseUsername].governorates.add(g.trim());
+                            });
+                        }
+                        if (currentarea) { // Add currentarea to the areas Set
+                            currentarea.split(',').forEach(a => { // Split by comma for multiple
+                                if (a.trim()) tempSheetData[lowerCaseUsername].areas.add(a.trim());
+                            });
+                        }
+                        console.log(`Processed row ${rowIndex + 1} for sheet username ${sheetUsername}: Governorates: ${Array.from(tempSheetData[lowerCaseUsername].governorates).join(', ')}, areas: ${Array.from(tempSheetData[lowerCaseUsername].areas).join(', ')}`);
+                    }
+                });
+
+                // Convert Sets to arrays for final googleSheetData
+                googleSheetData = Object.values(tempSheetData).map(entry => ({
+                    username: entry.username,
+                    title: entry.title, // This title is from the sheet, Supabase title will override
+                    governorate: Array.from(entry.governorates), // Convert Set to Array
+                    area: Array.from(entry.areas) // Convert Set to Array
+                }));
+
+                console.log('Final consolidated Google Sheet data:', googleSheetData);
+            } catch (error) {
+                console.error('Error fetching or parsing Google Sheet data:', error);
+                // Optionally, display an error to the user or use fallback data
+            }
+        }
+
         /**
          * Displays the login page and hides the main application content.
          * Clears any stored user data and page state.
@@ -906,6 +1122,7 @@
             currentActiveViewId = null; // Reset current view
             console.log('Showing login page.');
         }
+
         /**
          * Displays the main application content and hides the login page.
          * Updates the user card and applies role-based UI restrictions.
@@ -916,37 +1133,80 @@
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('appContent').classList.remove('hidden');
             console.log('Showing app content.');
-            updateUserCard(); // Update the user’s name and title in the header
-            applyUserPermissions(); // Apply UI restrictions based on user’s title
+            updateUserCard(); // Update the user's name, title, and area/governorate in the header
+            applyUserPermissions(); // Apply UI restrictions based on user's title
             // showHome(); // Removed: Initial page routing is now handled by DOMContentLoaded
         }
+
         /**
-         * Updates the user card in the header with the logged-in user’s information.
+         * Updates the user card in the header with the logged-in user's information,
+         * including username, title, and conditionally, area or governorate.
          */
         function updateUserCard() {
             const userCard = document.getElementById('userCard');
             const usernameSpan = userCard.querySelector('.username');
             const titleSpan = userCard.querySelector('.title');
+            const areaGovernorateSpan = userCard.querySelector('.area-governorate'); // Get the new span
+
+            console.log('updateUserCard - loggedInUser received:', loggedInUser);
+
             if (loggedInUser) {
                 usernameSpan.textContent = loggedInUser.username;
                 titleSpan.textContent = loggedInUser.title;
+                
+                // Conditionally display area or governorate based on user title
+                if (loggedInUser.title === 'Medical Representative') {
+                    console.log('Medical Representative area display check: loggedInUser.area =', loggedInUser.area, 'length > 0 =', loggedInUser.area && loggedInUser.area.length > 0);
+                    if (loggedInUser.area && loggedInUser.area.length > 0) {
+                        areaGovernorateSpan.textContent = `area: ${loggedInUser.area.join(', ')}`; // Join array for display
+                        areaGovernorateSpan.classList.remove('hidden');
+                        console.log(`Displaying Medical Representative area: ${loggedInUser.area.join(', ')}`);
+                    } else {
+                        areaGovernorateSpan.classList.add('hidden');
+                        areaGovernorateSpan.textContent = '';
+                        console.log('Medical Representative: area data missing or empty.');
+                    }
+                } else if (loggedInUser.title === 'District Manager') {
+                    console.log('District Manager governorate display check: loggedInUser.governorate =', loggedInUser.governorate, 'length > 0 =', loggedInUser.governorate && loggedInUser.governorate.length > 0);
+                    if (loggedInUser.governorate && loggedInUser.governorate.length > 0) {
+                        areaGovernorateSpan.textContent = `Governorate: ${loggedInUser.governorate.join(', ')}`; // Join array for display
+                        areaGovernorateSpan.classList.remove('hidden');
+                        console.log(`Displaying District Manager Governorate: ${loggedInUser.governorate.join(', ')}`);
+                    } else {
+                        areaGovernorateSpan.classList.add('hidden');
+                        areaGovernorateSpan.textContent = '';
+                        console.log('District Manager: Governorate data missing or empty.');
+                    }
+                } else {
+                    areaGovernorateSpan.classList.add('hidden'); // Hide if not applicable or empty
+                    areaGovernorateSpan.textContent = ''; // Clear text
+                    console.log('area/Governorate not applicable or data missing for this user role.');
+                }
+
                 userCard.classList.remove('hidden'); // Show the user card
             } else {
                 userCard.classList.add('hidden'); // Hide the user card if no one is logged in
+                usernameSpan.textContent = '';
+                titleSpan.textContent = '';
+                areaGovernorateSpan.textContent = '';
+                areaGovernorateSpan.classList.add('hidden');
             }
         }
+
         /**
-         * Applies UI restrictions (hiding/disabling cards and buttons) based on the logged-in user’s title.
+         * Applies UI restrictions (hiding/disabling cards and buttons) based on the logged-in user's title.
          */
         function applyUserPermissions() {
             const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
-            const adminCard = document.querySelector('.main-card[data-page="admin"]'); // admin card in home grid
+            const adminCard = document.querySelector('.main-card[data-page="admin"]'); 
+
             // First, reset all cards and buttons to their default (visible/enabled) state
             document.querySelectorAll('.main-card').forEach(card => {
                 card.classList.remove('disabled');
                 card.classList.remove('hidden'); // Ensure all cards are visible initially for permission logic
             });
             document.getElementById('logoutButton').classList.remove('hidden'); // Ensure logout button is visible
+
             if (loggedInUser) {
                 switch (loggedInUser.title) {
                     case 'admin':
@@ -969,11 +1229,12 @@
                         break;
                 }
             } else {
-                // If no user is logged in (shouldn’t happen if appContent is shown, but as a safeguard)
+                // If no user is logged in (shouldn't happen if appContent is shown, but as a safeguard)
                 document.querySelectorAll('.main-card').forEach(card => card.classList.add('hidden'));
                 document.getElementById('logoutButton').classList.add('hidden');
             }
         }
+
         /**
          * Handles the user login process by fetching credentials from Supabase.
          * IMPORTANT: This implementation assumes plain text passwords in the database as per the request.
@@ -983,77 +1244,94 @@
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
             const loginError = document.getElementById('loginError');
+
             loginError.style.display = 'none'; // Hide any previous error message
+
             if (!usernameInput || !passwordInput) {
                 loginError.textContent = 'Please enter both username and password.';
                 loginError.style.display = 'block';
                 return;
             }
+
             try {
-                // Query the ‘users’ table to find a matching username
+                // Step 1: Authenticate against Supabase for username, title, and password
+                // Using .limit(1) instead of .single() to avoid PGRST116 error if user not found
                 const { data, error } = await supabase
                     .from('users')
-                    .select('username, title, password') // Select username, title, and password for verification
-                    .eq('username', usernameInput) // Filter by username
-                    .single(); // Expect a single record
-                // Check for errors during the Supabase query or if no data is returned
-                if (error || !data) {
+                    .select('username, title, password') 
+                    .eq('username', usernameInput) 
+                    .limit(1); // Use limit(1) to handle 0 or 1 rows gracefully
+
+                let supabaseUser = null;
+                if (data && data.length > 0) {
+                    supabaseUser = data[0];
+                }
+
+                if (error || !supabaseUser) { // Check for error or if no user was found
                     loginError.textContent = 'Invalid username or password.';
                     loginError.style.display = 'block';
                     console.error('Login failed: User not found or query error.', error);
                     return;
                 }
-                // Compare the provided password with the stored plain text password
-                if (data.password !== passwordInput) {
+
+                if (supabaseUser.password !== passwordInput) {
                     loginError.textContent = 'Invalid username or password.';
                     loginError.style.display = 'block';
                     console.error('Login failed: Password mismatch.');
                     return;
                 }
-                // If credentials are valid, set the loggedInUser and store in local storage
-                loggedInUser = { username: data.username, title: data.title, password: data.password }; // Added password to loggedInUser
-                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser)); // Persist user info
+
+                console.log('Supabase user data:', supabaseUser);
+
+                // Step 2: If Supabase authentication is successful, fetch additional details from Google Sheet
+                let userarea = null;
+                let userGovernorate = null;
+
+                // Find user's consolidated data from the Google Sheet data
+                // Match Supabase username with the sheet's determined username
+                const sheetUser = googleSheetData.find(sheetRow => 
+                    sheetRow.username.toLowerCase() === usernameInput.toLowerCase()
+                );
+
+                if (sheetUser) {
+                    userarea = sheetUser.area; // This will now be an array
+                    userGovernorate = sheetUser.governorate; // This will now be an array
+                    console.log('Sheet user found for login:', sheetUser);
+                } else {
+                    console.warn(`No matching Google Sheet data found for username: ${usernameInput}. area and Governorate will be null.`);
+                }
+
+                // Combine data into loggedInUser
+                loggedInUser = { 
+                    username: supabaseUser.username, 
+                    title: supabaseUser.title, // Title from Supabase is primary
+                    area: userarea, 
+                    governorate: userGovernorate 
+                };
+                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                console.log('Final loggedInUser object after sheet data:', loggedInUser);
                 
-                // After successful login, always go to home first, then check for last page
-                showAppContent(); // This will show the main app and update user/permissions
-                showHome(); // This will explicitly set currentPage to ‘home’ and show home view
+                showAppContent();
+                showHome();
+
             } catch (err) {
                 console.error('An unexpected error occurred during login:', err);
                 loginError.textContent = 'An unexpected error occurred. Please try again.';
                 loginError.style.display = 'block';
             }
         }
+
         /**
          * Handles user logout. Clears session and returns to login page.
-         * This function now also clears the content of all iframes.
          */
         function handleLogout() {
-            console.log('User logged out. Clearing iframe states.');
-            // Get all full-page-view elements
-            const fullPageViewElements = document.querySelectorAll('.full-page-view');
-            fullPageViewElements.forEach(view => {
-                const iframe = view.querySelector('iframe');
-                if (iframe) {
-                    // Set iframe src to about:blank to clear its content and state
-                    iframe.src = 'about:blank';
-                    console.log(`Cleared iframe src for view: ${view.id}`);
-                    // Also hide the iframe and show demo content if it’s currently active
-                    const demoContent = view.querySelector('.demo-content');
-                    if (demoContent) {
-                        iframe.classList.add('hidden');
-                        demoContent.classList.remove('hidden');
-                    }
-                    // Ensure the view itself is hidden and not active
-                    view.classList.remove('active');
-                    view.classList.add('hidden');
-                }
-            });
-            // Now proceed with the standard logout process
+            console.log('User logged out.');
             showLoginPage(); // Go back to the login page
         }
+
         /**
          * Shows the home view and hides any active full-page view.
-         * Resets the current page in local storage to ‘home’.
+         * Resets the current page in local storage to 'home'.
          */
         function showHome() {
             console.log('Showing home view');
@@ -1068,6 +1346,7 @@
             if (backButton) {
                 backButton.classList.add('hidden'); // Hide the back button
             }
+
             // Re-apply permissions to ensure correct visibility of logout button on home
             if (loggedInUser) {
                 applyUserPermissions(); // This will show/hide admin card based on role
@@ -1075,12 +1354,13 @@
             } else {
                  logoutButton.classList.add('hidden'); // Hide logout button if not logged in
             }
+
             // Hide the currently active full-page view, if any
             if (currentActiveViewId) {
                 const activeView = document.getElementById(currentActiveViewId);
                 if (activeView) {
                     activeView.classList.remove('active');
-                    // Delay adding ‘hidden’ to allow CSS transition to complete (300ms)
+                    // Delay adding 'hidden' to allow CSS transition to complete (300ms)
                     setTimeout(() => {
                         activeView.classList.add('hidden');
                         // Also hide the iframe and show demo content if it was an iframe view
@@ -1092,12 +1372,13 @@
                 }
                 currentActiveViewId = null; // Reset current active view
             }
-            localStorage.setItem('currentPage', 'home'); // Store ‘home’ as the current page for persistence
+            localStorage.setItem('currentPage', 'home'); // Store 'home' as the current page for persistence
         }
+
         /**
          * Loads a specific page view into its corresponding iframe.
          * This function now also handles updating the URL in localStorage for persistence across refreshes.
-         * @param {string} page – The page identifier (e.g., ‘crm’, ‘dashboard’).
+         * @param {string} page - The page identifier (e.g., 'crm', 'dashboard').
          */
         function loadPage(page) {
             console.log(`Attempting to load page: ${page}`);
@@ -1109,25 +1390,30 @@
                 'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
                 'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
                 'products-knowledge': { viewId: 'productsKnowledgeView', displayName: 'Products Knowledge', fileName: 'Products knowledge.html' },
-                'admin': { viewId: 'adminView', displayName: 'admin', fileName: 'admin users.html' }
+                'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
             };
+
             const config = pageConfig[page];
             if (!config) {
                 console.error(`Error: Unknown page identifier: ${page}`);
                 return;
             }
+
             const { viewId, displayName, fileName } = config;
+
             // Get references to main UI elements
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
             const targetView = document.getElementById(viewId);
+
             // Initialize variables for elements inside targetView
             let loadingOverlay = null;
             let errorState = null;
             let iframeContainer = null;
             let iframe = null;
             let demoContent = null;
+
             // Ensure targetView exists before querying its children
             if (targetView) {
                 loadingOverlay = targetView.querySelector('.loading'); 
@@ -1138,6 +1424,7 @@
                     demoContent = iframeContainer.querySelector('.demo-content');
                 }
             }
+
             // Basic validation to ensure all required elements exist before proceeding
             if (!homeView || !backButton || !logoutButton || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
                 console.error('Error: One or more required DOM elements not found for page loading. Check HTML structure.');
@@ -1147,122 +1434,123 @@
                 console.error('  iframeContainer:', iframeContainer, 'iframe:', iframe, 'demoContent:', demoContent);
                 return; // Exit if elements are missing
             }
+
             console.log(`All required DOM elements found for page: ${page}. Proceeding to load.`);
+
             // Hide the home view, show the back button, and hide the logout button
             homeView.classList.add('hidden');
             backButton.classList.remove('hidden'); // Show back button
             logoutButton.classList.add('hidden'); // Hide logout button when inside a specific page
             console.log(`Back button visibility set for page: ${page}.`);
-            // If there’s a currently active full-page view and it’s different from the target, hide it
+
+            // If there's a currently active full-page view and it's different from the target, hide it
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
-                    // Delay adding ‘hidden’ to allow CSS transition to complete
+                    // Delay adding 'hidden' to allow CSS transition to complete (300ms)
                     setTimeout(() => prevActiveView.classList.add('hidden'), 300);
                 }
             }
+
             // Set the new active view ID
             currentActiveViewId = viewId;
+
             // Show the target full-page view with a slight delay for transition effect
             targetView.classList.remove('hidden');
             setTimeout(() => targetView.classList.add('active'), 10);
+
             // Show the loading spinner and hide any previous error state
             loadingOverlay.classList.add('show');
             errorState.classList.remove('show');
+
             // Hide the demo content and show the iframe before loading new content
             demoContent.classList.add('hidden');
             iframe.classList.remove('hidden');
+
             // Crucial fix for refresh: Store the page to load in localStorage
-            // This ensures that if the user refreshes, they return to the same iframe page.
+            // This ensures that the user refreshes, they return to the same iframe page.
             localStorage.setItem('currentPage', page);
+            iframe.src = fileName; // Set the iframe's source
 
-            // --- START OF MODIFICATION ---
-            // Step 1: Clear the iframe by setting its src to about:blank
-            // This forces the iframe to unload its current content and state.
-            iframe.src = 'about:blank';
-
-            // Use a Promise to wait for the 'about:blank' to load before setting the actual content.
-            // This ensures the iframe is truly reset.
             iframe.onload = function() {
-                console.log(`Iframe for ${displayName} cleared (about:blank loaded).`);
+                console.log(`${displayName} iframe loaded successfully from ${fileName}.`);
+                loadingOverlay.classList.remove('show'); // Hide spinner
+                errorState.classList.remove('show');     // Hide error
 
-                // Step 2: Load the actual content with a cache-busting parameter
-                // This forces the browser to fetch a fresh copy of the iframe content.
-                iframe.src = fileName + '?_cacheBuster=' + new Date().getTime();
-
-                // Re-assign the onload handler for the actual content
-                iframe.onload = function() {
-                    console.log(`${displayName} iframe loaded successfully from ${fileName}.`);
-                    loadingOverlay.classList.remove('show'); // Hide spinner
-                    errorState.classList.remove('show');     // Hide error
-                    // Send a postMessage to the iframe if a user is logged in and it’s CRM or Dashboard
-                    if (loggedInUser && (page === 'crm' || page === 'dashboard')) {
-                        console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
-                        // Send the loggedInUser object.
-                        // WARNING: Sending plain text passwords via postMessage is INSECURE.
-                        // In a production environment, use secure token-based authentication (e.g., JWT).
-                        iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*'); // IMPORTANT: Replace ‘*’ with the actual origin of your iframe content for security!
-                    }
-                };
-
-                // Re-assign the onerror handler as well
-                iframe.onerror = function() {
-                    console.error(`Failed to load ${displayName} iframe from ${fileName}. Displaying demo content.`);
-                    loadingOverlay.classList.remove('show'); // Hide spinner
-                    errorState.classList.add('show');        // Show error message
-                    demoContent.classList.remove('hidden');  // Show demo content as fallback
-                    iframe.classList.add('hidden');          // Hide the broken iframe
-                };
+                // Send a postMessage to the iframe if a user is logged in and it's CRM or Dashboard
+                // The demo content is now always hidden if the iframe loads successfully.
+                if (loggedInUser && (page === 'crm' || page === 'dashboard')) {
+                    console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
+                    // Send the loggedInUser object. You might want to send a token instead of raw password in a real app.
+                    iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*'); // IMPORTANT: Replace '*' with the actual origin of your iframe content for security!
+                }
             };
-            // --- END OF MODIFICATION ---
+
+            iframe.onerror = function() {
+                console.error(`Failed to load ${displayName} iframe from ${fileName}. Displaying demo content.`);
+                loadingOverlay.classList.remove('show'); // Hide spinner
+                errorState.classList.add('show');        // Show error message
+                demoContent.classList.remove('hidden');  // Show demo content as fallback
+                iframe.classList.add('hidden');          // Hide the broken iframe
+            };
         }
+
         // Initialize the application when DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM loaded, initializing application');
             
+            // Fetch Google Sheet data first
+            await fetchGoogleSheetData();
+
             // Check for logged-in user in localStorage on page load
             const storedUser = localStorage.getItem('loggedInUser');
             const lastPage = localStorage.getItem('currentPage'); // Read lastPage BEFORE any showHome() call
+
             if (storedUser) {
                 loggedInUser = JSON.parse(storedUser);
                 showAppContent(); // Show the main application content and update user/permissions
+
                 // Attempt to load the last visited page from localStorage
                 if (lastPage && lastPage !== 'home') {
-                    // Before loading, check if the card for the lastPage is allowed for the current user’s role.
+                    // Before loading, check if the card for the lastPage is allowed for the current user's role.
                     // This prevents loading a restricted page if permissions have changed or user role implies restriction.
                     const targetCard = document.querySelector(`.main-card[data-page="${lastPage}"]`);
                     // If the card exists and is not hidden by permissions, load the page.
                     if (targetCard && !targetCard.classList.contains('hidden')) {
                          loadPage(lastPage);
                     } else {
-                        // If the last page is now restricted or doesn’t exist, revert to home.
-                        console.log(`Last page “${lastPage}” is restricted or invalid for current user. Returning to home.`);
+                        // If the last page is now restricted or doesn't exist, revert to home.
+                        console.log(`Last page "${lastPage}" is restricted or invalid for current user. Returning to home.`);
                         showHome();
                     }
                 } else {
-                    showHome(); // If no last page stored or it was ‘home’, just show home.
+                    showHome(); // If no last page stored or it was 'home', just show home.
                 }
+
             } else {
                 showLoginPage(); // If no user is logged in, display the login page.
             }
+
             // Add event listeners for login and navigation buttons
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
+
             // Event listeners for main navigation cards
             document.querySelectorAll('.main-card').forEach(card => {
                 card.addEventListener('click', function() {
                     const page = this.dataset.page; // Get the data-page attribute
-                    // Only load the page if it’s not disabled AND not hidden by permissions
+                    // Only load the page if it's not disabled AND not hidden by permissions
                     if (page && !this.classList.contains('disabled') && !this.classList.contains('hidden')) {
                         loadPage(page);
                     } else if (this.classList.contains('disabled')) {
-                        console.log(`Card for page “${page}” is disabled.`);
+                        console.log(`Card for page "${page}" is disabled.`);
                     } else if (this.classList.contains('hidden')) {
-                        console.log(`Card for page “${page}” is hidden due to user permissions.`);
+                        console.log(`Card for page "${page}" is hidden due to user permissions.`);
                     }
                 });
             });
+
             // Event listener for the Back to Home button
             document.getElementById('backButton').addEventListener('click', function() {
                 showHome();
@@ -1271,4 +1559,3 @@
     </script>
 </body>
 </html>
-
