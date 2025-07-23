@@ -1028,12 +1028,12 @@
                 // Column C: Governorate -> index 2
                 // Column D: Medical Representative (Name) -> index 3
                 // Column E: area -> index 4
-                // Column A: General Name (assuming for other roles like Admin) -> index 0
 
                 const dmNameColIndex = getColumnIndex(headerRow, ['District Manager', 'DistrictManager', 'DM Name'], 1);
                 const mrNameColIndex = getColumnIndex(headerRow, ['Medical Representative', 'MedicalRep', 'MR Name'], 3);
                 const governorateColIndex = getColumnIndex(headerRow, ['Governorate'], 2);
                 const areaColIndex = getColumnIndex(headerRow, ['area'], 4); // This is configured to look for 'area' and defaults to index 4 (Column E)
+                // Assuming a general name column might be present for other roles like Admin, often Column A
                 const generalNameColIndex = getColumnIndex(headerRow, ['Name', 'GeneralName'], 0);
 
 
@@ -1158,13 +1158,13 @@
                 if (loggedInUser.title === 'Medical Representative') {
                     console.log('Medical Representative area display check: loggedInUser.area =', loggedInUser.area, 'length > 0 =', loggedInUser.area && loggedInUser.area.length > 0);
                     if (loggedInUser.area && loggedInUser.area.length > 0) {
-                        areaGovernorateSpan.textContent = `area: ${loggedInUser.area.join(', ')}`; // Join array for display
+                        areaGovernorateSpan.textContent = `Area: ${loggedInUser.area.join(', ')}`; // Join array for display
                         areaGovernorateSpan.classList.remove('hidden');
                         console.log(`Displaying Medical Representative area: ${loggedInUser.area.join(', ')}`);
                     } else {
                         areaGovernorateSpan.classList.add('hidden');
                         areaGovernorateSpan.textContent = '';
-                        console.log('Medical Representative: area data missing or empty.');
+                        console.log('Medical Representative: Area data missing or empty.');
                     }
                 } else if (loggedInUser.title === 'District Manager') {
                     console.log('District Manager governorate display check: loggedInUser.governorate =', loggedInUser.governorate, 'length > 0 =', loggedInUser.governorate && loggedInUser.governorate.length > 0);
@@ -1180,7 +1180,7 @@
                 } else {
                     areaGovernorateSpan.classList.add('hidden'); // Hide if not applicable or empty
                     areaGovernorateSpan.textContent = ''; // Clear text
-                    console.log('area/Governorate not applicable or data missing for this user role.');
+                    console.log('Area/Governorate not applicable or data missing for this user role.');
                 }
 
                 userCard.classList.remove('hidden'); // Show the user card
@@ -1298,7 +1298,7 @@
                     userGovernorate = sheetUser.governorate; // This will now be an array
                     console.log('Sheet user found for login:', sheetUser);
                 } else {
-                    console.warn(`No matching Google Sheet data found for username: ${usernameInput}. area and Governorate will be null.`);
+                    console.warn(`No matching Google Sheet data found for username: ${usernameInput}. Area and Governorate will be null.`);
                 }
 
                 // Combine data into loggedInUser
