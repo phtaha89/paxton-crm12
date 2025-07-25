@@ -838,6 +838,12 @@
                     <div class="main-card-title">Admin Panel</div>
                     <div class="main-card-subtitle">Manage users and system settings.</div>
                 </div>
+                <!-- Master List Card - New card, only for admin -->
+                <div id="masterListCard" class="main-card" data-page="master-list">
+                    <div class="main-card-icon">📋</div>
+                    <div class="main-card-title">Master List</div>
+                    <div class="main-card-subtitle">View and manage the master data list.</div>
+                </div>
                 <!-- Coming Soon Card (disabled) -->
                 <div class="main-card disabled">
                     <div class="main-card-icon">⏳</div>
@@ -964,6 +970,26 @@
                 <div class="demo-content">
                     <h2>Admin Panel</h2>
                     <p>This would be your administrative interface for user management and system settings. Currently showing demo content since the external file is not available.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Master List Full Page View - New view added -->
+        <div id="masterListView" class="full-page-view hidden">
+            <div class="loading" id="loadingMasterList">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading Master List...</div>
+            </div>
+            <div class="error-state" id="errorMasterList">
+                <div class="error-icon">⚠️</div>
+                <div class="error-title">Master List Page Not Found</div>
+                <div class="error-text">The Master List file could not be loaded. Please check its path.</div>
+            </div>
+            <div class="iframe-container-fpv">
+                <iframe src="" class="hidden"></iframe>
+                <div class="demo-content">
+                    <h2>Master List</h2>
+                    <p>This section will display the master data list. Currently showing demo content since the external file is not available.</p>
                 </div>
             </div>
         </div>
@@ -1199,6 +1225,7 @@
         function applyUserPermissions() {
             const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
             const adminCard = document.querySelector('.main-card[data-page="admin"]'); 
+            const masterListCard = document.getElementById('masterListCard'); // Get the new Master List card
 
             // First, reset all cards and buttons to their default (visible/enabled) state
             document.querySelectorAll('.main-card').forEach(card => {
@@ -1211,21 +1238,25 @@
                 switch (loggedInUser.title) {
                     case 'admin':
                         // admin users see everything. No cards or buttons are hidden.
+                        // Master List card is visible by default for admin.
                         break;
                     case 'District Manager':
-                        // District Managers cannot access the admin panel.
+                        // District Managers cannot access the admin panel or Master List.
                         if (adminCard) adminCard.classList.add('hidden'); // Hide the admin card in the grid
+                        if (masterListCard) masterListCard.classList.add('hidden'); // Hide Master List card
                         break;
                     case 'Medical Representative':
-                        // Medical Representatives cannot access admin or Dashboard.
+                        // Medical Representatives cannot access admin, Dashboard, or Master List.
                         if (adminCard) adminCard.classList.add('hidden'); // Hide admin card
                         if (dashboardCard) dashboardCard.classList.add('hidden'); // Hide Dashboard card
+                        if (masterListCard) masterListCard.classList.add('hidden'); // Hide Master List card
                         break;
                     default:
                         // For any other title or an unrecognised title, hide sensitive panels by default.
                         console.warn(`Unknown user title: ${loggedInUser.title}. Applying default restrictions.`);
                         if (adminCard) adminCard.classList.add('hidden');
                         if (dashboardCard) dashboardCard.classList.add('hidden');
+                        if (masterListCard) masterListCard.classList.add('hidden'); // Hide Master List card
                         break;
                 }
             } else {
@@ -1390,7 +1421,8 @@
                 'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
                 'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
                 'products-knowledge': { viewId: 'productsKnowledgeView', displayName: 'Products Knowledge', fileName: 'Products knowledge.html' },
-                'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' }
+                'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' },
+                'master-list': { viewId: 'masterListView', displayName: 'Master List', fileName: 'master list.html' } // New Master List config
             };
 
             const config = pageConfig[page];
@@ -1480,7 +1512,7 @@
 
                 // Send a postMessage to the iframe if a user is logged in and it's CRM or Dashboard
                 // The demo content is now always hidden if the iframe loads successfully.
-                if (loggedInUser && (page === 'crm' || page === 'dashboard')) {
+                if (loggedInUser && (page === 'crm' || page === 'dashboard' || page === 'master-list')) { // Added master-list here
                     console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
                     // Send the loggedInUser object. You might want to send a token instead of raw password in a real app.
                     iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*'); // IMPORTANT: Replace '*' with the actual origin of your iframe content for security!
