@@ -915,19 +915,18 @@
         .hcp-cell.event { background-color: #ffe5b4; }
         .hcp-cell.leave-entry { background-color: #fee2e2; font-weight: bold; } /* Changed to light red */
         .comment-box {
-            position: absolute;
+            display: none;
+            position: relative;
             background-color: #e6d5f5;
             border: 1px solid #d1b8e6;
             border-radius: 6px;
             padding: 8px;
+            margin-top: 4px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             z-index: 10;
             width: 200px;
-            left: 50%;
-            transform: translateX(-50%);
-            white-space: normal;
-            text-align: left;
-            display: none; /* Hidden by default */
+            left: 0;
+            top: 100%;
         }
         .comment-box.top::before {
             content: '';
@@ -938,6 +937,7 @@
             border-width: 8px;
             border-style: solid;
             border-color: #d1b8e6 transparent transparent transparent;
+            
         }
         .comment-box.top::after {
             content: '';
@@ -1038,6 +1038,10 @@
             align-items: center;
             flex-wrap: wrap;
         }
+         /* Add this to your existing styles */
+    .clinic-hcp {
+        background-color: #F0F2BD !important;
+    }
 
 
         /* Lists Dashboard Specific Styles */
@@ -1740,6 +1744,7 @@
                 max-width: 150px; /* Adjust as needed */
             }
         }
+       
     </style>
 </head>
 <body>
@@ -2315,7 +2320,6 @@
                 <button id="confirmNo" class="confirm-no">No</button>
             </div>
         </div>
-    </div>
 
     <script>
         // Supabase and Google Sheet URLs - Consolidated
@@ -2367,6 +2371,9 @@
 
         // Pagination constant
         const PAGE_SIZE = 1000; 
+
+        // Global variable to store the currently displayed visits data for HCP filtering
+        let currentDisplayedVisitsData = [];
 
         // --- LOGIN LOGIC ---
         async function fetchDistrictManagersForLogin() {
@@ -2517,8 +2524,19 @@
 
         // Tab switching logic
         function openTab(evt, tabName) {
+            // Reset any previously opened sub-tables or specific UI elements
+            $('#visitsTableContainer').hide(); // Hide KPI overview table
+            $('#selectedRepName').text(''); // Clear selected rep name in KPI
+            $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name in KPI table
+            currentVisitsTableView = 'normal'; // Reset KPI table view
+            $('#leavesFilterOptions').hide(); // Hide KPI leaves filter options
+            $('#searchInput').val(''); // Clear KPI search input
+
+            // Hide all tab content and remove active class from all buttons
             $('.tab-content').hide();
             $('.tab-button').removeClass('active');
+            
+            // Show the selected tab content and add active class to the clicked button
             $(`#${tabName}`).show();
             if (evt) {
                 $(evt.currentTarget).addClass('active');
@@ -2658,10 +2676,11 @@
                 const [month, year] = $(this).val().split('-').map(Number);
                 const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
                 fetchKPIData(month, year, selectedKpiDm);
-                $('#visitsTableContainer').hide();
+                $('#visitsTableContainer').hide(); // Hide on filter change
                 $('#selectedRepName').text('');
                 currentVisitsTableView = 'normal';
                 $('#leavesFilterOptions').hide();
+                $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
             });
 
             $('#syncKpiData').off('click').on('click', function() {
@@ -2669,16 +2688,22 @@
                 const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
                 fetchKPIData(month, year, selectedKpiDm);
                 showAlertDialog('Refreshing KPI data...');
+                $('#visitsTableContainer').hide(); // Hide on sync button click
+                $('#selectedRepName').text('');
+                currentVisitsTableView = 'normal';
+                $('#leavesFilterOptions').hide();
+                $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
             });
             
             $('#kpiDistrictManagerSelect').off('change').on('change', function() {
                 const [month, year] = $('#monthSelect').val().split('-').map(Number);
                 const selectedKpiDm = $(this).val();
                 fetchKPIData(month, year, selectedKpiDm);
-                $('#visitsTableContainer').hide();
+                $('#visitsTableContainer').hide(); // Hide on filter change
                 $('#selectedRepName').text('');
                 currentVisitsTableView = 'normal';
                 $('#leavesFilterOptions').hide();
+                $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
             });
 
             // Removed excelButton listener as per request
@@ -2706,6 +2731,7 @@
                         new Date(visit.created_at).getMonth() + 1 === month &&
                         new Date(visit.created_at).getFullYear() === year
                     );
+                    currentDisplayedVisitsData = filteredVisits; // Store for HCP filtering
                     renderVisitsTable(filteredVisits, 'normal');
                     $('#visitsTableContainer').show();
                 } else {
@@ -2756,37 +2782,71 @@
                 printVisitsTable();
             });
             
+            // Single click to open/toggle visibility of the visits table
             $(document).off('click', '#kpi-dashboard .rep-name').on('click', '#kpi-dashboard .rep-name', function() {
                 const repName = $(this).data('rep');
                 const selectedDm = $(this).data('dm');
+                
+                // If this rep is already selected and the table is visible, clicking again will close it
+                if ($(this).hasClass('active') && $('#visitsTableContainer').is(':visible')) {
+                    $('#visitsTableContainer').hide(); // Hide the table
+                    $(this).removeClass('active'); // Deactivate the rep name
+                    sessionStorage.removeItem('selectedMedicalRep'); // Clear selected rep
+                    return; // Exit if already open and clicked to close
+                }
+
+                // Otherwise, open/refresh the table for this rep
                 $('#selectedRepName').html(`(${repName})`);
                 sessionStorage.setItem('selectedMedicalRep', repName);
                 sessionStorage.setItem('selectedDistrictManager', selectedDm);
-
                 currentVisitsTableView = 'normal';
                 $('#leavesFilterOptions').hide();
 
-                if ($(this).hasClass('active') && $('#visitsTableContainer').is(':visible') && !$(this).data('force-refresh')) {
-                    $('#visitsTableContainer').hide();
-                    $(this).removeClass('active');
-                    sessionStorage.removeItem('selectedMedicalRep');
-                    return;
-                }
-                $(this).data('force-refresh', false);
-
                 $('#kpi-dashboard .rep-name').removeClass('active');
                 $(this).addClass('active');
-
                 showVisitsLoading();
+
                 const [month, year] = $('#monthSelect').val().split('-').map(Number);
                 const filteredVisits = allVisitsData.filter(visit =>
                     visit.medical_rep === repName &&
                     new Date(visit.created_at).getMonth() + 1 === month &&
                     new Date(visit.created_at).getFullYear() === year
                 );
+                currentDisplayedVisitsData = filteredVisits; // Store for HCP filtering
+
                 renderVisitsTable(filteredVisits, 'normal');
                 $('#visitsTableContainer').show();
+
+                $('html, body').animate({
+                    scrollTop: $("#visitsTableContainer").offset().top
+                }, 1000);
             });
+
+            // Double click to explicitly close the visits table and scroll up
+            $(document).off('dblclick', '#kpi-dashboard .rep-name').on('dblclick', '#kpi-dashboard .rep-name', function() {
+                $('#visitsTableContainer').hide(); // Hide the table
+                $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
+                sessionStorage.removeItem('selectedMedicalRep'); // Clear selected rep
+                // Scroll back up to the KPI dashboard table
+                $('html, body').animate({
+                    scrollTop: $("#kpi-dashboard .common-table-container").offset().top
+                }, 1000);
+            });
+
+            // Add click listener to the HCP Visits Overview header to hide the table
+            $(document).off('click', '#selectedRepName').on('click', '#selectedRepName', function() {
+                // Check if the visits table is currently visible
+                if ($('#visitsTableContainer').is(':visible')) {
+                    $('#visitsTableContainer').hide(); // Hide the table
+                    $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name in KPI table
+                    sessionStorage.removeItem('selectedMedicalRep'); // Clear selected rep
+                    // Optionally scroll back up to the KPI dashboard table
+                    $('html, body').animate({
+                        scrollTop: $("#kpi-dashboard .common-table-container").offset().top
+                    }, 1000);
+                }
+            });
+
 
             $(document).off('mouseenter', '#kpi-dashboard .duplicate-visit').on('mouseenter', '#kpi-dashboard .duplicate-visit', function() {
                 const visitsData = $(this).data('visits');
@@ -3177,7 +3237,7 @@
                 const repName = visit.medical_rep;
                 const isCurrentMonth = visitDate.getMonth() + 1 === selectedMonth && visitDate.getFullYear() === selectedYear;
                 const isHCPInMedicalReps = medicalRepsData[repName] && medicalRepsData[repName].hcps.some(hcp => hcp.name === hcpName);
-                return isCurrentMonth && isHCPInMedicalReps;
+                return isCurrentMonth && isHCPInMedicalReps; // Corrected typo here
             });
         }
 
@@ -3188,7 +3248,7 @@
                 metrics[rep] = {
                     repName: rep,
                     area: medicalRepsData[rep].area,
-                    totalHCPCount: 0,
+                    totalHCPs: 0,
                     visitedCount: 0,
                     uniqueHCPs: new Set(),
                     hcps: [],
@@ -3199,11 +3259,11 @@
                 };
 
                 if (hcpClasses.includes('A') && hcpClasses.includes('B')) {
-                    metrics[rep].totalHCPCount = medicalRepsData[rep].totalHCPs_AB || 0;
+                    metrics[rep].totalHCPs = medicalRepsData[rep].totalHCPs_AB || 0;
                     metrics[rep].hcps = medicalRepsData[rep].hcps_AB || [];
                     metrics[rep].targetVisitsForClass = medicalRepsData[rep].targetVisits_AB || 0;
                 } else if (hcpClasses.includes('UPA') && hcpClasses.includes('PRIVATE')) {
-                    metrics[rep].totalHCPCount = medicalRepsData[rep].totalHCPs_UPA_Private || 0;
+                    metrics[rep].totalHCPs = medicalRepsData[rep].totalHCPs_UPA_Private || 0;
                     metrics[rep].hcps = medicalRepsData[rep].hcps_UPA_Private || [];
                     metrics[rep].targetVisitsForClass = medicalRepsData[rep].targetVisits_UPA_Private || 0;
                 }
@@ -3237,7 +3297,7 @@
 
             const result = [];
             for (const rep in metrics) {
-                const totalHCPCount = metrics[rep].totalHCPCount;
+                const totalHCPCount = metrics[rep].totalHCPs; // Corrected to use totalHCPs from metrics[rep]
                 const uniqueHCPCount = metrics[rep].uniqueHCPs.size;
                 
                 // Fix for unvisitedHCPs: calculate directly
@@ -3270,12 +3330,9 @@
 
         function updateKPITableRows(data, tableBodyId) {
             let filteredData = data;
-            
             filteredData.sort((a, b) => parseFloat(b.coveragePercentage) - parseFloat(a.coveragePercentage));
-
             const tableBody = document.getElementById(tableBodyId);
             tableBody.innerHTML = '';
-
             if (filteredData.length === 0) {
                 tableBody.innerHTML = `<tr><td colspan="10" style="text-align: center; padding: 20px;">No data available for the selected filters.</td></tr>`;
                 return;
@@ -3286,7 +3343,6 @@
                 let coverageClass = '';
                 if (index === 0) coverageClass = 'highest-coverage';
                 if (index === filteredData.length - 1) coverageClass = 'lowest-coverage';
-
                 const coverageProgressClass = row.coveragePercentage >= 75 ? 'success' : (row.coveragePercentage >= 50 ? 'warning' : 'danger');
                 const frequencyProgressClass = row.frequencyPercentage >= 75 ? 'success' : (row.frequencyPercentage >= 50 ? 'warning' : 'danger');
 
@@ -3310,11 +3366,100 @@
                         </div>
                     </td>
                     <td>${row.workingDays || 0}</td>
-                    <td>${row.averageVisits || 0}</td>
+                    <td class="pm-call-rate" data-rep="${row.repName}">${row.averageVisits || 0}</td>
                 `;
                 tableBody.appendChild(tr);
             });
+
+            // Add click event listeners to the "PM Call Rate" cells
+            document.querySelectorAll('.pm-call-rate').forEach(cell => {
+                cell.addEventListener('click', function() {
+                    const repName = this.getAttribute('data-rep');
+                    showFloatingBox(repName);
+                });
+            });
         }
+
+        function showFloatingBox(repName) {
+            const floatingBox = document.getElementById('floatingBox');
+            
+            // Step 1: Filter all data for the specific representative
+            const repData = allVisitsData.filter(visit => visit.medical_rep === repName);
+
+            // Step 2: Filter specifically for visits to clinics
+            // Ensure 'visit_place' exists and case-insensitively includes 'clinic'
+            const clinicVisits = repData.filter(visit => 
+                visit.visit_place && typeof visit.visit_place === 'string' && visit.visit_place.toLowerCase().includes('clinic')
+            );
+            
+            // Calculate the number of clinic visits
+            const clinicVisitCount = clinicVisits.length;
+
+            // Step 3: Get the number of working days (excluding leaves and full-day events)
+            const workingDays = getWorkingDays(repName); 
+
+            // Step 4: Calculate the call rate
+            let callRate;
+            if (workingDays > 0) {
+                // Perform the division and format to two decimal places
+                callRate = (clinicVisitCount / workingDays).toFixed(2);
+            } else {
+                // Handle cases where workingDays is zero to avoid division by zero
+                callRate = '0.00'; 
+            }
+
+            // Update the floating box content
+            floatingBox.innerHTML = `
+                <div>
+                    <p>Private Clinics: ${clinicVisitCount}</p>
+                    <p>Call Rate: ${callRate}</p>
+                </div>
+            `;
+
+            // Position the floating box
+            const cell = document.querySelector(`.pm-call-rate[data-rep="${repName}"]`);
+            if (cell) {
+                const rect = cell.getBoundingClientRect();
+                floatingBox.style.position = 'absolute';
+                floatingBox.style.top = `${rect.bottom + window.scrollY}px`;
+                floatingBox.style.left = `${rect.left + window.scrollX}px`;
+                floatingBox.style.display = 'block';
+            }
+        }
+
+        // Function to get working days, excluding leave and full-day event entries
+        function getWorkingDays(repName) {
+            const repVisits = allVisitsData.filter(visit => visit.medical_rep === repName);
+            const workingDaysSet = new Set();
+            const leaveKeywords = ['annual leave', 'official vacation', 'casual leave', 'sick leave', 'leave', 'vacation'];
+            const eventSpecialties = ['event(full day activity)']; // Only full day events should be excluded from working days
+
+            repVisits.forEach(visit => {
+                const visitDate = new Date(visit.created_at);
+                const dateKey = visitDate.toISOString().split('T')[0];
+                const hcpNameLower = visit.hcp_name ? visit.hcp_name.toLowerCase() : '';
+                const specialtyLower = visit.specialty ? visit.specialty.toLowerCase() : '';
+
+                // Exclude days that are explicitly leaves or full-day events
+                const isLeave = leaveKeywords.some(keyword => hcpNameLower.includes(keyword));
+                const isFullDayEvent = eventSpecialties.includes(specialtyLower);
+
+                if (!isLeave && !isFullDayEvent) {
+                    workingDaysSet.add(dateKey);
+                }
+            });
+
+            return workingDaysSet.size;
+        }
+
+
+        // Close the floating box when clicking outside
+        document.addEventListener('click', function(event) {
+            const floatingBox = document.getElementById('floatingBox');
+            if (!event.target.closest('.pm-call-rate') && !event.target.closest('#floatingBox')) {
+                floatingBox.style.display = 'none';
+            }
+        });
 
         function renderVisitsTable(data, tableType = 'normal') {
             const tableBody = $('#visitsTable tbody');
@@ -3390,14 +3535,13 @@
             data.forEach(item => {
                 let rowClasses = [];
                 const specialEvents = ['event', 'training', 'meeting'];
-                const leaveTypes = ['annual leave', 'official leave', 'casual leave', 'sick leave'];
+                const leaveTypes = ['annual leave', 'Official vacation', 'casual leave', 'sick leave'];
                 const hcpNameLower = item.hcp_name ? item.hcp_name.toLowerCase() : '';
                 const specialtyLower = item.specialty ? item.specialty.toLowerCase() : '';
 
                 const isSpecialEvent = specialEvents.some(event => hcpNameLower.includes(event));
                 const isLeave = leaveTypes.some(leave => hcpNameLower.includes(leave));
-                const isAmSpecialty = specialtyLower.startsWith('am(');
-
+                
                 if (isSpecialEvent) rowClasses.push('event-training-meeting');
                 else if (isLeave) rowClasses.push('leave-row');
                 
@@ -3411,37 +3555,13 @@
                 }
 
                 let hcpNameCellClass = '';
-                if (isAmSpecialty) hcpNameCellClass = 'am-specialty-hcp';
+                if (specialtyLower.startsWith('am(')) hcpNameCellClass = 'am-specialty-hcp';
 
                 let rowHtml = '';
-                if (tableType === 'normal') {
+                if (tableType === 'normal' || tableType === 'archived') { 
                     rowHtml = `
                         <tr class="${rowClasses.join(' ')}" data-visits='${JSON.stringify(data.filter(visit => visit.hcp_name === item.hcp_name))}'>
-                            <td class="${hcpNameCellClass}">${item.hcp_name || '-'}</td>
-                            <td>${item.specialty || '-'}</td>
-                            <td>${item.brick || '-'}</td>
-                            <td>${item.visit_place || '-'}</td>
-                            <td>${item.target_visits || '-'}</td>
-                            <td>${item.remaining_visits || '-'}</td>
-                            <td>${item.comments || '-'}</td>
-                            <td class="visit-time">${formatDateTime(item.created_at)}</td>
-                            <td><button class="archive-button" data-id="${item.id}" title="Archive Visit"><i class="fas fa-archive"></i></button></td>
-                        </tr>
-                    `;
-                } else if (tableType === 'leaves') {
-                    rowHtml = `
-                        <tr class="${rowClasses.join(' ')}">
-                            <td>${item.hcp_name || '-'}</td>
-                            <td>${item.specialty || '-'}</td>
-                            <td>${item.comments || '-'}</td>
-                            <td>${formatDateOnly(item.created_at)}</td>
-                            <td></td>
-                        </tr>
-                    `;
-                } else if (tableType === 'archived') {
-                    rowHtml = `
-                        <tr class="${rowClasses.join(' ')}">
-                            <td class="${hcpNameCellClass}">${item.hcp_name || '-'}</td>
+                            <td class="${hcpNameCellClass} hcp-name-cell" data-hcp-name="${item.hcp_name || ''}">${item.hcp_name || '-'}</td>
                             <td>${item.specialty || '-'}</td>
                             <td>${item.brick || '-'}</td>
                             <td>${item.visit_place || '-'}</td>
@@ -3450,32 +3570,97 @@
                             <td>${item.comments || '-'}</td>
                             <td class="visit-time">${formatDateTime(item.created_at)}</td>
                             <td>
-                                <button class="restore-button" data-id="${item.id}" title="Restore Visit"><i class="fas fa-undo"></i></button>
-                                ${loggedInUserRole === 'admin' ? `<button class="remove-archived-button" data-id="${item.id}" title="Remove Permanently"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                ${tableType === 'normal' ? `<button class="archive-button" data-id="${item.id}" title="Archive Visit"><i class="fas fa-archive"></i></button>` : ''}
+                                ${tableType === 'archived' ? `
+                                    <button class="restore-button" data-id="${item.id}" title="Restore Visit"><i class="fas fa-undo"></i></button>
+                                    ${loggedInUserRole === 'admin' ? `<button class="remove-archived-button" data-id="${item.id}" title="Remove Permanently"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                ` : ''}
                             </td>
+                        </tr>
+                    `;
+                } else if (tableType === 'leaves') {
+                    rowHtml = `
+                        <tr class="${rowClasses.join(' ')}">
+                            <td class="hcp-name-cell" data-hcp-name="${item.hcp_name || ''}">${item.hcp_name || '-'}</td>
+                            <td>${item.specialty || '-'}</td>
+                            <td>${item.comments || '-'}</td>
+                            <td>${formatDateOnly(item.created_at)}</td>
+                            <td></td>
                         </tr>
                     `;
                 }
                 tableBody.append(rowHtml);
             });
+
+            // Add double-click event listener to HCP Name cells
+            $('#visitsTable tbody .hcp-name-cell').off('dblclick').on('dblclick', function() {
+                const clickedHcpName = $(this).data('hcp-name');
+                filterVisitsTableByHCP(clickedHcpName);
+            });
+
+            // Add a double-click listener to the HCP Name header to clear filter
+            $('#visitsTable thead th:first-child').off('dblclick').on('dblclick', function() {
+                clearHCPFilter();
+            });
+        }
+
+        // Function to filter visits table by HCP name
+        function filterVisitsTableByHCP(hcpName) {
+            const tableBody = $('#visitsTable tbody');
+            const rows = tableBody.find('tr');
+
+            // If already filtered by this HCP, clear the filter
+            if ($('#visitsTable').data('filtered-hcp') === hcpName) {
+                clearHCPFilter();
+                return;
+            }
+
+            rows.each(function() {
+                const rowHcpName = $(this).find('.hcp-name-cell').data('hcp-name');
+                if (rowHcpName && rowHcpName === hcpName) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+            $('#visitsTable').data('filtered-hcp', hcpName); // Store the current filter
+            $('#searchInput').val(hcpName).trigger('input'); // Update search input
+            showAlertDialog(`Showing visits for: ${hcpName}`, 'info');
+        }
+
+        // Function to clear HCP filter
+        function clearHCPFilter() {
+            $('#visitsTable tbody tr').show();
+            $('#visitsTable').removeData('filtered-hcp'); // Clear stored filter
+            $('#searchInput').val(''); // Clear search input
+            showAlertDialog('HCP filter cleared. Showing all visits.', 'info');
         }
 
         function calculateUnifiedWorkingDays(visitsData, googleSheetData, month, year) {
             const workingDaysMap = {};
-            const leaveTypes = ['annual leave', 'official leave', 'casual leave', 'sick leave'];
-            
+            // Ensure all variations of leave are covered, including "Official vacation"
+            const leaveKeywords = ['annual leave', 'official vacation', 'casual leave', 'sick leave', 'leave', 'vacation'];
+
             visitsData.forEach(visit => {
                 const repName = visit.medical_rep;
                 const visitDate = new Date(visit.created_at);
                 const visitDateKey = visitDate.toISOString().split('T')[0];
 
-                if (visitDate.getMonth() + 1 !== month || visitDate.getFullYear() !== year) return;
+                // Filter visits for the specified month and year
+                if (visitDate.getMonth() + 1 !== month || visitDate.getFullYear() !== year) {
+                    return;
+                }
 
                 const hcpNameLower = visit.hcp_name ? visit.hcp_name.toLowerCase() : '';
-                const isLeave = leaveTypes.some(leave => hcpNameLower.includes(leave));
+
+                // Determine if the visit is a leave, using a single, comprehensive check
+                // We use .some() to check if any of the keywords are present in hcpNameLower
+                const isLeave = leaveKeywords.some(keyword => hcpNameLower.includes(keyword));
 
                 if (!isLeave) {
-                    if (!workingDaysMap[repName]) workingDaysMap[repName] = new Set();
+                    if (!workingDaysMap[repName]) {
+                        workingDaysMap[repName] = new Set();
+                    }
                     workingDaysMap[repName].add(visitDateKey);
                 }
             });
@@ -3484,13 +3669,16 @@
             for (const rep in workingDaysMap) {
                 finalWorkingDays[rep] = workingDaysMap[rep].size;
             }
+
             return finalWorkingDays;
         }
+
+
 
         function calculateAverageVisits(metrics, visitsData, hcpClasses) {
             const selectedMonth = parseInt($('#monthSelect').val().split('-')[0]);
             const selectedYear = parseInt($('#monthSelect').val().split('-')[1]);
-            const leaveTypes = ['annual leave', 'official leave', 'casual leave', 'sick leave'];
+            const leaveTypes = ['annual leave', 'Official vacation', 'casual leave', 'sick leave'];
             const eventSpecialties = ['event(am activity)', 'event(pm activity)', 'event(full day activity)'];
 
             metrics.forEach(metric => {
@@ -3583,7 +3771,7 @@
             $('#selectedRepName').html(`(${repName}) - Leaves`);
             $('#leavesFilterOptions').show();
 
-            const leaveTypes = ['annual leave', 'sick leave', 'casual leave', 'official leave'];
+            const leaveTypes = ['annual leave', 'sick leave', 'casual leave', 'Official vacation'];
             let filteredLeaves = [];
 
             try {
@@ -3620,6 +3808,7 @@
                 filteredLeaves = allLeaves.filter(visit => 
                     leaveTypes.some(leave => visit.hcp_name?.toLowerCase().includes(leave))
                 );
+                currentDisplayedVisitsData = filteredLeaves; // Store for HCP filtering
 
                 renderVisitsTable(filteredLeaves, 'leaves');
                 $('#visitsTableContainer').show();
@@ -3679,6 +3868,7 @@
                 }
 
                 archivedVisitsData = filteredArchivedData;
+                currentDisplayedVisitsData = archivedVisitsData; // Store for HCP filtering
                 renderVisitsTable(archivedVisitsData, 'archived');
                 $('#visitsTableContainer').show();
             } catch (error) {
@@ -3915,7 +4105,7 @@
             }
 
             const amActivitiesSpecialties = ['hospital', 'account', 'dialysis center', 'oncology center'];
-            const leaveTypes = ['annual leave', 'official leave', 'casual leave', 'sick leave'];
+            const leaveTypes = ['annual leave', 'Official vacation', 'casual leave', 'sick leave'];
             const eventSpecialties = ['event(am activity)', 'event(pm activity)', 'event(full day activity)'];
 
 
@@ -3945,83 +4135,88 @@
                     const hcpTargetVisits = hcpGoogleData ? (parseInt(hcpGoogleData['T.V'], 10) || 0) : null;
 
                     const createCellContent = (name, dayDate, time, specialtyDisplay, brickDisplay, visitPlaceDisplay, comment = '', isEvent = false, isLeave = false, isAmSpecialty = false) => {
-                        return `<div class="hcp-cell ${isEvent ? 'event' : ''} ${isLeave ? 'leave-entry' : ''}" onclick="toggleComment(this)">
+                        let visitPlaceClass = '';
+                        if (visitPlaceDisplay.toLowerCase().includes('clinic')) {
+                            visitPlaceClass = 'clinic-hcp';
+                        }
+                        return `<div class="hcp-cell ${isEvent ? 'event' : ''} ${isLeave ? 'leave-entry' : ''} ${visitPlaceClass}" onclick="toggleComment(this)">
                                     <span class="hcp-name ${isAmSpecialty ? 'am-specialty-hcp' : ''}">${name}</span>
-                                    <span class="hcp-detail">${dayDate} ${time}</span> <!-- Combined Day and Date with Time -->
+                                    <span class="hcp-detail">${dayDate} ${time}</span>
                                     <span class="hcp-detail">${specialtyDisplay}</span>
                                     <span class="hcp-detail">${brickDisplay} - ${visitPlaceDisplay}</span>
                                     <div class="comment-box" data-comment-text="${escapeHtml(comment)}">${comment || 'No comment available'}</div>
                                 </div>`;
                     };
 
+
                     const isAmActivitySpecialty = amActivitiesSpecialties.includes(specialty);
-const isAmActivityEvent = specialty === 'event(am activity)';
-const isAmDetailsSpecialty = specialty.includes('am(');
-const isAmDetailsEvent = specialty === 'event(am activity)';
-const isPharmacySpecialty = specialty === 'pharmacy';
-const isPmActivityEvent = specialty === 'event(pm activity)';
-const isFullDayEvent = specialty === 'event(full day)';
-const isLeaveHCP = leaveTypes.some(leave => hcpName.toLowerCase().includes(leave));
-const isAnyEvent = eventSpecialties.includes(specialty);
-const originalSpecialty = visit.specialty || 'N/A';
+                    const isAmActivityEvent = specialty === 'event(am activity)';
+                    const isAmDetailsSpecialty = specialty.includes('am(');
+                    const isAmDetailsEvent = specialty === 'event(am activity)';
+                    const isPharmacySpecialty = specialty === 'pharmacy';
+                    const isPmActivityEvent = specialty === 'event(pm activity)';
+                    const isFullDayEvent = specialty === 'event(full day)';
+                    const isLeaveHCP = leaveTypes.some(leave => hcpName.toLowerCase().includes(leave));
+                    const isAnyEvent = eventSpecialties.includes(specialty);
+                    const originalSpecialty = visit.specialty || 'N/A';
 
-if (isFullDayEvent) {
-    // Handle full-day events
-    if (!dailyAmActivitiesHCPs.has(hcpName)) {
-        dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
-        dailyAmActivitiesHCPs.add(hcpName);
-    }
-    if (!dailyAmDetailsHCPs.has(hcpName)) {
-        amDetailsData.push({ name: hcpName, specialty: originalSpecialty, brick: brick, time: visitTime, date: dateStr, isEvent: true, comment: comments, visit_place: visitPlace, target_visits: hcpTargetVisits, isAmSpecialty: isAmDetailsSpecialty, dayDate: visitDayDate });
-        dailyAmDetailsHCPs.add(hcpName);
-    }
-    if (!dailyPmActivitiesHCPs.has(hcpName)) {
-        dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
-        dailyPmActivitiesHCPs.add(hcpName);
-    }
-    if (!dailyPharmacyActivitiesHCPs.has(hcpName)) {
-        dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
-        dailyPharmacyActivitiesHCPs.add(hcpName);
-    }
-} else if (isLeaveHCP && !isAmActivitySpecialty && !isAmActivityEvent) {
-    // Handle leaves only if it's not an AM activity or event
-    if (!dailyPmActivitiesHCPs.has(hcpName)) {
-        dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, false, true, isAmDetailsSpecialty));
-        dailyPmActivitiesHCPs.add(hcpName);
-    }
-} else {
-    // Handle AM and PM activities based on specialty
-    let addedToAmActivities = false;
-    if ((isAmActivitySpecialty || isAmActivityEvent) && !dailyAmActivitiesHCPs.has(hcpName)) {
-        dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
-        dailyAmActivitiesHCPs.add(hcpName);
-        addedToAmActivities = true;
-    }
+                    if (isFullDayEvent) {
+                        // Handle full-day events
+                        if (!dailyAmActivitiesHCPs.has(hcpName)) {
+                            dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyAmActivitiesHCPs.add(hcpName);
+                        }
+                        if (!dailyAmDetailsHCPs.has(hcpName)) {
+                            amDetailsData.push({ name: hcpName, specialty: originalSpecialty, brick: brick, time: visitTime, date: dateStr, isEvent: true, comment: comments, visit_place: visitPlace, target_visits: hcpTargetVisits, isAmSpecialty: isAmDetailsSpecialty, dayDate: visitDayDate });
+                            dailyAmDetailsHCPs.add(hcpName);
+                        }
+                        if (!dailyPmActivitiesHCPs.has(hcpName)) {
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyPmActivitiesHCPs.add(hcpName);
+                        }
+                        if (!dailyPharmacyActivitiesHCPs.has(hcpName)) {
+                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyPharmacyActivitiesHCPs.add(hcpName);
+                        }
+                    } else if (isLeaveHCP && !isAmActivitySpecialty && !isAmActivityEvent) {
+                        // Handle leaves only if it's not an AM activity or event
+                        if (!dailyPmActivitiesHCPs.has(hcpName)) {
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, false, true, isAmDetailsSpecialty));
+                            dailyPmActivitiesHCPs.add(hcpName);
+                        }
+                    } else {
+                        // Handle AM and PM activities based on specialty
+                        let addedToAmActivities = false;
+                        if ((isAmActivitySpecialty || isAmActivityEvent) && !dailyAmActivitiesHCPs.has(hcpName)) {
+                            dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                            dailyAmActivitiesHCPs.add(hcpName);
+                            addedToAmActivities = true;
+                        }
 
-    let addedToAmDetails = false;
-    if ((isAmDetailsSpecialty || isAmDetailsEvent) && !dailyAmDetailsHCPs.has(hcpName)) {
-        amDetailsData.push({ name: hcpName, specialty: originalSpecialty, brick: brick, time: visitTime, date: dateStr, isEvent: isAmDetailsEvent, comment: comments, visit_place: visitPlace, target_visits: hcpTargetVisits, isAmSpecialty: isAmDetailsSpecialty, dayDate: visitDayDate });
-        dailyAmDetailsHCPs.add(hcpName);
-        addedToAmDetails = true;
-    }
+                        let addedToAmDetails = false;
+                        if ((isAmDetailsSpecialty || isAmDetailsEvent) && !dailyAmDetailsHCPs.has(hcpName)) {
+                            amDetailsData.push({ name: hcpName, specialty: originalSpecialty, brick: brick, time: visitTime, date: dateStr, isEvent: isAmDetailsEvent, comment: comments, visit_place: visitPlace, target_visits: hcpTargetVisits, isAmSpecialty: isAmDetailsSpecialty, dayDate: visitDayDate });
+                            dailyAmDetailsHCPs.add(hcpName);
+                            addedToAmDetails = true;
+                        }
 
-    let addedToPharmacy = false;
-    if (isPharmacySpecialty && !dailyPharmacyActivitiesHCPs.has(hcpName)) {
-        dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
-        dailyPharmacyActivitiesHCPs.add(hcpName);
-        addedToPharmacy = true;
-    }
+                        let addedToPharmacy = false;
+                        if (isPharmacySpecialty && !dailyPharmacyActivitiesHCPs.has(hcpName)) {
+                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                            dailyPharmacyActivitiesHCPs.add(hcpName);
+                            addedToPharmacy = true;
+                        }
 
-    if (isPmActivityEvent && !dailyPmActivitiesHCPs.has(hcpName)) {
-        dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
-        dailyPmActivitiesHCPs.add(hcpName);
-    } else if (!addedToAmActivities && !addedToAmDetails && !addedToPharmacy) {
-        if (hcpTargetVisits !== null && hcpTargetVisits !== 0 && !dailyPmActivitiesHCPs.has(hcpName)) {
-            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
-            dailyPmActivitiesHCPs.add(hcpName);
-        }
-    }
-}
+                        if (isPmActivityEvent && !dailyPmActivitiesHCPs.has(hcpName)) {
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                            dailyPmActivitiesHCPs.add(hcpName);
+                        } else if (!addedToAmActivities && !addedToAmDetails && !addedToPharmacy) {
+                            if (hcpTargetVisits !== null && hcpTargetVisits !== 0 && !dailyPmActivitiesHCPs.has(hcpName)) {
+                                dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                                dailyPmActivitiesHCPs.add(hcpName);
+                            }
+                        }
+                    }
                 });
 
                 const amCell = findDailyReportTableCell('am', columnIndex);
@@ -4090,7 +4285,7 @@ if (isFullDayEvent) {
         function toggleComment(element) {
             const commentBox = element.querySelector('.comment-box');
             const isVisible = commentBox.style.display === 'block';
-            $('.comment-box').hide().removeClass('top bottom'); 
+            $('.comment-box').hide().removeClass('top bottom');
 
             if (!isVisible) {
                 const rect = element.getBoundingClientRect();
@@ -4106,6 +4301,7 @@ if (isFullDayEvent) {
                 commentBox.style.display = 'block';
                 commentBox.style.left = '50%';
                 commentBox.style.transform = 'translateX(-50%)';
+                commentBox.style.zIndex = '9999'; // Add this line to ensure it's on top!
 
                 // Temporarily show to get its dimensions
                 commentBox.style.visibility = 'hidden';
@@ -4148,6 +4344,7 @@ if (isFullDayEvent) {
             } else {
                 commentBox.style.display = 'none';
                 commentBox.classList.remove('top', 'bottom');
+                commentBox.style.zIndex = ''; // Reset z-index when hidden
             }
         }
 
@@ -4169,7 +4366,7 @@ if (isFullDayEvent) {
             ];
 
             const amActivitiesSpecialties = ['hospital', 'account', 'dialysis center', 'oncology center'];
-            const leaveTypes = ['annual leave', 'official leave', 'casual leave', 'sick leave'];
+            const leaveTypes = ['annual leave', 'Official vacation', 'casual leave', 'sick leave'];
             const eventSpecialties = ['event(am activity)', 'event(pm activity)', 'event(full day activity)'];
 
             dailyReportRawVisitsData.forEach(visit => {
@@ -5140,37 +5337,42 @@ Thank you.`;
         }
 
         function setDefaultWeeklyPlanDateRange() {
-    // Create a date object for the current time in Cairo (UTC+2)
-    const today = new Date();
-    const cairoOffset = 2; // Cairo is UTC+2
-    const cairoTime = new Date(today.getTime() + cairoOffset * 60 * 60 * 1000);
+            // Create a date object for the current time in Cairo (UTC+2)
+            const today = new Date();
+            const cairoOffset = 2; // Cairo is UTC+2
+            const cairoTime = new Date(today.getTime() + cairoOffset * 60 * 60 * 1000);
 
-    // Calculate the day of the week in Cairo time (0 is Sunday, 6 is Saturday)
-    const dayOfWeek = cairoTime.getDay();
+            // Calculate the day of the week in Cairo time (0 is Sunday, 6 is Saturday)
+            const dayOfWeek = cairoTime.getDay();
 
-    // Calculate days until the next Saturday
-    const diffToSaturday = (6 - dayOfWeek + 7) % 7;
+            // Calculate the start date based on the current day of the week
+            const startDate = new Date(cairoTime);
 
-    // Calculate the nearest Saturday in Cairo time
-    const startDate = new Date(cairoTime);
-    startDate.setDate(cairoTime.getDate() + diffToSaturday);
+            // If today is Thursday (4), set start date to next Saturday
+            if (dayOfWeek === 4) {
+                const diffToNextSaturday = (12 - dayOfWeek) % 7; // Days until next Saturday
+                startDate.setDate(cairoTime.getDate() + diffToNextSaturday);
+            } else {
+                // Otherwise, set start date to the most recent past Saturday
+                const diffToPastSaturday = -(dayOfWeek + 2) % 7; // Days since past Saturday
+                startDate.setDate(cairoTime.getDate() + diffToPastSaturday);
+            }
 
-    // Ensure the date is set to Saturday
-    if (startDate.getDay() !== 6) {
-        startDate.setDate(startDate.getDate() + 1);
-    }
+            // Ensure the date is set to Saturday
+            if (startDate.getDay() !== 6) {
+                startDate.setDate(startDate.getDate() + 1);
+            }
 
-    // Calculate the end date, which is 5 days after the start date
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 5);
+            // Calculate the end date, which is 5 days after the start date
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 5);
 
-    // Set the start and end date input fields to the calculated dates
-    document.getElementById('weeklyPlanStartDate').value = startDate.toISOString().split('T')[0];
-    document.getElementById('weeklyPlanEndDate').value = endDate.toISOString().split('T')[0];
-}
+            // Set the start and end date input fields to the calculated dates
+            document.getElementById('weeklyPlanStartDate').value = startDate.toISOString().split('T')[0];
+            document.getElementById('weeklyPlanEndDate').value = endDate.toISOString().split('T')[0];
+        }
 
         
-
         // Download tables as Excel
         function downloadWeeklyPlanExcel() {
             const selectedRep = document.getElementById('weeklyPlanMedicalReps').value;
@@ -5289,7 +5491,6 @@ Thank you.`;
             }
         }
 
-
         // --- Document Ready / Initial Load ---
         $(document).ready(function() {
             $('#adminLoginToggle').on('change', function() {
@@ -5307,7 +5508,6 @@ Thank you.`;
                     $('#loginTitle').html('<i class=""></i> Dashboard 🔐');
                 }
             });
-            
 
             fetchDistrictManagersForLogin().then(() => {
                 const loggedInUser = localStorage.getItem('loggedInUsername');
@@ -5322,63 +5522,6 @@ Thank you.`;
                 }
             });
         });
-        // IMPORTANT: Replace 'YOUR_IFRAME_USERNAME_INPUT_ID' and 'YOUR_IFRAME_PASSWORD_INPUT_ID'
-    // with the actual IDs of the username and password input fields within your iframe's login form.
-    const usernameInputId = 'username'; // Example: if your iframe's username input has id="username"
-    const passwordInputId = 'password'; // Example: if your iframe's password input has id="password"
-    const loginButtonId = 'loginButton'; // Example: if your iframe's login button has id="loginButton"
-
-    // Listen for messages from the parent window (index.html)
-    window.addEventListener('message', function(event) {
-        // --- SECURITY WARNING ---
-        // In a production environment, ALWAYS verify the origin of the message
-        // to prevent cross-site scripting (XSS) attacks.
-        // Replace 'YOUR_PARENT_APP_ORIGIN' with the actual origin (e.g., 'https://your-main-app-domain.com')
-        if (event.origin !== 'https://phtaha89.github.io') { // Updated origin
-            console.warn('Message received from untrusted origin:', event.origin);
-            return;
-        }
-        // --- END SECURITY WARNING ---
-
-        // Check if the message type is 'loggedInUser'
-        if (event.data && event.data.type === 'loggedInUser' && event.data.user) {
-            const user = event.data.user;
-            console.log('Iframe received user data for auto-login:', user.username);
-
-            const usernameField = document.getElementById(usernameInputId);
-            const passwordField = document.getElementById(passwordInputId);
-            const loginButton = document.getElementById(loginButtonId);
-
-            if (usernameField && passwordField) {
-                usernameField.value = user.username;
-                passwordField.value = user.password; // WARNING: Passing plain text passwords is insecure.
-
-                // Attempt to log in automatically
-                if (loginButton) {
-                    console.log('Attempting to click login button in iframe...');
-                    loginButton.click(); // Simulate a click on the login button
-                } else {
-                    // If there's no login button, you might have a login function to call directly
-                    // Example: if your iframe has a function like 'performLogin(username, password)'
-                    // if (typeof window.performLogin === 'function') {
-                    //     window.performLogin(user.username, user.password);
-                    // } else {
-                        console.warn('No login button or auto-login function found in iframe. Manual login might be required.');
-                    // }
-                }
-            } else {
-                console.error('Iframe login input fields not found. Please check their IDs.');
-            }
-        }
-    });
-
-    // Optional: Add a small delay to ensure DOM is ready in the iframe before trying to access elements
-    // This might be useful if the iframe's content loads slightly after the message is sent.
-    // window.onload = function() {
-    //     console.log('Iframe content loaded.');
-    //     // You might want to re-send the postMessage from the parent if the iframe loads late,
-    //     // or ensure the parent sends it after the iframe's onload event.
-    // };
     </script>
 </body>
 </html>
