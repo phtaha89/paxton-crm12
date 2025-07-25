@@ -140,12 +140,22 @@
             padding: 8px;
         }
 
+        /* Added for clickable Total HCPs stat */
+        #totalHCPsStat {
+            cursor: pointer;
+        }
+
         .stats-number {
             font-size: 28px;
             font-weight: 600;
             color: #1a202c;
             display: block;
             line-height: 1;
+        }
+
+        /* Style for duplicated HCPs count */
+        .stats-number.duplicated-count {
+            color: #dc2626; /* Red color */
         }
 
         .stats-label {
@@ -156,16 +166,57 @@
             margin-top: 4px;
         }
 
+        /* Added for clickable duplicated stat */
+        #duplicatedHCPsStat {
+            cursor: pointer;
+            position: relative; /* For tooltip positioning */
+        }
+
+        #duplicatedHCPsStat:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the text */
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%; /* At the bottom of the tooltip */
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+
         /* Table */
         .table-container {
             padding: 0;
-            overflow-x: auto;
+            overflow-x: auto; /* Make table horizontally scrollable */
         }
 
         .hcp-table {
             width: 100%;
             border-collapse: collapse;
             background: white;
+            table-layout: auto; /* Allow columns to auto-fit content */
         }
 
         .hcp-table th {
@@ -181,6 +232,7 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            white-space: nowrap; /* Prevent header text from wrapping */
         }
 
         .hcp-table td {
@@ -188,6 +240,10 @@
             border-bottom: 1px solid #f1f5f9;
             font-size: 14px;
             vertical-align: top;
+            white-space: nowrap; /* Ensure data is in one row */
+            overflow: hidden; /* Hide overflow content */
+            text-overflow: ellipsis; /* Add ellipsis for overflow */
+            max-width: 200px; /* Set a max-width to prevent excessively wide columns, adjust as needed */
         }
 
         .hcp-table tr:hover {
@@ -197,13 +253,21 @@
         .hcp-name {
             color: #3b82f6;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: bold; /* Make HCP names bold */
             text-decoration: none;
+            display: block; /* Make it a block element to apply overflow properties */
+            max-width: 100%; /* Ensure it takes full width of its TD */
         }
 
         .hcp-name:hover {
             color: #1d4ed8;
             text-decoration: underline;
+        }
+
+        /* Style for duplicated HCP names */
+        .hcp-name.duplicated-hcp {
+            color: #dc2626; /* Red color for duplicated names */
+            font-weight: 600;
         }
 
         .specialty-badge {
@@ -214,6 +278,7 @@
             font-size: 11px;
             font-weight: 500;
             display: inline-block;
+            white-space: nowrap; /* Ensure badge content stays on one line */
         }
 
         .area-badge {
@@ -224,6 +289,7 @@
             font-size: 11px;
             font-weight: 500;
             display: inline-block;
+            white-space: nowrap; /* Ensure badge content stays on one line */
         }
 
         /* Modal */
@@ -453,6 +519,13 @@
                 padding-left: 16px;
                 padding-right: 16px;
             }
+
+            /* Ensure name stays on one line in mobile view */
+            .hcp-table td {
+                max-width: 150px; /* Adjust based on typical name length */
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         }
     </style>
 </head>
@@ -515,7 +588,7 @@
         </div>
 
         <div class="stats-bar">
-            <div class="stats-item">
+            <div class="stats-item" id="totalHCPsStat"> <!-- Added ID for clickability -->
                 <span class="stats-number" id="totalHCPs">0</span>
                 <span class="stats-label">Total HCPs</span>
             </div>
@@ -525,7 +598,9 @@
             </div>
             <div class="stats-item" id="duplicatedHCPsStat">
                 <span class="stats-number" id="duplicatedHCPs">0</span>
-                <span class="stats-label">Duplicated Names</span>
+                <span class="stats-label">Duplicated Names
+                    <span class="tooltip-text">Click to show duplicates</span>
+                </span>
             </div>
         </div>
 
@@ -737,6 +812,29 @@
         }
 
         /**
+         * Identifies and returns a Set of original HCP names that are duplicated within the given data.
+         * @param {Array<Object>} data The array of HCP data.
+         * @returns {Set<string>} A Set containing original names of duplicated HCPs.
+         */
+        function getDuplicatedOriginalNames(data) {
+            const normalizedNameCounts = {};
+            data.forEach(hcp => {
+                const normalized = (hcp.hcps || '').toLowerCase().replace(/\s/g, '');
+                normalizedNameCounts[normalized] = (normalizedNameCounts[normalized] || 0) + 1;
+            });
+
+            const duplicatedSet = new Set();
+            for (const normalizedName in normalizedNameCounts) {
+                if (normalizedNameCounts[normalizedName] > 1) {
+                    // Add all original names that normalize to this duplicated form
+                    data.filter(hcp => (hcp.hcps || '').toLowerCase().replace(/\s/g, '') === normalizedName)
+                        .forEach(hcp => duplicatedSet.add(hcp.hcps));
+                }
+            }
+            return duplicatedSet;
+        }
+
+        /**
          * Clears all filter dropdowns and the search input.
          */
         function clearFilters() {
@@ -871,29 +969,47 @@
             }
 
             noResults.style.display = 'none';
-            tbody.innerHTML = filteredData.map(hcp => `
-                <tr>
-                    <td>
-                        ${hcp.hcps ? `<a href="#" class="hcp-name" onclick="showHCPDetails('${encodeURIComponent(hcp.hcps)}')">${hcp.hcps}</a>` : 'N/A'}
-                    </td>
-                    <td><span class="specialty-badge">${hcp.specialty || 'N/A'}</span></td>
-                    <td>${hcp.account || 'N/A'}</td> 
-                    <td><span class="area-badge">${hcp.area || 'N/A'}</span></td>
-                    <td>${hcp.brick || 'N/A'}</td>
-                    <td>${hcp.medicalRep || 'N/A'}</td>
-                    <td>${hcp.districtManager || 'N/A'}</td>
-                </tr>
-            `).join('');
+
+            // Get the set of duplicated original names within the current filteredData
+            const duplicatedNamesSet = getDuplicatedOriginalNames(filteredData);
+
+            tbody.innerHTML = filteredData.map(hcp => {
+                const isDuplicated = duplicatedNamesSet.has(hcp.hcps);
+                const hcpNameClass = isDuplicated ? 'hcp-name duplicated-hcp' : 'hcp-name';
+                
+                return `
+                    <tr>
+                        <td>
+                            ${hcp.hcps ? `<a href="#" class="${hcpNameClass}" onclick="showHCPDetails('${encodeURIComponent(hcp.hcps)}')">${hcp.hcps}</a>` : 'N/A'}
+                        </td>
+                        <td><span class="specialty-badge">${hcp.specialty || 'N/A'}</span></td>
+                        <td>${hcp.account || 'N/A'}</td> 
+                        <td><span class="area-badge">${hcp.area || 'N/A'}</span></td>
+                        <td>${hcp.brick || 'N/A'}</td>
+                        <td>${hcp.medicalRep || 'N/A'}</td>
+                        <td>${hcp.districtManager || 'N/A'}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         /**
          * Updates the statistics displayed in the stats bar.
          */
         function updateStats() {
+            const duplicatedHCPsSpan = document.getElementById('duplicatedHCPs');
+            const duplicatedCount = calculateDuplicatedCount(filteredData);
+            duplicatedHCPsSpan.textContent = duplicatedCount;
+            
+            // Add/remove duplicated-count class based on the count
+            if (duplicatedCount > 0) {
+                duplicatedHCPsSpan.classList.add('duplicated-count');
+            } else {
+                duplicatedHCPsSpan.classList.remove('duplicated-count');
+            }
+
             document.getElementById('totalHCPs').textContent = hcpData.length;
             document.getElementById('filteredHCPs').textContent = filteredData.length;
-            // Calculate duplicated count based on the *current* filteredData
-            document.getElementById('duplicatedHCPs').textContent = calculateDuplicatedCount(filteredData); 
         }
 
         /**
@@ -924,6 +1040,16 @@
             });
 
             filteredData = currentFilteredData; // Update the global filteredData
+            renderTable();
+            updateStats();
+        }
+
+        /**
+         * Resets all filters and displays the full original data.
+         */
+        function resetAllFilters() {
+            clearFilters(); // Clear all dropdowns and search input
+            filteredData = [...hcpData]; // Reset filteredData to the original full dataset
             renderTable();
             updateStats();
         }
@@ -1135,6 +1261,9 @@
 
             // Add event listener for duplicated HCPs stat
             document.getElementById('duplicatedHCPsStat').addEventListener('click', showDuplicatedHCPs);
+            
+            // Add event listener for Total HCPs stat to reset filters
+            document.getElementById('totalHCPsStat').addEventListener('click', resetAllFilters);
 
             // Add event listeners for new buttons
             document.getElementById('printBtn').addEventListener('click', printTable);
