@@ -885,6 +885,7 @@
                 // Pre-select the District Manager filter
                 const districtFilter = document.getElementById('districtFilter');
                 // Populate filters first so the option exists
+                // Always populate districtFilter with all available DMs from hcpData
                 populateSelect('districtFilter', [...new Set(hcpData.map(hcp => hcp.districtManager).filter(Boolean))].sort());
                 districtFilter.value = initialUser.username;
                 // Disable the District Manager filter so the user can't change it
@@ -893,6 +894,8 @@
                 // If admin or no specific filter, show all data
                 filteredData = [...hcpData]; 
                 document.getElementById('districtFilter').disabled = false; // Ensure it's enabled for admin/other roles
+                // For admin, populate districtFilter with all available DMs from hcpData
+                populateSelect('districtFilter', [...new Set(hcpData.map(hcp => hcp.districtManager).filter(Boolean))].sort());
             }
 
             // Populate other filters based on the *initially filtered* data
@@ -1062,6 +1065,8 @@
             filteredData = currentFilteredData; // Update the global filteredData
             renderTable();
             updateStats();
+            // Re-populate the other filters based on the new filteredData
+            populateFilters(); 
         }
 
         /**
