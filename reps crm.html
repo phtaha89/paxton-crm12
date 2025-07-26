@@ -4243,54 +4243,55 @@
                 }
 
                 populateHCPTable(hcpData, selectedDay) {
-                    this.elements.hcpTableBody.innerHTML = '';
+    this.elements.hcpTableBody.innerHTML = '';
 
-                    const filteredData = hcpData.filter(row => {
-                        const actualVisits = this.visitCounts[row['HCPS']] || 0;
-                        const targetVisits = parseInt(row['T.V']) || 0;
-                        return (targetVisits - actualVisits) > 0;
-                    });
+    // Sort the data based on remaining visits
+    const sortedData = hcpData.sort((a, b) => {
+        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
+        const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
+        const targetA = parseInt(a['T.V']) || 0;
+        const targetB = parseInt(b['T.V']) || 0;
+        if (remainingA === targetA && remainingB !== targetB) return -1;
+        if (remainingB === targetB && remainingA !== targetA) return 1;
+        return remainingB - remainingA;
+    });
 
-                    const sortedData = filteredData.sort((a, b) => {
-                        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
-                        const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
-                        const targetA = parseInt(a['T.V']) || 0;
-                        const targetB = parseInt(b['T.V']) || 0;
-                        if (remainingA === targetA && remainingB !== targetB) return -1;
-                        if (remainingB === targetB && remainingA !== targetA) return 1;
-                        return remainingB - remainingA;
-                    });
+    sortedData.forEach(row => {
+        const actualVisits = this.visitCounts[row['HCPS']] || 0;
+        const targetVisits = parseInt(row['T.V']) || 0;
+        const remainingVisits = targetVisits - actualVisits;
+        const tr = document.createElement('tr');
+        const remainingCellClass = remainingVisits <= 0 ? 'remaining-visit' : 'not-remaining';
+        tr.innerHTML = `
+            <td>${row['HCPS']}</td>
+            <td>${row['Speciality']}</td>
+            <td>${row['Class']}</td>
+            <td>${row['T.V']}</td>
+            <td class="${remainingCellClass}">${remainingVisits}</td>
+            <td>${row['Brick']}</td>
+            <td>${row['Address']}</td>
+            <td>${row['Mobile']}</td>
+            <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
+            <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
+            <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
+            <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
+            <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
+            <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
+        `;
+        tr.addEventListener('click', () => {
+            if (!this.elements.dayFilter.value) {
+                this.showMessage('Please select a Day first.', 'error');
+                return;
+            }
+            this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
+            this.elements.hcpTableBody.removeChild(tr);
+        });
+        this.elements.hcpTableBody.appendChild(tr);
+    });
 
-                    sortedData.forEach(row => {
-                        const actualVisits = this.visitCounts[row['HCPS']] || 0;
-                        const targetVisits = parseInt(row['T.V']) || 0;
-                        const remainingVisits = targetVisits - actualVisits;
-                        const tr = document.createElement('tr');
-                        const remainingCellClass = remainingVisits === targetVisits ? 'remaining-visit' : 'not-remaining';
+    this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
+}
 
-                        tr.innerHTML = `
-                            <td>${row['HCPS']}</td><td>${row['Speciality']}</td><td>${row['Class']}</td>
-                            <td>${row['T.V']}</td><td class="${remainingCellClass}">${remainingVisits}</td><td>${row['Brick']}</td>
-                            <td>${row['Address']}</td><td>${row['Mobile']}</td>
-                            <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
-                            <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
-                            <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
-                            <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
-                            <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
-                            <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
-                        `;
-                        tr.addEventListener('click', () => {
-                            if (!this.elements.dayFilter.value) {
-                                this.showMessage('Please select a Day first.', 'error');
-                                return;
-                            }
-                            this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
-                            this.elements.hcpTableBody.removeChild(tr);
-                        });
-                        this.elements.hcpTableBody.appendChild(tr);
-                    });
-                    this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
-                }
                 
                 
                 addToWeeklyPlan(hcpName, visitTime, day, speciality) {
@@ -4647,63 +4648,6 @@
             }
             
         });
-        // IMPORTANT: Replace 'YOUR_IFRAME_USERNAME_INPUT_ID' and 'YOUR_IFRAME_PASSWORD_INPUT_ID'
-    // with the actual IDs of the username and password input fields within your iframe's login form.
-    const usernameInputId = 'username'; // Example: if your iframe's username input has id="username"
-    const passwordInputId = 'password'; // Example: if your iframe's password input has id="password"
-    const loginButtonId = 'loginButton'; // Example: if your iframe's login button has id="loginButton"
-
-    // Listen for messages from the parent window (index.html)
-    window.addEventListener('message', function(event) {
-        // --- SECURITY WARNING ---
-        // In a production environment, ALWAYS verify the origin of the message
-        // to prevent cross-site scripting (XSS) attacks.
-        // Replace 'YOUR_PARENT_APP_ORIGIN' with the actual origin (e.g., 'https://your-main-app-domain.com')
-        if (event.origin !== 'https://phtaha89.github.io') { // Updated origin
-            console.warn('Message received from untrusted origin:', event.origin);
-            return;
-        }
-        // --- END SECURITY WARNING ---
-
-        // Check if the message type is 'loggedInUser'
-        if (event.data && event.data.type === 'loggedInUser' && event.data.user) {
-            const user = event.data.user;
-            console.log('Iframe received user data for auto-login:', user.username);
-
-            const usernameField = document.getElementById(usernameInputId);
-            const passwordField = document.getElementById(passwordInputId);
-            const loginButton = document.getElementById(loginButtonId);
-
-            if (usernameField && passwordField) {
-                usernameField.value = user.username;
-                passwordField.value = user.password; // WARNING: Passing plain text passwords is insecure.
-
-                // Attempt to log in automatically
-                if (loginButton) {
-                    console.log('Attempting to click login button in iframe...');
-                    loginButton.click(); // Simulate a click on the login button
-                } else {
-                    // If there's no login button, you might have a login function to call directly
-                    // Example: if your iframe has a function like 'performLogin(username, password)'
-                    // if (typeof window.performLogin === 'function') {
-                    //     window.performLogin(user.username, user.password);
-                    // } else {
-                        console.warn('No login button or auto-login function found in iframe. Manual login might be required.');
-                    // }
-                }
-            } else {
-                console.error('Iframe login input fields not found. Please check their IDs.');
-            }
-        }
-    });
-
-    // Optional: Add a small delay to ensure DOM is ready in the iframe before trying to access elements
-    // This might be useful if the iframe's content loads slightly after the message is sent.
-    // window.onload = function() {
-    //     console.log('Iframe content loaded.');
-    //     // You might want to re-send the postMessage from the parent if the iframe loads late,
-    //     // or ensure the parent sends it after the iframe's onload event.
-    // };
         
     </script>
 </body>
