@@ -892,9 +892,11 @@
             } else {
                 // If admin or no specific filter, show all data
                 filteredData = [...hcpData]; 
-                populateFilters(); // Populate all filters
                 document.getElementById('districtFilter').disabled = false; // Ensure it's enabled for admin/other roles
             }
+
+            // Populate other filters based on the *initially filtered* data
+            populateFilters(); 
 
             renderTable();
             updateStats();
@@ -903,18 +905,21 @@
 
         /**
          * Populates the filter dropdowns with unique values from the HCP data.
+         * Now uses 'filteredData' to get unique values for relevant dropdowns.
          */
         function populateFilters() {
-            // Helper to get unique values from a specific property
-            const getUniqueValues = (prop) => [...new Set(hcpData.map(hcp => hcp[prop]).filter(Boolean))].sort(); // Filter out empty strings/nulls
+            // Helper to get unique values from a specific property from the CURRENTLY filteredData
+            const getUniqueValues = (prop) => [...new Set(filteredData.map(hcp => hcp[prop]).filter(Boolean))].sort(); 
 
-            const districtManagers = getUniqueValues('districtManager');
+            // Only populate these if the DM filter is not active, or if it's an admin
+            // If DM is logged in, these dropdowns should only show options relevant to their filtered data.
             const medicalReps = getUniqueValues('medicalRep');
             const areas = getUniqueValues('area');
             const specialties = getUniqueValues('specialty');
             const bricks = getUniqueValues('brick');
 
-            populateSelect('districtFilter', districtManagers);
+            // District Manager filter is handled separately in initializeApp for initial state
+            // and its options are always from hcpData, but its selection/disabled state depends on loggedInUser.
             populateSelect('repFilter', medicalReps);
             populateSelect('areaFilter', areas);
             populateSelect('specialtyFilter', specialties);
@@ -996,7 +1001,8 @@
          * Updates the statistics displayed in the stats bar.
          */
         function updateStats() {
-            document.getElementById('totalHCPs').textContent = hcpData.length;
+            // totalHCPs now reflects the count of initially filtered data (for DM) or all data (for Admin)
+            document.getElementById('totalHCPs').textContent = filteredData.length; 
             document.getElementById('filteredHCPs').textContent = filteredData.length;
             
             const duplicatedHCPsCount = calculateDuplicatedCount(filteredData);
@@ -1023,13 +1029,21 @@
             const brickFilter = document.getElementById('brickFilter').value;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-            // Start filtering from the original hcpData
-            let currentFilteredData = hcpData.filter(hcp => {
-                // If the districtFilter is disabled (meaning a DM is logged in),
-                // ensure the data matches the logged-in DM's username.
-                // Otherwise, use the selected filter value.
-                const matchesDistrict = (document.getElementById('districtFilter').disabled && loggedInUser && loggedInUser.title === 'District Manager')
-                                        ? (hcp.districtManager && hcp.districtManager.toLowerCase() === loggedInUser.username.toLowerCase())
+            // Determine the base data to filter from. If a DM is logged in and their filter is applied,
+            // start from the already filtered `hcpData`. Otherwise, start from the full `hcpData`.
+            let baseDataForFiltering = hcpData;
+            if (loggedInUser && loggedInUser.title === 'District Manager') {
+                baseDataForFiltering = hcpData.filter(hcp => 
+                    hcp.districtManager && hcp.districtManager.toLowerCase() === loggedInUser.username.toLowerCase()
+                );
+            }
+
+
+            let currentFilteredData = baseDataForFiltering.filter(hcp => {
+                // The district filter is handled by the initial baseDataForFiltering for DMs,
+                // otherwise it's an active filter for Admins.
+                const matchesDistrict = (loggedInUser && loggedInUser.title === 'District Manager')
+                                        ? true // Already filtered by DM's name in baseDataForFiltering
                                         : (!districtFilter || hcp.districtManager === districtFilter);
 
                 const matchesRep = !repFilter || hcp.medicalRep === repFilter;
