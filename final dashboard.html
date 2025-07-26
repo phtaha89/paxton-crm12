@@ -585,7 +585,7 @@
         }
         .filter-controls select:hover { background-color: rgba(255, 255, 255, 0.3); }
         .filter-controls select option {
-            background-color: var(--primary-dark);
+            background-color: #1a365d; /* Dark background for options */
             color: white;
         }
 
@@ -2121,8 +2121,9 @@
         };
         let weeklyPlanSelectedVisitIds = [];
 
-        // Global state for selected District Manager
+        // Global state for selected District Manager (can be set by parent or internal filter)
         let currentSelectedDM = ''; 
+        let loggedInUser = null; // Global variable to store logged-in user data from parent
 
         // State for visits table view (normal, leaves, archived)
         let currentVisitsTableView = 'normal';
@@ -2133,6 +2134,20 @@
 
         // Global variable to store the currently displayed visits data for HCP filtering
         let currentDisplayedVisitsData = [];
+
+        // Listen for messages from the parent window (your main CRM app)
+        window.addEventListener('message', async function(event) {
+            // IMPORTANT: For security, always verify the origin of the message
+            // In a production environment, replace '*' with the actual origin of your main CRM app.
+            // Example: if (event.origin !== 'https://your-crm-app.com') return;
+
+            if (event.data && event.data.type === 'loggedInUser') {
+                loggedInUser = event.data.user; // Store the logged-in user globally
+                console.log('Dashboard received user data:', loggedInUser);
+                // Re-initialize dashboard with the received user data for initial filtering
+                await initializeDashboard(); // Ensure initialization waits for user data
+            }
+        });
 
         // --- Common Dashboard Initialization ---
         async function initializeDashboard() {
@@ -2148,15 +2163,30 @@
                 // Process medical reps and DMs from Google Sheet
                 processMedicalRepsAndDMs(allGoogleSheetData);
 
-                // Initialize the default active tab
-                openTab(null, 'kpi-dashboard');
-
-                // Set initial DM filter for KPI dashboard
+                // Set initial DM filter for KPI dashboard based on loggedInUser
                 populateKpiDistrictManagers();
-                $('#kpiDistrictManagerSelect').val(''); // Default to "All District Managers"
-                currentSelectedDM = ''; // Initialize global DM filter
+                const kpiDmSelect = $('#kpiDistrictManagerSelect');
+                const kpiDmFilterContainer = $('#kpiDmFilterContainer');
 
-                // Fetch KPI data for the initial state (all DMs, current month)
+                if (loggedInUser && loggedInUser.title === 'District Manager' && loggedInUser.username) {
+                    currentSelectedDM = loggedInUser.username; // Set global DM filter
+                    kpiDmSelect.val(loggedInUser.username); // Pre-select DM
+                    kpiDmSelect.prop('disabled', true); // Disable DM filter for DMs
+                } else if (loggedInUser && loggedInUser.title === 'Medical Representative') {
+                    // If Medical Rep, hide the entire DM filter
+                    kpiDmFilterContainer.hide();
+                    currentSelectedDM = ''; // Ensure no DM filter is applied for MRs
+                } else {
+                    // For Admin or other roles, allow "All District Managers" and keep enabled
+                    kpiDmSelect.val(''); 
+                    kpiDmSelect.prop('disabled', false);
+                    currentSelectedDM = ''; // Default to "All District Managers"
+                }
+
+                // Initialize the default active tab
+                openTab(null, 'kpi-dashboard'); // This will call initKpiDashboard etc.
+
+                // Fetch KPI data for the initial state (all DMs/selected DM, current month)
                 const today = new Date();
                 const currentMonth = today.getMonth() + 1;
                 const currentYear = today.getFullYear();
@@ -2387,7 +2417,7 @@
         // --- KPI Dashboard Functions ---
         async function initKpiDashboard() {
             setupMonthDropdown();
-            populateKpiDistrictManagers();
+            populateKpiDistrictManagers(); // This will handle initial DM selection/disabling based on loggedInUser
             
             // KPI Dashboard listeners
             $('#monthSelect').off('change').on('change', function() {
@@ -2715,7 +2745,7 @@
             const currentYear = today.getFullYear();
             $('#monthSelect').val(`${currentMonth}-${currentYear}`);
             
-            // Initial fetch for KPI data based on currentSelectedDM (which is initially empty for "All")
+            // Initial fetch for KPI data based on currentSelectedDM (which is initially empty for "All" or set by loggedInUser)
             fetchKPIData(currentMonth, currentYear, currentSelectedDM);
         }
 
@@ -2761,6 +2791,17 @@
             Array.from(requests_districtManagers).sort().forEach(dm => {
                 kpiDmSelect.append($('<option>', { value: dm, text: dm }));
             });
+
+            // Apply loggedInUser filter if available
+            if (loggedInUser && loggedInUser.title === 'District Manager' && loggedInUser.username) {
+                kpiDmSelect.val(loggedInUser.username);
+                kpiDmSelect.prop('disabled', true); // Disable dropdown for DMs
+            } else if (loggedInUser && loggedInUser.title === 'Medical Representative') {
+                // If Medical Rep, hide the entire DM filter container
+                $('#kpiDmFilterContainer').hide();
+            } else {
+                kpiDmSelect.prop('disabled', false); // Enable for Admin or other roles
+            }
         }
 
         /**
@@ -2817,7 +2858,7 @@
                 let pmVisitsMetrics = calculateMetrics(allMedicalRepsData, filteredVisitsData, ['A', 'B']);
                 let amVisitsMetrics = calculateMetrics(allMedicalRepsData, filteredVisitsData, ['UPA', 'PRIVATE']);
 
-                // Filter by selected DM
+                // Filter by selected DM (which could be pre-set by loggedInUser)
                 if (selectedKpiDm) {
                     pmVisitsMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
                     amVisitsMetrics = amVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
@@ -3014,8 +3055,7 @@
 
             // Step 3: Get the number of working days (excluding leaves and full-day events)
             const workingDays = getWorkingDays(repName); 
-
-            // Step 4: Calculate the call rate
+            // Calculate the call rate
             let callRate;
             if (workingDays > 0) {
                 // Perform the division and format to two decimal places
@@ -3548,22 +3588,34 @@
             medRepSelect.empty().append($('<option>', { value: '', text: 'Select Medical Representative' }));
             
             let repsToPopulate = [];
-            if (currentSelectedDM) {
+            if (loggedInUser && loggedInUser.title === 'Medical Representative') {
+                // If logged in as MR, pre-select their name and disable dropdown
+                repsToPopulate = [loggedInUser.username];
+                medRepSelect.prop('disabled', true);
+            } else if (currentSelectedDM) {
+                // If a DM is selected in KPI dashboard, filter reps by that DM
                 repsToPopulate = Array.from(requests_medicalRepsByDM.get(currentSelectedDM) || []);
+                medRepSelect.prop('disabled', false);
             } else {
-                // If no DM is selected, populate all reps from all DMs
+                // If no DM selected (Admin or other roles), populate all reps from all DMs
                 requests_medicalRepsByDM.forEach(reps => {
                     reps.forEach(rep => repsToPopulate.push(rep));
                 });
                 repsToPopulate = [...new Set(repsToPopulate)]; // Ensure unique reps
+                medRepSelect.prop('disabled', false);
             }
 
             repsToPopulate.sort().forEach(repName => {
                 medRepSelect.append($('<option>', { value: repName, text: repName }));
             });
 
-            // Set default selection to "Select Medical Representative"
-            medRepSelect.val('');
+            // Set default selection to the logged-in MR, or "Select Medical Representative"
+            if (loggedInUser && loggedInUser.title === 'Medical Representative') {
+                medRepSelect.val(loggedInUser.username);
+            } else {
+                medRepSelect.val('');
+            }
+            
             clearDailyReportTable(); // Clear table when filter changes
         }
 
@@ -3749,31 +3801,6 @@
                         // Handle full-day events
                         if (!dailyAmActivitiesHCPs.has(hcpName)) {
                             dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
-                            dailyAmActivitiesHCPs.add(hcpName);
-                        }
-                        if (!dailyAmDetailsHCPs.has(hcpName)) {
-                            amDetailsData.push({ name: hcpName, specialty: originalSpecialty, brick: brick, time: visitTime, date: dateStr, isEvent: true, comment: comments, visit_place: visitPlace, target_visits: hcpTargetVisits, isAmSpecialty: isAmDetailsSpecialty, dayDate: visitDayDate });
-                            dailyAmDetailsHCPs.add(hcpName);
-                        }
-                        if (!dailyPmActivitiesHCPs.has(hcpName)) {
-                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
-                            dailyPmActivitiesHCPs.add(hcpName);
-                        }
-                        if (!dailyPharmacyActivitiesHCPs.has(hcpName)) {
-                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
-                            dailyPharmacyActivitiesHCPs.add(hcpName);
-                        }
-                    } else if (isLeaveHCP && !isAmActivitySpecialty && !isAmActivityEvent) {
-                        // Handle leaves only if it's not an AM activity or event
-                        if (!dailyPmActivitiesHCPs.has(hcpName)) {
-                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, false, true, isAmDetailsSpecialty));
-                            dailyPmActivitiesHCPs.add(hcpName);
-                        }
-                    } else {
-                        // Handle AM and PM activities based on specialty
-                        let addedToAmActivities = false;
-                        if ((isAmActivitySpecialty || isAmActivityEvent) && !dailyAmActivitiesHCPs.has(hcpName)) {
-                            dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
                             dailyAmActivitiesHCPs.add(hcpName);
                             addedToAmActivities = true;
                         }
