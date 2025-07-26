@@ -138,11 +138,12 @@
         .stats-item {
             text-align: center;
             padding: 8px;
+            cursor: pointer; /* Indicate clickable */
+            transition: background-color 0.2s ease;
         }
 
-        /* Added for clickable Total HCPs stat */
-        #totalHCPsStat {
-            cursor: pointer;
+        .stats-item:hover {
+            background-color: #f0f2f5;
         }
 
         .stats-number {
@@ -153,9 +154,9 @@
             line-height: 1;
         }
 
-        /* Style for duplicated HCPs count */
-        .stats-number.duplicated-count {
-            color: #dc2626; /* Red color */
+        /* Style for duplicated HCPs number */
+        .stats-number.red {
+            color: #ef4444; /* Tailwind red-500 equivalent */
         }
 
         .stats-label {
@@ -166,57 +167,24 @@
             margin-top: 4px;
         }
 
-        /* Added for clickable duplicated stat */
-        #duplicatedHCPsStat {
-            cursor: pointer;
-            position: relative; /* For tooltip positioning */
+        .clickable-note {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+            display: block;
         }
-
-        #duplicatedHCPsStat:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .tooltip-text {
-            visibility: hidden;
-            width: 120px;
-            background-color: #555;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%; /* Position above the text */
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%; /* At the bottom of the tooltip */
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #555 transparent transparent transparent;
-        }
-
 
         /* Table */
         .table-container {
             padding: 0;
-            overflow-x: auto; /* Make table horizontally scrollable */
+            overflow-x: auto; /* Allows horizontal scrolling */
         }
 
         .hcp-table {
             width: 100%;
             border-collapse: collapse;
             background: white;
-            table-layout: auto; /* Allow columns to auto-fit content */
+            min-width: 800px; /* Ensure table doesn't shrink too much, allowing scroll */
         }
 
         .hcp-table th {
@@ -232,7 +200,6 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            white-space: nowrap; /* Prevent header text from wrapping */
         }
 
         .hcp-table td {
@@ -240,10 +207,10 @@
             border-bottom: 1px solid #f1f5f9;
             font-size: 14px;
             vertical-align: top;
-            white-space: nowrap; /* Ensure data is in one row */
-            overflow: hidden; /* Hide overflow content */
-            text-overflow: ellipsis; /* Add ellipsis for overflow */
-            max-width: 200px; /* Set a max-width to prevent excessively wide columns, adjust as needed */
+            white-space: nowrap; /* Keep content on a single line */
+            overflow: hidden; /* Hide overflowing content */
+            text-overflow: ellipsis; /* Show ellipsis for overflow */
+            max-width: 150px; /* Adjust as needed for column width */
         }
 
         .hcp-table tr:hover {
@@ -253,21 +220,17 @@
         .hcp-name {
             color: #3b82f6;
             cursor: pointer;
-            font-weight: bold; /* Make HCP names bold */
+            font-weight: 500;
             text-decoration: none;
-            display: block; /* Make it a block element to apply overflow properties */
-            max-width: 100%; /* Ensure it takes full width of its TD */
+            display: block; /* Ensure the link takes full cell width */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .hcp-name:hover {
             color: #1d4ed8;
             text-decoration: underline;
-        }
-
-        /* Style for duplicated HCP names */
-        .hcp-name.duplicated-hcp {
-            color: #dc2626; /* Red color for duplicated names */
-            font-weight: 600;
         }
 
         .specialty-badge {
@@ -278,7 +241,6 @@
             font-size: 11px;
             font-weight: 500;
             display: inline-block;
-            white-space: nowrap; /* Ensure badge content stays on one line */
         }
 
         .area-badge {
@@ -289,7 +251,6 @@
             font-size: 11px;
             font-weight: 500;
             display: inline-block;
-            white-space: nowrap; /* Ensure badge content stays on one line */
         }
 
         /* Modal */
@@ -519,13 +480,6 @@
                 padding-left: 16px;
                 padding-right: 16px;
             }
-
-            /* Ensure name stays on one line in mobile view */
-            .hcp-table td {
-                max-width: 150px; /* Adjust based on typical name length */
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
         }
     </style>
 </head>
@@ -588,9 +542,10 @@
         </div>
 
         <div class="stats-bar">
-            <div class="stats-item" id="totalHCPsStat"> <!-- Added ID for clickability -->
+            <div class="stats-item" id="totalHCPsStat">
                 <span class="stats-number" id="totalHCPs">0</span>
                 <span class="stats-label">Total HCPs</span>
+                <span class="clickable-note">Click to reset filters</span>
             </div>
             <div class="stats-item">
                 <span class="stats-number" id="filteredHCPs">0</span>
@@ -598,9 +553,8 @@
             </div>
             <div class="stats-item" id="duplicatedHCPsStat">
                 <span class="stats-number" id="duplicatedHCPs">0</span>
-                <span class="stats-label">Duplicated Names
-                    <span class="tooltip-text">Click to show duplicates</span>
-                </span>
+                <span class="stats-label">Duplicated Names</span>
+                <span class="clickable-note">Click to view</span>
             </div>
         </div>
 
@@ -675,6 +629,43 @@
                             <span class="detail-label">District Manager</span>
                             <span class="detail-value" id="hcp-manager">Mike Johnson</span>
                         </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Governorate</span>
+                            <span class="detail-value" id="hcp-governorate">Cairo</span>
+                        </div>
+                    </div>
+
+                    <!-- New section for Available Days -->
+                    <div class="detail-section full-width">
+                        <h3><i class="fas fa-calendar-alt"></i> Available Days</h3>
+                        <div id="hcp-available-days">
+                            <!-- Days will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="detail-section full-width">
+                        <h3><i class="fas fa-phone"></i> Contact Information</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Mobile</span>
+                            <span class="detail-value">
+                                ${hcp.mobile ? `<a href="tel:${formattedMobile}">${hcp.mobile}</a>` : 'N/A'}
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Address</span>
+                            <span class="detail-value">${hcp.address || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <div class="detail-section full-width">
+                        <h3><i class="fas fa-info-circle"></i> Other Details</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Class</span>
+                            <span class="detail-value">${hcp.class || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">T.V</span>
+                            <span class="detail-value">${hcp.tv || 'N/A'}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -688,6 +679,7 @@
         
         let hcpData = []; // This will store the fetched and parsed data
         let filteredData = []; // This will store the currently filtered data
+        let loggedInUser = null; // To store the user data received from the parent window
 
         const loadingOverlay = document.getElementById('loadingOverlay');
 
@@ -761,6 +753,14 @@
                 if (originalHeader.toUpperCase() === 'ACCOUNT') return 'account';
                 if (originalHeader.toUpperCase() === 'ADDRESS') return 'address';
                 if (originalHeader.toUpperCase() === 'MOBILE') return 'mobile';
+                // M to S for Available Days
+                if (originalHeader.toUpperCase() === 'SUNDAY') return 'sunday';
+                if (originalHeader.toUpperCase() === 'MONDAY') return 'monday';
+                if (originalHeader.toUpperCase() === 'TUESDAY') return 'tuesday';
+                if (originalHeader.toUpperCase() === 'WEDNESDAY') return 'wednesday';
+                if (originalHeader.toUpperCase() === 'THURSDAY') return 'thursday';
+                if (originalHeader.toUpperCase() === 'FRIDAY') return 'friday';
+                if (originalHeader.toUpperCase() === 'SATURDAY') return 'saturday';
                 // Add any other specific headers you might have that need direct mapping
                 // Default camelCase conversion for other headers not explicitly listed
                 return parts.map((part, index) => {
@@ -812,30 +812,8 @@
         }
 
         /**
-         * Identifies and returns a Set of original HCP names that are duplicated within the given data.
-         * @param {Array<Object>} data The array of HCP data.
-         * @returns {Set<string>} A Set containing original names of duplicated HCPs.
-         */
-        function getDuplicatedOriginalNames(data) {
-            const normalizedNameCounts = {};
-            data.forEach(hcp => {
-                const normalized = (hcp.hcps || '').toLowerCase().replace(/\s/g, '');
-                normalizedNameCounts[normalized] = (normalizedNameCounts[normalized] || 0) + 1;
-            });
-
-            const duplicatedSet = new Set();
-            for (const normalizedName in normalizedNameCounts) {
-                if (normalizedNameCounts[normalizedName] > 1) {
-                    // Add all original names that normalize to this duplicated form
-                    data.filter(hcp => (hcp.hcps || '').toLowerCase().replace(/\s/g, '') === normalizedName)
-                        .forEach(hcp => duplicatedSet.add(hcp.hcps));
-                }
-            }
-            return duplicatedSet;
-        }
-
-        /**
          * Clears all filter dropdowns and the search input.
+         * If a District Manager is logged in, it re-applies their specific filter.
          */
         function clearFilters() {
             document.getElementById('districtFilter').value = '';
@@ -844,6 +822,15 @@
             document.getElementById('specialtyFilter').value = '';
             document.getElementById('brickFilter').value = '';
             document.getElementById('searchInput').value = '';
+
+            // If a District Manager is logged in, re-apply their filter
+            if (loggedInUser && loggedInUser.title === 'District Manager' && loggedInUser.username) {
+                document.getElementById('districtFilter').value = loggedInUser.username;
+                document.getElementById('districtFilter').disabled = true; // Keep it disabled
+            } else {
+                document.getElementById('districtFilter').disabled = false; // Enable for Admin/other roles
+            }
+            filterData(); // Re-filter the data after clearing/resetting filters
         }
 
         /**
@@ -884,11 +871,31 @@
 
         /**
          * Initializes the application by fetching data, populating filters, and rendering the table.
+         * Now accepts an optional initialUser for filtering.
          */
-        async function initializeApp() {
+        async function initializeApp(initialUser = null) {
             hcpData = await fetchAndParseCSV();
-            filteredData = [...hcpData]; // Initialize filteredData with all data
-            populateFilters();
+            
+            // Apply initial filtering based on the logged-in user
+            if (initialUser && initialUser.title === 'District Manager' && initialUser.username) {
+                // Filter by District Manager's name
+                filteredData = hcpData.filter(hcp => 
+                    hcp.districtManager && hcp.districtManager.toLowerCase() === initialUser.username.toLowerCase()
+                );
+                // Pre-select the District Manager filter
+                const districtFilter = document.getElementById('districtFilter');
+                // Populate filters first so the option exists
+                populateSelect('districtFilter', [...new Set(hcpData.map(hcp => hcp.districtManager).filter(Boolean))].sort());
+                districtFilter.value = initialUser.username;
+                // Disable the District Manager filter so the user can't change it
+                districtFilter.disabled = true;
+            } else {
+                // If admin or no specific filter, show all data
+                filteredData = [...hcpData]; 
+                populateFilters(); // Populate all filters
+                document.getElementById('districtFilter').disabled = false; // Ensure it's enabled for admin/other roles
+            }
+
             renderTable();
             updateStats();
             setupEventListeners();
@@ -969,51 +976,44 @@
             }
 
             noResults.style.display = 'none';
-
-            // Get the set of duplicated original names within the current filteredData
-            const duplicatedNamesSet = getDuplicatedOriginalNames(filteredData);
-
-            tbody.innerHTML = filteredData.map(hcp => {
-                const isDuplicated = duplicatedNamesSet.has(hcp.hcps);
-                const hcpNameClass = isDuplicated ? 'hcp-name duplicated-hcp' : 'hcp-name';
-                
-                return `
-                    <tr>
-                        <td>
-                            ${hcp.hcps ? `<a href="#" class="${hcpNameClass}" onclick="showHCPDetails('${encodeURIComponent(hcp.hcps)}')">${hcp.hcps}</a>` : 'N/A'}
-                        </td>
-                        <td><span class="specialty-badge">${hcp.specialty || 'N/A'}</span></td>
-                        <td>${hcp.account || 'N/A'}</td> 
-                        <td><span class="area-badge">${hcp.area || 'N/A'}</span></td>
-                        <td>${hcp.brick || 'N/A'}</td>
-                        <td>${hcp.medicalRep || 'N/A'}</td>
-                        <td>${hcp.districtManager || 'N/A'}</td>
-                    </tr>
-                `;
-            }).join('');
+            // Pass the index of the HCP in the filteredData array to showHCPDetails
+            tbody.innerHTML = filteredData.map((hcp, index) => `
+                <tr>
+                    <td>
+                        ${hcp.hcps ? `<a href="#" class="hcp-name" onclick="showHCPDetails(${index})">${hcp.hcps}</a>` : 'N/A'}
+                    </td>
+                    <td><span class="specialty-badge">${hcp.specialty || 'N/A'}</span></td>
+                    <td>${hcp.account || 'N/A'}</td> 
+                    <td><span class="area-badge">${hcp.area || 'N/A'}</span></td>
+                    <td>${hcp.brick || 'N/A'}</td>
+                    <td>${hcp.medicalRep || 'N/A'}</td>
+                    <td>${hcp.districtManager || 'N/A'}</td>
+                </tr>
+            `).join('');
         }
 
         /**
          * Updates the statistics displayed in the stats bar.
          */
         function updateStats() {
-            const duplicatedHCPsSpan = document.getElementById('duplicatedHCPs');
-            const duplicatedCount = calculateDuplicatedCount(filteredData);
-            duplicatedHCPsSpan.textContent = duplicatedCount;
-            
-            // Add/remove duplicated-count class based on the count
-            if (duplicatedCount > 0) {
-                duplicatedHCPsSpan.classList.add('duplicated-count');
-            } else {
-                duplicatedHCPsSpan.classList.remove('duplicated-count');
-            }
-
             document.getElementById('totalHCPs').textContent = hcpData.length;
             document.getElementById('filteredHCPs').textContent = filteredData.length;
+            
+            const duplicatedHCPsCount = calculateDuplicatedCount(filteredData);
+            const duplicatedHCPsSpan = document.getElementById('duplicatedHCPs');
+            duplicatedHCPsSpan.textContent = duplicatedHCPsCount;
+            
+            // Add/remove 'red' class based on whether there are duplicates
+            if (duplicatedHCPsCount > 0) {
+                duplicatedHCPsSpan.classList.add('red');
+            } else {
+                duplicatedHCPsSpan.classList.remove('red');
+            }
         }
 
         /**
          * Filters the HCP data based on selected dropdown values and search term.
+         * This function now also respects the initial filter set by the logged-in user.
          */
         function filterData() {
             const districtFilter = document.getElementById('districtFilter').value;
@@ -1025,7 +1025,13 @@
 
             // Start filtering from the original hcpData
             let currentFilteredData = hcpData.filter(hcp => {
-                const matchesDistrict = !districtFilter || hcp.districtManager === districtFilter;
+                // If the districtFilter is disabled (meaning a DM is logged in),
+                // ensure the data matches the logged-in DM's username.
+                // Otherwise, use the selected filter value.
+                const matchesDistrict = (document.getElementById('districtFilter').disabled && loggedInUser && loggedInUser.title === 'District Manager')
+                                        ? (hcp.districtManager && hcp.districtManager.toLowerCase() === loggedInUser.username.toLowerCase())
+                                        : (!districtFilter || hcp.districtManager === districtFilter);
+
                 const matchesRep = !repFilter || hcp.medicalRep === repFilter;
                 const matchesArea = !areaFilter || hcp.area === areaFilter;
                 const matchesSpecialty = !specialtyFilter || hcp.specialty === specialtyFilter;
@@ -1040,16 +1046,6 @@
             });
 
             filteredData = currentFilteredData; // Update the global filteredData
-            renderTable();
-            updateStats();
-        }
-
-        /**
-         * Resets all filters and displays the full original data.
-         */
-        function resetAllFilters() {
-            clearFilters(); // Clear all dropdowns and search input
-            filteredData = [...hcpData]; // Reset filteredData to the original full dataset
             renderTable();
             updateStats();
         }
@@ -1075,14 +1071,12 @@
 
         /**
          * Displays the modal with full details for a selected HCP.
-         * @param {string} encodedHcpName The URI-encoded name of the HCP to display details for.
+         * @param {number} hcpIndex The index of the HCP in the filteredData array.
          */
-        function showHCPDetails(encodedHcpName) {
-            const hcpName = decodeURIComponent(encodedHcpName); // Decode the name here
-            // Find HCP using the 'hcps' property
-            const hcp = hcpData.find(h => h.hcps === hcpName);
+        function showHCPDetails(hcpIndex) {
+            const hcp = filteredData[hcpIndex]; // Get HCP directly from filteredData by index
             if (!hcp) {
-                console.error("HCP not found:", hcpName); // Log the actual name being searched
+                console.error("HCP not found at index:", hcpIndex); 
                 return;
             }
 
@@ -1091,74 +1085,108 @@
             const detailsContainer = document.getElementById('hcpDetails');
             const formattedMobile = formatPhoneNumberForCall(hcp.mobile);
 
+            // Generate HTML for available days
+            const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            let availableDaysHtml = '';
+            let hasAvailableDays = false;
+            daysOfWeek.forEach(day => {
+                if (hcp[day] && hcp[day].trim() !== '') {
+                    availableDaysHtml += `
+                        <div class="detail-row">
+                            <span class="detail-label">${day.charAt(0).toUpperCase() + day.slice(1)}</span>
+                            <span class="detail-value">${hcp[day]}</span>
+                        </div>
+                    `;
+                    hasAvailableDays = true;
+                }
+            });
+
+            if (!hasAvailableDays) {
+                availableDaysHtml = `<p class="text-gray-600">No specific available days recorded.</p>`;
+            }
+
+
             detailsContainer.innerHTML = `
-                <div class="detail-group">
-                    <i class="fas fa-user"></i>
-                    <div class="detail-content">
-                        <div class="detail-label">Full Name</div>
-                        <div class="detail-value">${hcp.hcps || 'N/A'}</div>
+                <div class="detail-section">
+                    <h3><i class="fas fa-user-md"></i> Personal Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Name</span>
+                        <span class="detail-value" id="hcp-name">${hcp.hcps || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Specialty</span>
+                        <span class="detail-value specialty" id="hcp-specialty">${hcp.specialty || 'N/A'}</span>
                     </div>
                 </div>
-                <div class="detail-group">
-                    <i class="fas fa-stethoscope"></i>
-                    <div class="detail-content">
-                        <div class="detail-label">Speciality</div>
-                        <div class="detail-value">${hcp.specialty || 'N/A'}</div>
+                
+                <div class="detail-section">
+                    <h3><i class="fas fa-building"></i> Practice Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Account</span>
+                        <span class="detail-value" id="hcp-account">${hcp.account || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Area</span>
+                        <span class="detail-value area" id="hcp-area">${hcp.area || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Brick</span>
+                        <span class="detail-value" id="hcp-brick">${hcp.brick || 'N/A'}</span>
                     </div>
                 </div>
-                <div class="detail-group">
-                    <i class="fas fa-hospital"></i>
-                    <div class="detail-content">
-                        <div class="detail-label">Account</div> 
-                        <div class="detail-value">${hcp.account || 'N/A'}</div> 
+                
+                <div class="detail-section full-width">
+                    <h3><i class="fas fa-users"></i> Team Assignment</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Medical Rep</span>
+                        <span class="detail-value" id="hcp-rep">${hcp.medicalRep || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">District Manager</span>
+                        <span class="detail-value" id="hcp-manager">${hcp.districtManager || 'N/A'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Governorate</span>
+                        <span class="detail-value" id="hcp-governorate">${hcp.governorate || 'N/A'}</span>
                     </div>
                 </div>
-                <div class="detail-group">
-                    <i class="fas fa-tag"></i>
-                    <div class="detail-content">
-                        <div class="detail-label">Class</div>
-                        <div class="detail-value">${hcp.class || 'N/A'}</div>
+
+                <!-- New section for Available Days -->
+                <div class="detail-section full-width">
+                    <h3><i class="fas fa-calendar-alt"></i> Available Days</h3>
+                    <div id="hcp-available-days">
+                        ${availableDaysHtml}
                     </div>
                 </div>
-                <div class="detail-group">
-                    <i class="fas fa-tv"></i>
-                    <div class="detail-content">
-                        <div class="detail-label">T.V</div>
-                        <div class="detail-value">${hcp.tv || 'N/A'}</div>
-                    </div>
-                </div>
-                <div class="detail-group">
-                    <i class="fas fa-mobile-alt"></i>
-                    <div class="detail-content">
-                        <div class="detail-label">Mobile</div>
-                        <div class="detail-value">
+
+                <div class="detail-section full-width">
+                    <h3><i class="fas fa-phone"></i> Contact Information</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Mobile</span>
+                        <span class="detail-value">
                             ${hcp.mobile ? `<a href="tel:${formattedMobile}">${hcp.mobile}</a>` : 'N/A'}
-                        </div>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Address</span>
+                        <span class="detail-value">${hcp.address || 'N/A'}</span>
                     </div>
                 </div>
-                <div class="detail-group">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <div class="detail-content">
-                        <div class="detail-label">Address</div>
-                        <div class="detail-value">${hcp.address || 'N/A'}</div>
+                <div class="detail-section full-width">
+                    <h3><i class="fas fa-info-circle"></i> Other Details</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Class</span>
+                        <span class="detail-value">${hcp.class || 'N/A'}</span>
                     </div>
-                </div>
-                <div class="detail-group">
-                    <i class="fas fa-map"></i>
-                    <div class="detail-content">
-                        <div class="detail-label">Territory Details</div>
-                        <div class="detail-value">
-                            <strong>Area:</strong> ${hcp.area || 'N/A'}<br>
-                            <strong>Brick:</strong> ${hcp.brick || 'N/A'}<br>
-                            <strong>Medical Rep:</strong> ${hcp.medicalRep || 'N/A'}<br>
-                            <strong>District Manager:</strong> ${hcp.districtManager || 'N/A'}<br>
-                            <strong>Governorate:</strong> ${hcp.governorate || 'N/A'} 
-                        </div>
+                    <div class="detail-row">
+                        <span class="detail-label">T.V</span>
+                        <span class="detail-value">${hcp.tv || 'N/A'}</span>
                     </div>
                 </div>
             `;
 
             document.getElementById('hcpModal').style.display = 'flex'; // Use flex to center
+            document.body.style.overflow = 'hidden'; // Prevent scrolling on body
         }
 
         /**
@@ -1207,12 +1235,14 @@
 
             // Get headers from the first object, ensuring order
             const headers = [
-                'District Manager', 'Governorate', 'medical rep', 'area', 'HCPS', 
-                'Speciality', 'Class', 'T.V', 'Brick', 'account', 'Address', 'Mobile'
+                'District Manager', 'Governorate', 'Medical Rep', 'Area', 'HCPs', 
+                'Speciality', 'Class', 'T.V', 'Brick', 'Account', 'Address', 'Mobile',
+                'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' // Added new headers
             ];
             const headerKeys = [
                 'districtManager', 'governorate', 'medicalRep', 'area', 'hcps', 
-                'specialty', 'class', 'tv', 'brick', 'account', 'address', 'mobile'
+                'specialty', 'class', 'tv', 'brick', 'account', 'address', 'mobile',
+                'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' // Added new keys
             ];
 
             let csvContent = headers.join(',') + '\n';
@@ -1261,9 +1291,9 @@
 
             // Add event listener for duplicated HCPs stat
             document.getElementById('duplicatedHCPsStat').addEventListener('click', showDuplicatedHCPs);
-            
-            // Add event listener for Total HCPs stat to reset filters
-            document.getElementById('totalHCPsStat').addEventListener('click', resetAllFilters);
+            // Add event listener for total HCPs stat to reset filters
+            document.getElementById('totalHCPsStat').addEventListener('click', clearFilters);
+
 
             // Add event listeners for new buttons
             document.getElementById('printBtn').addEventListener('click', printTable);
@@ -1276,12 +1306,14 @@
 
             closeBtn.onclick = function() {
                 modal.style.display = 'none';
+                document.body.style.overflow = ''; // Restore scrolling on body
             }
 
             // Close modal when clicking outside of it
             window.onclick = function(event) {
                 if (event.target === modal) {
                     modal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling on body
                 }
             }
 
@@ -1289,12 +1321,29 @@
             document.addEventListener('keydown', function(event) {
                 if (event.key === 'Escape' && modal.style.display === 'flex') { // Check for 'flex' display
                     modal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling on body
                 }
             });
         }
 
-        // Initialize the application when the page loads
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        // Listen for messages from the parent window (your main CRM app)
+        window.addEventListener('message', function(event) {
+            // IMPORTANT: For security, always verify the origin of the message
+            // In a production environment, replace '*' with the actual origin of your main CRM app.
+            // Example: if (event.origin !== 'https://your-crm-app.com') return;
+
+            if (event.data && event.data.type === 'loggedInUser') {
+                loggedInUser = event.data.user; // Store the logged-in user globally
+                console.log('Master List received user data:', loggedInUser);
+                
+                // Initialize the app with the received user data for initial filtering
+                initializeApp(loggedInUser); 
+            }
+        });
+
+        // Initialize the application when the page loads, without initial user data
+        // The message listener will re-initialize with user data if available
+        document.addEventListener('DOMContentLoaded', () => initializeApp());
     </script>
 </body>
 </html>
