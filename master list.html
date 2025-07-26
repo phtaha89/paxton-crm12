@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- SheetJS (xlsx.js) for XLSX file generation -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     
     <style>
         * {
@@ -536,7 +538,7 @@
             <button id="printBtn" class="action-button" title="Print Filtered Data">
                 <i class="fas fa-print"></i> Print
             </button>
-            <button id="exportBtn" class="action-button" title="Export Filtered Data to CSV">
+            <button id="exportBtn" class="action-button" title="Export Filtered Data to XLSX">
                 <i class="fas fa-file-excel"></i> Export
             </button>
         </div>
@@ -1244,55 +1246,41 @@
         }
 
         /**
-         * Exports the currently filtered HCP data to a CSV file.
+         * Exports the currently filtered HCP data to an XLSX file.
          */
-        function exportToCSV() {
+        function exportToXLSX() {
             if (filteredData.length === 0) {
                 console.warn("No data to export.");
                 return;
             }
 
-            // Get headers from the first object, ensuring order
+            // Define the order of headers for the XLSX file
             const headers = [
                 'District Manager', 'Governorate', 'Medical Rep', 'Area', 'HCPs', 
                 'Speciality', 'Class', 'T.V', 'Brick', 'Account', 'Address', 'Mobile',
-                'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' // Added new headers
+                'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
             ];
             const headerKeys = [
                 'districtManager', 'governorate', 'medicalRep', 'area', 'hcps', 
                 'specialty', 'class', 'tv', 'brick', 'account', 'address', 'mobile',
-                'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' // Added new keys
+                'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
             ];
 
-            let csvContent = headers.join(',') + '\n';
-
-            // Use filteredData instead of hcpData for export
+            // Map filteredData to an array of arrays, ensuring correct header order
+            const exportData = [headers]; // First row is headers
             filteredData.forEach(row => {
-                const rowValues = headerKeys.map(key => {
-                    let value = row[key] || '';
-                    // Escape commas and double quotes for CSV
-                    value = String(value).replace(/"/g, '""');
-                    if (value.includes(',') || value.includes('\n') || value.includes('"')) {
-                        value = `"${value}"`;
-                    }
-                    return value;
-                });
-                csvContent += rowValues.join(',') + '\n';
+                const rowValues = headerKeys.map(key => row[key] || '');
+                exportData.push(rowValues);
             });
 
-            // Prepend BOM for UTF-8 compatibility in Excel
-            const BOM = "\uFEFF"; // UTF-8 Byte Order Mark
-            const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            if (link.download !== undefined) { // Feature detection for download attribute
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'filtered_hcp_data.csv'); // Changed filename to reflect filtered data
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            // Create a new workbook and add a worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(exportData); // Use aoa_to_sheet for array of arrays
+
+            XLSX.utils.book_append_sheet(wb, ws, "HCP Data");
+
+            // Write the workbook to an XLSX file
+            XLSX.writeFile(wb, "filtered_hcp_data.xlsx");
         }
 
 
@@ -1316,7 +1304,7 @@
 
             // Add event listeners for new buttons
             document.getElementById('printBtn').addEventListener('click', printTable);
-            document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+            document.getElementById('exportBtn').addEventListener('click', exportToXLSX); // Changed to exportToXLSX
 
 
             // Modal event listeners
