@@ -276,152 +276,6 @@
             background: #16a34a;
         }
 
-        /* Login Page Styles */
-        #login-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: #91C8E4;
-        }
-
-        #login-form-container {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-        }
-
-        #login-form-container h2 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        #login-form-container .form-group {
-            margin-bottom: 1.25rem;
-            text-align: left;
-        }
-
-        #login-form-container label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #475569;
-            font-size: 0.825rem;
-        }
-
-        #login-form-container input, #login-form-container select {
-            width: 100%;
-            padding: 0.6rem 1rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 18px;
-            font-size: 0.75rem;
-            transition: all 0.2s;
-        }
-
-        #login-form-container input:focus, #login-form-container select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        #login-form-container button {
-            width: 100%;
-            padding: 0.5rem;
-            border: none;
-            border-radius: 18px;
-            background-color: #3b82f6;
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        #login-form-container button:hover {
-            background-color: #2563eb;
-        }
-
-        #login-error {
-            color: #ef4444;
-            margin-top: 1rem;
-            height: 1rem;
-            font-size: 0.825rem;
-        }
-
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            gap: 0.5rem;
-        }
-
-        .toggle-label {
-            font-size: 0.85rem;
-            color: #475569;
-            font-weight: 500;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 20px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: #3b82f6;
-        }
-
-        input:focus + .slider {
-            box-shadow: 0 0 1px #3b82f6;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(20px);
-        }
-
         /* Tab styles */
         .tabs {
             display: flex;
@@ -474,54 +328,6 @@
             background-color: var(--primary);
         }
         
-        /* User Info Bar */
-        .user-info-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background-color: #fff;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        #loggedInUser {
-            font-weight: 600;
-            color: var(--text);
-            font-size: 0.85rem;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0;
-        }
-        
-        #loggedInUserGovernorates {
-            font-size: 0.7rem;
-            font-weight: 400;
-            color: #64748b;
-            margin-top: 0.2rem;
-        }
-
-        #logoutButton {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.7rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        
-        #logoutButton:hover {
-            background-color: #c53030;
-        }
-
         .tab-content {
             display: none;
             padding: 8px;
@@ -1748,9 +1554,8 @@
     </style>
 </head>
 <body>
-        <div id="dashboard-content" style="display: show;">
+    <div id="dashboard-content">
         <div class="dashboard-container">
-            
             <div class="tabs">
                 <button class="tab-button active" onclick="openTab(event, 'kpi-dashboard')">KPI Dashboard</button>
                 <button class="tab-button" onclick="openTab(event, 'daily-report')">Daily Report</button>
@@ -2187,7 +1992,6 @@
                         <div class="common-filter-group">
                             <input type="date" id="weeklyPlanEndDate" class="common-filter-input" readonly>
                         </div>
-                        <!-- Removed weeklyPlanRetrieveButton as per request -->
                         <button id="weeklyPlanResetButton" class="common-button common-button-secondary"><i class="fas fa-redo"></i> Reset</button>
                         <button id="weeklyPlanDownloadButton" class="daily-report-icon-button" title="Download Excel"><i class="fas fa-file-excel"></i></button>
                         <button id="weeklyPlanDeleteVisitButton" class="common-button common-button-danger" style="display:none;"><i class="fas fa-trash-alt"></i> Delete Selected Visit</button>
@@ -2277,6 +2081,7 @@
                 <button id="confirmNo" class="confirm-no">No</button>
             </div>
         </div>
+    </div>
 
     <script>
         // Supabase and Google Sheet URLs - Consolidated
@@ -2288,22 +2093,21 @@
         const supabaseClient = supabase.createClient('https://plmevfyxpngzymvzvkzn.supabase.co', SUPABASE_API_KEY);
 
         // Global variables to store fetched data
-        let allMedicalRepsData = {};
-        let allVisitsData = [];
-        let allGoogleSheetData = [];
-        let medicalRepsForDailyReport = [];
+        let allMedicalRepsData = {}; // Stores processed data from Google Sheet
+        let allVisitsData = []; // Stores all visits from Supabase
+        let allGoogleSheetData = []; // Stores raw data from Google Sheet
 
         // Global variables for Lists Dashboard
         let listsGoogleData = [];
         let listsVisitCounts = {};
         let listsBricks = new Set();
-        let listsSelectedBricks = [];
         let listsFilteredHCPs = [];
+        let listsCurrentMonthVisits = [];
 
         // Global variables for Requests Dashboard
         let requests_districtManagers = new Set();
-        let requests_medicalReps = new Map();
-        let requests_areasByMedRep = new Map();
+        let requests_medicalRepsByDM = new Map(); // DM -> Set of Med Reps
+        let requests_areasByMedRep = new Map(); // Med Rep -> Set of Areas
         let requests_allRequests = [];
 
         // Global variables for Weekly Plan Dashboard
@@ -2315,12 +2119,10 @@
             Wednesday: { am: [], pm: [] },
             Thursday: { am: [], pm: [] }
         };
-        let weeklyPlanSelectedVisitIds = []; // Renamed to avoid conflict
+        let weeklyPlanSelectedVisitIds = [];
 
-        // Global user role and DM information
-        let loggedInUserRole = null;
-        let loggedInUserDM = null;
-        let loggedInUserGovernorates = [];
+        // Global state for selected District Manager
+        let currentSelectedDM = ''; 
 
         // State for visits table view (normal, leaves, archived)
         let currentVisitsTableView = 'normal';
@@ -2332,68 +2134,39 @@
         // Global variable to store the currently displayed visits data for HCP filtering
         let currentDisplayedVisitsData = [];
 
-        // --- LOGIN LOGIC REMOVED ---
-        // The login form and its functions are removed as per your request.
-        // The dashboard will now directly receive the logged-in user's name.
-
         // --- Common Dashboard Initialization ---
-        function initializeCommonDashboard(loggedInUsernameFromIndex) {
-            // Determine user role and DM based on the provided username
-            // Ensure both sides of the comparison are trimmed to avoid issues with whitespace
-            const userInSupabase = allGoogleSheetData.find(row => row['District Manager']?.trim() === loggedInUsernameFromIndex?.trim());
-            
-            if (userInSupabase) {
-                loggedInUserDM = loggedInUsernameFromIndex;
-                loggedInUserRole = 'District Manager'; // Assume DM if found in Google Sheet
-            } else if (loggedInUsernameFromIndex?.toLowerCase() === 'admin') { // Check for admin explicitly
-                loggedInUserDM = 'admin'; // Or any identifier for admin
-                loggedInUserRole = 'admin';
-            } else {
-                // If not found as DM or admin, handle as an error or default to a restricted view
-                console.error("Logged-in user not found as District Manager or Admin in Google Sheet:", loggedInUsernameFromIndex);
-                showAlertDialog("User not recognized. Displaying limited data.", "warning");
-                loggedInUserRole = 'guest'; // Assign a guest role for restricted access
-                loggedInUserDM = loggedInUsernameFromIndex;
-            }
-
-            console.log(`Dashboard initialized for user: ${loggedInUsernameFromIndex}, Role: ${loggedInUserRole}, DM: ${loggedInUserDM}`);
-
-
-            $('#loggedInUsernameDisplay').text(loggedInUserDM);
-            
-            // Populate governorates for the logged-in DM if applicable
-            const dmGovernorates = new Set();
-            allGoogleSheetData.forEach(row => {
-                if (row['District Manager'] === loggedInUserDM && row['area']) {
-                    dmGovernorates.add(row['area'].trim());
-                }
-            });
-            loggedInUserGovernorates = Array.from(dmGovernorates);
-            if (loggedInUserGovernorates.length > 0) {
-                $('#loggedInUserGovernorates').html(`(${loggedInUserGovernorates.join(', ')})`);
-            } else {
-                $('#loggedInUserGovernorates').text('');
-            }
-
-            // Remove logout button functionality as per request
-            $('#logoutButton').remove(); // This removes the button from the DOM
-            $('.user-info-bar').css('justify-content', 'flex-start'); // Adjust layout if only one item remains
-
-            // Initialize the default active tab
-            openTab(null, 'kpi-dashboard');
-
+        async function initializeDashboard() {
             // Pre-load Google Sheet data once for all dashboards
-            fetchMedicalRepsData().then(() => {
-                // Initialize each dashboard when the common data is ready
-                initKpiDashboard();
-                initDailyReportDashboard();
-                initListsDashboard(); 
-                requests_initRequestsDashboard(); 
-                initWeeklyPlanDashboard(); 
-            }).catch(error => {
+            try {
+                const response = await fetch(GOOGLE_SHEET_URL);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Google Sheet data. Please ensure the Google Sheet URL is correct and publicly accessible, and published to the web as a CSV.');
+                }
+                const csvText = await response.text();
+                allGoogleSheetData = parseCSV(csvText);
+                
+                // Process medical reps and DMs from Google Sheet
+                processMedicalRepsAndDMs(allGoogleSheetData);
+
+                // Initialize the default active tab
+                openTab(null, 'kpi-dashboard');
+
+                // Set initial DM filter for KPI dashboard
+                populateKpiDistrictManagers();
+                $('#kpiDistrictManagerSelect').val(''); // Default to "All District Managers"
+                currentSelectedDM = ''; // Initialize global DM filter
+
+                // Fetch KPI data for the initial state (all DMs, current month)
+                const today = new Date();
+                const currentMonth = today.getMonth() + 1;
+                const currentYear = today.getFullYear();
+                $('#monthSelect').val(`${currentMonth}-${currentYear}`);
+                fetchKPIData(currentMonth, currentYear, currentSelectedDM);
+
+            } catch (error) {
                 console.error("Failed to load essential common data:", error);
-                showAlertDialog("Failed to load essential data. Please refresh the page and verify Google Sheet URL and publishing settings.");
-            });
+                showAlertDialog("Failed to load essential data. Please refresh the page and verify Google Sheet URL and publishing settings.", 'error');
+            }
         }
 
         // Tab switching logic
@@ -2420,6 +2193,7 @@
             }
 
             // Call specific initialization functions when a tab is opened
+            // These functions will now rely on currentSelectedDM
             if (tabName === 'kpi-dashboard') initKpiDashboard();
             else if (tabName === 'daily-report') initDailyReportDashboard();
             else if (tabName === 'lists-dashboard') initListsDashboard();
@@ -2540,6 +2314,76 @@
             return date.toISOString().split('T')[0];
         }
 
+        // --- Centralized Data Processing for Medical Reps and DMs ---
+        function processMedicalRepsAndDMs(googleSheetData) {
+            allMedicalRepsData = {}; // Reset
+            requests_districtManagers.clear();
+            requests_medicalRepsByDM.clear();
+            requests_areasByMedRep.clear();
+
+            googleSheetData.forEach(row => {
+                const repName = row['medical rep']?.trim();
+                const area = row['area']?.trim() || 'N/A';
+                const targetVisitsPerHCP = parseInt(row['T.V'], 10) || 0;
+                const hcpName = row['HCPS']?.trim();
+                let hcpClass = row['Class']?.trim().toUpperCase();
+                const districtManager = row['District Manager']?.trim() || 'N/A';
+
+                if (repName && repName.includes("الجيزة")) return; // Skip specific reps
+
+                // Populate allMedicalRepsData (for KPI calculations)
+                if (repName) {
+                    if (!allMedicalRepsData[repName]) {
+                        allMedicalRepsData[repName] = {
+                            area: area,
+                            totalHCPs: 0,
+                            totalHCPs_AB: 0,
+                            totalHCPs_UPA_Private: 0,
+                            targetVisitsPerHCP: 0,
+                            targetVisits_AB: 0,
+                            targetVisits_UPA_Private: 0,
+                            hcps: [],
+                            hcps_AB: [],
+                            hcps_UPA_Private: [],
+                            districtManager: districtManager
+                        };
+                    }
+                    if (hcpName) {
+                        allMedicalRepsData[repName].totalHCPs++;
+                        allMedicalRepsData[repName].hcps.push({ name: hcpName, class: hcpClass, target_visits: targetVisitsPerHCP });
+                        
+                        if (['A', 'B'].includes(hcpClass)) {
+                            allMedicalRepsData[repName].totalHCPs_AB++;
+                            allMedicalRepsData[repName].hcps_AB.push({ name: hcpName, target_visits: targetVisitsPerHCP });
+                            allMedicalRepsData[repName].targetVisits_AB += targetVisitsPerHCP;
+                        } else if (['UPA', 'PRIVATE'].includes(hcpClass)) {
+                            allMedicalRepsData[repName].totalHCPs_UPA_Private++;
+                            allMedicalRepsData[repName].hcps_UPA_Private.push({ name: hcpName, target_visits: targetVisitsPerHCP });
+                            allMedicalRepsData[repName].targetVisits_UPA_Private += targetVisitsPerHCP;
+                        }
+                    }
+                    allMedicalRepsData[repName].targetVisitsPerHCP += targetVisitsPerHCP;
+                }
+
+                // Populate requests_districtManagers, requests_medicalRepsByDM, requests_areasByMedRep
+                if (districtManager !== 'N/A') {
+                    requests_districtManagers.add(districtManager);
+                }
+                if (districtManager && repName) {
+                    if (!requests_medicalRepsByDM.has(districtManager)) {
+                        requests_medicalRepsByDM.set(districtManager, new Set());
+                    }
+                    requests_medicalRepsByDM.get(districtManager).add(repName);
+                }
+                if (repName && area && area !== 'N/A') { 
+                    if (!requests_areasByMedRep.has(repName)) {
+                        requests_areasByMedRep.set(repName, new Set());
+                    }
+                    requests_areasByMedRep.get(repName).add(area);
+                }
+            });
+        }
+
         // --- KPI Dashboard Functions ---
         async function initKpiDashboard() {
             setupMonthDropdown();
@@ -2548,39 +2392,41 @@
             // KPI Dashboard listeners
             $('#monthSelect').off('change').on('change', function() {
                 const [month, year] = $(this).val().split('-').map(Number);
-                const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
-                fetchKPIData(month, year, selectedKpiDm);
+                fetchKPIData(month, year, currentSelectedDM);
                 $('#visitsTableContainer').hide(); // Hide on filter change
-                $('#selectedRepName').text('');
-                currentVisitsTableView = 'normal';
-                $('#leavesFilterOptions').hide();
+                $('#selectedRepName').text(''); // Clear selected rep name
+                currentVisitsTableView = 'normal'; // Reset KPI table view
+                $('#leavesFilterOptions').hide(); // Hide KPI leaves filter options
                 $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
             });
 
             $('#syncKpiData').off('click').on('click', function() {
                 const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
-                fetchKPIData(month, year, selectedKpiDm);
+                fetchKPIData(month, year, currentSelectedDM);
                 showAlertDialog('Refreshing KPI data...');
                 $('#visitsTableContainer').hide(); // Hide on sync button click
-                $('#selectedRepName').text('');
+                $('#selectedRepName').text(''); // Clear selected rep name
                 currentVisitsTableView = 'normal';
                 $('#leavesFilterOptions').hide();
                 $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
             });
             
             $('#kpiDistrictManagerSelect').off('change').on('change', function() {
+                currentSelectedDM = $(this).val(); // Update global DM filter
                 const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                const selectedKpiDm = $(this).val();
-                fetchKPIData(month, year, selectedKpiDm);
+                fetchKPIData(month, year, currentSelectedDM);
                 $('#visitsTableContainer').hide(); // Hide on filter change
-                $('#selectedRepName').text('');
+                $('#selectedRepName').text(''); // Clear selected rep name
                 currentVisitsTableView = 'normal';
                 $('#leavesFilterOptions').hide();
                 $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
-            });
 
-            // Removed excelButton listener as per request
+                // Trigger updates in other dashboards
+                updateDailyReportFilters();
+                updateListsFilters();
+                updateRequestsFilters();
+                updateWeeklyPlanFilters();
+            });
 
             $('#leavesButton').off('click').on('click', function() {
                 currentVisitsTableView = 'leaves';
@@ -2652,9 +2498,7 @@
                 exportToExcel(tableData, repName + '_visits_overview', currentVisitsTableView);
             });
 
-            $('#printVisits').off('click').on('click', function() {
-                printVisitsTable();
-            });
+            $('#printVisits').off('click').on('click', printVisitsTable);
             
             // Single click to open/toggle visibility of the visits table
             $(document).off('click', '#kpi-dashboard .rep-name').on('click', '#kpi-dashboard .rep-name', function() {
@@ -2672,7 +2516,7 @@
                 // Otherwise, open/refresh the table for this rep
                 $('#selectedRepName').html(`(${repName})`);
                 sessionStorage.setItem('selectedMedicalRep', repName);
-                sessionStorage.setItem('selectedDistrictManager', selectedDm);
+                sessionStorage.setItem('selectedDistrictManager', selectedDm); // Store selected DM for the rep
                 currentVisitsTableView = 'normal';
                 $('#leavesFilterOptions').hide();
 
@@ -2761,7 +2605,7 @@
 
                 try {
                     const { data: visitToArchive, error: fetchError } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .select('*')
                         .eq('id', visitId)
                         .single();
@@ -2781,7 +2625,7 @@
                     if (archiveError) throw archiveError;
 
                     const { error: deleteError } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .delete()
                         .eq('id', visitId);
 
@@ -2790,8 +2634,7 @@
                     row.remove();
                     showAlertDialog('Visit archived successfully!', 'success');
                     const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                    const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
-                    fetchKPIData(month, year, selectedKpiDm);
+                    fetchKPIData(month, year, currentSelectedDM);
                 } catch (error) {
                     console.error('Error archiving visit:', error);
                     showAlertDialog('An error occurred while archiving the visit: ' + error.message, 'error');
@@ -2820,7 +2663,7 @@
                     }
 
                     const { error: restoreError } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .insert([visitToRestoreForActive]);
 
                     if (restoreError) throw restoreError;
@@ -2835,8 +2678,7 @@
                     row.remove();
                     showAlertDialog('Visit restored successfully!', 'success');
                     const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                    const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
-                    fetchKPIData(month, year, selectedKpiDm);
+                    fetchKPIData(month, year, currentSelectedDM);
                     displayArchivedVisits();
                 } catch (error) {
                     console.error('Error restoring visit:', error);
@@ -2873,16 +2715,8 @@
             const currentYear = today.getFullYear();
             $('#monthSelect').val(`${currentMonth}-${currentYear}`);
             
-            let initialKpiDm = null;
-            if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                initialKpiDm = loggedInUserDM;
-                $('#kpiDistrictManagerSelect').val(loggedInUserDM).prop('disabled', true);
-            } else if (loggedInUserRole === 'admin') {
-                initialKpiDm = $('#kpiDistrictManagerSelect').val();
-                $('#kpiDistrictManagerSelect').prop('disabled', false);
-            }
-            
-            fetchKPIData(currentMonth, currentYear, initialKpiDm);
+            // Initial fetch for KPI data based on currentSelectedDM (which is initially empty for "All")
+            fetchKPIData(currentMonth, currentYear, currentSelectedDM);
         }
 
         function showKPILoading() {
@@ -2919,104 +2753,14 @@
             $('#visitsTable tbody').empty();
         }
 
-        async function fetchMedicalRepsData() {
-            try {
-                if (allGoogleSheetData.length === 0) {
-                     const response = await fetch(GOOGLE_SHEET_URL);
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch medical reps data from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
-                    }
-                    const csvText = await response.text();
-                    allGoogleSheetData = parseCSV(csvText);
-                }
-                return processMedicalRepsData(allGoogleSheetData);
-            } catch (error) {
-                console.error('Error fetching medical reps data:', error);
-                throw error;
-            }
-        }
-
-        function processMedicalRepsData(googleSheetData) {
-            const data = {};
-            const districtManagers = new Set();
-            const allMedicalReps = new Set();
-
-            googleSheetData.forEach(row => {
-                const repName = row['medical rep'];
-                const area = row['area']?.trim() || 'N/A';
-                const targetVisitsPerHCP = parseInt(row['T.V'], 10) || 0;
-                const hcpName = row['HCPS'];
-                let hcpClass = row['Class'];
-
-                const districtManager = row['District Manager'] || 'N/A';
-
-                hcpClass = hcpClass ? hcpClass.trim().toUpperCase() : '';
-
-                if (repName && repName.includes("الجيزة")) return;
-
-                if (repName) {
-                    if (!data[repName]) {
-                        data[repName] = {
-                            area: area,
-                            totalHCPs: 0,
-                            totalHCPs_AB: 0,
-                            totalHCPs_UPA_Private: 0,
-                            targetVisitsPerHCP: 0,
-                            targetVisits_AB: 0,
-                            targetVisits_UPA_Private: 0,
-                            hcps: [],
-                            hcps_AB: [],
-                            hcps_UPA_Private: [],
-                            districtManager: districtManager
-                        };
-                    }
-                    if (hcpName && hcpName.trim() !== '') {
-                        data[repName].totalHCPs++;
-                        data[repName].hcps.push({ name: hcpName, class: hcpClass, target_visits: targetVisitsPerHCP });
-                        
-                        if (['A', 'B'].includes(hcpClass)) {
-                            data[repName].totalHCPs_AB++;
-                            data[repName].hcps_AB.push({ name: hcpName, target_visits: targetVisitsPerHCP });
-                            data[repName].targetVisits_AB += targetVisitsPerHCP;
-                        } else if (['UPA', 'PRIVATE'].includes(hcpClass)) {
-                            data[repName].totalHCPs_UPA_Private++;
-                            data[repName].hcps_UPA_Private.push({ name: hcpName, target_visits: targetVisitsPerHCP });
-                            data[repName].targetVisits_UPA_Private += targetVisitsPerHCP;
-                        }
-                    }
-                    data[repName].targetVisitsPerHCP += targetVisitsPerHCP;
-                    if (districtManager !== 'N/A') {
-                        districtManagers.add(districtManager);
-                    }
-                    allMedicalReps.add({ name: repName, dm: districtManager });
-                }
-            });
-            medicalRepsForDailyReport = Array.from(allMedicalReps);
-            allMedicalRepsData = data;
-            return { processedData: data, districtManagers: Array.from(districtManagers).sort() };
-        }
-
         function populateKpiDistrictManagers() {
             const kpiDmSelect = $('#kpiDistrictManagerSelect');
             kpiDmSelect.empty();
             kpiDmSelect.append($('<option>', { value: '', text: 'All District Managers' }));
 
-            const uniqueDMs = new Set();
-            allGoogleSheetData.forEach(row => {
-                if (row['District Manager']) {
-                    uniqueDMs.add(row['District Manager'].trim());
-                }
-            });
-            Array.from(uniqueDMs).sort().forEach(dm => {
+            Array.from(requests_districtManagers).sort().forEach(dm => {
                 kpiDmSelect.append($('<option>', { value: dm, text: dm }));
             });
-
-            // Set the selected value based on loggedInUserDM
-            if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                kpiDmSelect.val(loggedInUserDM).prop('disabled', true);
-            } else if (loggedInUserRole === 'admin') {
-                kpiDmSelect.prop('disabled', false);
-            }
         }
 
         /**
@@ -3062,26 +2806,21 @@
             }
         }
 
-        async function fetchKPIData(month, year, selectedKpiDm = null) {
+        async function fetchKPIData(month, year, selectedKpiDm = '') {
             showKPILoading();
             try {
-                const { processedData: medicalRepsProcessedData, districtManagers } = await fetchMedicalRepsData();
                 const visitsData = await fetchVisitsData(month, year); // This now fetches all data via pagination
 
                 const workingDaysMap = calculateUnifiedWorkingDays(visitsData, allGoogleSheetData, month, year);
-                const filteredVisitsData = filterRecentVisits(visitsData, medicalRepsProcessedData, month, year);
+                const filteredVisitsData = filterRecentVisits(visitsData, allMedicalRepsData, month, year);
 
-                let pmVisitsMetrics = calculateMetrics(medicalRepsProcessedData, filteredVisitsData, ['A', 'B']);
-                let amVisitsMetrics = calculateMetrics(medicalRepsProcessedData, filteredVisitsData, ['UPA', 'PRIVATE']);
+                let pmVisitsMetrics = calculateMetrics(allMedicalRepsData, filteredVisitsData, ['A', 'B']);
+                let amVisitsMetrics = calculateMetrics(allMedicalRepsData, filteredVisitsData, ['UPA', 'PRIVATE']);
 
-                if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                    pmVisitsMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === loggedInUserDM);
-                    amVisitsMetrics = amVisitsMetrics.filter(metric => metric.districtManager === loggedInUserDM);
-                } else if (loggedInUserRole === 'admin' && selectedKpiDm) {
-                    if (selectedKpiDm !== '') {
-                        pmVisitsMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
-                        amVisitsMetrics = amVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
-                    }
+                // Filter by selected DM
+                if (selectedKpiDm) {
+                    pmVisitsMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
+                    amVisitsMetrics = amVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
                 }
 
                 pmVisitsMetrics.forEach(metric => {
@@ -3100,11 +2839,9 @@
                 $('.kpi-table-content').removeClass('active').hide();
                 $(`#${activeKpiTab}`).addClass('active').show();
 
-                populateDailyReportMedReps(); 
-
             } catch (error) {
                 console.error("Error in fetchKPIData:", error);
-                showAlertDialog('Error loading dashboard data. Please check console for details and verify Google Sheet URL/publishing settings.');
+                showAlertDialog('Error loading dashboard data. Please check console for details and verify Google Sheet URL/publishing settings.', 'error');
             }
         }
 
@@ -3118,7 +2855,7 @@
                 const repName = visit.medical_rep;
                 const isCurrentMonth = visitDate.getMonth() + 1 === selectedMonth && visitDate.getFullYear() === selectedYear;
                 const isHCPInMedicalReps = medicalRepsData[repName] && medicalRepsData[repName].hcps.some(hcp => hcp.name === hcpName);
-                return isCurrentMonth && isHCPInMedicalReps; // Corrected typo here
+                return isCurrentMonth && isHCPInMedicalReps;
             });
         }
 
@@ -3178,10 +2915,9 @@
 
             const result = [];
             for (const rep in metrics) {
-                const totalHCPCount = metrics[rep].totalHCPs; // Corrected to use totalHCPs from metrics[rep]
+                const totalHCPCount = metrics[rep].totalHCPs;
                 const uniqueHCPCount = metrics[rep].uniqueHCPs.size;
                 
-                // Fix for unvisitedHCPs: calculate directly
                 const unvisitedHCPs = totalHCPCount - uniqueHCPCount;
                 
                 const coverage = uniqueHCPCount;
@@ -3195,7 +2931,7 @@
                     repName: rep,
                     area: medicalRepsData[rep].area,
                     totalHCPCount,
-                    unvisitedHCPs, // Corrected
+                    unvisitedHCPs,
                     coverage,
                     coveragePercentage,
                     frequency,
@@ -3278,7 +3014,7 @@
 
             // Step 3: Get the number of working days (excluding leaves and full-day events)
             const workingDays = getWorkingDays(repName); 
-            
+
             // Step 4: Calculate the call rate
             let callRate;
             if (workingDays > 0) {
@@ -3454,7 +3190,7 @@
                                 ${tableType === 'normal' ? `<button class="archive-button" data-id="${item.id}" title="Archive Visit"><i class="fas fa-archive"></i></button>` : ''}
                                 ${tableType === 'archived' ? `
                                     <button class="restore-button" data-id="${item.id}" title="Restore Visit"><i class="fas fa-undo"></i></button>
-                                    ${loggedInUserRole === 'admin' ? `<button class="remove-archived-button" data-id="${item.id}" title="Remove Permanently"><i class="fas fa-trash-alt"></i></button>` : ''}
+                                    <button class="remove-archived-button" data-id="${item.id}" title="Remove Permanently"><i class="fas fa-trash-alt"></i></button>
                                 ` : ''}
                             </td>
                         </tr>
@@ -3553,8 +3289,6 @@
 
             return finalWorkingDays;
         }
-
-
 
         function calculateAverageVisits(metrics, visitsData, hcpClasses) {
             const selectedMonth = parseInt($('#monthSelect').val().split('-')[0]);
@@ -3666,7 +3400,7 @@
                     const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString();
                     const endDate = new Date(currentYear, currentMonth, 0).toISOString();
                     const { data, error } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .select('id, hcp_name, specialty, comments, created_at')
                         .eq('medical_rep', repName)
                         .gte('created_at', startDate)
@@ -3677,7 +3411,7 @@
                     const startDate = new Date(currentYear, 0, 1).toISOString();
                     const endDate = new Date(currentYear, 11, 31, 23, 59, 59, 999).toISOString();
                      const { data, error } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .select('id, hcp_name, specialty, comments, created_at')
                         .eq('medical_rep', repName)
                         .gte('created_at', startDate)
@@ -3734,13 +3468,9 @@
                 
                 let filteredArchivedData = allArchivedData;
 
-                if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                    const dmMedicalReps = new Set();
-                    allGoogleSheetData.forEach(row => {
-                        if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
-                            dmMedicalReps.add(row['medical rep']);
-                        }
-                    });
+                // Filter archived data by selected DM's reps if a DM is selected
+                if (currentSelectedDM) {
+                    const dmMedicalReps = requests_medicalRepsByDM.get(currentSelectedDM) || new Set();
                     filteredArchivedData = filteredArchivedData.filter(visit => dmMedicalReps.has(visit.medical_rep));
                 }
 
@@ -3783,38 +3513,9 @@
             printWindow.print();
         }
 
-        function setupMonthDropdown() {
-            const monthSelect = $('#monthSelect');
-            monthSelect.empty();
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            for (let i = 0; i < 12; i++) {
-                const date = new Date(currentYear, i, 1);
-                const monthName = date.toLocaleString('default', { month: 'long' });
-                const year = date.getFullYear();
-                const monthValue = `${date.getMonth() + 1}-${year}`;
-                monthSelect.append($('<option>', { value: monthValue, text: `${monthName} ${year}` }));
-            }
-            monthSelect.val(`${today.getMonth() + 1}-${currentYear}`);
-        }
-
-        function openKpiTab(evt, tabId) {
-            $('.kpi-table-content').hide().removeClass('active');
-            $('.kpi-tab-button').removeClass('active');
-            $(evt.currentTarget).addClass('active');
-            $(`#${tabId}`).show().addClass('active');
-
-            const kpiTabsContainer = $('.kpi-table-tabs');
-            if (tabId === 'am-visits-table') {
-                kpiTabsContainer.addClass('am-active');
-            } else {
-                kpiTabsContainer.removeClass('am-active');
-            }
-        }
-
         // --- Daily Report Functions ---
         function initDailyReportDashboard() {
-            populateDailyReportMedReps();
+            updateDailyReportFilters(); // Initial population based on currentSelectedDM
             setupDailyReportDateInput();
 
             $('#dailyMedRepSelect, #dailyStartDate').off('change').on('change', function() {
@@ -3842,25 +3543,28 @@
             });
         }
 
-        function populateDailyReportMedReps() {
+        function updateDailyReportFilters() {
             const medRepSelect = $('#dailyMedRepSelect');
             medRepSelect.empty().append($('<option>', { value: '', text: 'Select Medical Representative' }));
             
             let repsToPopulate = [];
-            if (loggedInUserRole === 'admin') {
-                repsToPopulate = medicalRepsForDailyReport;
-            } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                repsToPopulate = medicalRepsForDailyReport.filter(rep => rep.dm === loggedInUserDM);
+            if (currentSelectedDM) {
+                repsToPopulate = Array.from(requests_medicalRepsByDM.get(currentSelectedDM) || []);
+            } else {
+                // If no DM is selected, populate all reps from all DMs
+                requests_medicalRepsByDM.forEach(reps => {
+                    reps.forEach(rep => repsToPopulate.push(rep));
+                });
+                repsToPopulate = [...new Set(repsToPopulate)]; // Ensure unique reps
             }
 
-            const uniqueRepNames = new Set(repsToPopulate.map(rep => rep.name));
-
-            Array.from(uniqueRepNames).sort().forEach(repName => {
+            repsToPopulate.sort().forEach(repName => {
                 medRepSelect.append($('<option>', { value: repName, text: repName }));
             });
 
             // Set default selection to "Select Medical Representative"
             medRepSelect.val('');
+            clearDailyReportTable(); // Clear table when filter changes
         }
 
         function setupDailyReportDateInput() {
@@ -4083,17 +3787,17 @@
 
                         let addedToPharmacy = false;
                         if (isPharmacySpecialty && !dailyPharmacyActivitiesHCPs.has(hcpName)) {
-                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmSpecialty));
+                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
                             dailyPharmacyActivitiesHCPs.add(hcpName);
                             addedToPharmacy = true;
                         }
 
                         if (isPmActivityEvent && !dailyPmActivitiesHCPs.has(hcpName)) {
-                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmSpecialty));
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
                             dailyPmActivitiesHCPs.add(hcpName);
                         } else if (!addedToAmActivities && !addedToAmDetails && !addedToPharmacy) {
                             if (hcpTargetVisits !== null && hcpTargetVisits !== 0 && !dailyPmActivitiesHCPs.has(hcpName)) {
-                                dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmSpecialty));
+                                dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
                                 dailyPmActivitiesHCPs.add(hcpName);
                             }
                         }
@@ -4309,21 +4013,23 @@
         
         // --- Lists Dashboard Functions ---
         async function initListsDashboard() {
-            if (allGoogleSheetData.length === 0) { 
-                const googleResponse = await fetch(GOOGLE_SHEET_URL);
-                if (!googleResponse.ok) {
-                    throw new Error('Failed to fetch Lists data from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
-                }
-                const data = await googleResponse.text();
-                allGoogleSheetData = parseCSV(data); 
-            }
-            listsGoogleData = allGoogleSheetData;
-
             // Hide content and show loading initially
             $('#listsContent').hide();
             $('#listsLoading').show();
 
             try {
+                // Ensure allGoogleSheetData is loaded
+                if (allGoogleSheetData.length === 0) {
+                    const googleResponse = await fetch(GOOGLE_SHEET_URL);
+                    if (!googleResponse.ok) {
+                        throw new Error('Failed to fetch Lists data from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
+                    }
+                    const data = await googleResponse.text();
+                    allGoogleSheetData = parseCSV(data); 
+                    processMedicalRepsAndDMs(allGoogleSheetData); // Reprocess if not already done
+                }
+                listsGoogleData = allGoogleSheetData;
+
                 let allSupabaseData = [];
                 let offset = 0;
                 let hasMore = true;
@@ -4345,6 +4051,7 @@
                 }
 
                 processListsData(listsGoogleData, allSupabaseData);
+                updateListsFilters(); // Populate based on currentSelectedDM
                 
                 $('#listsLoading').hide();
                 $('#listsContent').show();
@@ -4354,8 +4061,7 @@
                 $('#lists-dashboard #medicalReps').off('change').on('change', populateListsBricks);
                 $('#lists-dashboard #visitOptions, #lists-dashboard #dayFilter').off('change').on('change', updateListsCountDisplay);
                 $('#lists-dashboard #searchBox').off('input').on('input', searchListsTable);
-                // Removed initListsCustomSelect as we're using standard select
-                $('#bricksSelect').off('change').on('change', updateListsCountDisplay); // Listener for standard select
+                $('#bricksSelect').off('change').on('change', updateListsCountDisplay);
             }
             catch (error) {
                 $('#listsLoading').hide();
@@ -4364,20 +4070,35 @@
             }
         }
 
-        function processListsData(googleData, supabaseData) {
-            let medicalReps = [...new Set(googleData.map(row => row['medical rep']).filter(rep => rep && !/[\u0600-\u06FF]/.test(rep)))];
-            
-            if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                const dmReps = new Set();
-                googleData.forEach(row => {
-                    if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
-                        dmReps.add(row['medical rep']);
-                    }
-                });
-                medicalReps = medicalReps.filter(rep => dmReps.has(rep));
-            }
+        function updateListsFilters() {
+            const medRepSelect = $('#lists-dashboard #medicalReps');
+            medRepSelect.empty().append($('<option>', { value: '', text: 'Select Representative' }));
 
-            populateSelect('medicalReps', medicalReps, 'Select Representative');
+            let repsToPopulate = [];
+            if (currentSelectedDM) {
+                repsToPopulate = Array.from(requests_medicalRepsByDM.get(currentSelectedDM) || []);
+            } else {
+                requests_medicalRepsByDM.forEach(reps => {
+                    reps.forEach(rep => repsToPopulate.push(rep));
+                });
+                repsToPopulate = [...new Set(repsToPopulate)];
+            }
+            repsToPopulate.sort().forEach(repName => {
+                medRepSelect.append($('<option>', { value: repName, text: repName }));
+            });
+            medRepSelect.val(''); // Reset selection
+
+            // Also reset bricks and other filters
+            $('#lists-dashboard #bricksSelect').empty().append($('<option>', { value: '', text: 'Select Brick' }));
+            $('#lists-dashboard #visitOptions').val('');
+            $('#lists-dashboard #dayFilter').val('');
+            $('#lists-dashboard #searchBox').val('');
+            $('#lists-dashboard #hcpTable tbody').empty();
+            $('#lists-dashboard #hcpTable, #lists-dashboard #listsError, #lists-dashboard #countDisplay, #lists-dashboard #searchContainer').hide();
+        }
+
+        function processListsData(googleData, supabaseData) {
+            listsGoogleData = googleData; // Ensure this is the full data
             listsVisitCounts = {};
             const currentDate = new Date();
             listsCurrentMonthVisits = supabaseData.filter(visit => {
@@ -4404,14 +4125,11 @@
             updateListsCountDisplay();
         }
 
-        // Removed initListsCustomSelect as we're using standard select
-        // Removed toggleListsBrickSelection as we're using standard select
-
         function updateListsCountDisplay() {
             const selectedRep = $('#lists-dashboard #medicalReps').val();
             const selectedOption = $('#lists-dashboard #visitOptions').val();
             const selectedDay = $('#lists-dashboard #dayFilter').val();
-            const selectedBrick = $('#lists-dashboard #bricksSelect').val(); // Get selected brick from standard select
+            const selectedBrick = $('#lists-dashboard #bricksSelect').val();
             const countDisplay = $('#lists-dashboard #countDisplay');
 
             if (!selectedRep || !selectedOption) {
@@ -4423,7 +4141,7 @@
             let displayText = '';
             const filteredByDay = listsGoogleData.filter(row => 
                 row['medical rep'] === selectedRep &&
-                (selectedBrick === '' || row['Brick'] === selectedBrick) && // Filter by selected brick
+                (selectedBrick === '' || row['Brick'] === selectedBrick) &&
                 (selectedDay === '' || row[selectedDay]?.trim() !== '')
             );
 
@@ -4444,7 +4162,7 @@
             const selectedRep = $('#lists-dashboard #medicalReps').val();
             const selectedOption = $('#lists-dashboard #visitOptions').val();
             const selectedDay = $('#lists-dashboard #dayFilter').val();
-            const selectedBrick = $('#lists-dashboard #bricksSelect').val(); // Get selected brick from standard select
+            const selectedBrick = $('#lists-dashboard #bricksSelect').val();
             const listsErrorDiv = $('#lists-dashboard #listsError');
 
             if (!selectedRep || !selectedOption) {
@@ -4455,7 +4173,7 @@
             
             listsFilteredHCPs = listsGoogleData.filter(row => {
                 if (row['medical rep'] !== selectedRep) return false;
-                if (selectedBrick !== '' && row['Brick'] !== selectedBrick) return false; // Filter by selected brick
+                if (selectedBrick !== '' && row['Brick'] !== selectedBrick) return false;
                 if (selectedDay !== '' && !row[selectedDay]?.trim()) return false;
                 
                 if (selectedOption === 'unvisited') return !listsVisitCounts[row['HCPS']] || listsVisitCounts[row['HCPS']] === 0;
@@ -4516,7 +4234,6 @@
 
         function resetListsData() {
             $('#lists-dashboard #medicalReps, #lists-dashboard #visitOptions, #lists-dashboard #dayFilter, #lists-dashboard #bricksSelect').prop('selectedIndex', 0);
-            listsSelectedBricks = []; // Still keep this if needed for other logic, but not for direct select value
             $('#lists-dashboard #searchBox').val('');
             $('#lists-dashboard #hcpTable tbody').empty();
             $('#lists-dashboard #hcpTable, #lists-dashboard #listsError, #lists-dashboard #countDisplay, #lists-dashboard #searchContainer').hide();
@@ -4524,6 +4241,7 @@
         
         // --- Requests Management Dashboard Functions ---
         async function requests_initRequestsDashboard() {
+            // Ensure allGoogleSheetData is loaded
             if (allGoogleSheetData.length === 0) {
                 const response = await fetch(GOOGLE_SHEET_URL);
                 if (!response.ok) {
@@ -4531,32 +4249,8 @@
                 }
                 const data = await response.text();
                 allGoogleSheetData = parseCSV(data);
+                processMedicalRepsAndDMs(allGoogleSheetData); // Reprocess if not already done
             }
-            
-            requests_districtManagers.clear();
-            requests_medicalReps.clear();
-            requests_areasByMedRep.clear();
-
-            allGoogleSheetData.forEach(row => {
-                const districtManager = row['District Manager']?.trim();
-                const medRep = row['medical rep']?.trim();
-                const area = row['area']?.trim();
-
-                if (districtManager) requests_districtManagers.add(districtManager);
-
-                if (districtManager && medRep) {
-                    if (!requests_medicalReps.has(districtManager)) {
-                        requests_medicalReps.set(districtManager, new Set());
-                    }
-                    requests_medicalReps.get(districtManager).add(medRep);
-                }
-                if (medRep && area) { 
-                    if (!requests_areasByMedRep.has(medRep)) {
-                        requests_areasByMedRep.set(medRep, new Set());
-                    }
-                    requests_areasByMedRep.get(medRep).add(area);
-                }
-            });
             
             requests_populateDistrictManagers();
             await requests_fetchAllRequests();
@@ -4573,31 +4267,22 @@
             });
         }
 
+        function updateRequestsFilters() {
+            requests_populateDistrictManagers();
+            requests_filterMedicalRepsForRequests(); // This will also trigger filterRequests
+        }
+
         function requests_populateDistrictManagers() {
             const districtManagerSelect = document.getElementById("requests_districtManager");
-            districtManagerSelect.innerHTML = '';
+            districtManagerSelect.innerHTML = '<option value="">All District Managers</option>';
             
-            let dmsToDisplay = Array.from(requests_districtManagers).sort();
-
-            if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                dmsToDisplay = dmsToDisplay.filter(dm => dm === loggedInUserDM);
-                districtManagerSelect.disabled = true;
-            } else {
-                districtManagerSelect.disabled = false;
-                districtManagerSelect.innerHTML = '<option value="">Select District Manager</option>';
-            }
-
-            dmsToDisplay.forEach(manager => {
+            Array.from(requests_districtManagers).sort().forEach(manager => {
                 const option = document.createElement("option");
                 option.value = manager;
                 option.textContent = manager;
                 districtManagerSelect.appendChild(option);
             });
-
-            if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                districtManagerSelect.value = loggedInUserDM;
-            }
-            requests_filterMedicalRepsForRequests();
+            districtManagerSelect.value = currentSelectedDM; // Set to the globally selected DM
         }
 
         async function requests_fetchAllRequests() {
@@ -4627,11 +4312,6 @@
                 }
                 requests_allRequests = allRequests;
                 
-                if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                    const dmReps = requests_medicalReps.get(loggedInUserDM) || new Set();
-                    requests_allRequests = requests_allRequests.filter(req => dmReps.has(req.medRep));
-                }
-
                 document.getElementById("requests_requestCount").textContent = requests_allRequests.length;
                 requests_filterRequests();
             } catch (error) {
@@ -4648,16 +4328,12 @@
             medRepSelect.innerHTML = '<option value="">Select Medical Rep</option>';
             
             let repsToPopulate = new Set();
-            if (loggedInUserRole === 'admin') {
-                if (districtManager) {
-                    repsToPopulate = requests_medicalReps.get(districtManager) || new Set();
-                } else {
-                    requests_medicalReps.forEach(reps => {
-                        reps.forEach(rep => repsToPopulate.add(rep));
-                    });
-                }
-            } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                repsToPopulate = requests_medicalReps.get(loggedInUserDM) || new Set();
+            if (districtManager) {
+                repsToPopulate = requests_medicalRepsByDM.get(districtManager) || new Set();
+            } else {
+                requests_medicalRepsByDM.forEach(reps => {
+                    reps.forEach(rep => repsToPopulate.add(rep));
+                });
             }
 
             Array.from(repsToPopulate).sort().forEach(rep => {
@@ -4686,7 +4362,7 @@
                     requests_areasByMedRep.get(selectedMedRep).forEach(area => areasToPopulate.add(area));
                 }
             } else if (districtManager) {
-                const repsUnderDM = requests_medicalReps.get(districtManager) || new Set();
+                const repsUnderDM = requests_medicalRepsByDM.get(districtManager) || new Set();
                 repsUnderDM.forEach(rep => {
                     if (requests_areasByMedRep.has(rep)) {
                         requests_areasByMedRep.get(rep).forEach(area => areasToPopulate.add(area));
@@ -4717,11 +4393,9 @@
 
             let filteredData = requests_allRequests;
 
-            if (loggedInUserRole === 'admin') {
-                if (districtManager) {
-                    const repsForSelectedDM = requests_medicalReps.get(districtManager) || new Set();
-                    filteredData = filteredData.filter(req => repsForSelectedDM.has(req.medRep));
-                }
+            if (districtManager) {
+                const repsForSelectedDM = requests_medicalRepsByDM.get(districtManager) || new Set();
+                filteredData = filteredData.filter(req => repsForSelectedDM.has(req.medRep));
             }
 
             if (medRep) {
@@ -4849,7 +4523,7 @@
                             </select>
                         </div>
                         <div class="request-card-actions">
-                            ${loggedInUserRole === 'admin' ? `<button class="delete-request-button" data-id="${req.id}" title="Delete Request"><i class="fas fa-trash"></i></button>` : ''}
+                            <button class="delete-request-button" data-id="${req.id}" title="Delete Request"><i class="fas fa-trash"></i></button>
                             <button class="email-request-button" data-id="${req.id}" title="Email Request"><i class="fas fa-envelope"></i></button>
                         </div>
                     `;
@@ -4962,6 +4636,7 @@ Thank you.`;
         async function initWeeklyPlanDashboard() {
             // Fetch medical reps for weekly plan dropdown
             try {
+                // Ensure allGoogleSheetData is loaded
                 if (allGoogleSheetData.length === 0) {
                     const response = await fetch(GOOGLE_SHEET_URL);
                     if (!response.ok) {
@@ -4969,22 +4644,10 @@ Thank you.`;
                     }
                     const csvText = await response.text();
                     allGoogleSheetData = parseCSV(csvText);
+                    processMedicalRepsAndDMs(allGoogleSheetData); // Reprocess if not already done
                 }
 
-                let medicalReps = [...new Set(allGoogleSheetData.map(row => row['medical rep']).filter(Boolean))];
-                
-                // Filter medical reps based on logged-in DM
-                if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                    const dmReps = new Set();
-                    allGoogleSheetData.forEach(row => {
-                        if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
-                            dmReps.add(row['medical rep']);
-                        }
-                    });
-                    medicalReps = medicalReps.filter(rep => dmReps.has(rep));
-                }
-
-                populateSelect('weeklyPlanMedicalReps', medicalReps, 'Select a Medical Rep');
+                updateWeeklyPlanFilters(); // Populate based on currentSelectedDM
                 setDefaultWeeklyPlanDateRange();
                 $('#weeklyPlanLoading').hide();
             } catch (error) {
@@ -5031,6 +4694,28 @@ Thank you.`;
                     clearWeeklyPlanSelection();
                 }
             });
+        }
+
+        function updateWeeklyPlanFilters() {
+            const medRepSelect = $('#weeklyPlanMedicalReps');
+            medRepSelect.empty().append($('<option>', { value: '', text: 'Select a Medical Rep' }));
+
+            let repsToPopulate = [];
+            if (currentSelectedDM) {
+                repsToPopulate = Array.from(requests_medicalRepsByDM.get(currentSelectedDM) || []);
+            } else {
+                requests_medicalRepsByDM.forEach(reps => {
+                    reps.forEach(rep => repsToPopulate.push(rep));
+                });
+                repsToPopulate = [...new Set(repsToPopulate)];
+            }
+            repsToPopulate.sort().forEach(repName => {
+                medRepSelect.append($('<option>', { value: repName, text: repName }));
+            });
+            medRepSelect.val(''); // Reset selection
+            document.getElementById('weeklyPlanContent').style.display = 'none';
+            clearWeeklyPlanSelection();
+            renderWeeklyPlan(); // Render empty tables
         }
 
         // Retrieve weekly plan from Supabase
@@ -5374,25 +5059,7 @@ Thank you.`;
 
         // --- Document Ready / Initial Load ---
         $(document).ready(function() {
-            // Remove login page elements and related functions
-            $('#login-page').remove();
-            $('#dashboard-content').show();
-
-            // IMPORTANT: Ensure this variable is correctly set in your index.html
-            // This `loggedInUsernameFromParent` variable should hold the name of the
-            // logged-in District Manager (e.g., "Taha Mohamed") or "admin" if it's an admin.
-            // If it's not set or is undefined, it will default to 'admin' for testing.
-            // Example for a District Manager: window.loggedInUsernameFromParent = "Taha Mohamed";
-            // Example for an Admin: window.loggedInUsernameFromParent = "admin";
-            const loggedInUsername = window.loggedInUsernameFromParent || 'admin'; // Default to 'admin' for testing if not set
-
-            // First, fetch all Google Sheet data to determine roles and populate DMs/Reps
-            fetchMedicalRepsData().then(() => {
-                initializeCommonDashboard(loggedInUsername);
-            }).catch(error => {
-                console.error("Initial data fetch failed:", error);
-                showAlertDialog("Failed to load initial data. Please check console for details.", "error");
-            });
+            initializeDashboard();
         });
     </script>
 </body>
