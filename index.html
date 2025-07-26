@@ -838,7 +838,7 @@
                     <div class="main-card-title">Admin Panel</div>
                     <div class="main-card-subtitle">Manage users and system settings.</div>
                 </div>
-                <!-- Master List Card - New card, only for admin -->
+                <!-- Master List Card - New card, now for admin and District Manager -->
                 <div id="masterListCard" class="main-card" data-page="master-list">
                     <div class="main-card-icon">📋</div>
                     <div class="main-card-title">Master List</div>
@@ -1241,9 +1241,9 @@
                         // Master List card is visible by default for admin.
                         break;
                     case 'District Manager':
-                        // District Managers cannot access the admin panel or Master List.
+                        // District Managers cannot access the admin panel.
                         if (adminCard) adminCard.classList.add('hidden'); // Hide the admin card in the grid
-                        if (masterListCard) masterListCard.classList.add('hidden'); // Hide Master List card
+                        // Master List card remains visible for District Managers
                         break;
                     case 'Medical Representative':
                         // Medical Representatives cannot access admin, Dashboard, or Master List.
@@ -1510,7 +1510,7 @@
                 loadingOverlay.classList.remove('show'); // Hide spinner
                 errorState.classList.remove('show');     // Hide error
 
-                // Send a postMessage to the iframe if a user is logged in and it's CRM or Dashboard
+                // Send a postMessage to the iframe if a user is logged in and it's CRM or Dashboard or Master List
                 // The demo content is now always hidden if the iframe loads successfully.
                 if (loggedInUser && (page === 'crm' || page === 'dashboard' || page === 'master-list')) { // Added master-list here
                     console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
