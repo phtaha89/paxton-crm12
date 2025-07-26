@@ -541,6 +541,10 @@
             <button id="exportBtn" class="action-button" title="Export Filtered Data to XLSX">
                 <i class="fas fa-file-excel"></i> Export
             </button>
+            <!-- New Edit List Button -->
+            <button id="editListBtn" class="action-button" title="Edit Current List" style="display: none;">
+                <i class="fas fa-edit"></i> Edit List
+            </button>
         </div>
 
         <div class="stats-bar">
@@ -678,12 +682,17 @@
     <script>
         // URL for the Google Sheet CSV export
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+        // URL for the Google Sheet to edit
+        const EDIT_LIST_URL = 'https://docs.google.com/spreadsheets/d/1ODMCJBT6YAzCF5GAx3JVqR8o9tghTO9OkD2E6z2Y0xA/edit?gid=0#gid=0';
         
         let hcpData = []; // This will store the fetched and parsed data
         let filteredData = []; // This will store the currently filtered data
         let loggedInUser = null; // To store the user data received from the parent window
 
         const loadingOverlay = document.getElementById('loadingOverlay');
+        const districtFilterSelect = document.getElementById('districtFilter');
+        const editListButton = document.getElementById('editListBtn');
+
 
         /**
          * Shows the loading overlay.
@@ -906,6 +915,7 @@
             renderTable();
             updateStats();
             setupEventListeners();
+            toggleEditListButtonVisibility(); // Call this initially
         }
 
         /**
@@ -1069,6 +1079,7 @@
             updateStats();
             // Re-populate the other filters based on the new filteredData
             populateFilters(); 
+            toggleEditListButtonVisibility(); // Call this after filtering
         }
 
         /**
@@ -1283,13 +1294,24 @@
             XLSX.writeFile(wb, "filtered_hcp_data.xlsx");
         }
 
+        /**
+         * Toggles the visibility of the "Edit List" button.
+         * The button is visible only when "All District Managers" is selected in the district filter.
+         */
+        function toggleEditListButtonVisibility() {
+            if (districtFilterSelect.value === '') { // '' corresponds to "All District Managers"
+                editListButton.style.display = 'flex'; // Show the button
+            } else {
+                editListButton.style.display = 'none'; // Hide the button
+            }
+        }
 
         /**
          * Sets up all event listeners for filters, search, and modal interactions.
          */
         function setupEventListeners() {
             // Filter event listeners
-            document.getElementById('districtFilter').addEventListener('change', filterData);
+            districtFilterSelect.addEventListener('change', filterData);
             document.getElementById('repFilter').addEventListener('change', filterData);
             document.getElementById('areaFilter').addEventListener('change', filterData);
             document.getElementById('specialtyFilter').addEventListener('change', filterData);
@@ -1304,7 +1326,11 @@
 
             // Add event listeners for new buttons
             document.getElementById('printBtn').addEventListener('click', printTable);
-            document.getElementById('exportBtn').addEventListener('click', exportToXLSX); // Changed to exportToXLSX
+            document.getElementById('exportBtn').addEventListener('click', exportToXLSX); 
+            // Add event listener for the new "Edit List" button
+            editListButton.addEventListener('click', () => {
+                window.open(EDIT_LIST_URL, '_blank'); // Open the Google Sheet in a new tab
+            });
 
 
             // Modal event listeners
