@@ -2339,12 +2339,13 @@
         // --- Common Dashboard Initialization ---
         function initializeCommonDashboard(loggedInUsernameFromIndex) {
             // Determine user role and DM based on the provided username
-            const userInSupabase = allGoogleSheetData.find(row => row['District Manager'] === loggedInUsernameFromIndex);
+            // Ensure both sides of the comparison are trimmed to avoid issues with whitespace
+            const userInSupabase = allGoogleSheetData.find(row => row['District Manager']?.trim() === loggedInUsernameFromIndex?.trim());
             
             if (userInSupabase) {
                 loggedInUserDM = loggedInUsernameFromIndex;
                 loggedInUserRole = 'District Manager'; // Assume DM if found in Google Sheet
-            } else if (loggedInUsernameFromIndex.toLowerCase() === 'admin') { // Check for admin explicitly
+            } else if (loggedInUsernameFromIndex?.toLowerCase() === 'admin') { // Check for admin explicitly
                 loggedInUserDM = 'admin'; // Or any identifier for admin
                 loggedInUserRole = 'admin';
             } else {
@@ -2354,6 +2355,9 @@
                 loggedInUserRole = 'guest'; // Assign a guest role for restricted access
                 loggedInUserDM = loggedInUsernameFromIndex;
             }
+
+            console.log(`Dashboard initialized for user: ${loggedInUsernameFromIndex}, Role: ${loggedInUserRole}, DM: ${loggedInUserDM}`);
+
 
             $('#loggedInUsernameDisplay').text(loggedInUserDM);
             
@@ -4079,17 +4083,17 @@
 
                         let addedToPharmacy = false;
                         if (isPharmacySpecialty && !dailyPharmacyActivitiesHCPs.has(hcpName)) {
-                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmSpecialty));
                             dailyPharmacyActivitiesHCPs.add(hcpName);
                             addedToPharmacy = true;
                         }
 
                         if (isPmActivityEvent && !dailyPmActivitiesHCPs.has(hcpName)) {
-                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmSpecialty));
                             dailyPmActivitiesHCPs.add(hcpName);
                         } else if (!addedToAmActivities && !addedToAmDetails && !addedToPharmacy) {
                             if (hcpTargetVisits !== null && hcpTargetVisits !== 0 && !dailyPmActivitiesHCPs.has(hcpName)) {
-                                dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                                dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmSpecialty));
                                 dailyPmActivitiesHCPs.add(hcpName);
                             }
                         }
@@ -5374,20 +5378,13 @@ Thank you.`;
             $('#login-page').remove();
             $('#dashboard-content').show();
 
-            // Simulate receiving the logged-in username from the parent index.html
-            // For demonstration, let's use a placeholder. In your actual index.html,
-            // you would replace this with a mechanism to pass the username.
-            // For example, if you have a global JS variable `loggedInUsernameFromParent`
-            // set in index.html, you would use:
-            // const loggedInUsername = window.loggedInUsernameFromParent || 'defaultUser';
-            
-            // For testing, you can uncomment one of these lines:
-            // const loggedInUsername = "Ahmed Ali"; // Example for a District Manager
-            // const loggedInUsername = "admin"; // Example for an Admin
-
-            // IMPORTANT: Replace this with the actual way you receive the username from index.html
-            // For example, if index.html sets a global variable:
-            const loggedInUsername = window.loggedInUsernameFromParent || 'admin'; // Default to 'admin' for testing
+            // IMPORTANT: Ensure this variable is correctly set in your index.html
+            // This `loggedInUsernameFromParent` variable should hold the name of the
+            // logged-in District Manager (e.g., "Taha Mohamed") or "admin" if it's an admin.
+            // If it's not set or is undefined, it will default to 'admin' for testing.
+            // Example for a District Manager: window.loggedInUsernameFromParent = "Taha Mohamed";
+            // Example for an Admin: window.loggedInUsernameFromParent = "admin";
+            const loggedInUsername = window.loggedInUsernameFromParent || 'admin'; // Default to 'admin' for testing if not set
 
             // First, fetch all Google Sheet data to determine roles and populate DMs/Reps
             fetchMedicalRepsData().then(() => {
@@ -5398,6 +5395,5 @@ Thank you.`;
             });
         });
     </script>
-
 </body>
 </html>
