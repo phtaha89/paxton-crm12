@@ -2784,25 +2784,30 @@
         }
 
         function populateKpiDistrictManagers() {
-            const kpiDmSelect = $('#kpiDistrictManagerSelect');
-            kpiDmSelect.empty();
-            kpiDmSelect.append($('<option>', { value: '', text: 'All District Managers' }));
+    const kpiDmSelect = $('#kpiDistrictManagerSelect');
+    kpiDmSelect.empty();
 
-            Array.from(requests_districtManagers).sort().forEach(dm => {
-                kpiDmSelect.append($('<option>', { value: dm, text: dm }));
-            });
+    if (loggedInUser && loggedInUser.title === 'District Manager' && loggedInUser.username) {
+        // If the logged-in user is a District Manager, only show their name
+        kpiDmSelect.append($('<option>', { value: loggedInUser.username, text: loggedInUser.username }));
+        kpiDmSelect.val(loggedInUser.username);
+        kpiDmSelect.prop('disabled', true); // Disable dropdown for DMs
+        currentSelectedDM = loggedInUser.username; // Set global DM filter
+    } else if (loggedInUser && loggedInUser.title === 'Medical Representative') {
+        // If Medical Rep, hide the entire DM filter
+        $('#kpiDmFilterContainer').hide();
+        currentSelectedDM = ''; // Ensure no DM filter is applied for MRs
+    } else {
+        // For Admin or other roles, allow "All District Managers" and keep enabled
+        kpiDmSelect.append($('<option>', { value: '', text: 'All District Managers' }));
+        Array.from(requests_districtManagers).sort().forEach(dm => {
+            kpiDmSelect.append($('<option>', { value: dm, text: dm }));
+        });
+        kpiDmSelect.prop('disabled', false); // Enable for Admin or other roles
+        currentSelectedDM = ''; // Default to "All District Managers"
+    }
+}
 
-            // Apply loggedInUser filter if available
-            if (loggedInUser && loggedInUser.title === 'District Manager' && loggedInUser.username) {
-                kpiDmSelect.val(loggedInUser.username);
-                kpiDmSelect.prop('disabled', true); // Disable dropdown for DMs
-            } else if (loggedInUser && loggedInUser.title === 'Medical Representative') {
-                // If Medical Rep, hide the entire DM filter container
-                $('#kpiDmFilterContainer').hide();
-            } else {
-                kpiDmSelect.prop('disabled', false); // Enable for Admin or other roles
-            }
-        }
 
         /**
          * Fetches visits data from Supabase with pagination.
@@ -4436,69 +4441,75 @@
         }
 
         function requests_filterRequests() {
-            const districtManager = document.getElementById("requests_districtManager").value;
-            const medRep = document.getElementById("requests_medRepFilter").value;
-            const area = document.getElementById("requests_areaFilter").value; 
-            const status = document.getElementById("requests_statusFilter").value;
-            const requestType = document.getElementById("requests_requestTypeFilter").value;
-            const searchTerm = document.getElementById("requests_searchBox").value.toLowerCase();
+    const districtManager = document.getElementById("requests_districtManager").value;
+    const medRep = document.getElementById("requests_medRepFilter").value;
+    const area = document.getElementById("requests_areaFilter").value;
+    const status = document.getElementById("requests_statusFilter").value;
+    const requestType = document.getElementById("requests_requestTypeFilter").value;
+    const searchTerm = document.getElementById("requests_searchBox").value.toLowerCase();
 
-            let filteredData = requests_allRequests;
+    let filteredData = requests_allRequests;
 
-            if (districtManager) {
-                const repsForSelectedDM = requests_medicalRepsByDM.get(districtManager) || new Set();
-                filteredData = filteredData.filter(req => repsForSelectedDM.has(req.medRep));
-            }
+    // Filter by logged-in user's role
+    if (loggedInUser && loggedInUser.title === 'District Manager') {
+        const repsForSelectedDM = requests_medicalRepsByDM.get(loggedInUser.username) || new Set();
+        filteredData = filteredData.filter(req => repsForSelectedDM.has(req.medRep));
+    }
 
-            if (medRep) {
-                filteredData = filteredData.filter(req => req.medRep === medRep);
-            }
+    // Apply additional filters if they are set
+    if (districtManager) {
+        const repsForSelectedDM = requests_medicalRepsByDM.get(districtManager) || new Set();
+        filteredData = filteredData.filter(req => repsForSelectedDM.has(req.medRep));
+    }
 
-            if (area) { 
-                filteredData = filteredData.filter(req => req.area === area);
-            }
+    if (medRep) {
+        filteredData = filteredData.filter(req => req.medRep === medRep);
+    }
 
-            if (status) {
-                filteredData = filteredData.filter(req => req.status === status);
-            }
+    if (area) {
+        filteredData = filteredData.filter(req => req.area === area);
+    }
 
-            if (requestType) {
-                if (requestType.toLowerCase() === 'personal') {
-                    filteredData = filteredData.filter(req => req.customerType?.toLowerCase() === 'personal');
-                } else if (requestType.toLowerCase() === 'customer') {
-                    filteredData = filteredData.filter(req => req.customerType?.toLowerCase() !== 'personal');
-                }
-            }
+    if (status) {
+        filteredData = filteredData.filter(req => req.status === status);
+    }
 
-            if (searchTerm) {
-                filteredData = filteredData.filter(req =>
-                    req.medRep?.toLowerCase().includes(searchTerm) ||
-                    req.customerName?.toLowerCase().includes(searchTerm) ||
-                    req.requestTitle?.toLowerCase().includes(searchTerm) ||
-                    req.requestDetails?.toLowerCase().includes(searchTerm) ||
-                    req.area?.toLowerCase().includes(searchTerm) ||
-                    req.status?.toLowerCase().includes(searchTerm) ||
-                    req.customerType?.toLowerCase().includes(searchTerm)
-                );
-            }
-
-            const sortedData = filteredData.sort((a, b) => {
-                const dateA = new Date(a.date).getTime();
-                const dateB = new Date(b.date).getTime();
-                const statusOrder = { "Requested": 1, "Pending": 2, "Scheduled": 3, "Postponed": 4, "Approved": 5, "Done": 6, "Rejected": 7 };
-
-                const statusA = statusOrder[a.status] || 99;
-                const statusB = statusOrder[b.status] || 99;
-
-                if (statusA !== statusB) {
-                    return statusA - statusB;
-                }
-                return dateB - dateA;
-            });
-
-            document.getElementById("requests_filteredCount").textContent = sortedData.length;
-            requests_displayRequests(sortedData);
+    if (requestType) {
+        if (requestType.toLowerCase() === 'personal') {
+            filteredData = filteredData.filter(req => req.customerType?.toLowerCase() === 'personal');
+        } else if (requestType.toLowerCase() === 'customer') {
+            filteredData = filteredData.filter(req => req.customerType?.toLowerCase() !== 'personal');
         }
+    }
+
+    if (searchTerm) {
+        filteredData = filteredData.filter(req =>
+            req.medRep?.toLowerCase().includes(searchTerm) ||
+            req.customerName?.toLowerCase().includes(searchTerm) ||
+            req.requestTitle?.toLowerCase().includes(searchTerm) ||
+            req.requestDetails?.toLowerCase().includes(searchTerm) ||
+            req.area?.toLowerCase().includes(searchTerm) ||
+            req.status?.toLowerCase().includes(searchTerm) ||
+            req.customerType?.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    const sortedData = filteredData.sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        const statusOrder = { "Requested": 1, "Pending": 2, "Scheduled": 3, "Postponed": 4, "Approved": 5, "Done": 6, "Rejected": 7 };
+        const statusA = statusOrder[a.status] || 99;
+        const statusB = statusOrder[b.status] || 99;
+        if (statusA !== statusB) {
+            return statusA - statusB;
+        }
+        return dateB - dateA;
+    });
+
+    document.getElementById("requests_filteredCount").textContent = sortedData.length;
+    requests_displayRequests(sortedData);
+}
+
 
         function requests_displayRequests(data) {
             const requestDetailsDisplay = document.getElementById("requests_requestDetailsDisplay");
