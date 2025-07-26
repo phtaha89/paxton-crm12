@@ -2177,7 +2177,7 @@
                     kpiDmFilterContainer.hide();
                     currentSelectedDM = ''; // Ensure no DM filter is applied for MRs
                 } else {
-                    // For Admin or other roles, allow "All District Managers" and keep enabled
+                    // For admin or other roles, allow "All District Managers" and keep enabled
                     kpiDmSelect.val(''); 
                     kpiDmSelect.prop('disabled', false);
                     currentSelectedDM = ''; // Default to "All District Managers"
@@ -2627,49 +2627,42 @@
                 $('#searchInput').val('').trigger('input');
             });
 
-            $(document).off('click', '#kpi-dashboard .archive-button').on('click', '#kpi-dashboard .archive-button', async function() {
-                const row = $(this).closest('tr');
-                const visitId = $(this).data('id');
-                const confirmed = await showConfirmModal('Are you sure you want to archive this visit? It will be moved to archived records.');
-                if (!confirmed) return;
-
-                try {
-                    const { data: visitToArchive, error: fetchError } = await supabaseClient
-                        .from('healthcarepro_visits')
-                        .select('*')
-                        .eq('id', visitId)
-                        .single();
-
-                    if (fetchError) throw fetchError;
-                    if (!visitToArchive) throw new Error('Visit not found for archiving.');
-
-                    const visitToArchiveForArchive = { ...visitToArchive };
-                    if (visitToArchiveForArchive.visit_place === null || visitToArchiveForArchive.visit_place === undefined) {
-                        visitToArchiveForArchive.visit_place = '';
-                    }
-
-                    const { error: archiveError } = await supabaseClient
-                        .from('archived_visits')
-                        .insert([visitToArchiveForArchive]);
-
-                    if (archiveError) throw archiveError;
-
-                    const { error: deleteError } = await supabaseClient
-                        .from('healthcarepro_visits')
-                        .delete()
-                        .eq('id', visitId);
-
-                    if (deleteError) throw deleteError;
-
-                    row.remove();
-                    showAlertDialog('Visit archived successfully!', 'success');
-                    const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                    fetchKPIData(month, year, currentSelectedDM);
-                } catch (error) {
-                    console.error('Error archiving visit:', error);
-                    showAlertDialog('An error occurred while archiving the visit: ' + error.message, 'error');
-                }
-            });
+            Copy
+$(document).off('click', '#kpi-dashboard .archive-button').on('click', '#kpi-dashboard .archive-button', async function() {
+    const row = $(this).closest('tr');
+    const visitId = $(this).data('id');
+    const confirmed = await showConfirmModal('Are you sure you want to archive this visit? It will be moved to archived records.');
+    if (!confirmed) return;
+    try {
+        const { data: visitToArchive, error: fetchError } = await supabaseClient
+            .from('healthcarepro_visits')
+            .select('*')
+            .eq('id', visitId)
+            .single();
+        if (fetchError) throw fetchError;
+        if (!visitToArchive) throw new Error('Visit not found for archiving.');
+        const visitToArchiveForArchive = { ...visitToArchive };
+        if (visitToArchiveForArchive.visit_place === null || visitToArchiveForArchive.visit_place === undefined) {
+            visitToArchiveForArchive.visit_place = '';
+        }
+        const { error: archiveError } = await supabaseClient
+            .from('archived_visits')
+            .insert([visitToArchiveForArchive]);
+        if (archiveError) throw archiveError;
+        const { error: deleteError } = await supabaseClient
+            .from('healthcarepro_visits')
+            .delete()
+            .eq('id', visitId);
+        if (deleteError) throw deleteError;
+        row.remove();
+        showAlertDialog('Visit archived successfully!', 'success');
+        const [month, year] = $('#monthSelect').val().split('-').map(Number);
+        fetchKPIData(month, year, currentSelectedDM);
+    } catch (error) {
+        console.error('Error archiving visit:', error);
+        showAlertDialog('An error occurred while archiving the visit: ' + error.message, 'error');
+    }
+});
 
             $(document).off('click', '#kpi-dashboard .restore-button').on('click', '#kpi-dashboard .restore-button', async function() {
                 const row = $(this).closest('tr');
@@ -2798,12 +2791,12 @@
         $('#kpiDmFilterContainer').hide();
         currentSelectedDM = ''; // Ensure no DM filter is applied for MRs
     } else {
-        // For Admin or other roles, allow "All District Managers" and keep enabled
+        // For admin or other roles, allow "All District Managers" and keep enabled
         kpiDmSelect.append($('<option>', { value: '', text: 'All District Managers' }));
         Array.from(requests_districtManagers).sort().forEach(dm => {
             kpiDmSelect.append($('<option>', { value: dm, text: dm }));
         });
-        kpiDmSelect.prop('disabled', false); // Enable for Admin or other roles
+        kpiDmSelect.prop('disabled', false); // Enable for admin or other roles
         currentSelectedDM = ''; // Default to "All District Managers"
     }
 }
@@ -3123,7 +3116,8 @@
             }
         });
 
-        function renderVisitsTable(data, tableType = 'normal') {
+        // Modify the rendering of action buttons to hide delete if the user is a District Manager
+function renderVisitsTable(data, tableType = 'normal') {
             const tableBody = $('#visitsTable tbody');
             const tableHeader = $('#visitsTableHeader');
             tableBody.empty();
@@ -3602,7 +3596,7 @@
                 repsToPopulate = Array.from(requests_medicalRepsByDM.get(currentSelectedDM) || []);
                 medRepSelect.prop('disabled', false);
             } else {
-                // If no DM selected (Admin or other roles), populate all reps from all DMs
+                // If no DM selected (admin or other roles), populate all reps from all DMs
                 requests_medicalRepsByDM.forEach(reps => {
                     reps.forEach(rep => repsToPopulate.push(rep));
                 });
@@ -4512,13 +4506,12 @@
 
 
         function requests_displayRequests(data) {
-            const requestDetailsDisplay = document.getElementById("requests_requestDetailsDisplay");
-            requestDetailsDisplay.innerHTML = '';
-
-            if (data.length > 0) {
-                data.forEach(req => {
-                    const requestCard = document.createElement("div");
-                    requestCard.className = `request-card status-${req.status.toLowerCase()}`;
+    const requestDetailsDisplay = document.getElementById("requests_requestDetailsDisplay");
+    requestDetailsDisplay.innerHTML = '';
+    if (data.length > 0) {
+        data.forEach(req => {
+            const requestCard = document.createElement("div");
+            requestCard.className = `request-card status-${req.status.toLowerCase()}`;
 
                     let customerTypeDisplay = '';
                     let customerNameDisplay = '';
