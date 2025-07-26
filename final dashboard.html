@@ -1748,52 +1748,9 @@
     </style>
 </head>
 <body>
-    <div id="login-page">
-        <div id="login-form-container">
-            <h2 id="loginTitle"><i class=""></i> Dashboard 🔐</h2>
-            <form id="loginForm">
-                <div class="toggle-container">
-                    <span class="toggle-label">Select from List</span>
-                    <label class="switch">
-                        <input type="checkbox" id="adminLoginToggle">
-                        <span class="slider round"></span>
-                    </label>
-                    <span class="toggle-label">Admin Login</span>
-                </div>
-
-                <div class="form-group" id="dmSelectGroup">
-                    <label for="username">District Manager</label>
-                    <select id="username" required>
-                        <!-- District Managers will be populated here -->
-                    </select>
-                </div>
-                <div class="form-group" id="adminUsernameGroup" style="display: none;">
-                    <label for="adminUsername">Admin Username</label>
-                    <input type="text" id="adminUsername" placeholder="Enter admin username">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required>
-                </div>
-                <button type="submit">Login</button>
-                <p id="login-error"></p>
-            </form>
-        </div>
-    </div>
-
-    <div id="dashboard-content" style="display: none;">
+        <div id="dashboard-content" style="display: show;">
         <div class="dashboard-container">
-            <!-- User Info Bar - Moved above tabs -->
-            <div class="user-info-bar">
-                <span id="loggedInUser">
-                    Welcome, <span id="loggedInUsernameDisplay"></span> 
-                    <span id="loggedInUserGovernorates" class="small-font"></span>
-                </span>
-                <div>
-                    <button id="logoutButton"><i class="fas fa-sign-out-alt"></i> Log Out</button>
-                </div>
-            </div>
-
+            
             <div class="tabs">
                 <button class="tab-button active" onclick="openTab(event, 'kpi-dashboard')">KPI Dashboard</button>
                 <button class="tab-button" onclick="openTab(event, 'daily-report')">Daily Report</button>
@@ -2375,136 +2332,49 @@
         // Global variable to store the currently displayed visits data for HCP filtering
         let currentDisplayedVisitsData = [];
 
-        // --- LOGIN LOGIC ---
-        async function fetchDistrictManagersForLogin() {
-            try {
-                const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch district managers from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
-                }
-                const csvText = await response.text();
-                allGoogleSheetData = parseCSV(csvText);
-                const districtManagers = new Set();
-                allGoogleSheetData.forEach(row => {
-                    if (row['District Manager']) {
-                        districtManagers.add(row['District Manager'].trim());
-                    }
-                });
-                const usernameSelect = $('#username');
-                usernameSelect.empty();
-                usernameSelect.append($('<option>', { value: '', text: 'Select District Manager' }));
-                Array.from(districtManagers).sort().forEach(dm => {
-                    usernameSelect.append($('<option>', { value: dm, text: dm }));
-                });
-            } catch (error) {
-                console.error('Error fetching district managers for login:', error);
-                $('#login-error').text('Failed to load district managers. Please check the console for details, ensure the Google Sheet URL is correct, and that the sheet is published to the web as a CSV.');
-            }
-        }
-
-        async function handleLogin(e) {
-            e.preventDefault();
-            const isAdminLogin = $('#adminLoginToggle').is(':checked');
-            let username;
-            let password = $('#password').val();
-            const loginError = $('#login-error');
-
-            loginError.text('');
-
-            if (isAdminLogin) {
-                username = $('#adminUsername').val();
-                if (!username || !password) {
-                    loginError.text('Please enter admin username and password.');
-                    return;
-                }
-            } else {
-                username = $('#username').val();
-                if (!username || !password) {
-                    loginError.text('Please select a username and enter a password.');
-                    return;
-                }
-            }
-
-            try {
-                let query;
-                if (isAdminLogin) {
-                    query = supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password', password)
-                        .eq('title', 'admin')
-                        .single();
-                } else {
-                    query = supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password', password)
-                        .single();
-                }
-                
-                const { data, error } = await query; 
-
-                if (error && error.code !== 'PGRST116') {
-                    throw error;
-                }
-
-                if (data) {
-                    loggedInUserRole = data.title;
-                    loggedInUserDM = data.username;
-                    
-                    localStorage.setItem('loggedInUsername', data.username);
-                    localStorage.setItem('loggedInUserRole', data.title);
-
-                    const dmGovernorates = new Set();
-                    allGoogleSheetData.forEach(row => {
-                        if (row['District Manager'] === loggedInUserDM && row['area']) {
-                            dmGovernorates.add(row['area'].trim());
-                        }
-                    });
-                    loggedInUserGovernorates = Array.from(dmGovernorates);
-                    localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
-
-                    $('#login-page').hide();
-                    $('#dashboard-content').show();
-                    initializeCommonDashboard(); 
-                } else {
-                    loginError.text('Invalid username or password.');
-                }
-            } catch (err) {
-                console.error('Login error:', err);
-                if (err.message.includes("Invalid API key")) {
-                    loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
-                } else {
-                    loginError.text('An error occurred during login. Please try again.');
-                }
-            }
-        }
+        // --- LOGIN LOGIC REMOVED ---
+        // The login form and its functions are removed as per your request.
+        // The dashboard will now directly receive the logged-in user's name.
 
         // --- Common Dashboard Initialization ---
-        function initializeCommonDashboard() {
-            loggedInUserRole = localStorage.getItem('loggedInUserRole');
-            loggedInUserDM = localStorage.getItem('loggedInUsername');
-            loggedInUserGovernorates = JSON.parse(localStorage.getItem('loggedInUserGovernorates') || '[]');
-
-            if (loggedInUserDM) {
-                $('#loggedInUsernameDisplay').text(loggedInUserDM);
-                if (loggedInUserGovernorates.length > 0) {
-                    $('#loggedInUserGovernorates').html(`(${loggedInUserGovernorates.join(', ')})`);
-                } else {
-                    $('#loggedInUserGovernorates').text('');
-                }
+        function initializeCommonDashboard(loggedInUsernameFromIndex) {
+            // Determine user role and DM based on the provided username
+            const userInSupabase = allGoogleSheetData.find(row => row['District Manager'] === loggedInUsernameFromIndex);
+            
+            if (userInSupabase) {
+                loggedInUserDM = loggedInUsernameFromIndex;
+                loggedInUserRole = 'District Manager'; // Assume DM if found in Google Sheet
+            } else if (loggedInUsernameFromIndex.toLowerCase() === 'admin') { // Check for admin explicitly
+                loggedInUserDM = 'admin'; // Or any identifier for admin
+                loggedInUserRole = 'admin';
+            } else {
+                // If not found as DM or admin, handle as an error or default to a restricted view
+                console.error("Logged-in user not found as District Manager or Admin in Google Sheet:", loggedInUsernameFromIndex);
+                showAlertDialog("User not recognized. Displaying limited data.", "warning");
+                loggedInUserRole = 'guest'; // Assign a guest role for restricted access
+                loggedInUserDM = loggedInUsernameFromIndex;
             }
 
-            $('#logoutButton').on('click', () => {
-                localStorage.removeItem('loggedInUsername');
-                localStorage.removeItem('loggedInUserRole');
-                localStorage.removeItem('loggedInUserGovernorates');
-                sessionStorage.clear();
-                location.reload();
-            });
+            $('#loggedInUsernameDisplay').text(loggedInUserDM);
             
+            // Populate governorates for the logged-in DM if applicable
+            const dmGovernorates = new Set();
+            allGoogleSheetData.forEach(row => {
+                if (row['District Manager'] === loggedInUserDM && row['area']) {
+                    dmGovernorates.add(row['area'].trim());
+                }
+            });
+            loggedInUserGovernorates = Array.from(dmGovernorates);
+            if (loggedInUserGovernorates.length > 0) {
+                $('#loggedInUserGovernorates').html(`(${loggedInUserGovernorates.join(', ')})`);
+            } else {
+                $('#loggedInUserGovernorates').text('');
+            }
+
+            // Remove logout button functionality as per request
+            $('#logoutButton').remove(); // This removes the button from the DOM
+            $('.user-info-bar').css('justify-content', 'flex-start'); // Adjust layout if only one item remains
+
             // Initialize the default active tab
             openTab(null, 'kpi-dashboard');
 
@@ -2513,9 +2383,9 @@
                 // Initialize each dashboard when the common data is ready
                 initKpiDashboard();
                 initDailyReportDashboard();
-                initListsDashboard(); // This will be called when tab is opened
+                initListsDashboard(); 
                 requests_initRequestsDashboard(); 
-                initWeeklyPlanDashboard(); // This will be called when tab is opened
+                initWeeklyPlanDashboard(); 
             }).catch(error => {
                 console.error("Failed to load essential common data:", error);
                 showAlertDialog("Failed to load essential data. Please refresh the page and verify Google Sheet URL and publishing settings.");
@@ -3136,6 +3006,13 @@
             Array.from(uniqueDMs).sort().forEach(dm => {
                 kpiDmSelect.append($('<option>', { value: dm, text: dm }));
             });
+
+            // Set the selected value based on loggedInUserDM
+            if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
+                kpiDmSelect.val(loggedInUserDM).prop('disabled', true);
+            } else if (loggedInUserRole === 'admin') {
+                kpiDmSelect.prop('disabled', false);
+            }
         }
 
         /**
@@ -3397,7 +3274,7 @@
 
             // Step 3: Get the number of working days (excluding leaves and full-day events)
             const workingDays = getWorkingDays(repName); 
-
+            
             // Step 4: Calculate the call rate
             let callRate;
             if (workingDays > 0) {
@@ -5493,35 +5370,34 @@ Thank you.`;
 
         // --- Document Ready / Initial Load ---
         $(document).ready(function() {
-            $('#adminLoginToggle').on('change', function() {
-                if ($(this).is(':checked')) {
-                    $('#dmSelectGroup').hide();
-                    $('#adminUsernameGroup').show();
-                    $('#username').prop('required', false);
-                    $('#adminUsername').prop('required', true);
-                    $('#loginTitle').html('<i class=""></i> Admin Dashboard 🔐');
-                } else {
-                    $('#dmSelectGroup').show();
-                    $('#adminUsernameGroup').hide();
-                    $('#username').prop('required', true);
-                    $('#adminUsername').prop('required', false);
-                    $('#loginTitle').html('<i class=""></i> Dashboard 🔐');
-                }
-            });
+            // Remove login page elements and related functions
+            $('#login-page').remove();
+            $('#dashboard-content').show();
 
-            fetchDistrictManagersForLogin().then(() => {
-                const loggedInUser = localStorage.getItem('loggedInUsername');
-                if (loggedInUser) {
-                    $('#login-page').hide();
-                    $('#dashboard-content').show();
-                    initializeCommonDashboard();
-                } else {
-                    $('#login-page').show();
-                    $('#dashboard-content').hide();
-                    $('#loginForm').on('submit', handleLogin);
-                }
+            // Simulate receiving the logged-in username from the parent index.html
+            // For demonstration, let's use a placeholder. In your actual index.html,
+            // you would replace this with a mechanism to pass the username.
+            // For example, if you have a global JS variable `loggedInUsernameFromParent`
+            // set in index.html, you would use:
+            // const loggedInUsername = window.loggedInUsernameFromParent || 'defaultUser';
+            
+            // For testing, you can uncomment one of these lines:
+            // const loggedInUsername = "Ahmed Ali"; // Example for a District Manager
+            // const loggedInUsername = "admin"; // Example for an Admin
+
+            // IMPORTANT: Replace this with the actual way you receive the username from index.html
+            // For example, if index.html sets a global variable:
+            const loggedInUsername = window.loggedInUsernameFromParent || 'admin'; // Default to 'admin' for testing
+
+            // First, fetch all Google Sheet data to determine roles and populate DMs/Reps
+            fetchMedicalRepsData().then(() => {
+                initializeCommonDashboard(loggedInUsername);
+            }).catch(error => {
+                console.error("Initial data fetch failed:", error);
+                showAlertDialog("Failed to load initial data. Please check console for details.", "error");
             });
         });
     </script>
+
 </body>
 </html>
