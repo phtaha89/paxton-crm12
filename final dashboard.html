@@ -3723,7 +3723,7 @@
             $('#daily-report .count-column').text('0');
         }
 
-        function populateDailyReportTable(visits, startDate) {
+         function populateDailyReportTable(visits, startDate) {
             const visitMap = new Map();
             const sectionCounts = { am: 0, pm: 0, pharmacy: 0, amDetails: 0 };
             const amDetailsData = [];
@@ -3801,6 +3801,31 @@
                         // Handle full-day events
                         if (!dailyAmActivitiesHCPs.has(hcpName)) {
                             dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyAmActivitiesHCPs.add(hcpName);
+                        }
+                        if (!dailyAmDetailsHCPs.has(hcpName)) {
+                            amDetailsData.push({ name: hcpName, specialty: originalSpecialty, brick: brick, time: visitTime, date: dateStr, isEvent: true, comment: comments, visit_place: visitPlace, target_visits: hcpTargetVisits, isAmSpecialty: isAmDetailsSpecialty, dayDate: visitDayDate });
+                            dailyAmDetailsHCPs.add(hcpName);
+                        }
+                        if (!dailyPmActivitiesHCPs.has(hcpName)) {
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyPmActivitiesHCPs.add(hcpName);
+                        }
+                        if (!dailyPharmacyActivitiesHCPs.has(hcpName)) {
+                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyPharmacyActivitiesHCPs.add(hcpName);
+                        }
+                    } else if (isLeaveHCP && !isAmActivitySpecialty && !isAmActivityEvent) {
+                        // Handle leaves only if it's not an AM activity or event
+                        if (!dailyPmActivitiesHCPs.has(hcpName)) {
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, false, true, isAmDetailsSpecialty));
+                            dailyPmActivitiesHCPs.add(hcpName);
+                        }
+                    } else {
+                        // Handle AM and PM activities based on specialty
+                        let addedToAmActivities = false;
+                        if ((isAmActivitySpecialty || isAmActivityEvent) && !dailyAmActivitiesHCPs.has(hcpName)) {
+                            dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
                             dailyAmActivitiesHCPs.add(hcpName);
                             addedToAmActivities = true;
                         }
