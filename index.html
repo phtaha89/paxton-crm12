@@ -1109,7 +1109,7 @@
                             });
                         }
                         if (currentarea) { // Add currentarea to the areas Set
-                            currentarea.split(',').forEach(a => { // Split by comma for multiple
+                            currentarea.split(',').forEach(a => { // Split by comma for comma for multiple
                                 if (a.trim()) tempSheetData[lowerCaseUsername].areas.add(a.trim());
                             });
                         }
@@ -1144,6 +1144,8 @@
             document.getElementById('password').value = ''; // Clear password input
             localStorage.removeItem('loggedInUser'); // Remove user from local storage
             localStorage.removeItem('currentPage'); // Remove current page from local storage
+            sessionStorage.removeItem('dashboardUsername'); // Clear dashboard credentials
+            sessionStorage.removeItem('dashboardPassword'); // Clear dashboard credentials
             loggedInUser = null; // Reset loggedInUser variable
             currentActiveViewId = null; // Reset current view
             console.log('Showing login page.');
@@ -1275,8 +1277,7 @@
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
             const loginError = document.getElementById('loginError');
-localStorage.setItem('username', username);
-localStorage.setItem('password', password);
+
             loginError.style.display = 'none'; // Hide any previous error message
 
             if (!usernameInput || !passwordInput) {
@@ -1341,6 +1342,10 @@ localStorage.setItem('password', password);
                     governorate: userGovernorate 
                 };
                 localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                // Store username and password in sessionStorage for dashboard auto-login
+                sessionStorage.setItem('dashboardUsername', usernameInput);
+                sessionStorage.setItem('dashboardPassword', passwordInput);
+
                 console.log('Final loggedInUser object after sheet data:', loggedInUser);
                 
                 showAppContent();
@@ -1515,8 +1520,20 @@ localStorage.setItem('password', password);
                 // The demo content is now always hidden if the iframe loads successfully.
                 if (loggedInUser && (page === 'crm' || page === 'dashboard' || page === 'master-list')) { // Added master-list here
                     console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
-                    // Send the loggedInUser object. You might want to send a token instead of raw password in a real app.
-                    iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*'); // IMPORTANT: Replace '*' with the actual origin of your iframe content for security!
+                    // IMPORTANT: Replace '*' with the actual origin of your iframe content for security!
+                    // For dashboard, also send username and password for auto-login
+                    if (page === 'dashboard') {
+                        const dashboardUsername = sessionStorage.getItem('dashboardUsername');
+                        const dashboardPassword = sessionStorage.getItem('dashboardPassword');
+                        iframe.contentWindow.postMessage({ 
+                            type: 'dashboardLogin', 
+                            username: dashboardUsername, 
+                            password: dashboardPassword,
+                            user: loggedInUser // Also send the loggedInUser object for consistency
+                        }, '*'); 
+                    } else {
+                        iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*');
+                    }
                 }
             };
 
