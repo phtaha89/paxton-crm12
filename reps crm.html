@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Representative CRM</title> <!-- Updated title as requested -->
+    <title>Paxton LLC CRM</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
@@ -1506,17 +1506,36 @@
     </style>
 </head>
 <body>
-    <!-- Initial message for when loaded directly, hidden if loaded via index.html -->
-    <div id="initialMessage" class="login-container">
+    <div id="loginPage" class="login-container">
         <div class="login-header">
             <div class="form-logo">
                 <i class="fas fa-handshake"></i>
             </div>
-            <h1 class="login-title">Medical Representative CRM</h1>
+            <h1 class="login-title">Paxton LLC CRM </h1>
         </div>
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> This CRM is designed to be accessed through the main Paxton LLC CRM application. Please log in there.
+        <div id="loginAlertContainer"></div>
+        <!-- ENHANCEMENT: Added icons to input fields -->
+        <div class="login-form-group">
+            <label for="medRepLogin">Medical Representative</label>
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                    <i class="fas fa-user-tie text-gray-400"></i>
+                </span>
+                <select id="medRepLogin" required class="pl-10">
+                    <option value="">Select Medical Rep</option>
+                </select>
+            </div>
         </div>
+        <div class="login-form-group">
+            <label for="password">Password</label>
+            <div class="relative">
+                 <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                    <i class="fas fa-lock text-gray-400"></i>
+                </span>
+                <input type="password" id="password" placeholder="Enter password" required class="pl-10" />
+            </div>
+        </div>
+        <button id="loginBtn" class="login-button">Login</button>
     </div>
 
     <div id="mainAppContainer" class="container hidden">
@@ -2201,7 +2220,7 @@
         let filteredHCPsForDashboard = []; // HCPs currently displayed in dashboard table
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Helper functions for localStorage (not used directly in CRM, but kept for consistency if needed)
+            // Helper functions for localStorage
             function setLocalStorageItem(name, value) {
                 localStorage.setItem(name, JSON.stringify(value));
             }
@@ -2216,13 +2235,12 @@
             }
 
             function showLoginAlert(message, type) {
-                // This alert is only for the initialMessage div, which is shown if not loaded via index.html
                 const alert = document.createElement('div');
                 alert.className = `alert alert-${type}`;
                 alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
                 alert.style.display = 'block';
-                document.getElementById('initialMessage').querySelector('.alert').remove(); // Remove existing info alert
-                document.getElementById('initialMessage').appendChild(alert);
+                document.getElementById('loginAlertContainer').innerHTML = '';
+                document.getElementById('loginAlertContainer').appendChild(alert);
                 alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 setTimeout(() => {
                     alert.style.display = 'none';
@@ -2245,7 +2263,7 @@
             function showRequestAlert(message, type) {
                 const alert = document.createElement('div');
                 alert.className = `alert alert-${type}`;
-                alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i></i>${message}`;
+                alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
                 alert.style.display = 'block';
                 document.getElementById('requestAlertContainer').innerHTML = '';
                 document.getElementById('requestAlertContainer').appendChild(alert);
@@ -2323,6 +2341,10 @@
                     // Fetch Supabase visit data using pagination
                     globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
 
+                    // Populate the login medical reps dropdown and medicalRepsAreas map
+                    const uniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(rep => !/[\u0600-\u06FF]/.test(rep)))];
+                    populateSelect(document.getElementById('medRepLogin'), uniqueReps);
+
                     // Populate medicalRepsAreas map and districtManagersGovernorates map
                     medicalRepsAreas.clear();
                     districtManagersGovernorates.clear();
@@ -2355,7 +2377,7 @@
 
                 } catch (error) {
                     console.error('Error fetching initial data:', error);
-                    // showLoginAlert('Error loading data. Please try again later.', 'error'); // Removed as this CRM is now a child
+                    showLoginAlert('Error loading data. Please try again later.', 'error');
                 }
             }
 
@@ -2373,9 +2395,12 @@
                 });
             }
 
-            // --- Login and Logout Logic (Modified for iframe communication) ---
-            const initialMessageDiv = document.getElementById('initialMessage');
+            // --- Login and Logout Logic ---
+            const loginPage = document.getElementById('loginPage');
             const mainAppContainer = document.getElementById('mainAppContainer');
+            const medRepLoginSelect = document.getElementById('medRepLogin');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.getElementById('loginBtn');
             const logoutBtn = document.getElementById('logoutBtn');
             const medRepNameElement = document.getElementById('medRepName');
             const medRepAreaElement = document.getElementById('medRepArea');
@@ -2392,65 +2417,95 @@
             const requestSection = document.getElementById('requestSection');
             const weeklyPlanSection = document.getElementById('weeklyPlanSection');
 
-            // Listen for messages from the parent (index.html)
-            window.addEventListener('message', async (event) => {
-                // Ensure the message is from a trusted origin in a production environment
-                // For this example, we'll allow all origins for simplicity (event.origin === 'YOUR_PARENT_ORIGIN')
-                if (event.data.type === 'loggedInUser' && event.data.user) {
-                    currentMedRep = event.data.user;
-                    console.log('CRM received loggedInUser:', currentMedRep);
-                    await initializeCRM(currentMedRep);
-                } else if (event.data.type === 'logout') {
-                    // Handle logout initiated by the parent
-                    handleLogout();
+            loginBtn.addEventListener('click', async () => {
+                const selectedRep = medRepLoginSelect.value;
+                const password = passwordInput.value;
+
+                if (!selectedRep) {
+                    showLoginAlert('Please select a Medical Representative', 'error');
+                    return;
+                }
+                try {
+                    // Authenticate against Supabase users table
+                    const response = await fetch(`https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/users?username=eq.${encodeURIComponent(selectedRep)}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
+                            'apikey': SUPABASE_API_KEY,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Failed to fetch user data:', response.status, errorText);
+                        throw new Error('Failed to fetch user data');
+                    }
+                    const users = await response.json();
+
+                    if (users.length === 0) {
+                        showLoginAlert('User not found', 'error');
+                        return;
+                    }
+                    const user = users[0];
+                    if (user.password !== password) {
+                        showLoginAlert('Incorrect password', 'error');
+                        return;
+                    }
+
+                    // Find rep data from globalGoogleData
+                    const repData = globalGoogleData.find(row => row['medical rep'] === selectedRep);
+                    if (repData) {
+                        currentMedRep = {
+                            name: repData['medical rep'],
+                            area: repData['area'],
+                            districtManager: repData['District Manager'],
+                            governorate: repData['Governorate']
+                        };
+                        setLocalStorageItem('currentUser', currentMedRep);
+
+                        medRepNameElement.textContent = currentMedRep.name;
+                        medRepAreaElement.textContent = currentMedRep.area;
+                        medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
+                        
+                        // Display all governorates for the District Manager
+                        const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
+                        if (dmGovernorates && dmGovernorates.size > 0) {
+                            medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
+                        } else {
+                            medRepGovElement.textContent = `Governorate: N/A`;
+                        }
+
+                        loginPage.classList.add('hidden');
+                        mainAppContainer.classList.remove('hidden');
+
+                        formManager.initializeRepSpecificData(currentMedRep.name);
+                        dashboardManager.initializeDashboardForRep(currentMedRep.name);
+                        requestFormManager.initialize(currentMedRep.name);
+                        weeklyPlanManager.initialize(currentMedRep.name);
+
+                        // Default to showing CRM Form section, but no specific internal form.
+                        showMainSection('crm');
+                        // No specific internal form is shown by default after login.
+                        // The user will need to click on a CRM sub-tab (HCPs, Pharmacy, etc.) to see a form.
+                    }
+                } catch (error) {
+                    console.error('Error during login:', error);
+                    showLoginAlert('An error occurred during login. Please try again.', 'error');
                 }
             });
-
-            async function initializeCRM(user) {
-                // Hide the initial message
-                initialMessageDiv.classList.add('hidden');
-                mainAppContainer.classList.remove('hidden');
-
-                // Update UI with user info
-                medRepNameElement.textContent = user.username;
-                medRepAreaElement.textContent = user.area && user.area.length > 0 ? `Area: ${user.area.join(', ')}` : 'Area: N/A';
-                medRepDMElement.textContent = `District Manager: ${user.districtManager || 'N/A'}`;
-                
-                const dmGovernorates = districtManagersGovernorates.get(user.districtManager);
-                if (dmGovernorates && dmGovernorates.size > 0) {
-                    medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
-                } else {
-                    medRepGovElement.textContent = `Governorate: N/A`;
-                }
-
-                // Initialize all managers with the current user's data
-                formManager.initializeRepSpecificData(user.username);
-                dashboardManager.initializeDashboardForRep(user.username);
-                requestFormManager.initialize(user.username);
-                weeklyPlanManager.initialize(user.username);
-                
-                // Default to showing CRM Form section
-                showMainSection('crm');
-            }
 
             logoutBtn.addEventListener('click', () => {
-                // Send a message to the parent (index.html) to initiate logout there
-                window.parent.postMessage({ type: 'logout' }, '*'); // '*' for any origin, replace with specific origin in production
-                handleLogout(); // Perform local CRM logout actions
-            });
-
-            function handleLogout() {
+                removeLocalStorageItem('currentUser');
                 mainAppContainer.classList.add('hidden');
-                initialMessageDiv.classList.remove('hidden'); // Show the initial message again
-                // Reset all CRM specific states
+                loginPage.classList.remove('hidden');
+                passwordInput.value = '';
                 currentMedRep = null;
                 formManager.handleReset();
                 dashboardManager.resetDashboard();
                 requestFormManager.resetForm();
                 weeklyPlanManager.reset();
-                // Re-fetch all data to clear any user-specific cached data
                 fetchAllData();
-            }
+            });
 
             // --- Main Section Tab Management ---
             const mainTabButtons = document.querySelectorAll('.main-tab-group .tab-button');
@@ -2757,10 +2812,10 @@
                         // Re-fetch all data and re-initialize UI after successful submission
                         await fetchAllData();
                         if (currentMedRep) {
-                            formManager.initializeRepSpecificData(currentMedRep.username); // Use currentMedRep.username
-                            dashboardManager.initializeDashboardForRep(currentMedRep.username); // Use currentMedRep.username
-                            requestFormManager.initialize(currentMedRep.username); // Use currentMedRep.username
-                            weeklyPlanManager.initialize(currentMedRep.username); // Use currentMedRep.username
+                            formManager.initializeRepSpecificData(currentMedRep.name);
+                            dashboardManager.initializeDashboardForRep(currentMedRep.name);
+                            requestFormManager.initialize(currentMedRep.name);
+                            weeklyPlanManager.initialize(currentMedRep.name);
                         }
                     } catch (error) {
                         showAlert(error.message, 'error');
@@ -2772,7 +2827,7 @@
 
                 getFormData() {
                     return {
-                        hcpName: this.elements.hcpSelect.value, medicalRep: currentMedRep ? currentMedRep.username : '', visitDate: this.elements.visitTimeHcpInput.value, comments: this.elements.commentsHcpInput.value,
+                        hcpName: this.elements.hcpSelect.value, medicalRep: currentMedRep ? currentMedRep.name : '', visitDate: this.elements.visitTimeHcpInput.value, comments: this.elements.commentsHcpInput.value,
                         visitPlace: this.elements.visitLocationHcpSelect.value, // Added visitPlace
                         pharmacyName: this.elements.pharmacyNameInput.value, brick: this.elements.brickSelect.value, visitTimePharmacy: this.elements.visitTimePharmacyInput.value, commentsPharmacy: this.elements.commentsPharmacyInput.value,
                         eventType: this.elements.eventTypeSelect.value, eventActivity: this.elements.eventActivitySelect.value, commentsEvent: this.elements.commentsEventInput.value, dateEvent: this.elements.dateEventInput.value,
@@ -2808,11 +2863,11 @@
                     const currentMonthStart = this.getCurrentMonthStart();
                     const visitsThisMonth = globalSupabaseVisits.filter(visit => 
                         visit.hcp_name === hcpName && 
-                        visit.medical_rep === currentMedRep.username && // Use currentMedRep.username
+                        visit.medical_rep === currentMedRep.name && 
                         new Date(visit.visit_date) >= new Date(currentMonthStart) &&
                         !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event(') // Exclude AM, Pharmacy and Event visits
                     );
-                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.username); // Use currentMedRep.username
+                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
                     const targetVisits = parseInt(hcp?.['T.V']) || 0;
                     // Allow negative remaining visits
                     return targetVisits - visitsThisMonth.length;
@@ -2844,7 +2899,7 @@
 
                 async storePharmacyInSupabase(formData) {
                     if (!currentMedRep) throw new Error('Medical Rep not logged in.');
-                    const visitData = { hcp_name: formData.pharmacyName, specialty: 'Pharmacy', brick: formData.brick, visit_date: formData.visitTimePharmacy, comments: formData.commentsPharmacy, medical_rep: currentMedRep.username, created_at: new Date().toISOString() }; // Use currentMedRep.username
+                    const visitData = { hcp_name: formData.pharmacyName, specialty: 'Pharmacy', brick: formData.brick, visit_date: formData.visitTimePharmacy, comments: formData.commentsPharmacy, medical_rep: currentMedRep.name, created_at: new Date().toISOString() };
                     const response = await fetch(SUPABASE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(visitData) });
                     if (!response.ok) { const errorText = await response.text(); throw new Error(`Failed to store pharmacy visit: ${errorText}`); }
                     globalSupabaseVisits.push((await response.json())[0]);
@@ -2865,7 +2920,7 @@
                         target_visits: 0,
                         last_visit: new Date().toISOString().split('T')[0],
                         remaining_visits: 0,
-                        medical_rep: currentMedRep.username, // Use currentMedRep.username
+                        medical_rep: currentMedRep.name,
                         visit_date: formData.dateEvent,
                         comments: formData.commentsEvent,
                         created_at: new Date().toISOString()
@@ -2880,7 +2935,7 @@
                         target_visits: 0,
                         last_visit: new Date().toISOString().split('T')[0],
                         remaining_visits: 0,
-                        medical_rep: currentMedRep.username, // Use currentMedRep.username
+                        medical_rep: currentMedRep.name,
                         visit_date: formData.dateEvent,
                         comments: formData.commentsEvent,
                         created_at: new Date().toISOString()
@@ -2938,7 +2993,7 @@
                         target_visits: 0,
                         last_visit: new Date().toISOString().split('T')[0], // Use current date for last_visit
                         remaining_visits: 0,
-                        medical_rep: currentMedRep.username, // Use currentMedRep.username
+                        medical_rep: currentMedRep.name,
                         visit_date: formData.dateEvent,
                         comments: formData.commentsEvent,
                         created_at: new Date().toISOString()
@@ -2965,7 +3020,7 @@
 
                 async storeAmDetailsInSupabase(formData) {
                     if (!currentMedRep) throw new Error('Medical Rep not logged in.');
-                    const visitData = { hcp_name: formData.amDoctorName, specialty: `AM(${formData.associatedAccount})`, brick: formData.amBrick, visit_date: formData.visitTimeAm, comments: formData.commentsAm, medical_rep: currentMedRep.username, created_at: new Date().toISOString() }; // Use currentMedRep.username
+                    const visitData = { hcp_name: formData.amDoctorName, specialty: `AM(${formData.associatedAccount})`, brick: formData.amBrick, visit_date: formData.visitTimeAm, comments: formData.commentsAm, medical_rep: currentMedRep.name, created_at: new Date().toISOString() };
                     const response = await fetch(SUPABASE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(visitData) });
                     if (!response.ok) { const errorText = await response.text(); throw new Error(`Failed to store AM details: ${errorText}`); }
                     globalSupabaseVisits.push((await response.json())[0]);
@@ -3035,7 +3090,7 @@
                     const selectedAccount = this.elements.associatedAccountSelect.value;
                     if (selectedAccount && currentMedRep) {
                         const cleanSelectedAccountName = selectedAccount.replace(' ⚠️', '').trim();
-                        const accountData = globalGoogleData.find(row => row['HCPS'] === cleanSelectedAccountName && row['medical rep'] === currentMedRep.username); // Use currentMedRep.username
+                        const accountData = globalGoogleData.find(row => row['HCPS'] === cleanSelectedAccountName && row['medical rep'] === currentMedRep.name);
                         this.elements.amBrickSelect.value = accountData ? accountData['Brick'] : '';
                     } else {
                         this.elements.amBrickSelect.value = '';
@@ -3044,15 +3099,11 @@
 
                 updateUnvisitedHcpCount() {
                     if (!currentMedRep) return;
-                    const googleSheetHcpsForRep = globalGoogleData.filter(hcp => hcp['medical rep'] === currentMedRep.username); // Use currentMedRep.username
+                    const googleSheetHcpsForRep = globalGoogleData.filter(hcp => hcp['medical rep'] === currentMedRep.name);
                     const currentMonthStart = this.getCurrentMonthStart();
                     let unvisitedCount = 0;
                     googleSheetHcpsForRep.forEach(hcp => {
-                        const hasVisited = globalSupabaseVisits.some(visit => 
-                            visit.hcp_name === hcp['HCPS'] && 
-                            visit.medical_rep === currentMedRep.username && // Use currentMedRep.username
-                            new Date(visit.visit_date) >= new Date(currentMonthStart) &&
-                            !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event('));
+                        const hasVisited = globalSupabaseVisits.some(visit => visit.hcp_name === hcp['HCPS'] && visit.medical_rep === currentMedRep.name && new Date(visit.visit_date) >= new Date(currentMonthStart) && !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event('));
                         if (!hasVisited) unvisitedCount++;
                     });
 
@@ -3064,12 +3115,12 @@
                     } else {
                         badge.classList.add('hidden');
                     }
-                    this.updateHcpOptions(currentMedRep.username); // Use currentMedRep.username
+                    this.updateHcpOptions(currentMedRep.name);
                 }
 
                 updateUnvisitedAmAccountCount() {
                     if (!currentMedRep) return;
-                    const googleSheetAmAccountsForRep = globalGoogleData.filter(account => account['medical rep'] === currentMedRep.username && ['hospital', 'account', 'dialysis center'].includes(account['Speciality'].toLowerCase())); // Use currentMedRep.username
+                    const googleSheetAmAccountsForRep = globalGoogleData.filter(account => account['medical rep'] === currentMedRep.name && ['hospital', 'account', 'dialysis center'].includes(account['Speciality'].toLowerCase()));
                     const currentMonthStart = this.getCurrentMonthStart();
                     let unvisitedCount = 0;
                     googleSheetAmAccountsForRep.forEach(account => {
@@ -3087,7 +3138,7 @@
                     badge.textContent = ''; // Clear text content as well
                     
                     // Re-populate associated accounts to reflect latest visited status
-                    this.updateAssociatedAccounts(currentMedRep.username); // Use currentMedRep.username
+                    this.updateAssociatedAccounts(currentMedRep.name); 
                 }
 
                 getCurrentMonthStart() {
@@ -3098,7 +3149,7 @@
                 }
 
                 async updateRemainingVisits(hcpName) {
-                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.username); // Use currentMedRep.username
+                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
                     if (hcp) {
                         const remainingVisits = await this.getRemainingVisits(hcp['HCPS']);
                         this.elements.remainingVisitsSpan.textContent = remainingVisits;
@@ -3114,7 +3165,7 @@
                     // Filter visits for the current medical representative only
                     const visits = globalSupabaseVisits.filter(visit => 
                         visit.hcp_name === name && 
-                        visit.medical_rep === currentMedRep.username // Use currentMedRep.username
+                        visit.medical_rep === currentMedRep.name
                     );
                     visits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
                     return visits.length > 0 ? visits[0].created_at : 'N/A';
@@ -3122,7 +3173,7 @@
 
                 async updateSavedComment(hcpName) {
                     try {
-                        const response = await fetch(`${SAVED_COMMENTS_URL}?hcp_name=eq.${encodeURIComponent(hcpName)}&medical_rep=eq.${encodeURIComponent(currentMedRep.username)}&order=created_at.desc&limit=1`, { headers: { 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Content-Type': 'application/json' }}); // Use currentMedRep.username
+                        const response = await fetch(`${SAVED_COMMENTS_URL}?hcp_name=eq.${encodeURIComponent(hcpName)}&medical_rep=eq.${encodeURIComponent(currentMedRep.name)}&order=created_at.desc&limit=1`, { headers: { 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Content-Type': 'application/json' }});
                         if (!response.ok) throw new Error('Failed to retrieve saved comment');
                         const lastComment = await response.json();
                         this.elements.savedCommentSpan.textContent = lastComment.length > 0 ? lastComment[0].comment : 'No previous comments available';
@@ -3133,7 +3184,7 @@
                 }
 
                 updateHcpDetails(hcpName) {
-                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.username); // Use currentMedRep.username
+                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
                     this.elements.brickHcpInput.value = hcp ? hcp['Brick'] : '';
                     this.elements.specialtyHcpInput.value = hcp ? hcp['Speciality'] : '';
                 }
@@ -3152,7 +3203,7 @@
 
                         // Fetch visits only from healthcarepro_visits table for the current rep
                         const visitsResponse = await fetchPaginatedData(
-                            `${SUPABASE_URL}?medical_rep=eq.${encodeURIComponent(currentMedRep.username)}&visit_date=gte.${currentMonthStart}`, // Use currentMedRep.username
+                            `${SUPABASE_URL}?medical_rep=eq.${encodeURIComponent(currentMedRep.name)}&visit_date=gte.${currentMonthStart}`,
                             SUPABASE_API_KEY
                         );
                         
@@ -3328,7 +3379,7 @@
                     const currentMonthStart = formManager.getCurrentMonthStart();
                     // Filter globalSupabaseVisits to only include visits from the current month for the current rep
                     const filteredVisits = globalSupabaseVisits.filter(visit => 
-                        visit.medical_rep === currentMedRep.username && // Use currentMedRep.username
+                        visit.medical_rep === currentMedRep.name && 
                         new Date(visit.visit_date) >= new Date(currentMonthStart)
                     );
                     filteredVisits.forEach(visit => { visitCountsForCurrentRep[visit.hcp_name] = (visitCountsForCurrentRep[visit.hcp_name] || 0) + 1; });
@@ -3429,7 +3480,7 @@
                     this.elements.errorDisplay.classList.add('hidden');
                     this.elements.countDisplay.classList.add('hidden');
                     this.elements.searchContainer.classList.add('hidden');
-                    if (currentMedRep) this.initializeDashboardForRep(currentMedRep.username); // Use currentMedRep.username
+                    if (currentMedRep) this.initializeDashboardForRep(currentMedRep.name);
                 }
             }
 
@@ -3576,8 +3627,8 @@
                             });
                             this.elements.personalAreaContainer.classList.remove('hidden');
                             // Set default selected area if currentMedRep.area exists
-                            if (currentMedRep && currentMedRep.area && currentMedRep.area.length > 0) { // Check if area is an array and not empty
-                                this.elements.personalAreaSelect.value = currentMedRep.area[0]; // Take the first area if it's an array
+                            if (currentMedRep && currentMedRep.area) {
+                                this.elements.personalAreaSelect.value = currentMedRep.area;
                             }
                         } else {
                             this.elements.personalAreaContainer.classList.add('hidden');
@@ -3601,8 +3652,8 @@
                             });
                             this.elements.areaContainer.classList.remove('hidden');
                             // Set default selected area if currentMedRep.area exists
-                            if (currentMedRep && currentMedRep.area && currentMedRep.area.length > 0) { // Check if area is an array and not empty
-                                this.elements.areaSelect.value = currentMedRep.area[0]; // Take the first area if it's an array
+                            if (currentMedRep && currentMedRep.area) {
+                                this.elements.areaSelect.value = currentMedRep.area;
                             }
                         } else {
                             this.elements.areaContainer.classList.add('hidden');
@@ -3830,7 +3881,7 @@
                     this.fetchTotalPersonalRequests();
                 }
 
-                async retrieveCustomerRequestsasync retrieveCustomerRequests() {
+                async retrieveCustomerRequests() {
                     const medRep = this.currentRepName;
                     const requestDetailsDisplay = this.elements.customerRequestDetailsDisplayDiv;
                     requestDetailsDisplay.innerHTML = '';
