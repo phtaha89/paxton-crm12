@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paxton LLC CRM</title>
+    <title>Medical Representative</title> <!-- Changed title as requested -->
     <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Supabase CDN for database interaction -->
@@ -1056,7 +1056,7 @@
                 // Column E: area -> index 4
 
                 const dmNameColIndex = getColumnIndex(headerRow, ['District Manager', 'DistrictManager', 'DM Name'], 1);
-                const mrNameColIndex = getColumnIndex(headerRow, ['Medical Representative', 'MedicalRep', 'MR Name'], 3);
+                const mrNameColIndex = getColumnIndex(headerRow, ['medical rep', 'Medical Representative', 'MedicalRep', 'MR Name'], 3); // Added 'medical rep'
                 const governorateColIndex = getColumnIndex(headerRow, ['Governorate'], 2);
                 const areaColIndex = getColumnIndex(headerRow, ['area'], 4); // This is configured to look for 'area' and defaults to index 4 (Column E)
                 // Assuming a general name column might be present for other roles like Admin, often Column A
@@ -1076,7 +1076,7 @@
                     const generalName = columns[generalNameColIndex];
 
                     const currentGovernorate = columns[governorateColIndex];
-                    const currentarea = columns[areaColIndex]; // This is where 'area' is read from
+                    const currentArea = columns[areaColIndex]; // This is where 'area' is read from
 
                     // Determine the primary username and title from the sheet row
                     // Prioritize specific roles (DM, MR) for username and title
@@ -1100,7 +1100,8 @@
                                 username: sheetUsername,
                                 title: sheetTitle, // This title is from the sheet, Supabase title will override
                                 governorates: new Set(), // Use Set to store unique governorates
-                                areas: new Set() // Use Set to store unique areas
+                                areas: new Set(), // Use Set to store unique areas
+                                districtManager: '' // To store DM for MRs
                             };
                         }
                         if (currentGovernorate) {
@@ -1108,10 +1109,13 @@
                                 if (g.trim()) tempSheetData[lowerCaseUsername].governorates.add(g.trim());
                             });
                         }
-                        if (currentarea) { // Add currentarea to the areas Set
-                            currentarea.split(',').forEach(a => { // Split by comma for comma for multiple
+                        if (currentArea) { // Add currentArea to the areas Set
+                            currentArea.split(',').forEach(a => { // Split by comma for comma for multiple
                                 if (a.trim()) tempSheetData[lowerCaseUsername].areas.add(a.trim());
                             });
+                        }
+                        if (dmName) {
+                            tempSheetData[lowerCaseUsername].districtManager = dmName;
                         }
                         console.log(`Processed row ${rowIndex + 1} for sheet username ${sheetUsername}: Governorates: ${Array.from(tempSheetData[lowerCaseUsername].governorates).join(', ')}, areas: ${Array.from(tempSheetData[lowerCaseUsername].areas).join(', ')}`);
                     }
@@ -1122,7 +1126,8 @@
                     username: entry.username,
                     title: entry.title, // This title is from the sheet, Supabase title will override
                     governorate: Array.from(entry.governorates), // Convert Set to Array
-                    area: Array.from(entry.areas) // Convert Set to Array
+                    area: Array.from(entry.areas), // Convert Set to Array
+                    districtManager: entry.districtManager
                 }));
 
                 console.log('Final consolidated Google Sheet data:', googleSheetData);
@@ -1317,8 +1322,9 @@
                 console.log('Supabase user data:', supabaseUser);
 
                 // Step 2: If Supabase authentication is successful, fetch additional details from Google Sheet
-                let userarea = null;
+                let userArea = null;
                 let userGovernorate = null;
+                let userDistrictManager = null;
 
                 // Find user's consolidated data from the Google Sheet data
                 // Match Supabase username with the sheet's determined username
@@ -1327,19 +1333,21 @@
                 );
 
                 if (sheetUser) {
-                    userarea = sheetUser.area; // This will now be an array
+                    userArea = sheetUser.area; // This will now be an array
                     userGovernorate = sheetUser.governorate; // This will now be an array
+                    userDistrictManager = sheetUser.districtManager;
                     console.log('Sheet user found for login:', sheetUser);
                 } else {
-                    console.warn(`No matching Google Sheet data found for username: ${usernameInput}. Area and Governorate will be null.`);
+                    console.warn(`No matching Google Sheet data found for username: ${usernameInput}. Area, Governorate, and District Manager will be null.`);
                 }
 
                 // Combine data into loggedInUser
                 loggedInUser = { 
                     username: supabaseUser.username, 
                     title: supabaseUser.title, // Title from Supabase is primary
-                    area: userarea, 
-                    governorate: userGovernorate 
+                    area: userArea, 
+                    governorate: userGovernorate,
+                    districtManager: userDistrictManager
                 };
                 localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
                 // Store username and password in sessionStorage for dashboard auto-login
@@ -1360,9 +1368,16 @@
 
         /**
          * Handles user logout. Clears session and returns to login page.
+         * Also sends a message to iframes to log them out.
          */
         function handleLogout() {
             console.log('User logged out.');
+            // Send logout message to all iframes
+            document.querySelectorAll('.iframe-container-fpv iframe').forEach(iframe => {
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ type: 'logout' }, '*');
+                }
+            });
             showLoginPage(); // Go back to the login page
         }
 
@@ -1422,7 +1437,7 @@
             
             // Configuration for each page, including view ID, display name, and file name
             const pageConfig = {
-                'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
+                'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm (1).html' }, // Ensure correct file name
                 'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
                 'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
                 'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
@@ -1552,6 +1567,17 @@
             
             // Fetch Google Sheet data first
             await fetchGoogleSheetData();
+
+            // Listen for messages from iframes (e.g., logout requests)
+            window.addEventListener('message', (event) => {
+                // IMPORTANT: Verify the origin of the message for security in a real application
+                // if (event.origin !== "http://your-iframe-domain.com") return;
+
+                if (event.data.type === 'logout') {
+                    handleLogout(); // Trigger parent's logout logic
+                    console.log('Parent received logout message from iframe.');
+                }
+            });
 
             // Check for logged-in user in localStorage on page load
             const storedUser = localStorage.getItem('loggedInUser');
