@@ -685,6 +685,7 @@
         const districtFilterSelect = document.getElementById('districtFilter');
         const repFilterSelect = document.getElementById('repFilter'); // Get reference to rep filter
         const brickFilterSelect = document.getElementById('brickFilter'); // Get reference to brick filter
+        const specialtyFilterSelect = document.getElementById('specialtyFilter'); // Get reference to specialty filter
         const editListButton = document.getElementById('editListBtn');
 
 
@@ -837,7 +838,6 @@
         function clearFilters() {
             document.getElementById('districtFilter').value = '';
             document.getElementById('repFilter').value = '';
-            // document.getElementById('areaFilter').value = ''; // Removed Area filter clear
             document.getElementById('specialtyFilter').value = '';
             document.getElementById('brickFilter').value = '';
             document.getElementById('searchInput').value = '';
@@ -926,51 +926,34 @@
 
         /**
          * Populates the filter dropdowns with unique values.
-         * The options for Medical Rep, Area, Specialty, and Brick depend on the
+         * The options for Medical Rep, Brick, and Specialty depend on the
          * currently selected District Manager and Medical Representative.
          */
         function populateFilters() {
             const currentDistrictManager = districtFilterSelect.value;
             const currentMedicalRep = repFilterSelect.value; 
-            let dataForDependentFilters = baseDataForUser;
+            const currentBrick = brickFilterSelect.value;
 
-            // Filter by District Manager if selected
+            // --- Populate Medical Rep filter ---
+            let dataForRepFilter = baseDataForUser;
             if (currentDistrictManager) {
-                dataForDependentFilters = dataForDependentFilters.filter(hcp => 
-                    hcp.districtManager === currentDistrictManager
-                );
+                dataForRepFilter = dataForRepFilter.filter(hcp => hcp.districtManager === currentDistrictManager);
             }
+            populateSelect('repFilter', [...new Set(dataForRepFilter.map(hcp => hcp.medicalRep).filter(Boolean))].sort());
 
-            // Filter by Medical Rep if selected
+            // --- Populate Brick filter ---
+            let dataForBrickFilter = dataForRepFilter; // Start with data filtered by DM
             if (currentMedicalRep) {
-                dataForDependentFilters = dataForDependentFilters.filter(hcp => 
-                    hcp.medicalRep === currentMedicalRep
-                );
+                dataForBrickFilter = dataForBrickFilter.filter(hcp => hcp.medicalRep === currentMedicalRep);
             }
+            populateSelect('brickFilter', [...new Set(dataForBrickFilter.map(hcp => hcp.brick).filter(Boolean))].sort());
 
-            // Helper to get unique values from a specific property from the dataForDependentFilters
-            const getUniqueValues = (prop) => [...new Set(dataForDependentFilters.map(hcp => hcp[prop]).filter(Boolean))].sort(); 
-
-            // Populate Medical Rep, Specialty, and Brick based on dataForDependentFilters
-            populateSelect('repFilter', getUniqueValues('medicalRep'));
-            // populateSelect('areaFilter', getUniqueValues('area')); // Removed Area filter population
-            populateSelect('specialtyFilter', getUniqueValues('specialty'));
-            populateSelect('brickFilter', getUniqueValues('brick'));
-
-            // Restore previously selected values if they still exist in the new options
-            const currentRepValue = repFilterSelect.value;
-            if (!getUniqueValues('medicalRep').includes(currentRepValue) && currentRepValue !== '') {
-                repFilterSelect.value = ''; 
+            // --- Populate Specialty filter ---
+            let dataForSpecialtyFilter = dataForBrickFilter; // Start with data filtered by DM and MR
+            if (currentBrick) {
+                dataForSpecialtyFilter = dataForSpecialtyFilter.filter(hcp => hcp.brick === currentBrick);
             }
-            // The Area filter is removed, so no need to restore its value
-            const currentSpecialtyValue = document.getElementById('specialtyFilter').value;
-            if (!getUniqueValues('specialty').includes(currentSpecialtyValue) && currentSpecialtyValue !== '') {
-                document.getElementById('specialtyFilter').value = '';
-            }
-            const currentBrickValue = document.getElementById('brickFilter').value;
-            if (!getUniqueValues('brick').includes(currentBrickValue) && currentBrickValue !== '') {
-                document.getElementById('brickFilter').value = '';
-            }
+            populateSelect('specialtyFilter', [...new Set(dataForSpecialtyFilter.map(hcp => hcp.specialty).filter(Boolean))].sort());
         }
 
 
@@ -994,9 +977,6 @@
                 case 'specialtyFilter':
                     allOptionText = 'All Specialties';
                     break;
-                // case 'areaFilter': // Removed Area filter case
-                //     allOptionText = 'All Areas';
-                //     break;
                 case 'brickFilter':
                     allOptionText = 'All Bricks';
                     break;
@@ -1090,7 +1070,6 @@
         function filterData() {
             const districtFilter = districtFilterSelect.value;
             const repFilter = document.getElementById('repFilter').value;
-            // const areaFilter = document.getElementById('areaFilter').value; // Removed Area filter
             const specialtyFilter = document.getElementById('specialtyFilter').value;
             const brickFilter = document.getElementById('brickFilter').value;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -1104,7 +1083,6 @@
                                         : (!districtFilter || hcp.districtManager === districtFilter);
 
                 const matchesRep = !repFilter || hcp.medicalRep === repFilter;
-                // const matchesArea = !areaFilter || hcp.area === areaFilter; // Removed Area filter condition
                 const matchesSpecialty = !specialtyFilter || hcp.specialty === specialtyFilter;
                 const matchesBrick = !brickFilter || hcp.brick === brickFilter;
                 
@@ -1355,19 +1333,27 @@
         function setupEventListeners() {
             // Filter event listeners
             districtFilterSelect.addEventListener('change', () => {
-                // When District Manager changes, reset Medical Rep and Brick filters to 'All'
+                // When District Manager changes, reset Medical Rep, Brick, and Specialty filters to 'All'
                 repFilterSelect.value = ''; 
-                brickFilterSelect.value = ''; // Reset Brick filter
-                filterData();
+                brickFilterSelect.value = '';
+                specialtyFilterSelect.value = '';
+                filterData(); // This will call populateFilters internally
             });
+
             repFilterSelect.addEventListener('change', () => { 
-                // When Medical Rep changes, reset Brick filter to 'All'
-                brickFilterSelect.value = ''; // Reset Brick filter
-                filterData();
+                // When Medical Rep changes, reset Brick and Specialty filters to 'All'
+                brickFilterSelect.value = ''; 
+                specialtyFilterSelect.value = '';
+                filterData(); // This will call populateFilters internally
             });
-            // document.getElementById('areaFilter').addEventListener('change', filterData); // Removed Area filter listener
-            document.getElementById('specialtyFilter').addEventListener('change', filterData);
-            document.getElementById('brickFilter').addEventListener('change', filterData);
+
+            brickFilterSelect.addEventListener('change', () => {
+                // When Brick changes, reset Specialty filter to 'All'
+                specialtyFilterSelect.value = ''; 
+                filterData(); // This will call populateFilters internally
+            });
+
+            specialtyFilterSelect.addEventListener('change', filterData); // Changed to specialtyFilterSelect
             document.getElementById('searchInput').addEventListener('input', filterData);
 
             // Add event listener for duplicated HCPs stat
