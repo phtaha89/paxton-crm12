@@ -550,7 +550,7 @@
         <div class="stats-bar">
             <div class="stats-item" id="totalHCPsStat">
                 <span class="stats-number" id="totalHCPs">0</span>
-                <span class="stats-label">Total HCPs</span>
+                <span class="stats-label" id="totalHCPsLabel">Total HCPs</span>
                 <span class="clickable-note">Click to reset filters</span>
             </div>
             <div class="stats-item">
@@ -664,14 +664,6 @@
                     </div>
                     <div class="detail-section full-width">
                         <h3><i class="fas fa-info-circle"></i> Other Details</h3>
-                        <div class="detail-row">
-                            <span class="detail-label">Class</span>
-                            <span class="detail-value">${hcp.class || 'N/A'}</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">T.V</span>
-                            <span class="detail-value">${hcp.tv || 'N/A'}</span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -685,12 +677,14 @@
         // URL for the Google Sheet to edit
         const EDIT_LIST_URL = 'https://docs.google.com/spreadsheets/d/1ODMCJBT6YAzCF5GAx3JVqR8o9tghTO9OkD2E6z2Y0xA/edit?gid=0#gid=0';
         
-        let hcpData = []; // This will store the fetched and parsed data
-        let filteredData = []; // This will store the currently filtered data
+        let hcpData = []; // This will store the fetched and parsed data (full list)
+        let filteredData = []; // This will store the currently filtered data (what's displayed in the table)
+        let baseDataForUser = []; // This will store the data relevant to the logged-in user (all for admin, DM's HCPs for DM)
         let loggedInUser = null; // To store the user data received from the parent window
 
         const loadingOverlay = document.getElementById('loadingOverlay');
         const districtFilterSelect = document.getElementById('districtFilter');
+        const repFilterSelect = document.getElementById('repFilter'); // Get reference to rep filter
         const editListButton = document.getElementById('editListBtn');
 
 
@@ -744,13 +738,23 @@
             const lines = csvString.trim().split('\n');
             if (lines.length === 0) return [];
 
-            const headers = lines[0].split(',').map(header => {
-                // Trim whitespace, replace non-alphanumeric with space, then split by space
-                const parts = header.trim().replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/);
-                if (parts.length === 0) return ''; // Handle empty header parts
+            // Regex to split by comma, but not if inside double quotes.
+            // This regex: /,(?=(?:(?:[^"]*"){2})*[^"]*$)/
+            // Splits by comma (,)
+            // Only if that comma is followed by an even number of double quotes (")
+            // This ensures commas inside quotes are ignored.
+            const splitRegex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+
+            const headerLine = lines[0];
+            const headers = headerLine.split(splitRegex).map(header => {
+                // Trim whitespace and remove surrounding quotes if present
+                let cleanHeader = header.trim().replace(/^"|"$/g, '');
+                // Replace non-alphanumeric with space, then split by space
+                const parts = cleanHeader.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/);
+                if (parts.length === 0) return '';
 
                 // Special handling for specific column names to ensure correct camelCase for internal use
-                const originalHeader = header.trim(); // Use original header for direct comparison
+                const originalHeader = cleanHeader; // Use original cleaned header for direct comparison
                 
                 if (originalHeader.toUpperCase() === 'DISTRICT MANAGER') return 'districtManager';
                 if (originalHeader.toUpperCase() === 'GOVERNORATE') return 'governorate';
@@ -772,7 +776,6 @@
                 if (originalHeader.toUpperCase() === 'THURSDAY') return 'thursday';
                 if (originalHeader.toUpperCase() === 'FRIDAY') return 'friday';
                 if (originalHeader.toUpperCase() === 'SATURDAY') return 'saturday';
-                // Add any other specific headers you might have that need direct mapping
                 // Default camelCase conversion for other headers not explicitly listed
                 return parts.map((part, index) => {
                     if (index === 0) {
@@ -785,15 +788,20 @@
             const data = [];
 
             for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',');
+                const line = lines[i].trim();
+                if (!line) continue; // Skip empty lines
+
+                const values = line.split(splitRegex).map(value => 
+                    value.trim().replace(/^"|"$/g, '') // Trim and remove surrounding quotes
+                );
+
                 if (values.length !== headers.length) {
-                    console.warn(`Skipping malformed row: ${lines[i]} (expected ${headers.length} columns, got ${values.length})`);
+                    console.warn(`Skipping malformed row: ${line} (expected ${headers.length} columns, got ${values.length})`);
                     continue;
                 }
                 const rowObject = {};
                 headers.forEach((header, index) => {
-                    // Assign value to the camelCase header
-                    rowObject[header] = values[index] ? values[index].trim() : ''; // Ensure value is trimmed or empty string
+                    rowObject[header] = values[index];
                 });
                 data.push(rowObject);
             }
@@ -842,6 +850,7 @@
                 document.getElementById('districtFilter').disabled = false; // Enable for Admin/other roles
             }
             filterData(); // Re-filter the data after clearing/resetting filters
+            populateFilters(); // Re-populate all filters based on the new base data
         }
 
         /**
@@ -886,32 +895,29 @@
          */
         async function initializeApp(initialUser = null) {
             hcpData = await fetchAndParseCSV();
+            console.log('Total HCPs fetched from Google Sheet:', hcpData.length); // Debugging line
             
-            // Apply initial filtering based on the logged-in user
+            // Determine the base data for the user
             if (initialUser && initialUser.title === 'District Manager' && initialUser.username) {
-                // Filter by District Manager's name
-                filteredData = hcpData.filter(hcp => 
+                baseDataForUser = hcpData.filter(hcp => 
                     hcp.districtManager && hcp.districtManager.toLowerCase() === initialUser.username.toLowerCase()
                 );
-                // Pre-select the District Manager filter
-                const districtFilter = document.getElementById('districtFilter');
-                // Populate filters first so the option exists
-                // Always populate districtFilter with all available DMs from hcpData
+                // Pre-select and disable the District Manager filter for DMs
                 populateSelect('districtFilter', [...new Set(hcpData.map(hcp => hcp.districtManager).filter(Boolean))].sort());
-                districtFilter.value = initialUser.username;
-                // Disable the District Manager filter so the user can't change it
-                districtFilter.disabled = true;
+                districtFilterSelect.value = initialUser.username;
+                districtFilterSelect.disabled = true;
             } else {
-                // If admin or no specific filter, show all data
-                filteredData = [...hcpData]; 
-                document.getElementById('districtFilter').disabled = false; // Ensure it's enabled for admin/other roles
-                // For admin, populate districtFilter with all available DMs from hcpData
+                // If admin or no specific filter, base data is all data
+                baseDataForUser = [...hcpData]; 
+                districtFilterSelect.disabled = false; // Ensure it's enabled for admin/other roles
                 populateSelect('districtFilter', [...new Set(hcpData.map(hcp => hcp.districtManager).filter(Boolean))].sort());
             }
 
-            // Populate other filters based on the *initially filtered* data
-            populateFilters(); 
+            // Initially, filteredData is the same as baseDataForUser
+            filteredData = [...baseDataForUser];
 
+            // Populate all filters based on the baseDataForUser or current filteredData
+            populateFilters(); 
             renderTable();
             updateStats();
             setupEventListeners();
@@ -919,27 +925,40 @@
         }
 
         /**
-         * Populates the filter dropdowns with unique values from the HCP data.
-         * Now uses 'filteredData' to get unique values for relevant dropdowns.
+         * Populates the filter dropdowns with unique values.
+         * The options for Medical Rep, Area, Specialty, and Brick depend on the
+         * currently selected District Manager.
          */
         function populateFilters() {
-            // Helper to get unique values from a specific property from the CURRENTLY filteredData
-            const getUniqueValues = (prop) => [...new Set(filteredData.map(hcp => hcp[prop]).filter(Boolean))].sort(); 
+            const currentDistrictManager = districtFilterSelect.value;
+            let dataForDependentFilters = baseDataForUser;
 
-            // Only populate these if the DM filter is not active, or if it's an admin
-            // If DM is logged in, these dropdowns should only show options relevant to their filtered data.
-            const medicalReps = getUniqueValues('medicalRep');
-            const areas = getUniqueValues('area');
-            const specialties = getUniqueValues('specialty');
-            const bricks = getUniqueValues('brick');
+            // If a specific District Manager is selected (and not "All District Managers"),
+            // filter the base data further to get options for dependent filters.
+            if (currentDistrictManager) {
+                dataForDependentFilters = baseDataForUser.filter(hcp => 
+                    hcp.districtManager === currentDistrictManager
+                );
+            }
 
-            // District Manager filter is handled separately in initializeApp for initial state
-            // and its options are always from hcpData, but its selection/disabled state depends on loggedInUser.
-            populateSelect('repFilter', medicalReps);
-            populateSelect('areaFilter', areas);
-            populateSelect('specialtyFilter', specialties);
-            populateSelect('brickFilter', bricks);
+            // Helper to get unique values from a specific property from the dataForDependentFilters
+            const getUniqueValues = (prop) => [...new Set(dataForDependentFilters.map(hcp => hcp[prop]).filter(Boolean))].sort(); 
+
+            // Populate Medical Rep, Area, Specialty, and Brick based on dataForDependentFilters
+            populateSelect('repFilter', getUniqueValues('medicalRep'));
+            populateSelect('areaFilter', getUniqueValues('area'));
+            populateSelect('specialtyFilter', getUniqueValues('specialty'));
+            populateSelect('brickFilter', getUniqueValues('brick'));
+
+            // Restore previously selected values if they still exist in the new options
+            // This prevents the dropdown from resetting if the selected option is still valid
+            const currentRepValue = repFilterSelect.value;
+            if (!getUniqueValues('medicalRep').includes(currentRepValue) && currentRepValue !== '') {
+                repFilterSelect.value = ''; // Reset if current value is no longer valid
+            }
+            // Repeat for other dependent filters if necessary
         }
+
 
         /**
          * Populates a select element with options.
@@ -948,6 +967,7 @@
          */
         function populateSelect(selectId, options) {
             const select = document.getElementById(selectId);
+            const currentValue = select.value; // Store the current value
             let allOptionText = '';
 
             switch (selectId) {
@@ -980,6 +1000,13 @@
                     select.appendChild(optionElement);
                 }
             });
+
+            // Attempt to restore the previously selected value if it's still an option
+            if (Array.from(select.options).some(option => option.value === currentValue)) {
+                select.value = currentValue;
+            } else {
+                select.value = ''; // Reset to "All" if the previous selection is no longer valid
+            }
         }
 
         /**
@@ -1004,7 +1031,7 @@
                     </td>
                     <td><span class="specialty-badge">${hcp.specialty || 'N/A'}</span></td>
                     <td>${hcp.account || 'N/A'}</td> 
-                    <td><span class="area-badge">${hcp.area || 'N/A'}</span></td>
+                    <td><td><span class="area-badge">${hcp.area || 'N/A'}</span></td>
                     <td>${hcp.brick || 'N/A'}</td>
                     <td>${hcp.medicalRep || 'N/A'}</td>
                     <td>${hcp.districtManager || 'N/A'}</td>
@@ -1016,8 +1043,10 @@
          * Updates the statistics displayed in the stats bar.
          */
         function updateStats() {
-            // totalHCPs now reflects the count of initially filtered data (for DM) or all data (for Admin)
-            document.getElementById('totalHCPs').textContent = filteredData.length; 
+            const totalHCPsSpan = document.getElementById('totalHCPs');
+            const totalHCPsLabel = document.getElementById('totalHCPsLabel');
+            
+            // "Filtered Results" reflects the currently displayed data
             document.getElementById('filteredHCPs').textContent = filteredData.length;
             
             const duplicatedHCPsCount = calculateDuplicatedCount(filteredData);
@@ -1030,6 +1059,15 @@
             } else {
                 duplicatedHCPsSpan.classList.remove('red');
             }
+
+            // Update Total HCPs and its label based on user role
+            if (loggedInUser && loggedInUser.title === 'District Manager') {
+                totalHCPsSpan.textContent = baseDataForUser.length;
+                totalHCPsLabel.textContent = 'Total HCPs (Your Team)';
+            } else {
+                totalHCPsSpan.textContent = hcpData.length; // This is the overall total from the sheet
+                totalHCPsLabel.textContent = 'Total HCPs';
+            }
         }
 
         /**
@@ -1037,28 +1075,19 @@
          * This function now also respects the initial filter set by the logged-in user.
          */
         function filterData() {
-            const districtFilter = document.getElementById('districtFilter').value;
+            const districtFilter = districtFilterSelect.value;
             const repFilter = document.getElementById('repFilter').value;
             const areaFilter = document.getElementById('areaFilter').value;
             const specialtyFilter = document.getElementById('specialtyFilter').value;
             const brickFilter = document.getElementById('brickFilter').value;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-            // Determine the base data to filter from. If a DM is logged in and their filter is applied,
-            // start from the already filtered `hcpData`. Otherwise, start from the full `hcpData`.
-            let baseDataForFiltering = hcpData;
-            if (loggedInUser && loggedInUser.title === 'District Manager') {
-                baseDataForFiltering = hcpData.filter(hcp => 
-                    hcp.districtManager && hcp.districtManager.toLowerCase() === loggedInUser.username.toLowerCase()
-                );
-            }
-
-
-            let currentFilteredData = baseDataForFiltering.filter(hcp => {
-                // The district filter is handled by the initial baseDataForFiltering for DMs,
+            // Start filtering from the base data relevant to the logged-in user
+            let currentFilteredData = baseDataForUser.filter(hcp => {
+                // The district filter is handled by the initial baseDataForUser for DMs,
                 // otherwise it's an active filter for Admins.
                 const matchesDistrict = (loggedInUser && loggedInUser.title === 'District Manager')
-                                        ? true // Already filtered by DM's name in baseDataForFiltering
+                                        ? true // Already filtered by DM's name in baseDataForUser
                                         : (!districtFilter || hcp.districtManager === districtFilter);
 
                 const matchesRep = !repFilter || hcp.medicalRep === repFilter;
@@ -1078,6 +1107,7 @@
             renderTable();
             updateStats();
             // Re-populate the other filters based on the new filteredData
+            // This needs to be called after filterData to ensure dependent dropdowns update correctly
             populateFilters(); 
             toggleEditListButtonVisibility(); // Call this after filtering
         }
@@ -1299,10 +1329,14 @@
          * The button is visible only when "All District Managers" is selected in the district filter.
          */
         function toggleEditListButtonVisibility() {
-            if (districtFilterSelect.value === '') { // '' corresponds to "All District Managers"
-                editListButton.style.display = 'flex'; // Show the button
+            // The button should be visible if no specific DM is selected AND the user is an admin.
+            // If a DM is logged in, their filter is disabled and pre-selected, so the button should be hidden.
+            if (loggedInUser && loggedInUser.title === 'District Manager') {
+                editListButton.style.display = 'none';
+            } else if (districtFilterSelect.value === '') { // '' corresponds to "All District Managers"
+                editListButton.style.display = 'flex'; // Show the button for admin when "All DMs" is selected
             } else {
-                editListButton.style.display = 'none'; // Hide the button
+                editListButton.style.display = 'none'; // Hide the button if a specific DM is selected by an an admin
             }
         }
 
@@ -1311,7 +1345,11 @@
          */
         function setupEventListeners() {
             // Filter event listeners
-            districtFilterSelect.addEventListener('change', filterData);
+            districtFilterSelect.addEventListener('change', () => {
+                // When District Manager changes, reset Medical Rep filter to 'All'
+                repFilterSelect.value = ''; 
+                filterData();
+            });
             document.getElementById('repFilter').addEventListener('change', filterData);
             document.getElementById('areaFilter').addEventListener('change', filterData);
             document.getElementById('specialtyFilter').addEventListener('change', filterData);
