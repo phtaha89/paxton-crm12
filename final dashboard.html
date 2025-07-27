@@ -2407,92 +2407,96 @@
         }
 
         async function handleLogin(e) {
-            e.preventDefault();
-            const isAdminLogin = $('#adminLoginToggle').is(':checked');
-            let username;
-            let password = $('#password').val();
-            const loginError = $('#login-error');
+    e.preventDefault();
+    const isAdminLogin = $('#adminLoginToggle').is(':checked');
+    let username;
+    let password = $('#password').val();
+    const loginError = $('#login-error');
+    loginError.text('');
 
-            loginError.text('');
-
-            if (isAdminLogin) {
-                username = $('#adminUsername').val();
-                if (!username || !password) {
-                    loginError.text('Please enter admin username and password.');
-                    return;
-                }
-            } else {
-                username = $('#username').val();
-                if (!username || !password) {
-                    loginError.text('Please select a username and enter a password.');
-                    return;
-                }
-            }
-
-            try {
-                let query;
-                if (isAdminLogin) {
-                    query = supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password', password)
-                        .eq('title', 'admin')
-                        .single();
-                } else {
-                    query = supabaseClient
-                        .from('users')
-                        .select('*')
-                        .eq('username', username)
-                        .eq('password', password)
-                        .single();
-                }
-                
-                const { data, error } = await query; 
-
-                if (error && error.code !== 'PGRST116') {
-                    throw error;
-                }
-
-                if (data) {
-                    loggedInUserRole = data.title;
-                    loggedInUserDM = data.username;
-                    
-                    localStorage.setItem('loggedInUsername', data.username);
-                    localStorage.setItem('loggedInUserRole', data.title);
-
-                    const dmGovernorates = new Set();
-                    const dmAreas = new Set(); // Also get areas for the DM
-                    allGoogleSheetData.forEach(row => {
-                        if (row['District Manager'] === loggedInUserDM) {
-                            if (row['Governorate']) { // Assuming 'Governorate' column exists
-                                dmGovernorates.add(row['Governorate'].trim());
-                            }
-                            if (row['area']) { // Assuming 'area' column exists
-                                dmAreas.add(row['area'].trim());
-                            }
-                        }
-                    });
-                    // For a DM, we store their governorates (or areas if that's more relevant for dashboard display)
-                    loggedInUserGovernorates = Array.from(dmGovernorates); 
-                    localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
-                    localStorage.setItem('loggedInUserAreas', JSON.stringify(Array.from(dmAreas))); // Store areas too
-
-                    $('#login-page').hide();
-                    $('#dashboard-content').show();
-                    initializeCommonDashboard(); 
-                } else {
-                    loginError.text('Invalid username or password.');
-                }
-            } catch (err) {
-                console.error('Login error:', err);
-                if (err.message.includes("Invalid API key")) {
-                    loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
-                } else {
-                    loginError.text('An error occurred during login. Please try again.');
-                }
-            }
+    if (isAdminLogin) {
+        username = $('#adminUsername').val();
+        if (!username || !password) {
+            loginError.text('Please enter admin username and password.');
+            return;
         }
+    } else {
+        username = $('#username').val();
+        if (!username || !password) {
+            loginError.text('Please select a username and enter a password.');
+            return;
+        }
+    }
+
+    try {
+        let query;
+        if (isAdminLogin) {
+            query = supabaseClient
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .eq('title', 'admin')
+                .single();
+        } else {
+            query = supabaseClient
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .single();
+        }
+
+        const { data, error } = await query;
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+
+        if (data) {
+            loggedInUserRole = data.title;
+            loggedInUserDM = data.username;
+
+            // Store credentials in localStorage
+            localStorage.setItem('username', username);
+            localStorage.setItem('password', password);
+
+            localStorage.setItem('loggedInUsername', data.username);
+            localStorage.setItem('loggedInUserRole', data.title);
+
+            const dmGovernorates = new Set();
+            const dmAreas = new Set(); // Also get areas for the DM
+            allGoogleSheetData.forEach(row => {
+                if (row['District Manager'] === loggedInUserDM) {
+                    if (row['Governorate']) { // Assuming 'Governorate' column exists
+                        dmGovernorates.add(row['Governorate'].trim());
+                    }
+                    if (row['area']) { // Assuming 'area' column exists
+                        dmAreas.add(row['area'].trim());
+                    }
+                }
+            });
+
+            // For a DM, we store their governorates (or areas if that's more relevant for dashboard display)
+            loggedInUserGovernorates = Array.from(dmGovernorates);
+            localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
+            localStorage.setItem('loggedInUserAreas', JSON.stringify(Array.from(dmAreas))); // Store areas too
+
+            $('#login-page').hide();
+            $('#dashboard-content').show();
+            initializeCommonDashboard();
+        } else {
+            loginError.text('Invalid username or password.');
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        if (err.message.includes("Invalid API key")) {
+            loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
+        } else {
+            loginError.text('An error occurred during login. Please try again.');
+        }
+    }
+}
+
 
         // --- Common Dashboard Initialization ---
         function initializeCommonDashboard() {
@@ -5517,6 +5521,7 @@ Thank you.`;
                 showAlertDialog('Error deleting visits: ' + error.message, 'danger');
             }
         }
+        
 
         // --- Document Ready / Initial Load ---
         $(document).ready(function() {
@@ -5547,8 +5552,99 @@ Thank you.`;
                     $('#dashboard-content').hide();
                     $('#loginForm').on('submit', handleLogin);
                 }
+                
             });
         });
+        async function handleLogin(e) {
+    e.preventDefault();
+    const isAdminLogin = $('#adminLoginToggle').is(':checked');
+    let username;
+    let password = $('#password').val();
+    const loginError = $('#login-error');
+    loginError.text('');
+
+    if (isAdminLogin) {
+        username = $('#adminUsername').val();
+        if (!username || !password) {
+            loginError.text('Please enter admin username and password.');
+            return;
+        }
+    } else {
+        username = $('#username').val();
+        if (!username || !password) {
+            loginError.text('Please select a username and enter a password.');
+            return;
+        }
+    }
+
+    try {
+        let query;
+        if (isAdminLogin) {
+            query = supabaseClient
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .eq('title', 'admin')
+                .single();
+        } else {
+            query = supabaseClient
+                .from('users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .single();
+        }
+
+        const { data, error } = await query;
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+
+        if (data) {
+            loggedInUserRole = data.title;
+            loggedInUserDM = data.username;
+
+            // Store credentials in localStorage
+            localStorage.setItem('username', username);
+            localStorage.setItem('password', password);
+
+            localStorage.setItem('loggedInUsername', data.username);
+            localStorage.setItem('loggedInUserRole', data.title);
+
+            const dmGovernorates = new Set();
+            const dmAreas = new Set(); // Also get areas for the DM
+            allGoogleSheetData.forEach(row => {
+                if (row['District Manager'] === loggedInUserDM) {
+                    if (row['Governorate']) { // Assuming 'Governorate' column exists
+                        dmGovernorates.add(row['Governorate'].trim());
+                    }
+                    if (row['area']) { // Assuming 'area' column exists
+                        dmAreas.add(row['area'].trim());
+                    }
+                }
+            });
+
+            // For a DM, we store their governorates (or areas if that's more relevant for dashboard display)
+            loggedInUserGovernorates = Array.from(dmGovernorates);
+            localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
+            localStorage.setItem('loggedInUserAreas', JSON.stringify(Array.from(dmAreas))); // Store areas too
+
+            $('#login-page').hide();
+            $('#dashboard-content').show();
+            initializeCommonDashboard();
+        } else {
+            loginError.text('Invalid username or password.');
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        if (err.message.includes("Invalid API key")) {
+            loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
+        } else {
+            loginError.text('An error occurred during login. Please try again.');
+        }
+    }
+}
     </script>
 </body>
 </html>
