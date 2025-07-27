@@ -1275,7 +1275,8 @@
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
             const loginError = document.getElementById('loginError');
-
+localStorage.setItem('username', username);
+localStorage.setItem('password', password);
             loginError.style.display = 'none'; // Hide any previous error message
 
             if (!usernameInput || !passwordInput) {
