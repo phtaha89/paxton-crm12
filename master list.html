@@ -202,6 +202,7 @@
             position: sticky;
             top: 0;
             z-index: 10;
+            white-space: nowrap; /* Added this line */
         }
 
         .hcp-table td {
@@ -510,22 +511,17 @@
                         <option value="">All Medical Reps</option>
                     </select>
                 </div>
+                <!-- The Area filter is removed as per your request -->
                 <div class="filter-group">
-                    <label for="areaFilter">Area</label>
-                    <select id="areaFilter" class="filter-select">
-                        <option value="">All Areas</option>
+                    <label for="brickFilter">Brick</label>
+                    <select id="brickFilter" class="filter-select">
+                        <option value="">All Bricks</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label for="specialtyFilter">Specialty</label>
                     <select id="specialtyFilter" class="filter-select">
                         <option value="">All Specialties</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="brickFilter">Brick</label>
-                    <select id="brickFilter" class="filter-select">
-                        <option value="">All Bricks</option>
                     </select>
                 </div>
             </div>
@@ -550,7 +546,7 @@
         <div class="stats-bar">
             <div class="stats-item" id="totalHCPsStat">
                 <span class="stats-number" id="totalHCPs">0</span>
-                <span class="stats-label" id="totalHCPsLabel">Total HCPs</span>
+                <span class="stats-label" id="totalHCPsLabel">Total HCPs (Your Team)</span>
                 <span class="clickable-note">Click to reset filters</span>
             </div>
             <div class="stats-item">
@@ -571,8 +567,7 @@
                         <th>HCPS</th>
                         <th>Speciality</th>
                         <th>Account</th>
-                        <th>Area</th>
-                        <th>Brick</th>
+                        <th>Brick</th> <!-- Changed from Area to Brick -->
                         <th>Medical Rep</th>
                         <th>District Manager</th>
                     </tr>
@@ -601,11 +596,11 @@
                         <h3><i class="fas fa-user-md"></i> Personal Information</h3>
                         <div class="detail-row">
                             <span class="detail-label">Name</span>
-                            <span class="detail-value" id="hcp-name">Dr. John Smith</span>
+                            <span class="detail-value" id="hcp-name">${hcp.hcps || 'N/A'}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Specialty</span>
-                            <span class="detail-value specialty" id="hcp-specialty">Cardiology</span>
+                            <span class="detail-value specialty" id="hcp-specialty">${hcp.specialty || 'N/A'}</span>
                         </div>
                     </div>
                     
@@ -613,15 +608,11 @@
                         <h3><i class="fas fa-building"></i> Practice Information</h3>
                         <div class="detail-row">
                             <span class="detail-label">Account</span>
-                            <span class="detail-value" id="hcp-account">General Hospital</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="detail-label">Area</span>
-                            <span class="detail-value area" id="hcp-area">North District</span>
+                            <span class="detail-value" id="hcp-account">${hcp.account || 'N/A'}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Brick</span>
-                            <span class="detail-value" id="hcp-brick">N001</span>
+                            <span class="detail-value area" id="hcp-brick">${hcp.brick || 'N/A'}</span>
                         </div>
                     </div>
                     
@@ -629,15 +620,15 @@
                         <h3><i class="fas fa-users"></i> Team Assignment</h3>
                         <div class="detail-row">
                             <span class="detail-label">Medical Rep</span>
-                            <span class="detail-value" id="hcp-rep">Jane Doe</span>
+                            <span class="detail-value" id="hcp-rep">${hcp.medicalRep || 'N/A'}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">District Manager</span>
-                            <span class="detail-value" id="hcp-manager">Mike Johnson</span>
+                            <span class="detail-value" id="hcp-manager">${hcp.districtManager || 'N/A'}</span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Governorate</span>
-                            <span class="detail-value" id="hcp-governorate">Cairo</span>
+                            <span class="detail-value" id="hcp-governorate">${hcp.governorate || 'N/A'}</span>
                         </div>
                     </div>
 
@@ -664,6 +655,14 @@
                     </div>
                     <div class="detail-section full-width">
                         <h3><i class="fas fa-info-circle"></i> Other Details</h3>
+                        <div class="detail-row">
+                            <span class="detail-label">Class</span>
+                            <span class="detail-value">${hcp.class || 'N/A'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">T.V</span>
+                            <span class="detail-value">${hcp.tv || 'N/A'}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -685,6 +684,7 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const districtFilterSelect = document.getElementById('districtFilter');
         const repFilterSelect = document.getElementById('repFilter'); // Get reference to rep filter
+        const brickFilterSelect = document.getElementById('brickFilter'); // Get reference to brick filter
         const editListButton = document.getElementById('editListBtn');
 
 
@@ -837,7 +837,7 @@
         function clearFilters() {
             document.getElementById('districtFilter').value = '';
             document.getElementById('repFilter').value = '';
-            document.getElementById('areaFilter').value = '';
+            // document.getElementById('areaFilter').value = ''; // Removed Area filter clear
             document.getElementById('specialtyFilter').value = '';
             document.getElementById('brickFilter').value = '';
             document.getElementById('searchInput').value = '';
@@ -927,36 +927,50 @@
         /**
          * Populates the filter dropdowns with unique values.
          * The options for Medical Rep, Area, Specialty, and Brick depend on the
-         * currently selected District Manager.
+         * currently selected District Manager and Medical Representative.
          */
         function populateFilters() {
             const currentDistrictManager = districtFilterSelect.value;
+            const currentMedicalRep = repFilterSelect.value; 
             let dataForDependentFilters = baseDataForUser;
 
-            // If a specific District Manager is selected (and not "All District Managers"),
-            // filter the base data further to get options for dependent filters.
+            // Filter by District Manager if selected
             if (currentDistrictManager) {
-                dataForDependentFilters = baseDataForUser.filter(hcp => 
+                dataForDependentFilters = dataForDependentFilters.filter(hcp => 
                     hcp.districtManager === currentDistrictManager
+                );
+            }
+
+            // Filter by Medical Rep if selected
+            if (currentMedicalRep) {
+                dataForDependentFilters = dataForDependentFilters.filter(hcp => 
+                    hcp.medicalRep === currentMedicalRep
                 );
             }
 
             // Helper to get unique values from a specific property from the dataForDependentFilters
             const getUniqueValues = (prop) => [...new Set(dataForDependentFilters.map(hcp => hcp[prop]).filter(Boolean))].sort(); 
 
-            // Populate Medical Rep, Area, Specialty, and Brick based on dataForDependentFilters
+            // Populate Medical Rep, Specialty, and Brick based on dataForDependentFilters
             populateSelect('repFilter', getUniqueValues('medicalRep'));
-            populateSelect('areaFilter', getUniqueValues('area'));
+            // populateSelect('areaFilter', getUniqueValues('area')); // Removed Area filter population
             populateSelect('specialtyFilter', getUniqueValues('specialty'));
             populateSelect('brickFilter', getUniqueValues('brick'));
 
             // Restore previously selected values if they still exist in the new options
-            // This prevents the dropdown from resetting if the selected option is still valid
             const currentRepValue = repFilterSelect.value;
             if (!getUniqueValues('medicalRep').includes(currentRepValue) && currentRepValue !== '') {
-                repFilterSelect.value = ''; // Reset if current value is no longer valid
+                repFilterSelect.value = ''; 
             }
-            // Repeat for other dependent filters if necessary
+            // The Area filter is removed, so no need to restore its value
+            const currentSpecialtyValue = document.getElementById('specialtyFilter').value;
+            if (!getUniqueValues('specialty').includes(currentSpecialtyValue) && currentSpecialtyValue !== '') {
+                document.getElementById('specialtyFilter').value = '';
+            }
+            const currentBrickValue = document.getElementById('brickFilter').value;
+            if (!getUniqueValues('brick').includes(currentBrickValue) && currentBrickValue !== '') {
+                document.getElementById('brickFilter').value = '';
+            }
         }
 
 
@@ -980,9 +994,9 @@
                 case 'specialtyFilter':
                     allOptionText = 'All Specialties';
                     break;
-                case 'areaFilter':
-                    allOptionText = 'All Areas';
-                    break;
+                // case 'areaFilter': // Removed Area filter case
+                //     allOptionText = 'All Areas';
+                //     break;
                 case 'brickFilter':
                     allOptionText = 'All Bricks';
                     break;
@@ -1031,8 +1045,7 @@
                     </td>
                     <td><span class="specialty-badge">${hcp.specialty || 'N/A'}</span></td>
                     <td>${hcp.account || 'N/A'}</td> 
-                    <td><td><span class="area-badge">${hcp.area || 'N/A'}</span></td>
-                    <td>${hcp.brick || 'N/A'}</td>
+                    <td><span class="area-badge">${hcp.brick || 'N/A'}</span></td> <!-- Display Brick data here -->
                     <td>${hcp.medicalRep || 'N/A'}</td>
                     <td>${hcp.districtManager || 'N/A'}</td>
                 </tr>
@@ -1077,7 +1090,7 @@
         function filterData() {
             const districtFilter = districtFilterSelect.value;
             const repFilter = document.getElementById('repFilter').value;
-            const areaFilter = document.getElementById('areaFilter').value;
+            // const areaFilter = document.getElementById('areaFilter').value; // Removed Area filter
             const specialtyFilter = document.getElementById('specialtyFilter').value;
             const brickFilter = document.getElementById('brickFilter').value;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -1091,7 +1104,7 @@
                                         : (!districtFilter || hcp.districtManager === districtFilter);
 
                 const matchesRep = !repFilter || hcp.medicalRep === repFilter;
-                const matchesArea = !areaFilter || hcp.area === areaFilter;
+                // const matchesArea = !areaFilter || hcp.area === areaFilter; // Removed Area filter condition
                 const matchesSpecialty = !specialtyFilter || hcp.specialty === specialtyFilter;
                 const matchesBrick = !brickFilter || hcp.brick === brickFilter;
                 
@@ -1100,7 +1113,7 @@
                     String(value).toLowerCase().includes(searchTerm)
                 );
 
-                return matchesDistrict && matchesRep && matchesArea && matchesSpecialty && matchesBrick && matchesSearch;
+                return matchesDistrict && matchesRep && matchesSpecialty && matchesBrick && matchesSearch;
             });
 
             filteredData = currentFilteredData; // Update the global filteredData
@@ -1188,12 +1201,8 @@
                         <span class="detail-value" id="hcp-account">${hcp.account || 'N/A'}</span>
                     </div>
                     <div class="detail-row">
-                        <span class="detail-label">Area</span>
-                        <span class="detail-value area" id="hcp-area">${hcp.area || 'N/A'}</span>
-                    </div>
-                    <div class="detail-row">
                         <span class="detail-label">Brick</span>
-                        <span class="detail-value" id="hcp-brick">${hcp.brick || 'N/A'}</span>
+                        <span class="detail-value area" id="hcp-brick">${hcp.brick || 'N/A'}</span>
                     </div>
                 </div>
                 
@@ -1297,13 +1306,13 @@
 
             // Define the order of headers for the XLSX file
             const headers = [
-                'District Manager', 'Governorate', 'Medical Rep', 'Area', 'HCPs', 
-                'Speciality', 'Class', 'T.V', 'Brick', 'Account', 'Address', 'Mobile',
+                'District Manager', 'Governorate', 'Medical Rep', 'Brick', 'HCPs', 
+                'Speciality', 'Class', 'T.V', 'Account', 'Address', 'Mobile',
                 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
             ];
             const headerKeys = [
-                'districtManager', 'governorate', 'medicalRep', 'area', 'hcps', 
-                'specialty', 'class', 'tv', 'brick', 'account', 'address', 'mobile',
+                'districtManager', 'governorate', 'medicalRep', 'brick', 'hcps', 
+                'specialty', 'class', 'tv', 'account', 'address', 'mobile',
                 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
             ];
 
@@ -1346,12 +1355,17 @@
         function setupEventListeners() {
             // Filter event listeners
             districtFilterSelect.addEventListener('change', () => {
-                // When District Manager changes, reset Medical Rep filter to 'All'
+                // When District Manager changes, reset Medical Rep and Brick filters to 'All'
                 repFilterSelect.value = ''; 
+                brickFilterSelect.value = ''; // Reset Brick filter
                 filterData();
             });
-            document.getElementById('repFilter').addEventListener('change', filterData);
-            document.getElementById('areaFilter').addEventListener('change', filterData);
+            repFilterSelect.addEventListener('change', () => { 
+                // When Medical Rep changes, reset Brick filter to 'All'
+                brickFilterSelect.value = ''; // Reset Brick filter
+                filterData();
+            });
+            // document.getElementById('areaFilter').addEventListener('change', filterData); // Removed Area filter listener
             document.getElementById('specialtyFilter').addEventListener('change', filterData);
             document.getElementById('brickFilter').addEventListener('change', filterData);
             document.getElementById('searchInput').addEventListener('input', filterData);
