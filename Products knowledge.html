@@ -12,7 +12,8 @@
         /* Custom styles for better aesthetics and mobile responsiveness */
         body {
             font-family: 'Inter', sans-serif; /* Using Inter font */
-            background: linear-gradient(135deg, #3C2414 0%, #5D4037 50%, #6D4C41 100%);
+            /* New background color matching the image */
+            background-color: #E0F2F7; /* Light blue background */
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -21,11 +22,14 @@
         }
 
         .product-card, .video-card {
-            /* Removed transition for animations */
+            /* No transitions for animations as per request */
+            transition: none;
         }
 
         .product-card:hover, .video-card:hover {
-            /* Removed transform and box-shadow on hover for animations */
+            /* No transform or box-shadow on hover for animations */
+            transform: none;
+            box-shadow: none;
         }
 
         .pdf-thumbnail, .video-thumbnail {
@@ -38,21 +42,16 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            /* Removed transition for animations */
+            transition: border-color 0.3s ease; /* Keep a subtle transition for border hover */
             height: 12rem; /* Fixed height for consistency */
         }
 
         .pdf-thumbnail:hover, .video-thumbnail:hover {
-            border-color: #3C2414;
+            border-color: #4285F4; /* Blue border on hover */
         }
 
-        .pdf-thumbnail iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            pointer-events: none; /* Prevent interaction with iframe content */
-            display: none; /* Hidden by default, shown if content loads */
-        }
+        /* Removed iframe styles as iframes are no longer used for direct display */
+        /* .pdf-thumbnail iframe { ... } */
 
         .pdf-placeholder, .video-placeholder {
             text-align: center;
@@ -88,13 +87,13 @@
             font-weight: 600;
             color: #6B7280; /* Gray text for inactive */
             cursor: pointer;
-            /* Removed transition for animations */
+            transition: all 0.3s ease; /* Subtle transition for toggle button */
             flex-grow: 1; /* Allow buttons to grow */
             text-align: center;
         }
 
         .toggle-button.active {
-            background-color: #3C2414; /* Active background */
+            background-color: #4285F4; /* Active background - vibrant blue */
             color: #ffffff; /* White text for active */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
@@ -122,7 +121,7 @@
 </head>
 <body class="antialiased">
     <div class="container mx-auto p-4 bg-white bg-opacity-95 rounded-2xl shadow-2xl backdrop-blur-md max-w-4xl my-8">
-        <header class="text-center pb-6 mb-6 border-b-2 border-amber-900">
+        <header class="text-center pb-6 mb-6 border-b-2 border-blue-600"> <!-- Changed border color -->
             <h1 class="text-3xl font-semibold text-gray-800 mb-2">Products Knowledge</h1>
             <p class="text-gray-600 text-sm">Access comprehensive product manuals and documentation</p>
         </header>
@@ -134,23 +133,26 @@
         </nav>
 
         <!-- Brochures Section (Initially Visible) -->
-        <div id="brochures-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Changed grid to lg:grid-cols-3 for PC mode -->
+        <div id="brochures-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <!-- Product Card: Taurolock -->
             <div class="product-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
                 <div class="flex items-center mb-4">
-                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">T</div>
+                    <!-- Changed product icon background to blue gradient -->
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">T</div>
                     <h3 class="text-lg font-semibold text-gray-800">Taurolock</h3>
                 </div>
+                <!-- Removed iframe, relying on placeholder and click handler -->
                 <div class="pdf-thumbnail" onclick="openPDF('taurolock')">
-                    <iframe src="https://drive.google.com/file/d/1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ/preview" allow="autoplay"></iframe>
                     <div class="pdf-placeholder">
                         <div class="icon"><i class="far fa-file-pdf"></i></div>
                         <div>Click to view PDF</div>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <a href="https://drive.google.com/file/d/1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 transition-all duration-300 text-center">View Full PDF</a>
+                    <!-- Changed button colors to blue gradient -->
+                    <a href="https://drive.google.com/file/d/1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all duration-300 text-center">View Full PDF</a>
                     <a href="https://drive.google.com/uc?export=download&id=1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ" class="btn btn-secondary flex-1 py-2 px-3 rounded-md text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-all duration-300 text-center">Download</a>
                 </div>
             </div>
@@ -159,18 +161,17 @@
             <div class="product-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
                 <div class="flex items-center mb-4">
-                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">E</div>
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">E</div>
                     <h3 class="text-lg font-semibold text-gray-800">Exit Pro</h3>
                 </div>
                 <div class="pdf-thumbnail" onclick="openPDF('exitpro')">
-                    <iframe src="https://drive.google.com/file/d/1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp/preview" allow="autoplay"></iframe>
                     <div class="pdf-placeholder">
                         <div class="icon"><i class="far fa-file-pdf"></i></div>
                         <div>Click to view PDF</div>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <a href="https://drive.google.com/file/d/1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 transition-all duration-300 text-center">View Full PDF</a>
+                    <a href="https://drive.google.com/file/d/1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all duration-300 text-center">View Full PDF</a>
                     <a href="https://drive.google.com/uc?export=download&id=1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp" class="btn btn-secondary flex-1 py-2 px-3 rounded-md text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-all duration-300 text-center">Download</a>
                 </div>
             </div>
@@ -179,18 +180,17 @@
             <div class="product-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
                 <div class="flex items-center mb-4">
-                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">S</div>
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">S</div>
                     <h3 class="text-lg font-semibold text-gray-800">Shower Guard</h3>
                 </div>
                 <div class="pdf-thumbnail" onclick="openPDF('showerguard')">
-                    <iframe src="https://drive.google.com/file/d/1jyCC59cHXfF_z00FMCJIHexswCMeSGih/preview" allow="autoplay"></iframe>
                     <div class="pdf-placeholder">
                         <div class="icon"><i class="far fa-file-pdf"></i></div>
                         <div>Click to view PDF</div>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <a href="https://drive.google.com/file/d/1jyCC59cHXfF_z00FMCJIHexswCMeSGih/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 transition-all duration-300 text-center">View Full PDF</a>
+                    <a href="https://drive.google.com/file/d/1jyCC59cHXfF_z00FMCJIHexswCMeSGih/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all duration-300 text-center">View Full PDF</a>
                     <a href="https://drive.google.com/uc?export=download&id=1jyCC59cHXfF_z00FMCJIHexswCMeSGih" class="btn btn-secondary flex-1 py-2 px-3 rounded-md text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-all duration-300 text-center">Download</a>
                 </div>
             </div>
@@ -199,42 +199,42 @@
             <div class="product-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
                 <div class="flex items-center mb-4">
-                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">D</div>
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">D</div>
                     <h3 class="text-lg font-semibold text-gray-800">Diafix</h3>
                 </div>
                 <div class="pdf-thumbnail" onclick="openPDF('diafix')">
-                    <iframe src="https://drive.google.com/file/d/1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr/preview" allow="autoplay"></iframe>
                     <div class="pdf-placeholder">
                         <div class="icon"><i class="far fa-file-pdf"></i></div>
                         <div>Click to view PDF</div>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <a href="https://drive.google.com/file/d/1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 transition-all duration-300 text-center">View Full PDF</a>
+                    <a href="https://drive.google.com/file/d/1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transition-all duration-300 text-center">View Full PDF</a>
                     <a href="https://drive.google.com/uc?export=download&id=1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr" class="btn btn-secondary flex-1 py-2 px-3 rounded-md text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 hover:bg-gray-200 transition-all duration-300 text-center">Download</a>
                 </div>
             </div>
         </div>
 
         <!-- Videos Section (Initially Hidden) -->
-        <div id="videos-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6 hidden">
+        <!-- Changed grid to lg:grid-cols-3 for PC mode -->
+        <div id="videos-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6 hidden">
             <!-- Video Card: Taurolock Video -->
             <div class="video-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
                 <div class="flex items-center mb-4">
-                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">T</div>
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">T</div>
                     <h3 class="text-lg font-semibold text-gray-800">Taurolock Video</h3>
                 </div>
                 <div class="video-thumbnail" onclick="openVideo('taurolock-video')">
                     <!-- Placeholder image for video thumbnail -->
-                    <img src="https://placehold.co/320x180/3C2414/ffffff?text=Taurolock+Video" alt="Taurolock Video Thumbnail" class="w-full h-full object-cover rounded-md">
+                    <img src="https://placehold.co/320x180/4285F4/ffffff?text=Taurolock+Video" alt="Taurolock Video Thumbnail" class="w-full h-full object-cover rounded-md">
                     <div class="video-placeholder">
                         <div class="icon"><i class="fas fa-video"></i></div>
                         <div>Click to watch video</div>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <a href="https://drive.google.com/file/d/1234567890/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-center">Watch Video</a>
+                    <a href="https://drive.google.com/file/d/1234567890/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-center">Watch Video</a>
                 </div>
             </div>
 
@@ -242,19 +242,19 @@
             <div class="video-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
                 <div class="flex items-center mb-4">
-                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">E</div>
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">E</div>
                     <h3 class="text-lg font-semibold text-gray-800">Exit Pro Video</h3>
                 </div>
                 <div class="video-thumbnail" onclick="openVideo('exitpro-video')">
                     <!-- Placeholder image for video thumbnail -->
-                    <img src="https://placehold.co/320x180/3C2414/ffffff?text=Exit+Pro+Video" alt="Exit Pro Video Thumbnail" class="w-full h-full object-cover rounded-md">
+                    <img src="https://placehold.co/320x180/4285F4/ffffff?text=Exit+Pro+Video" alt="Exit Pro Video Thumbnail" class="w-full h-full object-cover rounded-md">
                     <div class="video-placeholder">
                         <div class="icon"><i class="fas fa-video"></i></div>
                         <div>Click to watch video</div>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <a href="https://drive.google.com/file/d/14KcKzLF5hl3P_5T1j30jc1JTM4G89ppD/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-center">Watch Video</a>
+                    <a href="https://drive.google.com/file/d/14KcKzLF5hl3P_5T1j30jc1JTM4G89ppD/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-center">Watch Video</a>
                 </div>
             </div>
 
@@ -262,19 +262,19 @@
             <div class="video-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
                 <div class="flex items-center mb-4">
-                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">S</div>
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">S</div>
                     <h3 class="text-lg font-semibold text-gray-800">Shower Guard Video</h3>
                 </div>
                 <div class="video-thumbnail" onclick="openVideo('showerguard-video')">
                     <!-- Placeholder image for video thumbnail -->
-                    <img src="https://placehold.co/320x180/3C2414/ffffff?text=Shower+Guard+Video" alt="Shower Guard Video Thumbnail" class="w-full h-full object-cover rounded-md">
+                    <img src="https://placehold.co/320x180/4285F4/ffffff?text=Shower+Guard+Video" alt="Shower Guard Video Thumbnail" class="w-full h-full object-cover rounded-md">
                     <div class="video-placeholder">
                         <div class="icon"><i class="fas fa-video"></i></div>
                         <div>Click to watch video</div>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <a href="https://drive.google.com/file/d/1fqgQHVQE9GSDKaEd7UDoBJ682Dj2fowP/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-center">Watch Video</a>
+                    <a href="https://drive.google.com/file/d/1fqgQHVQE9GSDKaEd7UDoBJ682Dj2fowP/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-center">Watch Video</a>
                 </div>
             </div>
 
@@ -282,36 +282,33 @@
             <div class="video-card bg-white rounded-xl p-5 shadow-lg border border-gray-200 relative overflow-hidden">
                 <div class="absolute top-3 right-3 w-2 h-2 rounded-full bg-green-500"></div>
                 <div class="flex items-center mb-4">
-                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-amber-800 to-amber-700 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">D</div>
+                    <div class="product-icon w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-base mr-3 shadow-md">D</div>
                     <h3 class="text-lg font-semibold text-gray-800">Diafix Video</h3>
                 </div>
                 <div class="video-thumbnail" onclick="openVideo('diafix-video')">
                     <!-- Placeholder image for video thumbnail -->
-                    <img src="https://placehold.co/320x180/3C2414/ffffff?text=Diafix+Video" alt="Diafix Video Thumbnail" class="w-full h-full object-cover rounded-md">
+                    <img src="https://placehold.co/320x180/4285F4/ffffff?text=Diafix+Video" alt="Diafix Video Thumbnail" class="w-full h-full object-cover rounded-md">
                     <div class="video-placeholder">
                         <div class="icon"><i class="fas fa-video"></i></div>
                         <div>Click to watch video</div>
                     </div>
                 </div>
                 <div class="flex gap-2 mt-4">
-                    <a href="https://drive.google.com/file/d/1DF5G1p4O4aoc9YwkkhHOtRJqazeVIDx2/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-amber-800 to-amber-700 hover:from-amber-700 hover:to-amber-600 text-center">Watch Video</a>
+                    <a href="https://drive.google.com/file/d/1DF5G1p4O4aoc9YwkkhHOtRJqazeVIDx2/view" target="_blank" class="btn btn-primary flex-1 py-2 px-3 rounded-md text-sm font-medium text-white bg-gradient-to-br from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-center">Watch Video</a>
                 </div>
             </div>
         </div>
 
-        <footer class="text-center pt-6 mt-6 border-t border-gray-200 text-xs text-gray-500">
-            <p>Designed by DrTahaDesigns • Last Updated: July 2025</p>
-        </footer>
     </div>
 
     <script>
         // Function to open PDF in a new tab
         function openPDF(product) {
             const fileIds = {
-                'taurolock': '1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ', // Placeholder: Replace with actual Taurolock PDF ID
+                'taurolock': '1j6hP5TvMvTxxJZD1K2xEuNqmyxncPjrZ',
                 'exitpro': '1yryOXyfDKgy-Dqc-XzNMaGFM99v0fQOp',
                 'showerguard': '1jyCC59cHXfF_z00FMCJIHexswCMeSGih',
-                'diafix': '1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr' // Placeholder: Replace with actual Diafix PDF ID
+                'diafix': '1oYNcg01Dcwv_1Y5IXx8WVHUBiNGcJ9cr'
             };
 
             const fileId = fileIds[product];
@@ -323,7 +320,7 @@
         // Function to open video in a new tab
         function openVideo(productVideo) {
             const videoLinks = {
-                'taurolock-video': 'https://drive.google.com/file/d/1234567890/view', // Placeholder: Replace with actual Taurolock video URL
+                'taurolock-video': 'https://drive.google.com/file/d/1234567890/view',
                 'exitpro-video': 'https://drive.google.com/file/d/14KcKzLF5hl3P_5T1j30jc1JTM4G89ppD/view',
                 'showerguard-video': 'https://drive.google.com/file/d/1fqgQHVQE9GSDKaEd7UDoBJ682Dj2fowP/view',
                 'diafix-video': 'https://drive.google.com/file/d/1DF5G1p4O4aoc9YwkkhHOtRJqazeVIDx2/view'
@@ -335,35 +332,10 @@
             }
         }
 
-        // Handle iframe loading errors and show placeholder for PDFs
         document.addEventListener('DOMContentLoaded', function() {
-            const pdfIframes = document.querySelectorAll('.pdf-thumbnail iframe');
-            pdfIframes.forEach(iframe => {
-                const placeholder = iframe.nextElementSibling; // Get the next sibling, which is the placeholder
-
-                // Initially hide the iframe and show the placeholder
-                iframe.style.display = 'none';
-                placeholder.style.display = 'block';
-
-                const checkLoad = setTimeout(() => {
-                    // If after timeout, iframe still not loaded, ensure placeholder is visible
-                    if (iframe.style.display === 'none') {
-                        placeholder.style.display = 'block';
-                    }
-                }, 3000); // Give it 3 seconds to load
-
-                iframe.onload = function() {
-                    clearTimeout(checkLoad); // Clear timeout if loaded successfully
-                    this.style.display = 'block'; // Show iframe
-                    placeholder.style.display = 'none'; // Hide placeholder
-                };
-
-                iframe.onerror = function() {
-                    clearTimeout(checkLoad);
-                    this.style.display = 'none'; // Keep iframe hidden
-                    placeholder.style.display = 'block'; // Ensure placeholder is visible
-                };
-            });
+            // No need for iframe loading error handling since iframes are removed
+            // const pdfIframes = document.querySelectorAll('.pdf-thumbnail iframe');
+            // pdfIframes.forEach(iframe => { ... });
 
             // Toggle functionality for Brochures/Videos sections
             const brochuresBtn = document.getElementById('brochures-btn');
