@@ -3,30 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Representative</title> <!-- Changed title as requested -->
-    <!-- Google Fonts: Inter for a modern, clean look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Paxton LLC CRM</title>
+    <!-- Google Fonts: Inter for a modern, clean look, and Poppins for login title -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Supabase CDN for database interaction -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* CSS Variables for easier theme management and consistency */
+        /* CSS Variables for easier theme management and consistency - Adapted to image colors */
         :root {
-            --coffee-light: #8B5E3C; /* Light coffee/tan */
-            --coffee-dark: #6F4E37;  /* Rich coffee brown */
-            --coffee-gradient-start: #4A2C2A; /* Darker, almost black coffee */
-            --coffee-gradient-end: #8B5E3C;    /* Matches coffee-light */
-
-            --primary-red: #ef4444;
-            --primary-red-dark: #dc2626;
+            --primary-blue-light: #a8d9ff; /* Light blue for background, similar to image */
+            --primary-blue-dark: #3498db; /* Professional Blue for accents */
+            --primary-blue-darker: #2980b9; /* Darker Blue for hover */
+            --accent-orange: #f39c12; /* Warm Orange/Yellow Accent */
             --text-color-dark: #374151;
             --text-color-light: #6b7280;
             --bg-light: #f9fafb;
-            --bg-medium: #f0f2f5;
             --white: #ffffff;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
             --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
-            --border-radius: 12px;
+            --border-radius: 10px;
         }
 
         /* Base styles for all elements */
@@ -43,22 +41,22 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-medium);
+            background: var(--primary-blue-light); /* Light blue background as per image */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             color: var(--text-color-dark);
-            -webkit-font-smoothing: antialiased; /* Smoother text rendering */
+            -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
         /* Main container for the application, taking full available width and height */
         .container {
-            max-width: 1600px; /* Increased max-width for more spacious layout */
+            max-width: 1600px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
             width: 100%;
-            flex-grow: 1; /* Allows container to expand and fill space */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
@@ -66,214 +64,211 @@
         /* Header styling with flexbox for alignment */
         .header {
             display: flex;
-            justify-content: space-between; /* Distribute items */
+            justify-content: space-between;
             align-items: center;
             background: var(--white);
-            padding: 6px 25px; /* Made header slimmer */
+            padding: 8px 20px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             position: relative;
-            z-index: 100; /* Ensures header is always on top */
-            gap: 15px; /* Space between buttons */
+            z-index: 100;
+            gap: 10px;
+            flex-wrap: nowrap; /* Ensure user card and logout button are always in one row */
         }
 
-        /* User card styling */
+        /* User Card Styling */
         .user-card {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            margin-right: auto; /* Pushes it to the left */
-            padding: 5px 10px;
-            border-radius: 8px;
-            background-color: var(--bg-light);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .user-card .username {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-color-dark);
-        }
-
-        .user-card .title {
-            font-size: 0.75rem;
-            color: var(--text-color-light);
-        }
-
-        .user-card .area-governorate { /* New style for area/governorate */
-            font-size: 0.75rem;
-            color: var(--text-color-light);
-            margin-top: 2px;
-        }
-
-        /* Admin tab button styling */
-        .admin-tab {
-            background: var(--primary-red);
-            color: var(--white);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.95rem;
-            border: none;
-            transition: all 0.25s ease; /* Smooth transition for hover effects */
-            text-decoration: none;
-            display: inline-flex;
             align-items: center;
-            gap: 8px; /* Space between text and icon */
+            gap: 12px;
+            padding: 8px 15px;
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
+            order: 2; /* User card on right */
+            width: fit-content; /* Make width fit content */
+            max-width: 200px; /* Smaller max-width for user card */
         }
 
-        .admin-tab:hover {
-            background: var(--primary-red-dark);
-            transform: translateY(-2px); /* Slight lift effect */
-            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.25); /* Enhanced shadow on hover */
+        .user-card-icon {
+            font-size: 1.5rem;
+            color: var(--primary-blue-dark);
         }
-        
-        /* Back button styling, similar to admin tab but with primary coffee color */
-        .back-button {
-            background: var(--coffee-light); /* Changed to coffee color */
-            color: var(--white);
-            padding: 10px 20px;
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .user-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-color-dark);
+            white-space: nowrap; /* Prevent name wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Add ellipsis if too long */
+        }
+
+        .user-title {
+            font-size: 0.85rem;
+            color: var(--text-color-light);
+            font-weight: 400;
+            white-space: nowrap; /* Prevent title wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Add ellipsis if too long */
+        }
+
+        /* Button group in header */
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            order: 1; /* Buttons on left (including logout) */
+        }
+
+        /* Button base styling */
+        .header-button {
+            padding: 8px 15px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             border: none;
             transition: all 0.25s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .header-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Specific button colors */
+        .back-button {
+            background: var(--accent-orange);
+            color: var(--white);
         }
 
         .back-button:hover {
-            background: var(--coffee-dark); /* Changed to darker coffee color */
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25); /* Adjusted shadow color */
+            background: #d6890f;
         }
 
-        /* Logout button styling */
         .logout-button {
-            background: #6b7280; /* Grey color */
+            background: #ef4444; /* Red color for logout */
             color: var(--white);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            font-size: 0.95rem;
-            border: none;
-            transition: all 0.25s ease;
-            text-decoration: none;
-            display: inline-flex;
-            gap: 8px;
+            width: 100px; /* Fixed smaller width for logout button */
+            justify-content: center; /* Center content within the button */
         }
 
         .logout-button:hover {
-            background: #4b5563; /* Darker grey */
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(107, 114, 128, 0.25);
+            background: #dc2626;
         }
-
 
         /* Utility class to hide elements */
         .hidden {
             display: none !important;
         }
 
-        /* Banner styling with gradient and shine animation */
+        /* Banner styling with gradient and new animation */
         .banner {
-            background: linear-gradient(135deg, var(--coffee-gradient-start), var(--coffee-gradient-end)); /* Changed to coffee gradient */
+            background: linear-gradient(135deg, var(--primary-blue-dark), var(--primary-blue-darker)); /* Blue gradient */
             color: white;
-            padding: 20px 30px; /* Decreased padding for PC view */
-            margin-bottom: 25px; /* Slightly reduced margin below banner */
+            padding: 12px 25px; /* Decreased height for slimmer banner */
+            margin-bottom: 20px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
-            flex-shrink: 0; /* Prevents banner from shrinking */
-            display: flex; /* Use flexbox for horizontal alignment of logo and text */
-            flex-direction: row; /* Always row for logo and text */
-            align-items: center; /* Vertically align items */
-            gap: 25px; /* Slightly reduced space between logo and text */
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 20px;
         }
 
+        /* New banner animation: subtle radial pulse */
         .banner::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: translateX(-100%);
-            animation: shine 3s infinite; /* Shine animation for visual flair */
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: radial-pulse 4s infinite ease-out;
+            z-index: 0;
         }
 
-        @keyframes shine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+        @keyframes radial-pulse {
+            0% { width: 0; height: 0; opacity: 0; }
+            50% { width: 120%; height: 120%; opacity: 0.5; }
+            100% { width: 200%; height: 200%; opacity: 0; }
         }
 
         /* Company Logo styling within the banner */
         .company-logo {
-            max-width: 80px; /* Slightly reduced size */
+            max-width: 70px;
             height: auto;
-            border-radius: 8px; /* Slightly rounded corners for the logo */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Subtle shadow */
-            z-index: 1; /* Ensure logo is above shine effect */
-            flex-shrink: 0; /* Prevent logo from shrinking */
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1;
+            flex-shrink: 0;
         }
 
         .banner-text-content {
-            flex-grow: 1; /* Allows text content to take remaining space */
-            text-align: left; /* Ensure text is left-aligned within its container */
+            flex-grow: 1;
+            text-align: left;
+            z-index: 1;
         }
 
         .banner h1 {
-            font-size: 3rem; /* Reduced main title font size */
+            font-size: 2rem; /* Decreased font size for banner title */
             font-weight: 700;
-            margin-bottom: 6px; /* Reduced margin below title */
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            margin-bottom: 2px; /* Reduced margin */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .banner .subtitle {
-            font-size: 1.15rem; /* Reduced subtitle font size */
+            font-size: 0.9rem; /* Adjusted subtitle font size */
             opacity: 0.98;
             font-weight: 400;
-            position: relative;
-            z-index: 1;
         }
 
         /* Home view grid for navigation cards */
         .home-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid columns */
-            gap: 25px; /* Space between grid items */
-            padding: 20px 0;
-            flex-grow: 1; /* Allows grid to expand */
-            align-content: start; /* Aligns content to the start of the grid */
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Decreased minmax for smaller cards */
+            gap: 20px;
+            padding: 15px 0;
+            flex-grow: 1;
+            align-content: start;
         }
 
         /* Styling for each navigation card */
         .main-card {
             background: var(--white);
-            padding: 25px; /* Decreased padding */
+            padding: 18px; /* Decreased padding for smaller cards */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smooth transition for hover */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 160px; /* Decreased min-height */
+            min-height: 130px; /* Decreased min-height for smaller cards */
             position: relative;
             overflow: hidden;
-            border: 1px solid #e2e8f0; /* Subtle border */
+            border: 1px solid #e2e8f0;
         }
 
         /* Pseudo-element for hover effect on cards */
@@ -284,7 +279,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom right, rgba(139, 94, 60, 0.03), transparent 50%); /* Adjusted shadow color */
+            background: linear-gradient(to bottom right, rgba(52, 152, 219, 0.05), transparent 50%); /* Adjusted shadow color to primary blue */
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -294,9 +289,9 @@
         }
 
         .main-card:hover {
-            transform: translateY(-5px); /* Lift effect on hover */
-            box-shadow: var(--shadow-lg); /* Larger shadow on hover */
-            border-color: var(--coffee-light); /* Highlight border on hover */
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-blue-dark);
         }
 
         /* Disabled card styling */
@@ -309,29 +304,29 @@
         }
 
         .main-card.disabled:hover {
-            transform: none; /* No lift for disabled cards */
+            transform: none;
             box-shadow: var(--shadow-sm);
             border-color: #cbd5e1;
         }
 
         /* Icon styling for cards */
         .main-card-icon {
-            font-size: 3rem; /* Reduced icon size */
-            margin-bottom: 12px; /* Reduced margin */
-            color: var(--coffee-light); /* Changed to coffee color */
-            line-height: 1; /* Ensures icon is vertically centered */
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: var(--primary-blue-dark);
+            line-height: 1;
         }
 
         .main-card.disabled .main-card-icon {
-            color: var(--text-color-light); /* Muted icon for disabled cards */
+            color: var(--text-color-light);
         }
 
         /* Title styling for cards */
         .main-card-title {
-            font-size: 1.4rem; /* Reduced title size */
+            font-size: 1.2rem;
             font-weight: 600;
             color: var(--text-color-dark);
-            margin-bottom: 4px; /* Reduced margin */
+            margin-bottom: 3px;
         }
 
         .main-card.disabled .main-card-title {
@@ -340,7 +335,7 @@
 
         /* Subtitle styling for cards */
         .main-card-subtitle {
-            font-size: 0.9rem; /* Slightly reduced subtitle font size */
+            font-size: 0.8rem;
             color: var(--text-color-light);
             line-height: 1.4;
         }
@@ -350,55 +345,55 @@
             background: var(--white);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
-            flex-grow: 1; /* Allows full page view to fill available space */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden; /* Ensures content within iframe doesn't overflow */
-            transition: opacity 0.3s ease, transform 0.3s ease; /* Smooth transition for showing/hiding */
-            transform: translateY(10px); /* Initial slight offset for animation */
-            opacity: 0; /* Start hidden */
-            height: calc(100vh - 120px); /* Calculate height to fill screen minus header/padding */
+            overflow: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(10px);
+            opacity: 0;
+            height: calc(100vh - 100px);
         }
 
         .full-page-view.active {
-            opacity: 1; /* Fully visible */
-            transform: translateY(0); /* Move to final position */
-            display: flex; /* Ensure it's a flex container when active */
+            opacity: 1;
+            transform: translateY(0);
+            display: flex;
         }
 
         /* Iframe container within full page view */
         .iframe-container-fpv {
-            flex-grow: 1; /* Allows iframe to take all available space */
+            flex-grow: 1;
             position: relative;
             width: 100%;
             height: 100%;
             border: none;
-            display: block; /* Removes extra space below iframe */
-            background: var(--white); /* Fallback background */
+            display: block;
+            background: var(--white);
         }
 
         .full-page-view iframe {
             width: 100%;
             height: 100%;
             border: none;
-            display: block; /* Removes extra space below iframe */
-            background: var(--white); /* Fallback background */
+            display: block;
+            background: var(--white);
         }
 
         /* Error state styling */
         .error-state {
-            display: none; /* Hidden by default */
-            padding: 60px 40px;
+            display: none;
+            padding: 40px 30px;
             text-align: center;
-            color: var(--primary-red);
-            position: absolute; /* Overlay on top of iframe */
+            color: #ef4444;
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 5; /* Above iframe, below loading */
+            z-index: 5;
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -410,31 +405,31 @@
         }
 
         .error-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
         }
 
         .error-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .error-text {
             color: var(--text-color-light);
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         /* Loading overlay styling */
         .loading {
-            display: none; /* Hidden by default */
+            display: none;
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
             background: rgba(255, 255, 255, 0.95);
-            z-index: 10; /* Highest z-index */
+            z-index: 10;
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -446,18 +441,19 @@
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid var(--coffee-light); /* Changed to coffee color */
+            width: 35px;
+            height: 35px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid var(--primary-blue-dark);
             border-radius: 50%;
-            animation: spin 1s linear infinite; /* Spinner animation */
-            margin-bottom: 20px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
         }
 
         .loading-text {
             color: var(--text-color-light);
             font-weight: 500;
+            font-size: 0.95rem;
         }
 
         @keyframes spin {
@@ -468,13 +464,13 @@
         /* Status indicator in banner */
         .status-indicator {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 10px; /* Slightly larger */
-            height: 10px;
+            top: 15px;
+            right: 15px;
+            width: 9px;
+            height: 9px;
             border-radius: 50%;
-            background: #10b981; /* Green color */
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); /* Larger pulse shadow */
+            background: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
             animation: pulse 2s infinite;
         }
 
@@ -485,28 +481,28 @@
 
         /* Demo styles for missing pages */
         .demo-content {
-            padding: 40px;
+            padding: 30px;
             text-align: center;
             color: var(--text-color-dark);
-            width: 100%; /* Ensure demo content takes full width */
-            height: 100%; /* Ensure demo content takes full height */
-            display: flex; /* Use flexbox for centering text */
+            width: 100%;
+            height: 100%;
+            display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
 
         .demo-content h2 {
-            color: var(--coffee-dark);
-            margin-bottom: 20px;
-            font-size: 2rem;
+            color: var(--primary-blue-dark);
+            margin-bottom: 15px;
+            font-size: 1.8rem;
         }
 
         .demo-content p {
             color: var(--text-color-light);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            max-width: 600px; /* Limit width for readability */
+            font-size: 1rem;
+            line-height: 1.5;
+            max-width: 500px;
         }
 
         /* Login Page Styles */
@@ -515,29 +511,30 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: var(--bg-medium);
+            background: var(--primary-blue-light); /* Light blue background as per image */
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1000; /* Ensure it's on top */
+            z-index: 1000;
         }
 
         .login-box {
-            background: var(--white);
-            padding: 30px; /* Decreased padding */
+            background: var(--white); /* White card as per image */
+            padding: 25px;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-lg);
             text-align: center;
             width: 100%;
-            max-width: 350px; /* Made smaller */
+            max-width: 320px;
             animation: fadeIn 0.5s ease-out;
+            position: relative;
         }
 
         .login-box .login-logo {
-            max-width: 70px; /* Smaller logo for login box */
-            margin-bottom: 20px;
+            max-width: 60px;
+            margin-bottom: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
@@ -548,32 +545,33 @@
         }
 
         .login-box h2 {
-            font-size: 1.8rem; /* Slightly smaller font size */
-            color: var(--coffee-dark);
-            margin-bottom: 25px; /* Adjusted margin */
+            font-family: 'Poppins', sans-serif; /* Attractive font for login title */
+            font-size: 1.3rem; /* Decreased font size for login title */
+            color: var(--primary-blue-dark);
+            margin-bottom: 5px; /* Reduced margin */
             font-weight: 700;
         }
 
         .login-box .input-group {
-            margin-bottom: 15px; /* Decreased margin */
+            margin-bottom: 12px;
             text-align: left;
         }
 
         .login-box label {
             display: block;
-            margin-bottom: 6px; /* Decreased margin */
+            margin-bottom: 5px;
             font-weight: 500;
             color: var(--text-color-dark);
-            font-size: 0.9rem; /* Decreased font size */
+            font-size: 0.85rem;
         }
 
         .login-box input[type="text"],
         .login-box input[type="password"] {
             width: 100%;
-            padding: 10px 12px; /* Decreased padding */
+            padding: 9px 11px;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 0.95rem; /* Decreased font size */
+            font-size: 0.9rem;
             color: var(--text-color-dark);
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
@@ -581,176 +579,279 @@
         .login-box input[type="text"]:focus,
         .login-box input[type="password"]:focus {
             outline: none;
-            border-color: var(--coffee-light);
-            box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.2);
+            border-color: var(--primary-blue-dark);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
 
+        /* Redesigned Login Button */
         .login-box button {
-            width: 100%;
-            padding: 12px 20px;
-            background: var(--coffee-light);
+            width: 120px; /* Fixed smaller width for attractive button */
+            padding: 8px 15px;
+            background: var(--primary-blue-dark); /* Solid blue as per image */
             color: var(--white);
             border: none;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 0.9rem; /* Smaller font size */
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .login-box button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.4s ease;
+            transform: skewX(-20deg);
+            z-index: -1;
+        }
+
+        .login-box button:hover::before {
+            left: 100%;
         }
 
         .login-box button:hover {
-            background: var(--coffee-dark);
+            background: var(--primary-blue-darker); /* Darker blue on hover */
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(139, 94, 60, 0.25);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
         }
 
         .login-box .error-message {
-            color: var(--primary-red);
-            margin-top: 15px;
-            font-size: 0.9rem;
+            color: #ef4444;
+            margin-top: 12px;
+            font-size: 0.85rem;
             font-weight: 500;
-            display: none; /* Hidden by default */
+            display: none;
         }
 
-        /* Responsive adjustments for smaller screens */
+        /* Full-page Blurred Message Overlay */
+        .full-page-message-overlay {
+            position: fixed; /* Use fixed to cover entire viewport */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85); /* Semi-transparent white */
+            backdrop-filter: blur(8px); /* Stronger blur effect */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            z-index: 2000; /* Ensure it's on top of everything */
+        }
+
+        .full-page-message-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .full-page-message-overlay p {
+            font-size: 1.8rem; /* Larger font for full-page message */
+            font-weight: 700;
+            color: var(--primary-blue-dark); /* Use primary blue for message */
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9); /* Slightly opaque background for readability */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Footer Styling */
+        .footer {
+            margin-top: auto;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-color-light);
+            background: var(--bg-light);
+            border-top: 1px solid #e2e8f0;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 1024px) {
             .container {
-                padding: 15px;
+                padding: 10px;
+            }
+            .header {
+                padding: 6px 15px;
+            }
+            .user-card {
+                padding: 6px 12px;
+                gap: 10px;
+                max-width: 180px; /* Adjusted max-width for smaller screens */
+            }
+            .user-card-icon {
+                font-size: 1.3rem;
+            }
+            .user-name {
+                font-size: 0.9rem; /* Decreased font size for user card on tablets */
+            }
+            .user-title {
+                font-size: 0.75rem; /* Decreased font size for user card on tablets */
+            }
+            .header-button {
+                padding: 7px 12px;
+                font-size: 0.85rem;
+            }
+            .logout-button {
+                width: 90px; /* Adjusted width for smaller screens */
             }
             .banner {
-                padding: 25px 30px; /* Slightly more compact */
-                gap: 20px;
+                padding: 10px 20px;
+                gap: 15px;
             }
             .banner h1 {
-                font-size: 3rem;
+                font-size: 1.8rem;
             }
             .banner .subtitle {
-                font-size: 1.1rem;
+                font-size: 0.85rem;
             }
             .company-logo {
-                max-width: 80px; /* Adjust size for medium screens */
+                max-width: 60px;
             }
             .home-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            .main-card {
+                min-height: 120px;
+                padding: 15px;
             }
             .main-card-icon {
-                font-size: 3rem;
+                font-size: 2rem;
             }
             .main-card-title {
-                font-size: 1.3rem;
+                font-size: 1.1rem;
+            }
+            .full-page-view {
+                height: calc(100vh - 90px);
+            }
+            .full-page-message-overlay p {
+                font-size: 1.5rem;
+                padding: 15px;
             }
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 8px;
             }
             .header {
-                flex-direction: row; /* Keep buttons in a row */
-                justify-content: space-between; /* Space out buttons */
-                padding: 8px 15px; /* Slimmer header on mobile */
+                flex-wrap: nowrap; /* Keep in one row even on mobile */
+                justify-content: space-between; /* Space between user card and buttons */
+                padding: 8px 10px;
             }
-            .admin-tab, .back-button, .logout-button {
-                padding: 8px 15px;
-                font-size: 0.85rem;
+            .user-card {
+                width: 100%; /* Allow user card to take more width */
+                margin-bottom: 0;
+                justify-content: flex-start; /* Align left within its space */
+                order: 2; /* User card on right */
+                flex-grow: 1; /* Allow it to grow */
+                max-width: 150px; /* Adjusted max-width for mobile */
+            }
+            .user-name {
+                font-size: 0.7rem; /* Further decreased font size for mobile */
+            }
+            .user-title {
+                font-size: 0.6rem; /* Further decreased font size for mobile */
+            }
+            .header-buttons {
+                width: auto;
+                justify-content: flex-start; /* Align left within its space */
+                order: 1; /* Buttons on left */
+                flex-grow: 1;
+            }
+            .header-button {
+                flex-grow: 0; /* Don't make buttons fill available space */
+                padding: 6px 8px; /* Adjusted padding */
+                font-size: 0.75rem; /* Adjusted font size */
+            }
+            .logout-button {
+                width: 70px; /* Further decrease width for mobile */
             }
             .banner {
-                /* Maintain row direction for logo and text */
-                padding: 20px 15px; /* Adjust padding for mobile row layout */
-                margin-bottom: 20px;
-                gap: 15px; /* Adjust gap for mobile row layout */
+                padding: 8px 15px;
+                gap: 10px;
             }
             .company-logo {
-                max-width: 60px; /* Even smaller on mobile to allow space for text */
+                max-width: 45px;
             }
             .banner h1 {
-                font-size: 2rem; /* Reduced font size for mobile row layout */
-                margin-bottom: 4px; /* Reduced margin */
+                font-size: 1.4rem;
             }
             .banner .subtitle {
-                font-size: 0.9rem; /* Reduced font size for mobile */
+                font-size: 0.75rem;
             }
             .home-grid {
-                grid-template-columns: 1fr; /* Single column on very small screens */
-                gap: 15px;
+                grid-template-columns: 1fr;
+                gap: 12px;
             }
             .main-card {
-                min-height: 150px;
-                padding: 25px;
+                min-height: 110px;
+                padding: 12px;
             }
             .main-card-icon {
-                font-size: 2.8rem;
+                font-size: 1.6rem;
             }
             .main-card-title {
-                font-size: 1.2rem;
+                font-size: 0.95rem;
             }
             .full-page-view {
-                height: calc(100vh - 90px); /* Adjust height for mobile header */
+                height: calc(100vh - 80px);
             }
             .login-box {
-                padding: 25px 15px; /* Further decreased padding for mobile */
-                margin: 0 15px; /* Adjusted margin */
-                max-width: 300px; /* Even smaller on mobile */
+                padding: 20px;
+                margin: 0 10px;
+                max-width: 280px;
             }
             .login-box .login-logo {
-                max-width: 60px; /* Smaller logo on mobile */
-                margin-bottom: 15px;
+                max-width: 50px;
             }
             .login-box h2 {
-                font-size: 1.6rem;
-                margin-bottom: 18px;
-            }
-            .login-box label {
-                font-size: 0.85rem;
+                font-size: 1.2rem;
+                margin-bottom: 15px;
             }
             .login-box input[type="text"],
             .login-box input[type="password"] {
                 padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+            .login-box button {
+                padding: 9px 15px;
                 font-size: 0.9rem;
             }
-        }
-
-        @media (max-width: 480px) {
-            .banner {
-                padding: 15px 10px;
-                gap: 10px;
-            }
-            .company-logo {
-                max-width: 50px;
-            }
-            .banner h1 {
-                font-size: 1.6rem;
-            }
-            .banner .subtitle {
-                font-size: 0.8rem;
-            }
-            .admin-tab, .back-button, .logout-button {
-                font-size: 0.8rem;
-                padding: 6px 12px;
-            }
-            .user-card {
-                padding: 3px 8px;
-            }
-            .user-card .username {
-                font-size: 0.8rem;
-            }
-            .user-card .title {
-                font-size: 0.7rem;
-            }
-            .user-card .area-governorate { /* Responsive adjustment for area/governorate */
-                font-size: 0.65rem;
+            .full-page-message-overlay p {
+                font-size: 1.2rem;
+                padding: 10px;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Full-page Blurred Message Overlay (for login/logout messages) -->
+    <div id="fullPageMessageOverlay" class="full-page-message-overlay">
+        <p id="fullPageOverlayMessage"></p>
+    </div>
+
     <!-- Login Page -->
     <div id="loginPage" class="login-container">
         <div class="login-box">
             <!-- Paxton Logo for Login Box -->
-            <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="login-logo" onerror="this.onerror=null;this.src='https://placehold.co/70x70/A0522D/FFFFFF?text=Logo';">
-            <h2>PAXTON LLC CRM</h2> <!-- Changed title as requested -->
+            <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="login-logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/3498db/FFFFFF?text=Logo';">
+            <h2>PAXTON LLC CRM</h2>
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" placeholder="Enter your username">
@@ -767,24 +868,24 @@
     <!-- Main Application Content (hidden until login) -->
     <div id="appContent" class="container hidden">
         <div class="header">
-            <!-- User Card -->
-            <div id="userCard" class="user-card hidden">
-                <span class="username"></span>
-                <span class="title"></span>
-                <span class="area-governorate"></span> <!-- New span for area/Governorate -->
+            <!-- Logout button on the left -->
+            <div class="header-buttons">
+                <button id="logoutButton" class="header-button logout-button">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+                <!-- Back button, initially hidden -->
+                <button id="backButton" class="header-button back-button hidden">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </button>
             </div>
-            <!-- Back button, initially hidden -->
-            <button id="backButton" class="back-button hidden">
-                &#x2190; Back to Home
-            </button>
-            <!-- Admin tab button - REMOVED as per user request to use the card instead -->
-            <!-- <button id="adminButton" class="admin-tab">
-                Admin
-            </button> -->
-            <!-- Logout button -->
-            <button id="logoutButton" class="logout-button">
-                Logout
-            </button>
+            <!-- User Card on the right -->
+            <div id="userCard" class="user-card hidden">
+                <i class="fas fa-user-circle user-card-icon"></i>
+                <div class="user-info">
+                    <span id="userCardName" class="user-name"></span>
+                    <span id="userCardTitle" class="user-title"></span>
+                </div>
+            </div>
         </div>
 
         <!-- Home View: This section will display the main navigation cards -->
@@ -792,9 +893,7 @@
             <div class="banner">
                 <div class="status-indicator"></div>
                 <!-- Company Logo moved to the left and placed before text content -->
-                <!-- The logo image source has been corrected to a standard URL format. -->
-                <!-- The onerror attribute provides a fallback placeholder image if the main image fails to load. -->
-                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/90x90/A0522D/FFFFFF?text=Logo';">
+                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/70x70/3498db/FFFFFF?text=Logo';">
                 <div class="banner-text-content">
                     <h1>PAXTON LLC CRM</h1>
                     <div class="subtitle">Medical Team Affairs</div>
@@ -814,31 +913,31 @@
                     <div class="main-card-title">Dashboard</div>
                     <div class="main-card-subtitle">View key performance indicators and analytics.</div>
                 </div>
-                <!-- UPA Codes Card - This card is fully clickable and functions like the CRM card. -->
+                <!-- UPA Codes Card -->
                 <div class="main-card" data-page="upa-codes">
                     <div class="main-card-icon">🏥</div>
                     <div class="main-card-title">UPA Codes</div>
                     <div class="main-card-subtitle">Access UPA Codes and affairs.</div>
                 </div>
-                <!-- Price List Card - This card is fully clickable and functions like the CRM card. -->
+                <!-- Price List Card -->
                 <div class="main-card" data-page="price-list">
                     <div class="main-card-icon">💲</div>
                     <div class="main-card-title">Price List</div>
                     <div class="main-card-subtitle">products pricing information.</div>
                 </div>
-                <!-- Products Knowledge Card - New card added -->
+                <!-- Products Knowledge Card -->
                 <div class="main-card" data-page="products-knowledge">
                     <div class="main-card-icon">📚</div>
                     <div class="main-card-title">Products Knowledge</div>
                     <div class="main-card-subtitle">Detailed information about our products.</div>
                 </div>
-                <!-- Admin Card - Now the primary way to access admin for allowed roles -->
+                <!-- Admin Card -->
                 <div id="adminCard" class="main-card" data-page="admin">
                     <div class="main-card-icon">⚙️</div>
                     <div class="main-card-title">Admin Panel</div>
                     <div class="main-card-subtitle">Manage users and system settings.</div>
                 </div>
-                <!-- Master List Card - New card, now for admin and District Manager -->
+                <!-- Master List Card -->
                 <div id="masterListCard" class="main-card" data-page="master-list">
                     <div class="main-card-icon">📋</div>
                     <div class="main-card-title">Master List</div>
@@ -934,7 +1033,7 @@
             </div>
         </div>
 
-        <!-- Products Knowledge Full Page View - New view added -->
+        <!-- Products Knowledge Full Page View -->
         <div id="productsKnowledgeView" class="full-page-view hidden">
             <div class="loading" id="loadingProductsKnowledge">
                 <div class="spinner"></div>
@@ -958,7 +1057,7 @@
         <div id="adminView" class="full-page-view hidden">
             <div class="loading" id="loadingAdmin">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading Admin Panel...</div>
+                <div class="loading-text">Loading Admin...</div>
             </div>
             <div class="error-state" id="errorAdmin">
                 <div class="error-icon">⚠️</div>
@@ -974,7 +1073,7 @@
             </div>
         </div>
 
-        <!-- Master List Full Page View - New view added -->
+        <!-- Master List Full Page View -->
         <div id="masterListView" class="full-page-view hidden">
             <div class="loading" id="loadingMasterList">
                 <div class="spinner"></div>
@@ -996,6 +1095,10 @@
 
     </div>
 
+    <footer class="footer">
+        Designed by DrTahaDesigns
+    </footer>
+
     <script>
         // Supabase configuration from your provided keys
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
@@ -1006,16 +1109,18 @@
 
         // Global variables to manage application state
         let currentActiveViewId = null; // Stores the ID of the currently active full-page view
-        // Stores user data: { username, title, area, governorate }
+        // Stores user data: { username, title }
         let loggedInUser = null; 
-        let googleSheetData = []; // Global variable to store parsed Google Sheet data
+        // googleSheetData is no longer used for user card display, but kept if other parts of the app need it.
+        let googleSheetData = []; 
 
-        // Google Sheet URL for area and governorate data
+        // Google Sheet URL (kept for potential future use or other app parts)
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
         /**
          * Fetches and parses the Google Sheet CSV data.
-         * Dynamically maps columns based on header names and user's specified indices.
+         * This function is kept for potential future use, but its data is no longer
+         * directly used for the user card's area/governorate display as per the request.
          */
         async function fetchGoogleSheetData() {
             try {
@@ -1024,46 +1129,33 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const csvText = await response.text();
-                console.log('Raw Google Sheet CSV text:', csvText); // Log raw CSV text
+                console.log('Raw Google Sheet CSV text:', csvText);
 
                 const lines = csvText.split('\n');
-                if (lines.length < 2) { // Ensure there's at least a header and one data row
+                if (lines.length < 2) {
                     console.warn('Google Sheet CSV is empty or only has headers.');
                     googleSheetData = [];
                     return;
                 }
 
-                // Assuming the first row is the header
                 const headerRow = lines[0].split(',').map(h => h.trim());
-                console.log('Google Sheet headers:', headerRow); // Log headers
-
                 const dataRows = lines.slice(1);
 
-                // Dynamically find column indices based on header names for robustness
-                // Fallback to hardcoded indices if header names are not found, based on user's column letters
                 const getColumnIndex = (headers, possibleNames, fallbackIndex) => {
                     for (const name of possibleNames) {
                         const index = headers.indexOf(name);
                         if (index !== -1) return index;
                     }
-                    return fallbackIndex; // Use fallback index if no header name matches
+                    return fallbackIndex;
                 };
 
-                // User specified:
-                // Column B: District Manager (Name) -> index 1
-                // Column C: Governorate -> index 2
-                // Column D: Medical Representative (Name) -> index 3
-                // Column E: area -> index 4
-
                 const dmNameColIndex = getColumnIndex(headerRow, ['District Manager', 'DistrictManager', 'DM Name'], 1);
-                const mrNameColIndex = getColumnIndex(headerRow, ['medical rep', 'Medical Representative', 'MedicalRep', 'MR Name'], 3); // Added 'medical rep'
                 const governorateColIndex = getColumnIndex(headerRow, ['Governorate'], 2);
-                const areaColIndex = getColumnIndex(headerRow, ['area'], 4); // This is configured to look for 'area' and defaults to index 4 (Column E)
-                // Assuming a general name column might be present for other roles like Admin, often Column A
+                const mrNameColIndex = getColumnIndex(headerRow, ['Medical Representative', 'MedicalRep', 'MR Name', 'medical rep'], 3);
+                const areaColIndex = getColumnIndex(headerRow, ['area'], 4); 
                 const generalNameColIndex = getColumnIndex(headerRow, ['Name', 'GeneralName'], 0);
 
-
-                let tempSheetData = {}; // To store consolidated data by username
+                let tempSheetData = {};
 
                 dataRows.forEach((row, rowIndex) => {
                     const columns = row.split(',').map(col => col.trim());
@@ -1075,11 +1167,6 @@
                     const mrName = columns[mrNameColIndex];
                     const generalName = columns[generalNameColIndex];
 
-                    const currentGovernorate = columns[governorateColIndex];
-                    const currentArea = columns[areaColIndex]; // This is where 'area' is read from
-
-                    // Determine the primary username and title from the sheet row
-                    // Prioritize specific roles (DM, MR) for username and title
                     if (dmName && dmName !== '') {
                         sheetUsername = dmName;
                         sheetTitle = 'District Manager';
@@ -1087,10 +1174,7 @@
                         sheetUsername = mrName;
                         sheetTitle = 'Medical Representative';
                     } else {
-                        // Fallback for other roles (e.g., Admin) whose name might be in Column A
                         sheetUsername = generalName;
-                        // The title for generalName users (like Admin) will be primarily from Supabase
-                        // We leave sheetTitle empty or generic here, and let Supabase title take precedence for Admin.
                     }
 
                     if (sheetUsername) {
@@ -1098,43 +1182,78 @@
                         if (!tempSheetData[lowerCaseUsername]) { 
                             tempSheetData[lowerCaseUsername] = {
                                 username: sheetUsername,
-                                title: sheetTitle, // This title is from the sheet, Supabase title will override
-                                governorates: new Set(), // Use Set to store unique governorates
-                                areas: new Set(), // Use Set to store unique areas
-                                districtManager: '' // To store DM for MRs
+                                title: sheetTitle,
+                                governorates: new Set(),
+                                areas: new Set()
                             };
                         }
+                        const currentGovernorate = columns[governorateColIndex];
+                        const currentarea = columns[areaColIndex]; 
+
                         if (currentGovernorate) {
-                            currentGovernorate.split(',').forEach(g => { // Split by comma for multiple
+                            currentGovernorate.split(',').forEach(g => {
                                 if (g.trim()) tempSheetData[lowerCaseUsername].governorates.add(g.trim());
                             });
                         }
-                        if (currentArea) { // Add currentArea to the areas Set
-                            currentArea.split(',').forEach(a => { // Split by comma for comma for multiple
+                        if (currentarea) { 
+                            currentarea.split(',').forEach(a => {
                                 if (a.trim()) tempSheetData[lowerCaseUsername].areas.add(a.trim());
                             });
                         }
-                        if (dmName) {
-                            tempSheetData[lowerCaseUsername].districtManager = dmName;
-                        }
-                        console.log(`Processed row ${rowIndex + 1} for sheet username ${sheetUsername}: Governorates: ${Array.from(tempSheetData[lowerCaseUsername].governorates).join(', ')}, areas: ${Array.from(tempSheetData[lowerCaseUsername].areas).join(', ')}`);
                     }
                 });
 
-                // Convert Sets to arrays for final googleSheetData
                 googleSheetData = Object.values(tempSheetData).map(entry => ({
                     username: entry.username,
-                    title: entry.title, // This title is from the sheet, Supabase title will override
-                    governorate: Array.from(entry.governorates), // Convert Set to Array
-                    area: Array.from(entry.areas), // Convert Set to Array
-                    districtManager: entry.districtManager
+                    title: entry.title, 
+                    governorate: Array.from(entry.governorates),
+                    area: Array.from(entry.areas)
                 }));
 
                 console.log('Final consolidated Google Sheet data:', googleSheetData);
             } catch (error) {
                 console.error('Error fetching or parsing Google Sheet data:', error);
-                // Optionally, display an error to the user or use fallback data
             }
+        }
+
+        /**
+         * Updates the user card with logged-in user's information (only name and title from Supabase).
+         */
+        function updateAndShowUserCard() {
+            const userCard = document.getElementById('userCard');
+            const userCardName = document.getElementById('userCardName');
+            const userCardTitle = document.getElementById('userCardTitle');
+            const userCardLocation = document.getElementById('userCardLocation'); // Keep reference to clear it
+
+            if (loggedInUser) {
+                userCardName.textContent = loggedInUser.username;
+                userCardTitle.textContent = loggedInUser.title;
+                if (userCardLocation) userCardLocation.textContent = ''; // Ensure it's empty
+                userCard.classList.remove('hidden');
+            } else {
+                userCard.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Displays a blurred full-page message overlay.
+         * @param {string} message The message to display.
+         * @param {number} duration The duration in milliseconds to show the message.
+         * @param {function} callback Optional callback function to execute after the message disappears.
+         */
+        function showBlurredMessage(message, duration, callback = null) {
+            const fullPageMessageOverlay = document.getElementById('fullPageMessageOverlay');
+            const fullPageOverlayMessage = document.getElementById('fullPageOverlayMessage');
+
+            fullPageOverlayMessage.textContent = message;
+            fullPageMessageOverlay.classList.add('show');
+
+            setTimeout(() => {
+                fullPageMessageOverlay.classList.remove('show');
+                if (callback) {
+                    setTimeout(callback, 400); // Small delay to allow fade out transition
+                }
+            }, duration);
         }
 
         /**
@@ -1144,86 +1263,28 @@
         function showLoginPage() {
             document.getElementById('loginPage').classList.remove('hidden');
             document.getElementById('appContent').classList.add('hidden');
-            document.getElementById('loginError').style.display = 'none'; // Hide any previous login error
-            document.getElementById('username').value = ''; // Clear username input
-            document.getElementById('password').value = ''; // Clear password input
-            localStorage.removeItem('loggedInUser'); // Remove user from local storage
-            localStorage.removeItem('currentPage'); // Remove current page from local storage
-            sessionStorage.removeItem('dashboardUsername'); // Clear dashboard credentials
-            sessionStorage.removeItem('dashboardPassword'); // Clear dashboard credentials
-            loggedInUser = null; // Reset loggedInUser variable
-            currentActiveViewId = null; // Reset current view
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            // Clear all relevant local storage data on logout
+            localStorage.clear(); // Clears all localStorage for this domain
+            sessionStorage.clear(); // Clears all sessionStorage for this domain
+            loggedInUser = null;
+            currentActiveViewId = null;
+            updateAndShowUserCard(); // Hide user card on logout
             console.log('Showing login page.');
         }
 
         /**
          * Displays the main application content and hides the login page.
-         * Updates the user card and applies role-based UI restrictions.
-         * This function no longer calls showHome() directly, allowing DOMContentLoaded
-         * to handle initial page routing based on localStorage.
+         * Applies role-based UI restrictions.
          */
         function showAppContent() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('appContent').classList.remove('hidden');
             console.log('Showing app content.');
-            updateUserCard(); // Update the user's name, title, and area/governorate in the header
-            applyUserPermissions(); // Apply UI restrictions based on user's title
-            // showHome(); // Removed: Initial page routing is now handled by DOMContentLoaded
-        }
-
-        /**
-         * Updates the user card in the header with the logged-in user's information,
-         * including username, title, and conditionally, area or governorate.
-         */
-        function updateUserCard() {
-            const userCard = document.getElementById('userCard');
-            const usernameSpan = userCard.querySelector('.username');
-            const titleSpan = userCard.querySelector('.title');
-            const areaGovernorateSpan = userCard.querySelector('.area-governorate'); // Get the new span
-
-            console.log('updateUserCard - loggedInUser received:', loggedInUser);
-
-            if (loggedInUser) {
-                usernameSpan.textContent = loggedInUser.username;
-                titleSpan.textContent = loggedInUser.title;
-                
-                // Conditionally display area or governorate based on user title
-                if (loggedInUser.title === 'Medical Representative') {
-                    console.log('Medical Representative area display check: loggedInUser.area =', loggedInUser.area, 'length > 0 =', loggedInUser.area && loggedInUser.area.length > 0);
-                    if (loggedInUser.area && loggedInUser.area.length > 0) {
-                        areaGovernorateSpan.textContent = `Area: ${loggedInUser.area.join(', ')}`; // Join array for display
-                        areaGovernorateSpan.classList.remove('hidden');
-                        console.log(`Displaying Medical Representative area: ${loggedInUser.area.join(', ')}`);
-                    } else {
-                        areaGovernorateSpan.classList.add('hidden');
-                        areaGovernorateSpan.textContent = '';
-                        console.log('Medical Representative: Area data missing or empty.');
-                    }
-                } else if (loggedInUser.title === 'District Manager') {
-                    console.log('District Manager governorate display check: loggedInUser.governorate =', loggedInUser.governorate, 'length > 0 =', loggedInUser.governorate && loggedInUser.governorate.length > 0);
-                    if (loggedInUser.governorate && loggedInUser.governorate.length > 0) {
-                        areaGovernorateSpan.textContent = `Governorate: ${loggedInUser.governorate.join(', ')}`; // Join array for display
-                        areaGovernorateSpan.classList.remove('hidden');
-                        console.log(`Displaying District Manager Governorate: ${loggedInUser.governorate.join(', ')}`);
-                    } else {
-                        areaGovernorateSpan.classList.add('hidden');
-                        areaGovernorateSpan.textContent = '';
-                        console.log('District Manager: Governorate data missing or empty.');
-                    }
-                } else {
-                    areaGovernorateSpan.classList.add('hidden'); // Hide if not applicable or empty
-                    areaGovernorateSpan.textContent = ''; // Clear text
-                    console.log('Area/Governorate not applicable or data missing for this user role.');
-                }
-
-                userCard.classList.remove('hidden'); // Show the user card
-            } else {
-                userCard.classList.add('hidden'); // Hide the user card if no one is logged in
-                usernameSpan.textContent = '';
-                titleSpan.textContent = '';
-                areaGovernorateSpan.textContent = '';
-                areaGovernorateSpan.classList.add('hidden');
-            }
+            applyUserPermissions();
+            updateAndShowUserCard(); // Show user card when app content is visible
         }
 
         /**
@@ -1232,42 +1293,34 @@
         function applyUserPermissions() {
             const dashboardCard = document.querySelector('.main-card[data-page="dashboard"]');
             const adminCard = document.querySelector('.main-card[data-page="admin"]'); 
-            const masterListCard = document.getElementById('masterListCard'); // Get the new Master List card
+            const masterListCard = document.getElementById('masterListCard');
 
-            // First, reset all cards and buttons to their default (visible/enabled) state
             document.querySelectorAll('.main-card').forEach(card => {
                 card.classList.remove('disabled');
-                card.classList.remove('hidden'); // Ensure all cards are visible initially for permission logic
+                card.classList.remove('hidden');
             });
-            document.getElementById('logoutButton').classList.remove('hidden'); // Ensure logout button is visible
+            document.getElementById('logoutButton').classList.remove('hidden');
 
             if (loggedInUser) {
                 switch (loggedInUser.title) {
                     case 'admin':
-                        // admin users see everything. No cards or buttons are hidden.
-                        // Master List card is visible by default for admin.
                         break;
                     case 'District Manager':
-                        // District Managers cannot access the admin panel.
-                        if (adminCard) adminCard.classList.add('hidden'); // Hide the admin card in the grid
-                        // Master List card remains visible for District Managers
+                        if (adminCard) adminCard.classList.add('hidden');
                         break;
                     case 'Medical Representative':
-                        // Medical Representatives cannot access admin, Dashboard, or Master List.
-                        if (adminCard) adminCard.classList.add('hidden'); // Hide admin card
-                        if (dashboardCard) dashboardCard.classList.add('hidden'); // Hide Dashboard card
-                        if (masterListCard) masterListCard.classList.add('hidden'); // Hide Master List card
+                        if (adminCard) adminCard.classList.add('hidden');
+                        if (dashboardCard) dashboardCard.classList.add('hidden');
+                        if (masterListCard) masterListCard.classList.add('hidden');
                         break;
                     default:
-                        // For any other title or an unrecognised title, hide sensitive panels by default.
                         console.warn(`Unknown user title: ${loggedInUser.title}. Applying default restrictions.`);
                         if (adminCard) adminCard.classList.add('hidden');
                         if (dashboardCard) dashboardCard.classList.add('hidden');
-                        if (masterListCard) masterListCard.classList.add('hidden'); // Hide Master List card
+                        if (masterListCard) masterListCard.classList.add('hidden');
                         break;
                 }
             } else {
-                // If no user is logged in (shouldn't happen if appContent is shown, but as a safeguard)
                 document.querySelectorAll('.main-card').forEach(card => card.classList.add('hidden'));
                 document.getElementById('logoutButton').classList.add('hidden');
             }
@@ -1275,15 +1328,13 @@
 
         /**
          * Handles the user login process by fetching credentials from Supabase.
-         * IMPORTANT: This implementation assumes plain text passwords in the database as per the request.
-         * In a production environment, passwords MUST be hashed (e.g., using bcrypt) for security.
          */
         async function handleLogin() {
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
             const loginError = document.getElementById('loginError');
 
-            loginError.style.display = 'none'; // Hide any previous error message
+            loginError.style.display = 'none';
 
             if (!usernameInput || !passwordInput) {
                 loginError.textContent = 'Please enter both username and password.';
@@ -1292,20 +1343,18 @@
             }
 
             try {
-                // Step 1: Authenticate against Supabase for username, title, and password
-                // Using .limit(1) instead of .single() to avoid PGRST116 error if user not found
                 const { data, error } = await supabase
                     .from('users')
                     .select('username, title, password') 
                     .eq('username', usernameInput) 
-                    .limit(1); // Use limit(1) to handle 0 or 1 rows gracefully
+                    .limit(1);
 
                 let supabaseUser = null;
                 if (data && data.length > 0) {
                     supabaseUser = data[0];
                 }
 
-                if (error || !supabaseUser) { // Check for error or if no user was found
+                if (error || !supabaseUser) {
                     loginError.textContent = 'Invalid username or password.';
                     loginError.style.display = 'block';
                     console.error('Login failed: User not found or query error.', error);
@@ -1321,43 +1370,17 @@
 
                 console.log('Supabase user data:', supabaseUser);
 
-                // Step 2: If Supabase authentication is successful, fetch additional details from Google Sheet
-                let userArea = null;
-                let userGovernorate = null;
-                let userDistrictManager = null;
-
-                // Find user's consolidated data from the Google Sheet data
-                // Match Supabase username with the sheet's determined username
-                const sheetUser = googleSheetData.find(sheetRow => 
-                    sheetRow.username.toLowerCase() === usernameInput.toLowerCase()
-                );
-
-                if (sheetUser) {
-                    userArea = sheetUser.area; // This will now be an array
-                    userGovernorate = sheetUser.governorate; // This will now be an array
-                    userDistrictManager = sheetUser.districtManager;
-                    console.log('Sheet user found for login:', sheetUser);
-                } else {
-                    console.warn(`No matching Google Sheet data found for username: ${usernameInput}. Area, Governorate, and District Manager will be null.`);
-                }
-
-                // Combine data into loggedInUser
                 loggedInUser = { 
                     username: supabaseUser.username, 
-                    title: supabaseUser.title, // Title from Supabase is primary
-                    area: userArea, 
-                    governorate: userGovernorate,
-                    districtManager: userDistrictManager
+                    title: supabaseUser.title
                 };
                 localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-                // Store username and password in sessionStorage for dashboard auto-login
                 sessionStorage.setItem('dashboardUsername', usernameInput);
                 sessionStorage.setItem('dashboardPassword', passwordInput);
 
-                console.log('Final loggedInUser object after sheet data:', loggedInUser);
+                console.log('Final loggedInUser object:', loggedInUser);
                 
-                showAppContent();
-                showHome();
+                showBlurredMessage(`Welcome ${loggedInUser.username}!`, 1500, showAppContent);
 
             } catch (err) {
                 console.error('An unexpected error occurred during login:', err);
@@ -1368,17 +1391,10 @@
 
         /**
          * Handles user logout. Clears session and returns to login page.
-         * Also sends a message to iframes to log them out.
          */
         function handleLogout() {
             console.log('User logged out.');
-            // Send logout message to all iframes
-            document.querySelectorAll('.iframe-container-fpv iframe').forEach(iframe => {
-                if (iframe.contentWindow) {
-                    iframe.contentWindow.postMessage({ type: 'logout' }, '*');
-                }
-            });
-            showLoginPage(); // Go back to the login page
+            showBlurredMessage('See you soon!', 1500, showLoginPage);
         }
 
         /**
@@ -1392,58 +1408,52 @@
             const logoutButton = document.getElementById('logoutButton');
             
             if (homeView) {
-                homeView.classList.remove('hidden'); // Show the home grid
+                homeView.classList.remove('hidden');
             }
             
             if (backButton) {
-                backButton.classList.add('hidden'); // Hide the back button
+                backButton.classList.add('hidden');
             }
 
-            // Re-apply permissions to ensure correct visibility of logout button on home
             if (loggedInUser) {
-                applyUserPermissions(); // This will show/hide admin card based on role
-                logoutButton.classList.remove('hidden'); // Always show logout button when logged in
+                applyUserPermissions();
+                logoutButton.classList.remove('hidden');
             } else {
-                 logoutButton.classList.add('hidden'); // Hide logout button if not logged in
+                 logoutButton.classList.add('hidden');
             }
 
-            // Hide the currently active full-page view, if any
             if (currentActiveViewId) {
                 const activeView = document.getElementById(currentActiveViewId);
                 if (activeView) {
                     activeView.classList.remove('active');
-                    // Delay adding 'hidden' to allow CSS transition to complete (300ms)
                     setTimeout(() => {
                         activeView.classList.add('hidden');
-                        // Also hide the iframe and show demo content if it was an iframe view
                         const iframe = activeView.querySelector('iframe');
                         const demoContent = activeView.querySelector('.demo-content');
                         if (iframe) iframe.classList.add('hidden');
                         if (demoContent) demoContent.classList.remove('hidden');
                     }, 300);
                 }
-                currentActiveViewId = null; // Reset current active view
+                currentActiveViewId = null;
             }
-            localStorage.setItem('currentPage', 'home'); // Store 'home' as the current page for persistence
+            localStorage.setItem('currentPage', 'home');
         }
 
         /**
          * Loads a specific page view into its corresponding iframe.
-         * This function now also handles updating the URL in localStorage for persistence across refreshes.
          * @param {string} page - The page identifier (e.g., 'crm', 'dashboard').
          */
         function loadPage(page) {
             console.log(`Attempting to load page: ${page}`);
             
-            // Configuration for each page, including view ID, display name, and file name
             const pageConfig = {
-                'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' }, // Ensure correct file name
+                'crm': { viewId: 'crmView', displayName: 'CRM', fileName: 'reps crm.html' },
                 'dashboard': { viewId: 'dashboardView', displayName: 'Dashboard', fileName: 'final dashboard.html' },
                 'upa-codes': { viewId: 'upaCodesView', displayName: 'UPA Codes', fileName: 'upa-codes.html' },
                 'price-list': { viewId: 'priceListView', displayName: 'Price List', fileName: 'price-list.html' },
                 'products-knowledge': { viewId: 'productsKnowledgeView', displayName: 'Products Knowledge', fileName: 'Products knowledge.html' },
                 'admin': { viewId: 'adminView', displayName: 'Admin', fileName: 'admin users.html' },
-                'master-list': { viewId: 'masterListView', displayName: 'Master List', fileName: 'master list.html' } // New Master List config
+                'master-list': { viewId: 'masterListView', displayName: 'Master List', fileName: 'master list.html' }
             };
 
             const config = pageConfig[page];
@@ -1454,20 +1464,17 @@
 
             const { viewId, displayName, fileName } = config;
 
-            // Get references to main UI elements
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
             const targetView = document.getElementById(viewId);
 
-            // Initialize variables for elements inside targetView
             let loadingOverlay = null;
             let errorState = null;
             let iframeContainer = null;
             let iframe = null;
             let demoContent = null;
 
-            // Ensure targetView exists before querying its children
             if (targetView) {
                 loadingOverlay = targetView.querySelector('.loading'); 
                 errorState = targetView.querySelector('.error-state'); 
@@ -1478,65 +1485,50 @@
                 }
             }
 
-            // Basic validation to ensure all required elements exist before proceeding
             if (!homeView || !backButton || !logoutButton || !targetView || !loadingOverlay || !errorState || !iframeContainer || !iframe || !demoContent) {
                 console.error('Error: One or more required DOM elements not found for page loading. Check HTML structure.');
-                // Log specific missing elements for easier debugging
                 console.error('  homeView:', homeView, 'backButton:', backButton, 'logoutButton:', logoutButton);
                 console.error('  targetView:', targetView, 'loadingOverlay:', loadingOverlay, 'errorState:', errorState);
                 console.error('  iframeContainer:', iframeContainer, 'iframe:', iframe, 'demoContent:', demoContent);
-                return; // Exit if elements are missing
+                return;
             }
 
             console.log(`All required DOM elements found for page: ${page}. Proceeding to load.`);
 
-            // Hide the home view, show the back button, and hide the logout button
             homeView.classList.add('hidden');
-            backButton.classList.remove('hidden'); // Show back button
-            logoutButton.classList.add('hidden'); // Hide logout button when inside a specific page
+            backButton.classList.remove('hidden');
+            logoutButton.classList.add('hidden');
             console.log(`Back button visibility set for page: ${page}.`);
 
-            // If there's a currently active full-page view and it's different from the target, hide it
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
-                    // Delay adding 'hidden' to allow CSS transition to complete (300ms)
                     setTimeout(() => prevActiveView.classList.add('hidden'), 300);
                 }
             }
 
-            // Set the new active view ID
             currentActiveViewId = viewId;
 
-            // Show the target full-page view with a slight delay for transition effect
             targetView.classList.remove('hidden');
             setTimeout(() => targetView.classList.add('active'), 10);
 
-            // Show the loading spinner and hide any previous error state
             loadingOverlay.classList.add('show');
             errorState.classList.remove('show');
 
-            // Hide the demo content and show the iframe before loading new content
             demoContent.classList.add('hidden');
             iframe.classList.remove('hidden');
 
-            // Crucial fix for refresh: Store the page to load in localStorage
-            // This ensures that the user refreshes, they return to the same iframe page.
             localStorage.setItem('currentPage', page);
-            iframe.src = fileName; // Set the iframe's source
+            iframe.src = fileName;
 
             iframe.onload = function() {
                 console.log(`${displayName} iframe loaded successfully from ${fileName}.`);
-                loadingOverlay.classList.remove('show'); // Hide spinner
-                errorState.classList.remove('show');     // Hide error
+                loadingOverlay.classList.remove('show');
+                errorState.classList.remove('show');
 
-                // Send a postMessage to the iframe if a user is logged in and it's CRM or Dashboard or Master List
-                // The demo content is now always hidden if the iframe loads successfully.
-                if (loggedInUser && (page === 'crm' || page === 'dashboard' || page === 'master-list')) { // Added master-list here
+                if (loggedInUser && (page === 'crm' || page === 'dashboard' || page === 'master-list')) {
                     console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
-                    // IMPORTANT: Replace '*' with the actual origin of your iframe content for security!
-                    // For dashboard, also send username and password for auto-login
                     if (page === 'dashboard') {
                         const dashboardUsername = sessionStorage.getItem('dashboardUsername');
                         const dashboardPassword = sessionStorage.getItem('dashboardPassword');
@@ -1544,7 +1536,7 @@
                             type: 'dashboardLogin', 
                             username: dashboardUsername, 
                             password: dashboardPassword,
-                            user: loggedInUser // Also send the loggedInUser object for consistency
+                            user: loggedInUser
                         }, '*'); 
                     } else {
                         iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*');
@@ -1554,10 +1546,10 @@
 
             iframe.onerror = function() {
                 console.error(`Failed to load ${displayName} iframe from ${fileName}. Displaying demo content.`);
-                loadingOverlay.classList.remove('show'); // Hide spinner
-                errorState.classList.add('show');        // Show error message
-                demoContent.classList.remove('hidden');  // Show demo content as fallback
-                iframe.classList.add('hidden');          // Hide the broken iframe
+                loadingOverlay.classList.remove('show');
+                errorState.classList.add('show');
+                demoContent.classList.remove('hidden');
+                iframe.classList.add('hidden');
             };
         }
 
@@ -1565,58 +1557,38 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM loaded, initializing application');
             
-            // Fetch Google Sheet data first
+            // Fetch Google Sheet data (kept for potential other uses, not directly for user card)
             await fetchGoogleSheetData();
 
-            // Listen for messages from iframes (e.g., logout requests)
-            window.addEventListener('message', (event) => {
-                // IMPORTANT: Verify the origin of the message for security in a real application
-                // if (event.origin !== "http://your-iframe-domain.com") return;
-
-                if (event.data.type === 'logout') {
-                    handleLogout(); // Trigger parent's logout logic
-                    console.log('Parent received logout message from iframe.');
-                }
-            });
-
-            // Check for logged-in user in localStorage on page load
             const storedUser = localStorage.getItem('loggedInUser');
-            const lastPage = localStorage.getItem('currentPage'); // Read lastPage BEFORE any showHome() call
+            const lastPage = localStorage.getItem('currentPage');
 
             if (storedUser) {
                 loggedInUser = JSON.parse(storedUser);
-                showAppContent(); // Show the main application content and update user/permissions
+                showAppContent();
 
-                // Attempt to load the last visited page from localStorage
                 if (lastPage && lastPage !== 'home') {
-                    // Before loading, check if the card for the lastPage is allowed for the current user's role.
-                    // This prevents loading a restricted page if permissions have changed or user role implies restriction.
                     const targetCard = document.querySelector(`.main-card[data-page="${lastPage}"]`);
-                    // If the card exists and is not hidden by permissions, load the page.
                     if (targetCard && !targetCard.classList.contains('hidden')) {
                          loadPage(lastPage);
                     } else {
-                        // If the last page is now restricted or doesn't exist, revert to home.
                         console.log(`Last page "${lastPage}" is restricted or invalid for current user. Returning to home.`);
                         showHome();
                     }
                 } else {
-                    showHome(); // If no last page stored or it was 'home', just show home.
+                    showHome();
                 }
 
             } else {
-                showLoginPage(); // If no user is logged in, display the login page.
+                showLoginPage();
             }
 
-            // Add event listeners for login and navigation buttons
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
 
-            // Event listeners for main navigation cards
             document.querySelectorAll('.main-card').forEach(card => {
                 card.addEventListener('click', function() {
-                    const page = this.dataset.page; // Get the data-page attribute
-                    // Only load the page if it's not disabled AND not hidden by permissions
+                    const page = this.dataset.page;
                     if (page && !this.classList.contains('disabled') && !this.classList.contains('hidden')) {
                         loadPage(page);
                     } else if (this.classList.contains('disabled')) {
@@ -1627,7 +1599,6 @@
                 });
             });
 
-            // Event listener for the Back to Home button
             document.getElementById('backButton').addEventListener('click', function() {
                 showHome();
             });
