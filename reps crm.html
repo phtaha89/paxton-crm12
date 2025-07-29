@@ -2308,10 +2308,6 @@
                     // Fetch Supabase visit data using pagination
                     globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
 
-                    // Populate the medical representative dropdown
-                    const uniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(rep => !/[\u0600-\u06FF]/.test(rep)))];
-                    populateSelect(document.getElementById('medicalRepSelector'), uniqueReps);
-
                     // Populate medicalRepsAreas map and districtManagersGovernorates map
                     medicalRepsAreas.clear();
                     districtManagersGovernorates.clear();
@@ -3071,7 +3067,12 @@
                     const currentMonthStart = this.getCurrentMonthStart();
                     let unvisitedCount = 0;
                     googleSheetHcpsForRep.forEach(hcp => {
-                        const hasVisited = globalSupabaseVisits.some(visit => visit.hcp_name === hcp['HCPS'] && visit.medical_rep === currentMedRep.name && new Date(visit.visit_date) >= new Date(currentMonthStart) && !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event('));
+                        const hasVisited = globalSupabaseVisits.some(visit => 
+                            visit.hcp_name === hcp['HCPS'] && 
+                            visit.medical_rep === currentMedRep.name && 
+                            new Date(visit.visit_date) >= new Date(currentMonthStart) &&
+                            !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event(') // Exclude AM, Pharmacy and Event visits
+                        );
                         if (!hasVisited) unvisitedCount++;
                     });
 
@@ -4422,7 +4423,7 @@
                     const day = this.elements.dayFilter.value;
 
                     if (!day) {
-                        this.showMessage('Please select a day first.', 'error');
+                        this.showMessage('Please select a Day first.', 'error');
                         this.elements.eventTime.selectedIndex = 0;
                         return;
                     }
@@ -4589,11 +4590,13 @@
             window.removeFromWeeklyPlan = weeklyPlanManager.removeFromWeeklyPlan.bind(weeklyPlanManager);
 
             await fetchAllData();
-            const savedUser = getLocalStorageItem('currentUser');
-            if (savedUser) {
-                currentMedRep = savedUser;
-                medRepNameElement.textContent = currentMedRep.name;
-                medRepAreaElement.textContent = currentMedRep.area;
+            const storedUser = getLocalStorageItem('loggedInUser'); // Get loggedInUser from index.html's localStorage
+            if (storedUser) {
+                currentMedRep = storedUser; // Use the full loggedInUser object
+
+                // Update the Medical Rep Card
+                medRepNameElement.textContent = currentMedRep.username; // Use username from storedUser
+                medRepAreaElement.textContent = currentMedRep.area || 'N/A'; // Assuming area might be in storedUser or derived
                 medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
                 
                 const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
@@ -4603,15 +4606,49 @@
                     medRepGovElement.textContent = `Governorate: N/A`;
                 }
 
-                loginPage.classList.add('hidden');
-                mainAppContainer.classList.remove('hidden');
+                // Populate and control the medicalRepSelector based on user title
+                if (currentMedRep.title === 'Medical Representative') {
+                    // Only show the logged-in MR in the dropdown and disable it
+                    populateSelect(medicalRepSelector, [currentMedRep.username]);
+                    medicalRepSelector.value = currentMedRep.username;
+                    medicalRepSelector.disabled = true;
+                } else if (currentMedRep.title === 'District Manager') {
+                    // Show all MRs under this DM and keep dropdown enabled
+                    const medicalRepsUnderDM = globalGoogleData
+                        .filter(row => row['District Manager'] === currentMedRep.username)
+                        .map(row => row['medical rep'])
+                        .filter(rep => rep && !/[\u0600-\u06FF]/.test(rep)); // Filter out empty/invalid names and Arabic
+                    
+                    const uniqueMedicalRepsUnderDM = [...new Set(medicalRepsUnderDM)];
+                    
+                    populateSelect(medicalRepSelector, uniqueMedicalRepsUnderDM);
+                    medicalRepSelector.disabled = false;
+                    
+                    // Pre-select the first MR if available, or keep "Select Medical Rep"
+                    if (uniqueMedicalRepsUnderDM.length > 0) {
+                        medicalRepSelector.value = uniqueMedicalRepsUnderDM[0];
+                    } else {
+                        medicalRepSelector.value = ''; // Ensure "Select Medical Rep" is shown if no reps
+                        showAlert('No Medical Representatives found under this District Manager.', 'info');
+                    }
+                } else {
+                    // For other roles or unknown, clear the dropdown and disable it
+                    populateSelect(medicalRepSelector, []);
+                    medicalRepSelector.disabled = true;
+                    showAlert('Unsupported user role. Please log in with a Medical Representative or District Manager account.', 'error');
+                }
 
-                formManager.initializeRepSpecificData(currentMedRep.name);
-                dashboardManager.initializeDashboardForRep(currentMedRep.name);
-                requestFormManager.initialize(currentMedRep.name);
-                weeklyPlanManager.initialize(currentMedRep.name);
-                
-                showMainSection('crm');
+                // Trigger the change event to load data for the initially selected/logged-in rep
+                // This will call the logic inside medicalRepSelector.addEventListener('change')
+                medicalRepSelector.dispatchEvent(new Event('change'));
+
+                mainAppContainer.classList.remove('hidden');
+                // The showMainSection('crm') is already called inside the change event listener
+                // after successful data loading.
+            } else {
+                // If no user is stored, hide the main app and show a message
+                mainAppContainer.classList.add('hidden');
+                showAlert('No user logged in. Please log in via the main application.', 'error');
             }
             
         });
