@@ -1527,6 +1527,7 @@
                 loadingOverlay.classList.remove('show');
                 errorState.classList.remove('show');
 
+                // THIS IS THE CRUCIAL PART: Sending user data to the iframe
                 if (loggedInUser && (page === 'crm' || page === 'dashboard' || page === 'master-list')) {
                     console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
                     if (page === 'dashboard') {
@@ -1539,6 +1540,7 @@
                             user: loggedInUser
                         }, '*'); 
                     } else {
+                        // For CRM and Master List, send the loggedInUser object directly
                         iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*');
                     }
                 }
