@@ -1506,39 +1506,9 @@
     </style>
 </head>
 <body>
-    <div id="loginPage" class="login-container">
-        <div class="login-header">
-            <div class="form-logo">
-                <i class="fas fa-handshake"></i>
-            </div>
-            <h1 class="login-title">Paxton LLC CRM </h1>
-        </div>
-        <div id="loginAlertContainer"></div>
-        <!-- ENHANCEMENT: Added icons to input fields -->
-        <div class="login-form-group">
-            <label for="medRepLogin">Medical Representative</label>
-            <div class="relative">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <i class="fas fa-user-tie text-gray-400"></i>
-                </span>
-                <select id="medRepLogin" required class="pl-10">
-                    <option value="">Select Medical Rep</option>
-                </select>
-            </div>
-        </div>
-        <div class="login-form-group">
-            <label for="password">Password</label>
-            <div class="relative">
-                 <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                    <i class="fas fa-lock text-gray-400"></i>
-                </span>
-                <input type="password" id="password" placeholder="Enter password" required class="pl-10" />
-            </div>
-        </div>
-        <button id="loginBtn" class="login-button">Login</button>
-    </div>
+    <!-- Removed loginPage div -->
 
-    <div id="mainAppContainer" class="container hidden">
+    <div id="mainAppContainer" class="container">
         <div class="med-rep-card">
             <div class="med-rep-info">
                 <div class="med-rep-name" id="medRepName">Medical Rep Name</div>
@@ -1546,7 +1516,16 @@
                 <div class="med-rep-dm" id="medRepDM">District Manager: N/A</div>
                 <div class="med-rep-gov" id="medRepGov">Governorate: N/A</div>
             </div>
-            <button id="logoutBtn" class="logout-button">Logout</button>
+            <!-- New Medical Rep Dropdown -->
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                    <i class="fas fa-user-tie text-gray-400"></i>
+                </span>
+                <select id="medicalRepSelector" class="pl-10">
+                    <option value="">Select Medical Rep</option>
+                </select>
+            </div>
+            <!-- Removed logoutBtn -->
         </div>
 
         <div class="main-tab-group tab-group -mt-2">
@@ -2234,19 +2213,7 @@
                 localStorage.removeItem(name);
             }
 
-            function showLoginAlert(message, type) {
-                const alert = document.createElement('div');
-                alert.className = `alert alert-${type}`;
-                alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
-                alert.style.display = 'block';
-                document.getElementById('loginAlertContainer').innerHTML = '';
-                document.getElementById('loginAlertContainer').appendChild(alert);
-                alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                setTimeout(() => {
-                    alert.style.display = 'none';
-                }, 5000);
-            }
-
+            // Removed showLoginAlert as login box is removed
             function showAlert(message, type) {
                 const alert = document.createElement('div');
                 alert.className = `alert alert-${type}`;
@@ -2341,9 +2308,9 @@
                     // Fetch Supabase visit data using pagination
                     globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
 
-                    // Populate the login medical reps dropdown and medicalRepsAreas map
+                    // Populate the medical representative dropdown
                     const uniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(rep => !/[\u0600-\u06FF]/.test(rep)))];
-                    populateSelect(document.getElementById('medRepLogin'), uniqueReps);
+                    populateSelect(document.getElementById('medicalRepSelector'), uniqueReps);
 
                     // Populate medicalRepsAreas map and districtManagersGovernorates map
                     medicalRepsAreas.clear();
@@ -2377,7 +2344,7 @@
 
                 } catch (error) {
                     console.error('Error fetching initial data:', error);
-                    showLoginAlert('Error loading data. Please try again later.', 'error');
+                    showAlert('Error loading data. Please try again later.', 'error'); // Using general showAlert
                 }
             }
 
@@ -2395,13 +2362,9 @@
                 });
             }
 
-            // --- Login and Logout Logic ---
-            const loginPage = document.getElementById('loginPage');
-            const mainAppContainer = document.getElementById('mainAppContainer');
-            const medRepLoginSelect = document.getElementById('medRepLogin');
-            const passwordInput = document.getElementById('password');
-            const loginBtn = document.getElementById('loginBtn');
-            const logoutBtn = document.getElementById('logoutBtn');
+            // --- Medical Rep Selector Logic (Replaces Login/Logout) ---
+            const medicalRepSelector = document.getElementById('medicalRepSelector');
+            const mainAppContainer = document.getElementById('mainAppContainer'); // Already defined, but for clarity
             const medRepNameElement = document.getElementById('medRepName');
             const medRepAreaElement = document.getElementById('medRepArea');
             const medRepDMElement = document.getElementById('medRepDM');
@@ -2417,95 +2380,100 @@
             const requestSection = document.getElementById('requestSection');
             const weeklyPlanSection = document.getElementById('weeklyPlanSection');
 
-            loginBtn.addEventListener('click', async () => {
-                const selectedRep = medRepLoginSelect.value;
-                const password = passwordInput.value;
+            medicalRepSelector.addEventListener('change', async () => {
+                const selectedRepName = medicalRepSelector.value;
 
-                if (!selectedRep) {
-                    showLoginAlert('Please select a Medical Representative', 'error');
+                if (!selectedRepName) {
+                    // If "Select Medical Rep" is chosen, reset everything
+                    currentMedRep = null;
+                    medRepNameElement.textContent = 'Medical Rep Name';
+                    medRepAreaElement.textContent = 'Area';
+                    medRepDMElement.textContent = 'District Manager: N/A';
+                    medRepGovElement.textContent = 'Governorate: N/A';
+
+                    // Disable all main tabs
+                    crmMainTabBtn.disabled = true;
+                    dashboardMainTabBtn.disabled = true;
+                    requestMainTabBtn.disabled = true;
+                    weeklyPlanMainTabBtn.disabled = true;
+
+                    // Hide all sections and reset their states
+                    formManager.handleReset();
+                    dashboardManager.resetDashboard();
+                    requestFormManager.resetForm();
+                    weeklyPlanManager.reset();
+                    formSection.classList.add('hidden');
+                    dashboardSection.classList.add('hidden');
+                    requestSection.classList.add('hidden');
+                    weeklyPlanSection.classList.add('hidden');
+                    
+                    showAlert('Please select a Medical Representative to proceed.', 'info');
                     return;
                 }
-                try {
-                    // Authenticate against Supabase users table
-                    const response = await fetch(`https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/users?username=eq.${encodeURIComponent(selectedRep)}`, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': `Bearer ${SUPABASE_API_KEY}`,
-                            'apikey': SUPABASE_API_KEY,
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('Failed to fetch user data:', response.status, errorText);
-                        throw new Error('Failed to fetch user data');
-                    }
-                    const users = await response.json();
 
-                    if (users.length === 0) {
-                        showLoginAlert('User not found', 'error');
-                        return;
-                    }
-                    const user = users[0];
-                    if (user.password !== password) {
-                        showLoginAlert('Incorrect password', 'error');
-                        return;
+                // Find rep data from globalGoogleData
+                const repData = globalGoogleData.find(row => row['medical rep'] === selectedRepName);
+
+                if (repData) {
+                    currentMedRep = {
+                        name: repData['medical rep'],
+                        area: repData['area'],
+                        districtManager: repData['District Manager'],
+                        governorate: repData['Governorate']
+                    };
+                    setLocalStorageItem('currentUser', currentMedRep); // Still useful for persistence across sessions
+
+                    medRepNameElement.textContent = currentMedRep.name;
+                    medRepAreaElement.textContent = currentMedRep.area;
+                    medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
+                    
+                    // Display all governorates for the District Manager
+                    const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
+                    if (dmGovernorates && dmGovernorates.size > 0) {
+                        medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
+                    } else {
+                        medRepGovElement.textContent = `Governorate: N/A`;
                     }
 
-                    // Find rep data from globalGoogleData
-                    const repData = globalGoogleData.find(row => row['medical rep'] === selectedRep);
-                    if (repData) {
-                        currentMedRep = {
-                            name: repData['medical rep'],
-                            area: repData['area'],
-                            districtManager: repData['District Manager'],
-                            governorate: repData['Governorate']
-                        };
-                        setLocalStorageItem('currentUser', currentMedRep);
+                    // Enable all main tabs
+                    crmMainTabBtn.disabled = false;
+                    dashboardMainTabBtn.disabled = false;
+                    requestMainTabBtn.disabled = false;
+                    weeklyPlanMainTabBtn.disabled = false;
 
-                        medRepNameElement.textContent = currentMedRep.name;
-                        medRepAreaElement.textContent = currentMedRep.area;
-                        medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
-                        
-                        // Display all governorates for the District Manager
-                        const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
-                        if (dmGovernorates && dmGovernorates.size > 0) {
-                            medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
-                        } else {
-                            medRepGovElement.textContent = `Governorate: N/A`;
-                        }
+                    // Initialize managers for the selected rep
+                    formManager.initializeRepSpecificData(currentMedRep.name);
+                    dashboardManager.initializeDashboardForRep(currentMedRep.name);
+                    requestFormManager.initialize(currentMedRep.name);
+                    weeklyPlanManager.initialize(currentMedRep.name);
+                    
+                    // Show the CRM section by default
+                    showMainSection('crm');
+                    showAlert(`Welcome, ${currentMedRep.name}! Data loaded successfully.`, 'success');
 
-                        loginPage.classList.add('hidden');
-                        mainAppContainer.classList.remove('hidden');
-
-                        formManager.initializeRepSpecificData(currentMedRep.name);
-                        dashboardManager.initializeDashboardForRep(currentMedRep.name);
-                        requestFormManager.initialize(currentMedRep.name);
-                        weeklyPlanManager.initialize(currentMedRep.name);
-
-                        // Default to showing CRM Form section, but no specific internal form.
-                        showMainSection('crm');
-                        // No specific internal form is shown by default after login.
-                        // The user will need to click on a CRM sub-tab (HCPs, Pharmacy, etc.) to see a form.
-                    }
-                } catch (error) {
-                    console.error('Error during login:', error);
-                    showLoginAlert('An error occurred during login. Please try again.', 'error');
+                } else {
+                    showAlert('Selected Medical Representative data not found.', 'error');
+                    // Reset UI if data not found
+                    currentMedRep = null;
+                    medRepNameElement.textContent = 'Medical Rep Name';
+                    medRepAreaElement.textContent = 'Area';
+                    medRepDMElement.textContent = 'District Manager: N/A';
+                    medRepGovElement.textContent = 'Governorate: N/A';
+                    crmMainTabBtn.disabled = true;
+                    dashboardMainTabBtn.disabled = true;
+                    requestMainTabBtn.disabled = true;
+                    weeklyPlanMainTabBtn.disabled = true;
+                    formManager.handleReset();
+                    dashboardManager.resetDashboard();
+                    requestFormManager.resetForm();
+                    weeklyPlanManager.reset();
+                    formSection.classList.add('hidden');
+                    dashboardSection.classList.add('hidden');
+                    requestSection.classList.add('hidden');
+                    weeklyPlanSection.classList.add('hidden');
                 }
             });
 
-            logoutBtn.addEventListener('click', () => {
-                removeLocalStorageItem('currentUser');
-                mainAppContainer.classList.add('hidden');
-                loginPage.classList.remove('hidden');
-                passwordInput.value = '';
-                currentMedRep = null;
-                formManager.handleReset();
-                dashboardManager.resetDashboard();
-                requestFormManager.resetForm();
-                weeklyPlanManager.reset();
-                fetchAllData();
-            });
 
             // --- Main Section Tab Management ---
             const mainTabButtons = document.querySelectorAll('.main-tab-group .tab-button');
@@ -3191,7 +3159,7 @@
 
                 async handleRetrieve() {
                     if (!currentMedRep) {
-                        showAlert('Please login to retrieve visits.', 'error');
+                        showAlert('Please select a Medical Representative to retrieve visits.', 'error');
                         return;
                     }
 
@@ -3432,7 +3400,7 @@
                 applyFilter() {
                     const selectedRep = this.elements.dashboardMedicalRepsSelect.value, selectedOption = this.elements.visitOptionsSelect.value, selectedDay = this.elements.dayFilterSelect.value;
                     let errorMsg = '';
-                    if (!selectedRep) errorMsg += 'Please login as a Medical Representative. ';
+                    if (!selectedRep) errorMsg += 'Please select a Medical Representative. ';
                     if (!selectedOption) errorMsg += 'Please select a display option. ';
                     this.elements.errorDisplay.textContent = errorMsg;
                     this.elements.errorDisplay.classList.toggle('hidden', !errorMsg);
@@ -3707,7 +3675,7 @@
                     let valid = true;
 
                     if (!medRep) { 
-                        showRequestAlert("Medical Rep information is missing. Please re-login.", "error");
+                        showRequestAlert("Medical Rep information is missing. Please select a Medical Representative.", "error");
                         valid = false;
                     }
                     if (!area) {
@@ -3886,7 +3854,7 @@
                     const requestDetailsDisplay = this.elements.customerRequestDetailsDisplayDiv;
                     requestDetailsDisplay.innerHTML = '';
                     if (!medRep) {
-                        showRequestAlert("Medical Rep information is missing. Please re-login to retrieve requests.", "error");
+                        showRequestAlert("Medical Rep information is missing. Please select a Medical Representative to retrieve requests.", "error");
                         return;
                     }
                     
@@ -4243,55 +4211,54 @@
                 }
 
                 populateHCPTable(hcpData, selectedDay) {
-    this.elements.hcpTableBody.innerHTML = '';
+                    this.elements.hcpTableBody.innerHTML = '';
 
-    // Sort the data based on remaining visits
-    const sortedData = hcpData.sort((a, b) => {
-        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
-        const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
-        const targetA = parseInt(a['T.V']) || 0;
-        const targetB = parseInt(b['T.V']) || 0;
-        if (remainingA === targetA && remainingB !== targetB) return -1;
-        if (remainingB === targetB && remainingA !== targetA) return 1;
-        return remainingB - remainingA;
-    });
+                    const filteredData = hcpData.filter(row => {
+                        const actualVisits = this.visitCounts[row['HCPS']] || 0;
+                        const targetVisits = parseInt(row['T.V']) || 0;
+                        return (targetVisits - actualVisits) > 0;
+                    });
 
-    sortedData.forEach(row => {
-        const actualVisits = this.visitCounts[row['HCPS']] || 0;
-        const targetVisits = parseInt(row['T.V']) || 0;
-        const remainingVisits = targetVisits - actualVisits;
-        const tr = document.createElement('tr');
-        const remainingCellClass = remainingVisits <= 0 ? 'remaining-visit' : 'not-remaining';
-        tr.innerHTML = `
-            <td>${row['HCPS']}</td>
-            <td>${row['Speciality']}</td>
-            <td>${row['Class']}</td>
-            <td>${row['T.V']}</td>
-            <td class="${remainingCellClass}">${remainingVisits}</td>
-            <td>${row['Brick']}</td>
-            <td>${row['Address']}</td>
-            <td>${row['Mobile']}</td>
-            <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
-            <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
-            <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
-            <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
-            <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
-            <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
-        `;
-        tr.addEventListener('click', () => {
-            if (!this.elements.dayFilter.value) {
-                this.showMessage('Please select a Day first.', 'error');
-                return;
-            }
-            this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
-            this.elements.hcpTableBody.removeChild(tr);
-        });
-        this.elements.hcpTableBody.appendChild(tr);
-    });
+                    const sortedData = filteredData.sort((a, b) => {
+                        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
+                        const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
+                        const targetA = parseInt(a['T.V']) || 0;
+                        const targetB = parseInt(b['T.V']) || 0;
+                        if (remainingA === targetA && remainingB !== targetB) return -1;
+                        if (remainingB === targetB && remainingA !== targetA) return 1;
+                        return remainingB - remainingA;
+                    });
 
-    this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
-}
+                    sortedData.forEach(row => {
+                        const actualVisits = this.visitCounts[row['HCPS']] || 0;
+                        const targetVisits = parseInt(row['T.V']) || 0;
+                        const remainingVisits = targetVisits - actualVisits;
+                        const tr = document.createElement('tr');
+                        const remainingCellClass = remainingVisits === targetVisits ? 'remaining-visit' : 'not-remaining';
 
+                        tr.innerHTML = `
+                            <td>${row['HCPS']}</td><td>${row['Speciality']}</td><td>${row['Class']}</td>
+                            <td>${row['T.V']}</td><td class="${remainingCellClass}">${remainingVisits}</td><td>${row['Brick']}</td>
+                            <td>${row['Address']}</td><td>${row['Mobile']}</td>
+                            <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
+                            <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
+                            <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
+                            <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
+                            <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
+                            <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
+                        `;
+                        tr.addEventListener('click', () => {
+                            if (!this.elements.dayFilter.value) {
+                                this.showMessage('Please select a Day first.', 'error');
+                                return;
+                            }
+                            this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
+                            this.elements.hcpTableBody.removeChild(tr);
+                        });
+                        this.elements.hcpTableBody.appendChild(tr);
+                    });
+                    this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
+                }
                 
                 
                 addToWeeklyPlan(hcpName, visitTime, day, speciality) {
