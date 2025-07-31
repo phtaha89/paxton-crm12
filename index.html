@@ -262,7 +262,7 @@
             text-align: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Default: column for larger screens */
             justify-content: center;
             align-items: center;
             min-height: 130px; /* Decreased min-height for smaller cards */
@@ -312,7 +312,7 @@
         /* Icon styling for cards */
         .main-card-icon {
             font-size: 2.2rem;
-            margin-bottom: 8px;
+            margin-bottom: 8px; /* Default margin for column layout */
             color: var(--primary-blue-dark);
             line-height: 1;
         }
@@ -800,14 +800,24 @@
                 gap: 12px;
             }
             .main-card {
-                min-height: 110px;
+                min-height: 80px; /* Adjusted min-height for horizontal layout */
                 padding: 12px;
+                flex-direction: row; /* Change to row for mobile */
+                justify-content: flex-start; /* Align items to the start */
+                text-align: left; /* Align text to the left */
+                gap: 15px; /* Space between icon and text */
             }
             .main-card-icon {
-                font-size: 1.6rem;
+                font-size: 1.8rem; /* Adjusted icon size for horizontal layout */
+                margin-bottom: 0; /* Remove bottom margin */
+                flex-shrink: 0; /* Prevent icon from shrinking */
             }
             .main-card-title {
-                font-size: 0.95rem;
+                font-size: 1rem; /* Adjusted title font size */
+                margin-bottom: 0; /* Remove bottom margin */
+            }
+            .main-card-subtitle {
+                font-size: 0.7rem; /* Adjusted subtitle font size */
             }
             .full-page-view {
                 height: calc(100vh - 80px);
@@ -836,6 +846,12 @@
             .full-page-message-overlay p {
                 font-size: 1.2rem;
                 padding: 10px;
+            }
+            /* New container for text content within main-card for mobile */
+            .main-card-text-content {
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1; /* Allow text content to take available space */
             }
         }
     </style>
@@ -904,50 +920,66 @@
                 <!-- CRM Card -->
                 <div class="main-card" data-page="crm">
                     <div class="main-card-icon">📊</div>
-                    <div class="main-card-title">CRM</div>
-                    <div class="main-card-subtitle">Hcps related affairs.</div>
+                    <div class="main-card-text-content">
+                        <div class="main-card-title">CRM</div>
+                        <div class="main-card-subtitle">Hcps related affairs.</div>
+                    </div>
                 </div>
                 <!-- Dashboard Card -->
                 <div class="main-card" data-page="dashboard">
                     <div class="main-card-icon">📈</div>
-                    <div class="main-card-title">Dashboard</div>
-                    <div class="main-card-subtitle">View key performance indicators and analytics.</div>
+                    <div class="main-card-text-content">
+                        <div class="main-card-title">Dashboard</div>
+                        <div class="main-card-subtitle">View key performance indicators and analytics.</div>
+                    </div>
                 </div>
                 <!-- UPA Codes Card -->
                 <div class="main-card" data-page="upa-codes">
                     <div class="main-card-icon">🏥</div>
-                    <div class="main-card-title">UPA Codes</div>
-                    <div class="main-card-subtitle">Access UPA Codes and affairs.</div>
+                    <div class="main-card-text-content">
+                        <div class="main-card-title">UPA Codes</div>
+                        <div class="main-card-subtitle">Access UPA Codes and affairs.</div>
+                    </div>
                 </div>
                 <!-- Price List Card -->
                 <div class="main-card" data-page="price-list">
                     <div class="main-card-icon">💲</div>
-                    <div class="main-card-title">Price List</div>
-                    <div class="main-card-subtitle">products pricing information.</div>
+                    <div class="main-card-text-content">
+                        <div class="main-card-title">Price List</div>
+                        <div class="main-card-subtitle">products pricing information.</div>
+                    </div>
                 </div>
                 <!-- Products Knowledge Card -->
                 <div class="main-card" data-page="products-knowledge">
                     <div class="main-card-icon">📚</div>
-                    <div class="main-card-title">Products Knowledge</div>
-                    <div class="main-card-subtitle">Detailed information about our products.</div>
+                    <div class="main-card-text-content">
+                        <div class="main-card-title">Products Knowledge</div>
+                        <div class="main-card-subtitle">Detailed information about our products.</div>
+                    </div>
                 </div>
                 <!-- Admin Card -->
                 <div id="adminCard" class="main-card" data-page="admin">
                     <div class="main-card-icon">⚙️</div>
-                    <div class="main-card-title">Admin Panel</div>
-                    <div class="main-card-subtitle">Manage users and system settings.</div>
+                    <div class="main-card-text-content">
+                        <div class="main-card-title">Admin Panel</div>
+                        <div class="main-card-subtitle">Manage users and system settings.</div>
+                    </div>
                 </div>
                 <!-- Master List Card -->
                 <div id="masterListCard" class="main-card" data-page="master-list">
                     <div class="main-card-icon">📋</div>
-                    <div class="main-card-title">Master List</div>
-                    <div class="main-card-subtitle">View and manage the master data list.</div>
+                    <div class="main-card-text-content">
+                        <div class="main-card-title">Master List</div>
+                        <div class="main-card-subtitle">View and manage the master data list.</div>
+                    </div>
                 </div>
                 <!-- Coming Soon Card (disabled) -->
                 <div class="main-card disabled">
                     <div class="main-card-icon">⏳</div>
-                    <div class="main-card-title">Coming Soon</div>
-                    <div class="main-card-subtitle">Exciting new features are on their way!</div>
+                    <div class="main-card-text-content">
+                        <div class="main-card-title">Coming Soon</div>
+                        <div class="main-card-subtitle">Exciting new features are on their way!</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1539,8 +1571,15 @@
                             password: dashboardPassword,
                             user: loggedInUser
                         }, '*'); 
+                    } else if (page === 'crm' && loggedInUser.title === 'admin') {
+                        // For CRM, if admin, send loggedInUser and all Google Sheet data
+                        iframe.contentWindow.postMessage({ 
+                            type: 'loggedInUser', 
+                            user: loggedInUser,
+                            allGoogleSheetData: googleSheetData // Send the full data for admin
+                        }, '*');
                     } else {
-                        // For CRM and Master List, send the loggedInUser object directly
+                        // For other cases (e.g., CRM for non-admin, Master List)
                         iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*');
                     }
                 }
