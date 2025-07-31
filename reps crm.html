@@ -2248,8 +2248,9 @@
                     .filter(line => line.trim())
                     .map(line => {
                         const values = line.split(',').map(v => v.trim());
+                        // Ensure all headers have a corresponding value, even if empty
                         return headers.reduce((obj, header, index) => {
-                            obj[header] = values[index] || '';
+                            obj[header] = values[index] !== undefined ? values[index] : '';
                             return obj;
                         }, {});
                     });
@@ -2308,7 +2309,8 @@
                     // Fetch Supabase visit data using pagination
                     globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
 
-                    // Populate the medical representative dropdown
+                    // Populate the medical representative dropdown initially with non-Arabic names
+                    // This is the default view before any user is selected or an admin logs in.
                     const uniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(rep => !/[\u0600-\u06FF]/.test(rep)))];
                     populateSelect(document.getElementById('medicalRepSelector'), uniqueReps);
 
@@ -2419,7 +2421,8 @@
                         name: repData['medical rep'],
                         area: repData['area'],
                         districtManager: repData['District Manager'],
-                        governorate: repData['Governorate']
+                        governorate: repData['Governorate'],
+                        title: repData['Title'] || 'Medical Rep' // Assuming 'Title' column exists, default to 'Medical Rep'
                     };
                     setLocalStorageItem('currentUser', currentMedRep); // Still useful for persistence across sessions
 
@@ -2434,6 +2437,31 @@
                     } else {
                         medRepGovElement.textContent = `Governorate: N/A`;
                     }
+
+                    // Admin logic: If the logged-in user is an admin, populate with all reps
+                    if (currentMedRep.title.toLowerCase() === 'admin') {
+                        // Populate with all unique medical reps, including Arabic names
+                        const allUniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']))];
+                        populateSelect(medicalRepSelector, allUniqueReps);
+                        // Ensure the admin's name is still selected after repopulating
+                        medicalRepSelector.value = currentMedRep.name;
+                        // Keep the selector enabled for admins to switch between all reps
+                        medicalRepSelector.disabled = false;
+                        // Enable dashboard medical reps selector for admin
+                        dashboardManager.elements.dashboardMedicalRepsSelect.disabled = false;
+                        // Populate dashboard medical reps selector with all reps
+                        populateSelect(dashboardManager.elements.dashboardMedicalRepsSelect, allUniqueReps);
+                    } else {
+                        // For non-admin users, populate with only their name and disable the selector
+                        populateSelect(medicalRepSelector, [currentMedRep.name]);
+                        medicalRepSelector.value = currentMedRep.name;
+                        medicalRepSelector.disabled = true;
+                        // Disable dashboard medical reps selector for non-admin
+                        dashboardManager.elements.dashboardMedicalRepsSelect.disabled = true;
+                        // Populate dashboard medical reps selector with only their name
+                        populateSelect(dashboardManager.elements.dashboardMedicalRepsSelect, [currentMedRep.name]);
+                    }
+
 
                     // Enable all main tabs
                     crmMainTabBtn.disabled = false;
@@ -3042,15 +3070,45 @@
                     const selectedHcp = this.elements.hcpSelect.value;
                     if (selectedHcp) {
                         const cleanSelectedHcpName = selectedHcp.replace(' ⚠️', '').trim();
+                        const hcpData = globalGoogleData.find(h => h['HCPS'] === cleanSelectedHcpName && h['medical rep'] === currentMedRep.name);
+                        
                         this.updateRemainingVisits(cleanSelectedHcpName);
                         this.updateHcpDetails(cleanSelectedHcpName);
                         this.updateSavedComment(cleanSelectedHcpName);
+
+                        // Logic for Visit Location based on HCP Class
+                        if (hcpData && (hcpData['Class'] === 'Private' || hcpData['Class'] === 'UPA')) {
+                            // Set default to 'AM Hospital' and disable other options
+                            this.elements.visitLocationHcpSelect.innerHTML = `
+                                <option value="AM Hospital">AM Hospital</option>
+                            `;
+                            this.elements.visitLocationHcpSelect.value = 'AM Hospital';
+                            this.elements.visitLocationHcpSelect.disabled = true;
+                        } else {
+                            // Re-enable and reset to default options if class is not Private or UPA
+                            this.elements.visitLocationHcpSelect.innerHTML = `
+                                <option value="">Select Visit Location</option>
+                                <option value="Clinic">Clinic</option>
+                                <option value="AM Hospital">AM Hospital</option>
+                            `;
+                            this.elements.visitLocationHcpSelect.value = ''; // Reset to default "Select Visit Location"
+                            this.elements.visitLocationHcpSelect.disabled = false;
+                        }
+
                     } else {
                         this.elements.remainingVisitsSpan.textContent = '0';
                         this.elements.lastVisitDateValueSpan.textContent = 'N/A';
                         this.elements.brickHcpInput.value = '';
                         this.elements.specialtyHcpInput.value = '';
                         this.elements.savedCommentSpan.textContent = 'No previous comments available';
+                        // Reset visit location dropdown to default state
+                        this.elements.visitLocationHcpSelect.innerHTML = `
+                            <option value="">Select Visit Location</option>
+                            <option value="Clinic">Clinic</option>
+                            <option value="AM Hospital">AM Hospital</option>
+                        `;
+                        this.elements.visitLocationHcpSelect.value = '';
+                        this.elements.visitLocationHcpSelect.disabled = false;
                     }
                 }
 
@@ -3071,7 +3129,12 @@
                     const currentMonthStart = this.getCurrentMonthStart();
                     let unvisitedCount = 0;
                     googleSheetHcpsForRep.forEach(hcp => {
-                        const hasVisited = globalSupabaseVisits.some(visit => visit.hcp_name === hcp['HCPS'] && visit.medical_rep === currentMedRep.name && new Date(visit.visit_date) >= new Date(currentMonthStart) && !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event('));
+                        const hasVisited = globalSupabaseVisits.some(visit => 
+                            visit.hcp_name === hcp['HCPS'] && 
+                            visit.medical_rep === currentMedRep.name && 
+                            new Date(visit.visit_date) >= new Date(currentMonthStart) &&
+                            !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event(')
+                        );
                         if (!hasVisited) unvisitedCount++;
                     });
 
@@ -3261,6 +3324,15 @@
                     this.elements.brickHcpInput.value = '';
                     this.elements.specialtyHcpInput.value = '';
                     this.elements.visitLocationHcpSelect.value = ''; // Reset visit location
+                    // Ensure visit location dropdown is re-enabled and reset to default options
+                    this.elements.visitLocationHcpSelect.innerHTML = `
+                        <option value="">Select Visit Location</option>
+                        <option value="Clinic">Clinic</option>
+                        <option value="AM Hospital">AM Hospital</option>
+                    `;
+                    this.elements.visitLocationHcpSelect.disabled = false;
+
+
                     this.elements.commentsHcpInput.value = '';
                     this.elements.samplesSelect.value = 'No';
                     this.elements.sampleCountInput.value = '1';
@@ -3333,8 +3405,18 @@
 
                 async initializeDashboardForRep(repName) {
                     this.setLoading(true);
-                    this.elements.dashboardMedicalRepsSelect.innerHTML = `<option value="${repName}">${repName}</option>`;
-                    this.elements.dashboardMedicalRepsSelect.value = repName;
+                    // If the current user is an admin, enable and populate with all reps
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        const allUniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']))];
+                        populateSelect(this.elements.dashboardMedicalRepsSelect, allUniqueReps);
+                        this.elements.dashboardMedicalRepsSelect.disabled = false;
+                        this.elements.dashboardMedicalRepsSelect.value = repName; // Select the current admin rep
+                    } else {
+                        // For non-admin, populate with only their name and disable
+                        populateSelect(this.elements.dashboardMedicalRepsSelect, [repName]);
+                        this.elements.dashboardMedicalRepsSelect.value = repName;
+                        this.elements.dashboardMedicalRepsSelect.disabled = true;
+                    }
                     this.processVisitDataForCurrentRep();
                     this.populateBricksForRep(repName);
                     this.updateCountDisplay();
@@ -3345,16 +3427,30 @@
                 processVisitDataForCurrentRep() {
                     visitCountsForCurrentRep = {};
                     const currentMonthStart = formManager.getCurrentMonthStart();
-                    // Filter globalSupabaseVisits to only include visits from the current month for the current rep
-                    const filteredVisits = globalSupabaseVisits.filter(visit => 
-                        visit.medical_rep === currentMedRep.name && 
-                        new Date(visit.visit_date) >= new Date(currentMonthStart)
-                    );
-                    filteredVisits.forEach(visit => { visitCountsForCurrentRep[visit.hcp_name] = (visitCountsForCurrentRep[visit.hcp_name] || 0) + 1; });
+                    
+                    // If currentMedRep is admin, process visits for ALL reps
+                    const visitsToProcess = (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') 
+                                            ? globalSupabaseVisits 
+                                            : globalSupabaseVisits.filter(visit => visit.medical_rep === currentMedRep.name);
+
+                    visitsToProcess.forEach(visit => { 
+                        const visitDate = new Date(visit.visit_date);
+                        if (formManager.getCairoDate(visitDate) >= currentMonthStart) {
+                            visitCountsForCurrentRep[visit.hcp_name] = (visitCountsForCurrentRep[visit.hcp_name] || 0) + 1; 
+                        }
+                    });
                 }
 
                 populateBricksForRep(repName) {
-                    const uniqueBricks = [...new Set(globalGoogleData.filter(row => row['medical rep'] === repName).map(row => row['Brick']).filter(Boolean))];
+                    let uniqueBricks = [];
+                    // If admin, show all bricks from all reps
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        uniqueBricks = [...new Set(globalGoogleData.map(row => row['Brick']).filter(Boolean))];
+                    } else {
+                        // Otherwise, show only bricks for the current rep
+                        uniqueBricks = [...new Set(globalGoogleData.filter(row => row['medical rep'] === repName).map(row => row['Brick']).filter(Boolean))];
+                    }
+                    
                     this.elements.bricksOptions.innerHTML = '';
                     selectedBricks = [];
                     this.elements.bricksTrigger.textContent = 'Select Brick';
@@ -3369,7 +3465,7 @@
 
                 toggleBrickSelection(brick) {
                     const index = selectedBricks.indexOf(brick);
-                    if (index === -1) selectedBricks.push(brick); else selectedBricks.splice(index, 1);
+                    if (index === -1) selectedBr.push(brick); else selectedBricks.splice(index, 1);
                     this.elements.bricksTrigger.textContent = selectedBricks.length === 0 ? 'Select Brick' : selectedBricks.join(', ');
                     this.elements.bricksOptions.querySelectorAll('.custom-select-option').forEach(option => {
                         option.classList.toggle('selected', selectedBricks.includes(option.dataset.value));
@@ -3378,19 +3474,32 @@
                 }
 
                 updateCountDisplay() {
-                    const selectedRep = this.elements.dashboardMedicalRepsSelect.value, selectedOption = this.elements.visitOptionsSelect.value;
+                    const selectedRep = this.elements.dashboardMedicalRepsSelect.value;
+                    const selectedOption = this.elements.visitOptionsSelect.value;
+                    const selectedDay = this.elements.dayFilterSelect.value;
+                    
                     if (!selectedRep || !selectedOption) { this.elements.countDisplay.classList.add('hidden'); return; }
-                    let count = 0, displayText = '';
-                    const filteredGoogleDataForRep = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
-                    const selectedDay = this.elements.dayFilterSelect.value; // Get selected day
+                    
+                    let count = 0;
+                    let displayText = '';
+                    
+                    let dataToFilter = [];
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        // If admin, filter from all google data, but apply selectedRep filter if chosen
+                        dataToFilter = globalGoogleData.filter(row => selectedRep === '' || row['medical rep'] === selectedRep);
+                    } else {
+                        // For non-admin, filter only their own data
+                        dataToFilter = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    }
+
                     if (selectedOption === 'unvisited') {
-                        count = filteredGoogleDataForRep.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
+                        count = dataToFilter.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
                         displayText = `Unvisited HCPs (${selectedBricks.length > 0 ? selectedBricks.join(', ') : 'All Bricks'}) Count: `;
                     } else if (selectedOption === 'remaining') {
-                        count = filteredGoogleDataForRep.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
+                        count = dataToFilter.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
                         displayText = `Remaining Visits (${selectedBricks.length > 0 ? selectedBricks.join(', ') : 'All Bricks'}) Count: `;
                     } else if (selectedOption === 'full') {
-                        count = filteredGoogleDataForRep.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
+                        count = dataToFilter.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
                         displayText = `Full List (${selectedBricks.length > 0 ? selectedBricks.join(', ') : 'All Bricks'}) Count: `;
                     }
                     this.elements.countDisplay.textContent = `${displayText} ${count}`;
@@ -3398,21 +3507,36 @@
                 }
 
                 applyFilter() {
-                    const selectedRep = this.elements.dashboardMedicalRepsSelect.value, selectedOption = this.elements.visitOptionsSelect.value, selectedDay = this.elements.dayFilterSelect.value;
+                    const selectedRep = this.elements.dashboardMedicalRepsSelect.value;
+                    const selectedOption = this.elements.visitOptionsSelect.value;
+                    const selectedDay = this.elements.dayFilterSelect.value;
                     let errorMsg = '';
-                    if (!selectedRep) errorMsg += 'Please select a Medical Representative. ';
+                    
+                    // If admin, selectedRep can be empty to show all reps' data
+                    if (!selectedRep && !(currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin')) {
+                        errorMsg += 'Please select a Medical Representative. ';
+                    }
                     if (!selectedOption) errorMsg += 'Please select a display option. ';
+                    
                     this.elements.errorDisplay.textContent = errorMsg;
                     this.elements.errorDisplay.classList.toggle('hidden', !errorMsg);
                     if (errorMsg) { this.elements.hcpTable.classList.add('hidden'); this.elements.searchContainer.classList.add('hidden'); return; }
                     
-                    const googleDataForCurrentRep = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    let dataToFilter = [];
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        // If admin, filter from all google data, but apply selectedRep filter if chosen
+                        dataToFilter = globalGoogleData.filter(row => selectedRep === '' || row['medical rep'] === selectedRep);
+                    } else {
+                        // For non-admin, filter only their own data
+                        dataToFilter = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    }
+
                     if (selectedOption === 'unvisited') {
-                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
+                        filteredHCPsForDashboard = dataToFilter.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     } else if (selectedOption === 'remaining') {
-                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
+                        filteredHCPsForDashboard = dataToFilter.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     } else { // full list
-                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
+                        filteredHCPsForDashboard = dataToFilter.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     }
                     this.populateHCPTable(filteredHCPsForDashboard, selectedDay);
                     this.elements.searchContainer.classList.remove('hidden');
@@ -3860,13 +3984,20 @@
                     
                     let queryUrl = REQUESTS_URL;
                     let filters = [`customerType=neq.Personal`];
-                    const associatedAreas = medicalRepsAreas.get(medRep);
-                    if (associatedAreas && associatedAreas.size > 0) {
-                        filters.push(`area=in.(${Array.from(associatedAreas).join(',')})`);
+                    
+                    // Admin logic: If the current user is an admin, retrieve all customer requests
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        // No additional filters needed for admin, they see all
                     } else {
-                        showRequestAlert("No associated areas found for this medical representative, so no customer requests to display.", "info");
-                        this.elements.retrievedCustomerRequestsDiv.classList.add('hidden');
-                        return;
+                        // For non-admin, filter by associated areas
+                        const associatedAreas = medicalRepsAreas.get(medRep);
+                        if (associatedAreas && associatedAreas.size > 0) {
+                            filters.push(`area=in.(${Array.from(associatedAreas).join(',')})`);
+                        } else {
+                            showRequestAlert("No associated areas found for this medical representative, so no customer requests to display.", "info");
+                            this.elements.retrievedCustomerRequestsDiv.classList.add('hidden');
+                            return;
+                        }
                     }
 
                     const fullQueryUrl = `${queryUrl}?${filters.join('&')}&order=date.desc`;
@@ -3878,7 +4009,7 @@
                             const dateA = new Date(a.date).getTime();
                             const dateB = new Date(b.date).getTime();
                             if ((a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected") && !(b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected")) return 1;
-                            if ((b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected") && !(a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected")) return -1;
+                            if ((b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected") && !(a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || b.status === "Rejected")) return -1;
                             return dateB - dateA;
                         });
                         if (sortedData.length > 0) {
@@ -3920,7 +4051,16 @@
                         return;
                     }
                     let queryUrl = REQUESTS_URL;
-                    let filters = [`customerType=eq.Personal`, `medRep=eq.${personalName}`];
+                    let filters = [`customerType=eq.Personal`];
+                    
+                    // Admin logic: If the current user is an admin, retrieve all personal requests
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        // No additional filters needed for admin, they see all
+                    } else {
+                        // For non-admin, filter by their own name
+                        filters.push(`medRep=eq.${personalName}`);
+                    }
+
                     const fullQueryUrl = `${queryUrl}?${filters.join('&')}&order=date.desc`;
 
                     try {
@@ -3966,7 +4106,11 @@
                     const medRep = this.currentRepName;
                     let queryUrl = REQUESTS_URL;
                     let filters = [`customerType=neq.Personal`];
-                    if (medRep) {
+                    
+                    // Admin logic: If the current user is an admin, count all customer requests
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        // No additional filters needed for admin
+                    } else if (medRep) {
                         const associatedAreas = medicalRepsAreas.get(medRep);
                         if (associatedAreas && associatedAreas.size > 0) {
                             filters.push(`area=in.(${Array.from(associatedAreas).join(',')})`);
@@ -3992,7 +4136,11 @@
                     const personalName = this.elements.personalNameSelect.value;
                     let queryUrl = REQUESTS_URL;
                     let filters = [`customerType=eq.Personal`];
-                    if (personalName) {
+                    
+                    // Admin logic: If the current user is an admin, count all personal requests
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        // No additional filters needed for admin
+                    } else if (personalName) {
                         filters.push(`medRep=eq.${personalName}`);
                     } else {
                         this.elements.personalRequestCountSpan.innerText = '0';
@@ -4087,9 +4235,18 @@
                     this.currentRepName = repName;
                     
                     // Filter by logged-in user
-                    this.elements.medicalReps.innerHTML = `<option value="${repName}">${repName}</option>`;
-                    this.elements.medicalReps.value = repName;
-                    this.elements.medicalReps.disabled = true;
+                    // If the current user is an admin, enable and populate with all reps
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        const allUniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']))];
+                        populateSelect(this.elements.medicalReps, allUniqueReps);
+                        this.elements.medicalReps.disabled = false;
+                        this.elements.medicalReps.value = repName; // Select the current admin rep
+                    } else {
+                        // For non-admin, populate with only their name and disable
+                        populateSelect(this.elements.medicalReps, [repName]);
+                        this.elements.medicalReps.value = repName;
+                        this.elements.medicalReps.disabled = true;
+                    }
 
                     this.processVisitData();
                     this.handleRepChange();
@@ -4140,22 +4297,32 @@
                 processVisitData() {
                     const currentMonthStart = formManager.getCurrentMonthStart(); // Use Cairo-aware start of month
                     
-                    const currentMonthVisits = globalSupabaseVisits.filter(visit => {
+                    // If currentMedRep is admin, process visits for ALL reps
+                    const visitsToProcess = (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') 
+                                            ? globalSupabaseVisits 
+                                            : globalSupabaseVisits.filter(visit => visit.medical_rep === this.currentRepName);
+
+                    this.visitCounts = {};
+                    visitsToProcess.forEach(visit => {
                         const visitDate = new Date(visit.visit_date);
                         // Compare dates in Cairo timezone
-                        return formManager.getCairoDate(visitDate) >= currentMonthStart;
-                    });
-                    
-                    this.visitCounts = {};
-                    currentMonthVisits.forEach(visit => {
-                        this.visitCounts[visit.hcp_name] = (this.visitCounts[visit.hcp_name] || 0) + 1;
+                        if (formManager.getCairoDate(visitDate) >= currentMonthStart) {
+                            this.visitCounts[visit.hcp_name] = (this.visitCounts[visit.hcp_name] || 0) + 1;
+                        }
                     });
                 }
 
                 handleRepChange() {
                     const selectedRep = this.elements.medicalReps.value;
                     this.currentRepName = selectedRep;
-                    const filteredData = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    
+                    let filteredData = [];
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        filteredData = globalGoogleData.filter(row => selectedRep === '' || row['medical rep'] === selectedRep);
+                    } else {
+                        filteredData = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    }
+
                     const area = filteredData.length > 0 ? filteredData[0]['area'] : 'Not Found';
                     
                     this.bricks = new Set(filteredData.map(row => row['Brick']).filter(Boolean));
@@ -4178,7 +4345,13 @@
                         return;
                     }
 
-                    const filteredData = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    let filteredData = [];
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                        filteredData = globalGoogleData.filter(row => selectedRep === '' || row['medical rep'] === selectedRep);
+                    } else {
+                        filteredData = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    }
+
                     const unvisitedCount = filteredData.filter(row => {
                         const visits = this.visitCounts[row['HCPS']] || 0;
                         const targetVisits = parseInt(row['T.V']) || 3;
@@ -4200,13 +4373,22 @@
                         return;
                     }
 
-                    let filteredHCPs = globalGoogleData.filter(row => {
-                        return row['medical rep'] === selectedRep &&
-                               (selectedDay === '' || row[selectedDay].trim() !== '') &&
-                               (selectedBrick === '' || row['Brick'] === selectedBrick) &&
-                               !this.movedHCPs.has(row['HCPS']);
-                    });
-
+                    let filteredHCPs = [];
+                    if (currentMedRep && currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                         filteredHCPs = globalGoogleData.filter(row => {
+                            return (selectedRep === '' || row['medical rep'] === selectedRep) &&
+                                   (selectedDay === '' || row[selectedDay].trim() !== '') &&
+                                   (selectedBrick === '' || row['Brick'] === selectedBrick) &&
+                                   !this.movedHCPs.has(row['HCPS']);
+                        });
+                    } else {
+                        filteredHCPs = globalGoogleData.filter(row => {
+                            return row['medical rep'] === selectedRep &&
+                                   (selectedDay === '' || row[selectedDay].trim() !== '') &&
+                                   (selectedBrick === '' || row['Brick'] === selectedBrick) &&
+                                   !this.movedHCPs.has(row['HCPS']);
+                        });
+                    }
                     this.populateHCPTable(filteredHCPs, selectedDay);
                 }
 
@@ -4603,7 +4785,24 @@
                     medRepGovElement.textContent = `Governorate: N/A`;
                 }
 
-                loginPage.classList.add('hidden');
+                // If savedUser is admin, populate medicalRepSelector with all reps
+                if (currentMedRep.title && currentMedRep.title.toLowerCase() === 'admin') {
+                    const allUniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']))];
+                    populateSelect(medicalRepSelector, allUniqueReps);
+                    medicalRepSelector.value = currentMedRep.name;
+                    medicalRepSelector.disabled = false; // Ensure it's enabled for admin
+                    dashboardManager.elements.dashboardMedicalRepsSelect.disabled = false;
+                    populateSelect(dashboardManager.elements.dashboardMedicalRepsSelect, allUniqueReps);
+                } else {
+                    // For non-admin, restrict to their name and disable
+                    populateSelect(medicalRepSelector, [currentMedRep.name]);
+                    medicalRepSelector.value = currentMedRep.name;
+                    medicalRepSelector.disabled = true;
+                    dashboardManager.elements.dashboardMedicalRepsSelect.disabled = true;
+                    populateSelect(dashboardManager.elements.dashboardMedicalRepsSelect, [currentMedRep.name]);
+                }
+
+                // Removed loginPage.classList.add('hidden'); as loginPage div is removed
                 mainAppContainer.classList.remove('hidden');
 
                 formManager.initializeRepSpecificData(currentMedRep.name);
