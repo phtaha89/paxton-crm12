@@ -1042,6 +1042,10 @@
     .clinic-hcp {
         background-color: #F0F2BD !important;
     }
+    .visit-place-cell {
+        font-weight: bold;
+        color: var(--danger);
+    }
 
 
         /* Lists Dashboard Specific Styles */
@@ -4166,18 +4170,19 @@
                     const hcpTargetVisits = hcpGoogleData ? (parseInt(hcpGoogleData['T.V'], 10) || 0) : null;
 
                     const createCellContent = (name, dayDate, time, specialtyDisplay, brickDisplay, visitPlaceDisplay, comment = '', isEvent = false, isLeave = false, isAmSpecialty = false) => {
-                        let visitPlaceClass = '';
-                        if (visitPlaceDisplay.toLowerCase().includes('clinic')) {
-                            visitPlaceClass = 'clinic-hcp';
-                        }
-                        return `<div class="hcp-cell ${isEvent ? 'event' : ''} ${isLeave ? 'leave-entry' : ''} ${visitPlaceClass}" onclick="toggleComment(this)">
-                                    <span class="hcp-name ${isAmSpecialty ? 'am-specialty-hcp' : ''}">${name}</span>
-                                    <span class="hcp-detail">${dayDate} ${time}</span>
-                                    <span class="hcp-detail">${specialtyDisplay}</span>
-                                    <span class="hcp-detail">${brickDisplay} - ${visitPlaceDisplay}</span>
-                                    <div class="comment-box" data-comment-text="${escapeHtml(comment)}">${comment || 'No comment available'}</div>
-                                </div>`;
-                    };
+    let visitPlaceClass = 'visit-place-cell'; // Apply the visit-place-cell class by default
+    if (visitPlaceDisplay.toLowerCase().includes('clinic')) {
+        visitPlaceClass += ' clinic-hcp'; // Add clinic-hcp class if it's a clinic
+    }
+    return `<div class="hcp-cell ${isEvent ? 'event' : ''} ${isLeave ? 'leave-entry' : ''} ${visitPlaceClass}" onclick="toggleComment(this)">
+                <span class="hcp-name ${isAmSpecialty ? 'am-specialty-hcp' : ''}">${name}</span>
+                <span class="hcp-detail">${dayDate} ${time}</span>
+                <span class="hcp-detail">${specialtyDisplay}</span>
+                <span class="hcp-detail">${brickDisplay} - <span class="${visitPlaceClass}">${visitPlaceDisplay}</span></span>
+                <div class="comment-box" data-comment-text="${escapeHtml(comment)}">${comment || 'No comment available'}</div>
+            </div>`;
+};
+
 
 
                     const isAmActivitySpecialty = amActivitiesSpecialties.includes(specialty);
