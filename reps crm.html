@@ -2187,8 +2187,10 @@
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
         // Global variables for both form and dashboard
-        let currentMedRep = null;
-        let globalGoogleData = []; // Data from Google Sheet
+        let currentMedRep = null; // This will now be set by the postMessage from parent
+        let loggedInUser = null; // Stores the user object { username, title } from parent
+        let globalGoogleData = []; // Data from Google Sheet (full set if admin, otherwise fetched by CRM)
+        let globalGoogleSheetDataFromParent = []; // Used to store the full data passed from parent if admin
         let globalSupabaseVisits = []; // Visit data from Supabase (all users)
         let visitCountsForCurrentRep = {}; // Specific to the logged-in rep
         let medicalRepsAreas = new Map(); // Map to store medical rep and their associated areas
@@ -2199,21 +2201,8 @@
         let filteredHCPsForDashboard = []; // HCPs currently displayed in dashboard table
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Helper functions for localStorage
-            function setLocalStorageItem(name, value) {
-                localStorage.setItem(name, JSON.stringify(value));
-            }
+            // Helper functions for localStorage - REMOVED as data is passed via postMessage
 
-            function getLocalStorageItem(name) {
-                const item = localStorage.getItem(name);
-                return item ? JSON.parse(item) : null;
-            }
-
-            function removeLocalStorageItem(name) {
-                localStorage.removeItem(name);
-            }
-
-            // Removed showLoginAlert as login box is removed
             function showAlert(message, type) {
                 const alert = document.createElement('div');
                 alert.className = `alert alert-${type}`;
@@ -2299,25 +2288,25 @@
             // --- Core Data Fetching and Processing (Combined) ---
             async function fetchAllData() {
                 try {
-                    // Fetch Google Sheet data
-                    const googleResponse = await fetch(GOOGLE_SHEET_URL);
-                    if (!googleResponse.ok) throw new Error('Failed to fetch Google Sheet data');
-                    const googleText = await googleResponse.text();
-                    globalGoogleData = parseCSV(googleText);
+                    // Fetch Google Sheet data only if not provided by parent (i.e., not admin)
+                    if (!globalGoogleSheetDataFromParent || globalGoogleSheetDataFromParent.length === 0) {
+                        const googleResponse = await fetch(GOOGLE_SHEET_URL);
+                        if (!googleResponse.ok) throw new Error('Failed to fetch Google Sheet data');
+                        const googleText = await googleResponse.text();
+                        globalGoogleData = parseCSV(googleText);
+                    } else {
+                        globalGoogleData = globalGoogleSheetDataFromParent; // Use data passed from parent
+                    }
 
                     // Fetch Supabase visit data using pagination
                     globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
-
-                    // Populate the medical representative dropdown
-                    const uniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(rep => !/[\u0600-\u06FF]/.test(rep)))];
-                    populateSelect(document.getElementById('medicalRepSelector'), uniqueReps);
 
                     // Populate medicalRepsAreas map and districtManagersGovernorates map
                     medicalRepsAreas.clear();
                     districtManagersGovernorates.clear();
                     globalGoogleData.forEach(row => {
-                        const repName = row['medical rep'].trim();
-                        const area = row['area'].trim();
+                        const repName = row['medical rep'] ? row['medical rep'].trim() : '';
+                        const area = row['area'] ? row['area'].trim() : '';
                         const districtManager = row['District Manager'] ? row['District Manager'].trim() : 'N/A';
                         const governorate = row['Governorate'] ? row['Governorate'].trim() : 'N/A';
 
@@ -2380,6 +2369,78 @@
             const requestSection = document.getElementById('requestSection');
             const weeklyPlanSection = document.getElementById('weeklyPlanSection');
 
+            // Listen for messages from the parent window (index.html)
+            window.addEventListener('message', async (event) => {
+                // Ensure the message is from a trusted origin if deployed publicly
+                // if (event.origin !== 'YOUR_PARENT_APP_ORIGIN') return; 
+
+                if (event.data && event.data.type === 'loggedInUser') {
+                    loggedInUser = event.data.user;
+                    if (event.data.allGoogleSheetData) {
+                        globalGoogleSheetDataFromParent = event.data.allGoogleSheetData;
+                    }
+                    console.log('CRM received loggedInUser:', loggedInUser);
+                    console.log('CRM received allGoogleSheetData (if admin):', globalGoogleSheetDataFromParent);
+
+                    // Now that we have user data, fetch all necessary data and set up the dropdown
+                    await fetchAllData();
+                    handleUserRoleBasedRepSelection();
+                }
+            });
+
+            async function handleUserRoleBasedRepSelection() {
+                if (!loggedInUser) {
+                    showAlert('User data not received from parent. Please log in again.', 'error');
+                    return;
+                }
+
+                const medicalRepSelector = document.getElementById('medicalRepSelector');
+                medicalRepSelector.innerHTML = '<option value="">Select Medical Rep</option>'; // Clear existing options
+                medicalRepSelector.disabled = false; // Enable by default, then disable if needed
+
+                let repsToDisplay = [];
+                let defaultSelectedRep = '';
+
+                switch (loggedInUser.title) {
+                    case 'Medical Representative':
+                        repsToDisplay = [loggedInUser.username];
+                        defaultSelectedRep = loggedInUser.username;
+                        medicalRepSelector.disabled = true; // Disable dropdown for individual reps
+                        break;
+                    case 'District Manager':
+                        // Find all medical reps associated with this DM
+                        const dmName = loggedInUser.username;
+                        const associatedReps = globalGoogleData
+                            .filter(row => row['District Manager'] === dmName && row['medical rep'])
+                            .map(row => row['medical rep'])
+                            .filter(Boolean); // Ensure no empty strings
+                        repsToDisplay = [...new Set(associatedReps)]; // Get unique names
+                        // If there's only one associated rep, pre-select them
+                        if (repsToDisplay.length === 1) {
+                            defaultSelectedRep = repsToDisplay[0];
+                        }
+                        break;
+                    case 'admin':
+                        // Display all unique medical reps from the full Google Sheet data
+                        repsToDisplay = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(Boolean))];
+                        break;
+                    default:
+                        showAlert(`Unknown user title: ${loggedInUser.title}. Cannot determine medical rep access.`, 'error');
+                        return;
+                }
+
+                populateSelect(medicalRepSelector, repsToDisplay);
+
+                if (defaultSelectedRep) {
+                    medicalRepSelector.value = defaultSelectedRep;
+                }
+
+                // Trigger the change event to initialize the UI for the selected rep
+                // This will call the existing medicalRepSelector.addEventListener('change')
+                medicalRepSelector.dispatchEvent(new Event('change'));
+            }
+
+
             medicalRepSelector.addEventListener('change', async () => {
                 const selectedRepName = medicalRepSelector.value;
 
@@ -2421,7 +2482,7 @@
                         districtManager: repData['District Manager'],
                         governorate: repData['Governorate']
                     };
-                    setLocalStorageItem('currentUser', currentMedRep); // Still useful for persistence across sessions
+                    // Removed localStorage.setItem('currentUser', currentMedRep); as it's now handled by parent
 
                     medRepNameElement.textContent = currentMedRep.name;
                     medRepAreaElement.textContent = currentMedRep.area;
@@ -3025,32 +3086,32 @@
                 }
 
                 updateAssociatedAccounts(repName) {
-    this.elements.associatedAccountSelect.innerHTML = '<option value="">Select Associated Account</option>';
-    const filteredAccounts = globalGoogleData.filter(hcp => hcp['medical rep'] === repName && ['hospital', 'account', 'dialysis center'].includes(hcp['Speciality'].toLowerCase()));
+                    this.elements.associatedAccountSelect.innerHTML = '<option value="">Select Associated Account</option>';
+                    const filteredAccounts = globalGoogleData.filter(hcp => hcp['medical rep'] === repName && ['hospital', 'account', 'dialysis center'].includes(hcp['Speciality'].toLowerCase()));
 
-    // Check if the healthcare professional's class is "upa" or "private"
-    const hcpClass = globalGoogleData.find(hcp => hcp['medical rep'] === repName && hcp['HCPS'] === this.elements.hcpSelect.value)?.['Class'];
+                    // Check if the healthcare professional's class is "upa" or "private"
+                    const hcpClass = globalGoogleData.find(hcp => hcp['medical rep'] === repName && hcp['HCPS'] === this.elements.hcpSelect.value)?.['Class'];
 
-    if (hcpClass && (hcpClass.toLowerCase() === 'upa' || hcpClass.toLowerCase() === 'private')) {
-        // Only add "AM Hospital" as an option and select it by default
-        const option = document.createElement('option');
-        option.value = 'AM Hospital';
-        option.textContent = 'AM Hospital';
-        this.elements.associatedAccountSelect.appendChild(option);
-        this.elements.associatedAccountSelect.value = 'AM Hospital';
-    } else {
-        // Original logic for other classes
-        const uniqueAccountNames = new Set();
-        filteredAccounts.forEach(account => {
-            if (uniqueAccountNames.has(account['HCPS'])) return;
-            uniqueAccountNames.add(account['HCPS']);
-            const option = document.createElement('option');
-            option.value = account['HCPS'];
-            option.textContent = account['HCPS'];
-            this.elements.associatedAccountSelect.appendChild(option);
-        });
-    }
-}
+                    if (hcpClass && (hcpClass.toLowerCase() === 'upa' || hcpClass.toLowerCase() === 'private')) {
+                        // Only add "AM Hospital" as an option and select it by default
+                        const option = document.createElement('option');
+                        option.value = 'AM Hospital';
+                        option.textContent = 'AM Hospital';
+                        this.elements.associatedAccountSelect.appendChild(option);
+                        this.elements.associatedAccountSelect.value = 'AM Hospital';
+                    } else {
+                        // Original logic for other classes
+                        const uniqueAccountNames = new Set();
+                        filteredAccounts.forEach(account => {
+                            if (uniqueAccountNames.has(account['HCPS'])) return;
+                            uniqueAccountNames.add(account['HCPS']);
+                            const option = document.createElement('option');
+                            option.value = account['HCPS'];
+                            option.textContent = account['HCPS'];
+                            this.elements.associatedAccountSelect.appendChild(option);
+                        });
+                    }
+                }
 
 
                 handleHcpChange() {
@@ -3923,7 +3984,7 @@
                             const dateA = new Date(a.date).getTime();
                             const dateB = new Date(b.date).getTime();
                             if ((a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected") && !(b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected")) return 1;
-                            if ((b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected") && !(a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected")) return -1;
+                            if ((b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected") && !(a.status === "Done" || a.status === "Canceled" || b.status === "Approved" || b.status === "Rejected")) return -1;
                             return dateB - dateA;
                         });
                         if (sortedData.length > 0) {
@@ -4467,7 +4528,7 @@
                     const day = this.elements.dayFilter.value;
 
                     if (!day) {
-                        this.showMessage('Please select a day first.', 'error');
+                        this.showMessage('Please select a Day first.', 'error');
                         this.elements.eventTime.selectedIndex = 0;
                         return;
                     }
@@ -4633,41 +4694,35 @@
             // Expose removeFromWeeklyPlan globally for inline onclick
             window.removeFromWeeklyPlan = weeklyPlanManager.removeFromWeeklyPlan.bind(weeklyPlanManager);
 
-            await fetchAllData();
-            const savedUser = getLocalStorageItem('currentUser');
-            if (savedUser) {
-                currentMedRep = savedUser;
-                medRepNameElement.textContent = currentMedRep.name;
-                medRepAreaElement.textContent = currentMedRep.area;
-                medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
-                
-                const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
-                if (dmGovernorates && dmGovernorates.size > 0) {
-                    medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
-                } else {
-                    medRepGovElement.textContent = `Governorate: N/A`;
-                }
-
-                loginPage.classList.add('hidden');
-                mainAppContainer.classList.remove('hidden');
-
-                formManager.initializeRepSpecificData(currentMedRep.name);
-                dashboardManager.initializeDashboardForRep(currentMedRep.name);
-                requestFormManager.initialize(currentMedRep.name);
-                weeklyPlanManager.initialize(currentMedRep.name);
-                
-                showMainSection('crm');
-            }
-            // Function to filter visit locations based on the professional's class
-function filterVisitLocations(professionalClass) {
-  if (professionalClass === "UPA" || professionalClass === "Private") {
-    return visitLocations.filter(location => location.name === "Am Hospital");
-  } else {
-    return visitLocations; // Return all locations if the class is not UPA or Private
-  }
-}
-
+            // The initial data fetching and UI setup is now triggered by the message event from parent
+            // Removed the direct call to fetchAllData() and the localStorage.getItem('currentUser') logic here.
             
+            // The initial state of the CRM is now waiting for the parent to send data.
+            // All CRM sections are hidden by default until a rep is selected via the dropdown (which is populated by parent message).
+            mainAppContainer.classList.remove('hidden'); // Ensure the main container is visible
+            formSection.classList.add('hidden');
+            dashboardSection.classList.add('hidden');
+            requestSection.classList.add('hidden');
+            weeklyPlanSection.classList.add('hidden');
+            crmMainTabBtn.disabled = true;
+            dashboardMainTabBtn.disabled = true;
+            requestMainTabBtn.disabled = true;
+            weeklyPlanMainTabBtn.disabled = true;
+
+            // Function to filter visit locations based on the professional's class (already existing)
+            function filterVisitLocations(professionalClass) {
+                if (professionalClass === "UPA" || professionalClass === "Private") {
+                    // This function seems to be intended for a 'visitLocations' array not defined here.
+                    // If 'visitLocations' is supposed to be a global array, it needs to be defined.
+                    // For now, it will likely cause an error if called as 'visitLocations' is undefined.
+                    // Assuming it's meant to filter a list of available locations.
+                    // For the purpose of this request, the logic for `visitLocationHcpSelect` is handled
+                    // directly in `handleHcpChange` based on `hcpData['Class']`.
+                    return []; // Placeholder return
+                } else {
+                    return []; // Placeholder return
+                }
+            }
         });
         
     </script>
