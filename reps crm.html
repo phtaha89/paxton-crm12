@@ -2187,8 +2187,8 @@
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
         // Global variables for both form and dashboard
-        let currentMedRep = null; // Represents the currently "logged in" user and their role
-        let globalGoogleData = []; // Data from Google Sheet, now includes 'Role'
+        let currentMedRep = null;
+        let globalGoogleData = []; // Data from Google Sheet
         let globalSupabaseVisits = []; // Visit data from Supabase (all users)
         let visitCountsForCurrentRep = {}; // Specific to the logged-in rep
         let medicalRepsAreas = new Map(); // Map to store medical rep and their associated areas
@@ -2305,31 +2305,10 @@
                     const googleText = await googleResponse.text();
                     globalGoogleData = parseCSV(googleText);
 
-                    // Simulate 'Role' for demonstration
-                    globalGoogleData = globalGoogleData.map(row => {
-                        let role = "Medical Representative";
-                        // Assuming specific names for admin and DM roles for testing
-                        if (row['medical rep'] === "Admin User") {
-                            role = "admin";
-                        } else if (row['medical rep'] === "District Manager Name") { // Replace with an actual DM name from your sheet if available
-                            role = "District Manager";
-                        }
-                        return { ...row, Role: role };
-                    });
-
-                    // Add dummy users for testing roles if they don't exist in the sheet
-                    const existingRepNames = new Set(globalGoogleData.map(row => row['medical rep']));
-                    if (!existingRepNames.has("Admin User")) {
-                        globalGoogleData.push({ 'medical rep': 'Admin User', 'area': 'All', 'District Manager': 'N/A', 'Governorate': 'All', 'Role': 'admin' });
-                    }
-                    if (!existingRepNames.has("District Manager Name")) { // Replace with an actual DM name if available
-                        globalGoogleData.push({ 'medical rep': 'District Manager Name', 'area': 'Central', 'District Manager': 'District Manager Name', 'Governorate': 'Cairo', 'Role': 'District Manager' });
-                    }
-
                     // Fetch Supabase visit data using pagination
                     globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
 
-                    // Populate the medical representative dropdown with all unique reps initially
+                    // Populate the medical representative dropdown
                     const uniqueReps = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(rep => !/[\u0600-\u06FF]/.test(rep)))];
                     populateSelect(document.getElementById('medicalRepSelector'), uniqueReps);
 
@@ -2369,8 +2348,7 @@
                 }
             }
 
-            // Modified populateSelect to handle initial selection
-            function populateSelect(selectElement, items, selectedValue = null) {
+            function populateSelect(selectElement, items) {
                 const initialOption = selectElement.querySelector('option[value=""]');
                 selectElement.innerHTML = '';
                 if (initialOption) {
@@ -2382,9 +2360,6 @@
                     option.textContent = item;
                     selectElement.appendChild(option);
                 });
-                if (selectedValue) {
-                    selectElement.value = selectedValue;
-                }
             }
 
             // --- Medical Rep Selector Logic (Replaces Login/Logout) ---
@@ -2406,9 +2381,9 @@
             const weeklyPlanSection = document.getElementById('weeklyPlanSection');
 
             medicalRepSelector.addEventListener('change', async () => {
-                const selectedRepNameInDropdown = medicalRepSelector.value; // The name currently selected in the dropdown
+                const selectedRepName = medicalRepSelector.value;
 
-                if (!selectedRepNameInDropdown) {
+                if (!selectedRepName) {
                     // If "Select Medical Rep" is chosen, reset everything
                     currentMedRep = null;
                     medRepNameElement.textContent = 'Medical Rep Name';
@@ -2436,90 +2411,67 @@
                     return;
                 }
 
-                // Find the data for the *selected* user from globalGoogleData to determine their role
-                const selectedUserData = globalGoogleData.find(row => row['medical rep'] === selectedRepNameInDropdown);
-                let userRole = selectedUserData?.Role || "Medical Representative"; // Default to Medical Rep if role not found
+                // Find rep data from globalGoogleData
+                const repData = globalGoogleData.find(row => row['medical rep'] === selectedRepName);
 
-                // Update currentMedRep with the details of the *selected* user
-                currentMedRep = {
-                    name: selectedRepNameInDropdown,
-                    area: selectedUserData?.area || 'N/A',
-                    districtManager: selectedUserData?.['District Manager'] || 'N/A',
-                    governorate: selectedUserData?.['Governorate'] || 'N/A',
-                    role: userRole
-                };
-                setLocalStorageItem('currentUser', currentMedRep);
+                if (repData) {
+                    currentMedRep = {
+                        name: repData['medical rep'],
+                        area: repData['area'],
+                        districtManager: repData['District Manager'],
+                        governorate: repData['Governorate']
+                    };
+                    setLocalStorageItem('currentUser', currentMedRep); // Still useful for persistence across sessions
 
-                // Update display based on currentMedRep
-                medRepNameElement.textContent = currentMedRep.name;
-                medRepAreaElement.textContent = currentMedRep.area;
-                medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
-                const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
-                if (dmGovernorates && dmGovernorates.size > 0) {
-                    medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
+                    medRepNameElement.textContent = currentMedRep.name;
+                    medRepAreaElement.textContent = currentMedRep.area;
+                    medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
+                    
+                    // Display all governorates for the District Manager
+                    const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
+                    if (dmGovernorates && dmGovernorates.size > 0) {
+                        medRepGovElement.textContent = `Governorates: ${Array.from(dmGovernorates).join(', ')}`;
+                    } else {
+                        medRepGovElement.textContent = `Governorate: N/A`;
+                    }
+
+                    // Enable all main tabs
+                    crmMainTabBtn.disabled = false;
+                    dashboardMainTabBtn.disabled = false;
+                    requestMainTabBtn.disabled = false;
+                    weeklyPlanMainTabBtn.disabled = false;
+
+                    // Initialize managers for the selected rep
+                    formManager.initializeRepSpecificData(currentMedRep.name);
+                    dashboardManager.initializeDashboardForRep(currentMedRep.name);
+                    requestFormManager.initialize(currentMedRep.name);
+                    weeklyPlanManager.initialize(currentMedRep.name);
+                    
+                    // Show the CRM section by default
+                    showMainSection('crm');
+                    showAlert(`Welcome, ${currentMedRep.name}! Data loaded successfully.`, 'success');
+
                 } else {
-                    medRepGovElement.textContent = `Governorate: N/A`;
+                    showAlert('Selected Medical Representative data not found.', 'error');
+                    // Reset UI if data not found
+                    currentMedRep = null;
+                    medRepNameElement.textContent = 'Medical Rep Name';
+                    medRepAreaElement.textContent = 'Area';
+                    medRepDMElement.textContent = 'District Manager: N/A';
+                    medRepGovElement.textContent = 'Governorate: N/A';
+                    crmMainTabBtn.disabled = true;
+                    dashboardMainTabBtn.disabled = true;
+                    requestMainTabBtn.disabled = true;
+                    weeklyPlanMainTabBtn.disabled = true;
+                    formManager.handleReset();
+                    dashboardManager.resetDashboard();
+                    requestFormManager.resetForm();
+                    weeklyPlanManager.reset();
+                    formSection.classList.add('hidden');
+                    dashboardSection.classList.add('hidden');
+                    requestSection.classList.add('hidden');
+                    weeklyPlanSection.classList.add('hidden');
                 }
-
-                // Handle dropdown behavior based on role
-                if (userRole === "Medical Representative") {
-                    medicalRepSelector.disabled = true; // Disable for regular medical reps
-                    // Ensure only their name is in the dropdown and selected
-                    populateSelect(medicalRepSelector, [currentMedRep.name], currentMedRep.name);
-                    showAlert(`Welcome, ${currentMedRep.name}! Your role is Medical Representative.`, 'success');
-
-                } else if (userRole === "District Manager") {
-                    medicalRepSelector.disabled = false; // Keep enabled for DMs
-                    // Populate dropdown with reps under this DM
-                    const repsUnderDM = globalGoogleData
-                        .filter(row => row['District Manager'] === currentMedRep.name && row.Role === "Medical Representative")
-                        .map(row => row['medical rep']);
-                    
-                    // Add the DM themselves to the list if they are also a rep
-                    if (!repsUnderDM.includes(currentMedRep.name) && currentMedRep.role === "Medical Representative") { // Check if DM is also a rep
-                        repsUnderDM.unshift(currentMedRep.name);
-                    }
-
-                    populateSelect(medicalRepSelector, repsUnderDM, repsUnderDM[0] || currentMedRep.name); // Select the first rep or DM by default
-                    // Update currentMedRep.name to reflect the selected rep if DM is viewing a rep
-                    currentMedRep.name = medicalRepSelector.value;
-
-                    showAlert(`Welcome, ${selectedUserData.name}! Your role is District Manager. You can view your team's data.`, 'success');
-
-                } else if (userRole === "admin") {
-                    medicalRepSelector.disabled = false; // Keep enabled for Admin
-                    // Populate dropdown with all medical reps
-                    const allMedicalReps = globalGoogleData
-                        .filter(row => row.Role === "Medical Representative")
-                        .map(row => row['medical rep']);
-                    
-                    // Add the admin themselves to the list if they are also a rep
-                    if (!allMedicalReps.includes(currentMedRep.name) && currentMedRep.role === "Medical Representative") { // Check if Admin is also a rep
-                        allMedicalReps.unshift(currentMedRep.name);
-                    }
-
-                    populateSelect(medicalRepSelector, allMedicalReps, allMedicalReps[0] || currentMedRep.name); // Select the first rep or Admin by default
-                    // Update currentMedRep.name to reflect the selected rep if Admin is viewing a rep
-                    currentMedRep.name = medicalRepSelector.value;
-
-                    showAlert(`Welcome, ${selectedUserData.name}! Your role is Admin. You can view all medical reps' data.`, 'success');
-                }
-
-                // Enable all main tabs
-                crmMainTabBtn.disabled = false;
-                dashboardMainTabBtn.disabled = false;
-                requestMainTabBtn.disabled = false;
-                weeklyPlanMainTabBtn.disabled = false;
-
-                // Initialize managers for the *currently selected* rep in the dropdown
-                // This will be `currentMedRep.name` after the role-based adjustment above
-                formManager.initializeRepSpecificData(currentMedRep.name);
-                dashboardManager.initializeDashboardForRep(currentMedRep.name);
-                requestFormManager.initialize(currentMedRep.name);
-                weeklyPlanManager.initialize(currentMedRep.name);
-                
-                // Show the CRM section by default
-                showMainSection('crm');
             });
 
 
@@ -3073,32 +3025,32 @@
                 }
 
                 updateAssociatedAccounts(repName) {
-                    this.elements.associatedAccountSelect.innerHTML = '<option value="">Select Associated Account</option>';
-                    const filteredAccounts = globalGoogleData.filter(hcp => hcp['medical rep'] === repName && ['hospital', 'account', 'dialysis center'].includes(hcp['Speciality'].toLowerCase()));
+    this.elements.associatedAccountSelect.innerHTML = '<option value="">Select Associated Account</option>';
+    const filteredAccounts = globalGoogleData.filter(hcp => hcp['medical rep'] === repName && ['hospital', 'account', 'dialysis center'].includes(hcp['Speciality'].toLowerCase()));
 
-                    // Check if the healthcare professional's class is "upa" or "private"
-                    const hcpClass = globalGoogleData.find(hcp => hcp['medical rep'] === repName && hcp['HCPS'] === this.elements.hcpSelect.value)?.['Class'];
+    // Check if the healthcare professional's class is "upa" or "private"
+    const hcpClass = globalGoogleData.find(hcp => hcp['medical rep'] === repName && hcp['HCPS'] === this.elements.hcpSelect.value)?.['Class'];
 
-                    if (hcpClass && (hcpClass.toLowerCase() === 'upa' || hcpClass.toLowerCase() === 'private')) {
-                        // Only add "AM Hospital" as an option and select it by default
-                        const option = document.createElement('option');
-                        option.value = 'AM Hospital';
-                        option.textContent = 'AM Hospital';
-                        this.elements.associatedAccountSelect.appendChild(option);
-                        this.elements.associatedAccountSelect.value = 'AM Hospital';
-                    } else {
-                        // Original logic for other classes
-                        const uniqueAccountNames = new Set();
-                        filteredAccounts.forEach(account => {
-                            if (uniqueAccountNames.has(account['HCPS'])) return;
-                            uniqueAccountNames.add(account['HCPS']);
-                            const option = document.createElement('option');
-                            option.value = account['HCPS'];
-                            option.textContent = account['HCPS'];
-                            this.elements.associatedAccountSelect.appendChild(option);
-                        });
-                    }
-                }
+    if (hcpClass && (hcpClass.toLowerCase() === 'upa' || hcpClass.toLowerCase() === 'private')) {
+        // Only add "AM Hospital" as an option and select it by default
+        const option = document.createElement('option');
+        option.value = 'AM Hospital';
+        option.textContent = 'AM Hospital';
+        this.elements.associatedAccountSelect.appendChild(option);
+        this.elements.associatedAccountSelect.value = 'AM Hospital';
+    } else {
+        // Original logic for other classes
+        const uniqueAccountNames = new Set();
+        filteredAccounts.forEach(account => {
+            if (uniqueAccountNames.has(account['HCPS'])) return;
+            uniqueAccountNames.add(account['HCPS']);
+            const option = document.createElement('option');
+            option.value = account['HCPS'];
+            option.textContent = account['HCPS'];
+            this.elements.associatedAccountSelect.appendChild(option);
+        });
+    }
+}
 
 
                 handleHcpChange() {
@@ -3426,27 +3378,10 @@
 
                 async initializeDashboardForRep(repName) {
                     this.setLoading(true);
-                    // Populate dashboardMedicalReps based on currentMedRep.role
-                    if (currentMedRep.role === "Medical Representative") {
-                        this.elements.dashboardMedicalRepsSelect.innerHTML = `<option value="${repName}">${repName}</option>`;
-                        this.elements.dashboardMedicalRepsSelect.value = repName;
-                        this.elements.dashboardMedicalRepsSelect.disabled = true;
-                    } else if (currentMedRep.role === "District Manager") {
-                        this.elements.dashboardMedicalRepsSelect.disabled = false;
-                        const repsUnderDM = globalGoogleData
-                            .filter(row => row['District Manager'] === currentMedRep.name && row.Role === "Medical Representative")
-                            .map(row => row['medical rep']);
-                        populateSelect(this.elements.dashboardMedicalRepsSelect, repsUnderDM, repName); // repName is the currently selected rep in main dropdown
-                    } else if (currentMedRep.role === "admin") {
-                        this.elements.dashboardMedicalRepsSelect.disabled = false;
-                        const allMedicalReps = globalGoogleData
-                            .filter(row => row.Role === "Medical Representative")
-                            .map(row => row['medical rep']);
-                        populateSelect(this.elements.dashboardMedicalRepsSelect, allMedicalReps, repName); // repName is the currently selected rep in main dropdown
-                    }
-
+                    this.elements.dashboardMedicalRepsSelect.innerHTML = `<option value="${repName}">${repName}</option>`;
+                    this.elements.dashboardMedicalRepsSelect.value = repName;
                     this.processVisitDataForCurrentRep();
-                    this.populateBricksForRep(repName); // Use the passed repName for bricks
+                    this.populateBricksForRep(repName);
                     this.updateCountDisplay();
                     this.applyFilter();
                     this.setLoading(false);
@@ -3455,10 +3390,9 @@
                 processVisitDataForCurrentRep() {
                     visitCountsForCurrentRep = {};
                     const currentMonthStart = formManager.getCurrentMonthStart();
-                    // Filter globalSupabaseVisits to only include visits from the currently selected rep in the dashboard dropdown
-                    const selectedRepInDashboard = this.elements.dashboardMedicalRepsSelect.value;
+                    // Filter globalSupabaseVisits to only include visits from the current month for the current rep
                     const filteredVisits = globalSupabaseVisits.filter(visit => 
-                        visit.medical_rep === selectedRepInDashboard && 
+                        visit.medical_rep === currentMedRep.name && 
                         new Date(visit.visit_date) >= new Date(currentMonthStart)
                     );
                     filteredVisits.forEach(visit => { visitCountsForCurrentRep[visit.hcp_name] = (visitCountsForCurrentRep[visit.hcp_name] || 0) + 1; });
@@ -3559,7 +3493,6 @@
                     this.elements.errorDisplay.classList.add('hidden');
                     this.elements.countDisplay.classList.add('hidden');
                     this.elements.searchContainer.classList.add('hidden');
-                    // Re-initialize dashboard for the currently selected rep in the main dropdown
                     if (currentMedRep) this.initializeDashboardForRep(currentMedRep.name);
                 }
             }
@@ -3990,7 +3923,7 @@
                             const dateA = new Date(a.date).getTime();
                             const dateB = new Date(b.date).getTime();
                             if ((a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected") && !(b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected")) return 1;
-                            if ((b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected") && !(a.status === "Done" || a.status === "Canceled" || b.status === "Approved" || b.status === "Rejected")) return -1;
+                            if ((b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected") && !(a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected")) return -1;
                             return dateB - dateA;
                         });
                         if (sortedData.length > 0) {
@@ -4198,25 +4131,10 @@
                     this.elements.content.style.display = 'block';
                     this.currentRepName = repName;
                     
-                    // Populate medicalReps dropdown based on currentMedRep.role
-                    if (currentMedRep.role === "Medical Representative") {
-                        this.elements.medicalReps.innerHTML = `<option value="${repName}">${repName}</option>`;
-                        this.elements.medicalReps.value = repName;
-                        this.elements.medicalReps.disabled = true;
-                    } else if (currentMedRep.role === "District Manager") {
-                        this.elements.medicalReps.disabled = false;
-                        const repsUnderDM = globalGoogleData
-                            .filter(row => row['District Manager'] === currentMedRep.name && row.Role === "Medical Representative")
-                            .map(row => row['medical rep']);
-                        populateSelect(this.elements.medicalReps, repsUnderDM, repName);
-                    } else if (currentMedRep.role === "admin") {
-                        this.elements.medicalReps.disabled = false;
-                        const allMedicalReps = globalGoogleData
-                            .filter(row => row.Role === "Medical Representative")
-                            .map(row => row['medical rep']);
-                        populateSelect(this.elements.medicalReps, allMedicalReps, repName);
-                    }
-
+                    // Filter by logged-in user
+                    this.elements.medicalReps.innerHTML = `<option value="${repName}">${repName}</option>`;
+                    this.elements.medicalReps.value = repName;
+                    this.elements.medicalReps.disabled = true;
 
                     this.processVisitData();
                     this.handleRepChange();
@@ -4719,11 +4637,6 @@
             const savedUser = getLocalStorageItem('currentUser');
             if (savedUser) {
                 currentMedRep = savedUser;
-                // Re-apply role-based dropdown logic on load if a user was saved
-                const selectedUserData = globalGoogleData.find(row => row['medical rep'] === currentMedRep.name);
-                let userRole = selectedUserData?.Role || "Medical Representative";
-                currentMedRep.role = userRole; // Ensure role is correctly set from loaded data
-
                 medRepNameElement.textContent = currentMedRep.name;
                 medRepAreaElement.textContent = currentMedRep.area;
                 medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
@@ -4735,31 +4648,7 @@
                     medRepGovElement.textContent = `Governorate: N/A`;
                 }
 
-                // Apply role-specific dropdown behavior on load
-                if (currentMedRep.role === "Medical Representative") {
-                    medicalRepSelector.disabled = true;
-                    populateSelect(medicalRepSelector, [currentMedRep.name], currentMedRep.name);
-                } else if (currentMedRep.role === "District Manager") {
-                    medicalRepSelector.disabled = false;
-                    const repsUnderDM = globalGoogleData
-                        .filter(row => row['District Manager'] === currentMedRep.name && row.Role === "Medical Representative")
-                        .map(row => row['medical rep']);
-                    if (!repsUnderDM.includes(currentMedRep.name) && currentMedRep.role === "Medical Representative") {
-                        repsUnderDM.unshift(currentMedRep.name);
-                    }
-                    populateSelect(medicalRepSelector, repsUnderDM, currentMedRep.name);
-                } else if (currentMedRep.role === "admin") {
-                    medicalRepSelector.disabled = false;
-                    const allMedicalReps = globalGoogleData
-                        .filter(row => row.Role === "Medical Representative")
-                        .map(row => row['medical rep']);
-                    if (!allMedicalReps.includes(currentMedRep.name) && currentMedRep.role === "Medical Representative") {
-                        allMedicalReps.unshift(currentMedRep.name);
-                    }
-                    populateSelect(medicalRepSelector, allMedicalReps, currentMedRep.name);
-                }
-
-                // loginPage.classList.add('hidden'); // This element doesn't exist anymore
+                loginPage.classList.add('hidden');
                 mainAppContainer.classList.remove('hidden');
 
                 formManager.initializeRepSpecificData(currentMedRep.name);
@@ -4768,11 +4657,6 @@
                 weeklyPlanManager.initialize(currentMedRep.name);
                 
                 showMainSection('crm');
-                showAlert(`Welcome back, ${currentMedRep.name}!`, 'success');
-            } else {
-                // If no saved user, ensure main app is hidden and prompt for selection
-                mainAppContainer.classList.remove('hidden'); // Ensure container is visible to show selector
-                showAlert('Please select a Medical Representative to begin.', 'info');
             }
             // Function to filter visit locations based on the professional's class
 function filterVisitLocations(professionalClass) {
