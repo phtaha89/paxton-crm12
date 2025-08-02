@@ -331,134 +331,178 @@
     }
 
     function generateTaurolockPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        const products = [
-            {name: "Taurolock Hep 100 / amp 3 ml", pharmacist: "288.57 EGP", public: "327.92 EGP", discount: "12%"},
-            {name: "Taurolock Hep 500 / amp 5 ml", pharmacist: "318.16 EGP", public: "361.54 EGP", discount: "12%"},
-            {name: "Taurolock Hep 500 / vial 10 ml", pharmacist: "524.26 EGP", public: "595.75 EGP", discount: "12%"},
-            {name: "Taurolock U 25.000 / vial 5 ml", pharmacist: "1802.53 EGP", public: "2,048.32 EGP", discount: "12%"}
-        ];
-        
-        generatePDF(doc, "Taurolock Products Price Offer", products, "#004080");
-        doc.save("Taurolock_Price_Offer.pdf");
-    }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const products = [
+            {name: "Taurolock Hep 100 / amp 3 ml", pharmacist: "288.57 EGP", public: "327.92 EGP", discount: "12%", upa: "245 EGP"},
+            {name: "Taurolock Hep 500 / amp 5 ml", pharmacist: "318.16 EGP", public: "361.54 EGP", discount: "12%", upa: "275 EGP"},
+            {name: "Taurolock Hep 500 / vial 10 ml", pharmacist: "524.26 EGP", public: "595.75 EGP", discount: "12%"},
+            {name: "Taurolock U 25.000 / vial 5 ml", pharmacist: "1802.53 EGP", public: "2,048.32 EGP", discount: "12%", upa: "1,500 EGP"}
+        ];
+        
+        generateProfessionalPDF(doc, "Taurolock Products", "Price Quotation", products, [0, 64, 128]);
+        doc.save("Taurolock_Official_Price_Quotation.pdf");
+    }
 
-    function generateWouncurePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        const products = [
-            {name: "Wouncure powder 10 gm", pharmacist: "37.75 EGP", public: "51 EGP", discount: "26%", codes: "Sofico: 11600028 | Pharma overseas: 36310"},
-            {name: "Wouncure powder 20 gm", pharmacist: "65.5 EGP", public: "88 EGP", discount: "26%", codes: "Sofico: 11600029 | Pharma overseas: 36311"}
-        ];
-        
-        generatePDF(doc, "Wouncure Products Price Offer", products, "#006400");
-        doc.save("Wouncure_Price_Offer.pdf");
-    }
+    function generateWouncurePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const products = [
+            {name: "Wouncure powder 10 gm", pharmacist: "37.75 EGP", public: "51 EGP", discount: "26%", upa: "33.15 EGP", codes: "Sofico: 11600028 | Pharma overseas: 36310"},
+            {name: "Wouncure powder 20 gm", pharmacist: "65.5 EGP", public: "88 EGP", discount: "26%", upa: "45 EGP", codes: "Sofico: 11600029 | Pharma overseas: 36311"}
+        ];
+        
+        generateProfessionalPDF(doc, "Wouncure Products", "Price Quotation", products, [0, 100, 0]);
+        doc.save("Wouncure_Official_Price_Quotation.pdf");
+    }
 
-    function generateEmodialPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        const products = [
-            {name: "Exit Pro", pharmacist: "270.00 EGP", public: "306.82 EGP", discount: "12%"},
-            {name: "Shower Guard", pharmacist: "150.00 EGP", public: "168.00 EGP", discount: "12%"},
-            {name: "Diafex", pharmacist: "100.00 EGP", public: "113.64 EGP", discount: "13%"}
-        ];
-        
-        generatePDF(doc, "Emodial Products Price Offer", products, "#8b0000");
-        doc.save("Emodial_Price_Offer.pdf");
-    }
+    function generateEmodialPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        const products = [
+            {name: "Exit Pro", pharmacist: "270.00 EGP", public: "306.82 EGP", discount: "12%"},
+            {name: "Shower Guard", pharmacist: "150.00 EGP", public: "168.00 EGP", discount: "12%"},
+            {name: "Diafex", pharmacist: "100.00 EGP", public: "113.64 EGP", discount: "13%"}
+        ];
+        
+        generateProfessionalPDF(doc, "Emodial Products", "Price Quotation", products, [139, 0, 0]);
+        doc.save("Emodial_Official_Price_Quotation.pdf");
+    }
 
-    function generatePDF(doc, title, products, color) {
-        // Header
-        doc.setFillColor(75, 0, 130); // Purple background
-        doc.rect(0, 0, 210, 40, 'F');
-        
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(24);
-        doc.setFont("helvetica", "bold");
-        doc.text("PAXTON PRODUCTS", 105, 20, { align: "center" });
-        
-        doc.setFontSize(16);
-        doc.text(title, 105, 32, { align: "center" });
-        
-        // Reset text color
-        doc.setTextColor(0, 0, 0);
-        
-        let yPosition = 60;
-        
-        products.forEach((product, index) => {
-            // Product box
-            doc.setFillColor(240, 240, 240);
-            doc.rect(20, yPosition, 170, 45, 'F');
-            doc.setDrawColor(200, 200, 200);
-            doc.rect(20, yPosition, 170, 45, 'S');
-            
-            // Product name
-            doc.setFontSize(14);
-            doc.setFont("helvetica", "bold");
-            doc.text(product.name, 25, yPosition + 12);
-            
-            // Price information
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "normal");
-            
-            // Pharmacist price box
-            doc.setFillColor(207, 226, 243);
-            doc.rect(25, yPosition + 18, 60, 12, 'F');
-            doc.setDrawColor(150, 150, 150);
-            doc.rect(25, yPosition + 18, 60, 12, 'S');
-            doc.text("Pharmacist Price", 27, yPosition + 25);
-            doc.setFont("helvetica", "bold");
-            doc.text(product.pharmacist, 27, yPosition + 35);
-            
-            // Discount circle
-            const circleX = 105;
-            const circleY = yPosition + 24;
-            doc.setFillColor(255, 210, 6);
-            doc.circle(circleX, circleY, 8, 'F');
-            doc.setTextColor(2, 4, 61);
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "bold");
-            doc.text(product.discount, circleX, circleY + 2, { align: "center" });
-            doc.setTextColor(0, 0, 0);
-            
-            // Public price box
-            doc.setFillColor(248, 215, 218);
-            doc.rect(125, yPosition + 18, 60, 12, 'F');
-            doc.setDrawColor(150, 150, 150);
-            doc.rect(125, yPosition + 18, 60, 12, 'S');
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(12);
-            doc.text("Public Price", 127, yPosition + 25);
-            doc.setFont("helvetica", "bold");
-            doc.text(product.public, 127, yPosition + 35);
-            
-            // Add codes if available
-            if (product.codes) {
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(8);
-                doc.text(product.codes, 25, yPosition + 42);
-            }
-            
-            yPosition += 55;
-            
-            // Add new page if needed
-            if (yPosition > 250 && index < products.length - 1) {
-                doc.addPage();
-                yPosition = 20;
-            }
-        });
-        
-        // Footer
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "italic");
-        doc.setTextColor(100, 100, 100);
-        doc.text("Generated on: " + new Date().toLocaleDateString(), 105, 280, { align: "center" });
-    }
+    function generateProfessionalPDF(doc, productLine, documentType, products, brandColor) {
+        const currentDate = new Date();
+        const dateStr = currentDate.toLocaleDateString('en-GB');
+        const timeStr = currentDate.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+        
+        // Document title bar
+        doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
+        doc.rect(0, 0, 210, 25, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${productLine} - ${documentType}`, 105, 16, { align: "center" });
+        
+        let yPosition = 35;
+        
+        // Products table header
+        doc.setFillColor(52, 73, 94); // Dark blue
+        doc.rect(15, yPosition, 180, 12, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.text("Product Description", 20, yPosition + 8);
+        doc.text("Pharmacist Price", 110, yPosition + 8, { align: "center" });
+        doc.text("Public Price", 145, yPosition + 8, { align: "center" });
+        doc.text("Discount", 175, yPosition + 8, { align: "center" });
+        
+        yPosition += 12;
+        
+        products.forEach((product, index) => {
+            // Calculate text dimensions for auto-sizing
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
+            
+            // Measure text widths
+            const pharmacistWidth = doc.getTextWidth(product.pharmacist);
+            const publicWidth = doc.getTextWidth(product.public);
+            const discountWidth = doc.getTextWidth(product.discount);
+            
+            // Auto-fit box widths with minimum sizes and padding
+            const pharmacistBoxWidth = Math.max(pharmacistWidth + 8, 25);
+            const publicBoxWidth = Math.max(publicWidth + 8, 25);
+            const discountBoxWidth = Math.max(discountWidth + 6, 15);
+            
+            // Calculate column positions to align with headers
+            const col1Start = 20; // Product name
+            const col1Width = 80;
+            const col2Start = 110; // Center under "Pharmacist Price"
+            const col3Start = 145; // Center under "Public Price"  
+            const col4Start = 175; // Center under "Discount"
+            
+            // Determine row height based on product name length
+            const productName = product.name;
+            let rowHeight = 18;
+            let isMultiLine = false;
+            
+            if (productName.length > 30) {
+                rowHeight = 24;
+                isMultiLine = true;
+            }
+            
+            // Alternating row colors
+            if (index % 2 === 0) {
+                doc.setFillColor(248, 249, 250);
+                doc.rect(15, yPosition, 180, rowHeight, 'F');
+            }
+            
+            // Product details box
+            doc.setDrawColor(220, 220, 220);
+            doc.rect(15, yPosition, 180, rowHeight, 'S');
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "bold");
+            
+            // Product name - handle long names (ENSURE THIS IS ALWAYS RENDERED)
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(8);
+            doc.setFont("helvetica", "bold");
+            
+            if (isMultiLine) {
+                const words = productName.split(' ');
+                const midPoint = Math.ceil(words.length / 2);
+                const line1 = words.slice(0, midPoint).join(' ');
+                const line2 = words.slice(midPoint).join(' ');
+                doc.text(line1, col1Start, yPosition + 6);
+                doc.text(line2, col1Start, yPosition + 14);
+            } else {
+                doc.text(productName, col1Start, yPosition + (rowHeight/2) + 2);
+            }
+            
+            // Auto-sized Pharmacist price box
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
+            doc.setFillColor(207, 226, 243);
+            const pharmacistBoxY = yPosition + (rowHeight - 12) / 2;
+            doc.rect(col2Start - (pharmacistBoxWidth/2), pharmacistBoxY, pharmacistBoxWidth, 12, 'F');
+            doc.setDrawColor(180, 180, 180);
+            doc.rect(col2Start - (pharmacistBoxWidth/2), pharmacistBoxY, pharmacistBoxWidth, 12, 'S');
+            doc.text(product.pharmacist, col2Start, pharmacistBoxY + 8, { align: "center" });
+            
+            // Auto-sized Public price box
+            doc.setFillColor(248, 215, 218);
+            const publicBoxY = yPosition + (rowHeight - 12) / 2;
+            doc.rect(col3Start - (publicBoxWidth/2), publicBoxY, publicBoxWidth, 12, 'F');
+            doc.rect(col3Start - (publicBoxWidth/2), publicBoxY, publicBoxWidth, 12, 'S');
+            doc.text(product.public, col3Start, publicBoxY + 8, { align: "center" });
+            
+            // Auto-sized Discount badge
+            doc.setFillColor(255, 193, 7);
+            const discountBoxY = yPosition + (rowHeight - 10) / 2;
+            doc.rect(col4Start - (discountBoxWidth/2), discountBoxY, discountBoxWidth, 10, 'F');
+            doc.setTextColor(0, 0, 0);
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(7);
+            doc.text(product.discount, col4Start, discountBoxY + 7, { align: "center" });
+            
+            // Product codes if available
+            if (product.codes) {
+                doc.setTextColor(100, 100, 100);
+                doc.setFont("helvetica", "italic");
+                doc.setFontSize(6);
+                const codeY = isMultiLine ? yPosition + 21 : yPosition + rowHeight - 3;
+                doc.text(product.codes, col1Start, codeY);
+            }
+            
+            doc.setTextColor(0, 0, 0);
+            yPosition += rowHeight + 2;
+        });
+    }
 </script>
 
 </body>
