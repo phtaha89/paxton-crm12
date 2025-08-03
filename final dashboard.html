@@ -2157,17 +2157,17 @@ function getIframeUserInfo() {
             const username = window.frameElement.dataset.username;
             const title = window.frameElement.dataset.title; // 'admin' or 'District Manager'
             if (username && title) {
+                console.log("User info from iframe:", { username, title });
                 return { username: username, title: title };
             }
         }
     } catch (e) {
         console.warn("Could not access iframe parent data directly:", e);
     }
-    // Fallback: Default user if not in iframe or data not available
-    // For testing purposes, you can set a default here:
-    return { username: 'AdminUser', title: 'admin' }; // Default to admin for easier testing
-    // return { username: 'DM1', title: 'District Manager' }; // Or default to a DM
-    // return { username: 'DefaultUser', title: 'Medical Representative' }; // Or default to a Medical Representative
+    // If iframe data is not available, return null for username and title.
+    // This ensures no default admin access if not explicitly set by the iframe.
+    console.warn("User info not found in iframe dataset. Defaulting to a restricted 'Guest' role (null username/title). Please ensure your iframe has data-username and data-title attributes.");
+    return { username: null, title: null };
 }
 
 // --- Common Dashboard Initialization ---
@@ -2232,7 +2232,7 @@ async function initializeCommonDashboard() {
                 selectedDistrictManagerFilter = repDM;
                 $('#kpiDistrictManagerSelect').val(repDM).prop('disabled', true);
             } else {
-                selectedDistrictManagerFilter = ''; // Fallback if DM not found for MR
+                selectedDistrictManagerFilter = ''; // Fallback if DM not found for MR or unknown role
                 $('#kpiDistrictManagerSelect').prop('disabled', true);
             }
         }
@@ -2863,17 +2863,17 @@ function populateKpiDistrictManagers() {
     // Set initial selection and disable if DM is logged in
     if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
         kpiDmSelect.val(loggedInUserDM);
-        kpiDmSelect.prop('disabled', true);
+        kpiDmSelect.prop('disabled', true); 
     } else if (loggedInUserRole === 'admin') {
         kpiDmSelect.prop('disabled', false); // Admin can select any DM
         kpiDmSelect.val(selectedDistrictManagerFilter); // Set to current filter, which might be ''
     } else {
-        // For a regular Medical Representative, set their DM and disable
+        // For a regular Medical Representative or unknown role, set their DM and disable
         const repDM = allGoogleSheetData.find(row => row['medical rep'] === loggedInUserDM)?.['District Manager'];
         if (repDM) {
             kpiDmSelect.val(repDM);
         }
-        kpiDmSelect.prop('disabled', true);
+        kpiDmSelect.prop('disabled', true); 
     }
 }
 
@@ -2920,11 +2920,11 @@ async function fetchVisitsData(month, year) {
     }
 }
 
-async function fetchKPIData(month, year, selectedKpiDm = null) {
+async function fetchKPIData(month, year, currentDmFilter) { // Renamed selectedKpiDm to currentDmFilter for clarity
     showKPILoading();
     try {
         const { processedData: medicalRepsProcessedData, districtManagers } = await fetchMedicalRepsData();
-        const visitsData = await fetchVisitsData(month, year); // This now fetches all data via pagination
+        const visitsData = await fetchVisitsData(month, year);
 
         const workingDaysMap = calculateUnifiedWorkingDays(visitsData, allGoogleSheetData, month, year);
         const filteredVisitsData = filterRecentVisits(visitsData, medicalRepsProcessedData, month, year);
@@ -2932,33 +2932,51 @@ async function fetchKPIData(month, year, selectedKpiDm = null) {
         let pmVisitsMetrics = calculateMetrics(medicalRepsProcessedData, filteredVisitsData, ['A', 'B']);
         let amVisitsMetrics = calculateMetrics(medicalRepsProcessedData, filteredVisitsData, ['UPA', 'PRIVATE']);
 
-        // Apply filtering based on central DM selection
-        if (selectedKpiDm) { // If a specific DM is selected (not 'All DMs')
-            pmVisitsMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
-            amVisitsMetrics = amVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
+        // --- Start of refined filtering logic for data display ---
+        let finalPmMetrics = [];
+        let finalAmMetrics = [];
+
+        if (loggedInUserRole === 'admin') {
+            // Admin can see all or filter by selected DM
+            if (currentDmFilter) {
+                finalPmMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === currentDmFilter);
+                finalAmMetrics = amVisitsMetrics.filter(metric => metric.districtManager === currentDmFilter);
+            } else {
+                finalPmMetrics = pmVisitsMetrics; // Show all if no DM selected
+                finalAmMetrics = amVisitsMetrics;
+            }
+        } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
+            // DM can only see their own reps
+            finalPmMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === loggedInUserDM);
+            finalAmMetrics = amVisitsMetrics.filter(metric => metric.districtManager === loggedInUserDM);
         } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
-            // If a Medical Representative is logged in, filter for their data
-            pmVisitsMetrics = pmVisitsMetrics.filter(metric => metric.repName === loggedInUserDM);
-            amVisitsMetrics = amVisitsMetrics.filter(metric => metric.repName === loggedInUserDM);
+            // MR can only see their own data
+            finalPmMetrics = pmVisitsMetrics.filter(metric => metric.repName === loggedInUserDM);
+            finalAmMetrics = amVisitsMetrics.filter(metric => metric.repName === loggedInUserDM);
+        } else {
+            // Default for unknown/guest users: show nothing
+            finalPmMetrics = [];
+            finalAmMetrics = [];
         }
+        // --- End of refined filtering logic for data display ---
 
-        pmVisitsMetrics.forEach(metric => {
+        finalPmMetrics.forEach(metric => {
             metric.workingDays = workingDaysMap[metric.repName] || 0;
         });
-        const finalPmMetrics = calculateAverageVisits(pmVisitsMetrics, filteredVisitsData, ['A', 'B']);
-        updateKPITableRows(finalPmMetrics, 'privateVisitsTableBody');
+        const calculatedPmMetrics = calculateAverageVisits(finalPmMetrics, filteredVisitsData, ['A', 'B']);
+        updateKPITableRows(calculatedPmMetrics, 'privateVisitsTableBody');
 
-        amVisitsMetrics.forEach(metric => {
+        calculatedAmMetrics.forEach(metric => { // Corrected variable name from finalAmMetrics to calculatedAmMetrics
             metric.workingDays = workingDaysMap[metric.repName] || 0;
         });
-        const finalAmMetrics = calculateAverageVisits(amVisitsMetrics, filteredVisitsData, ['UPA', 'PRIVATE']);
-        updateKPITableRows(finalAmMetrics, 'amVisitsTableBody');
+        const calculatedAmMetrics = calculateAverageVisits(finalAmMetrics, filteredVisitsData, ['UPA', 'PRIVATE']);
+        updateKPITableRows(calculatedAmMetrics, 'amVisitsTableBody');
 
         const activeKpiTab = $('.kpi-tab-button.active').data('tab-id');
         $('.kpi-table-content').removeClass('active').hide();
         $(`#${activeKpiTab}`).addClass('active').show();
 
-        populateDailyReportMedReps(); 
+        populateDailyReportMedReps(); // Ensure this is called to update other dropdowns
 
     } catch (error) {
         console.error("Error in fetchKPIData:", error);
@@ -2976,7 +2994,7 @@ function filterRecentVisits(visitsData, medicalRepsData, month, year) {
         const repName = visit.medical_rep;
         const isCurrentMonth = visitDate.getMonth() + 1 === selectedMonth && visitDate.getFullYear() === selectedYear;
         const isHCPInMedicalReps = medicalRepsData[repName] && medicalRepsData[repName].hcps.some(hcp => hcp.name === hcpName);
-        return isCurrentMonth && isHCPInMedicalReps; // Corrected typo here
+        return isCurrentMonth && isHCPInMedicalReps; 
     });
 }
 
@@ -3036,7 +3054,7 @@ function calculateMetrics(medicalRepsData, visitsData, hcpClasses) {
 
     const result = [];
     for (const rep in metrics) {
-        const totalHCPCount = metrics[rep].totalHCPs; // Corrected to use totalHCPs from metrics[rep]
+        const totalHCPCount = metrics[rep].totalHCPs; 
         const uniqueHCPCount = metrics[rep].uniqueHCPs.size;
         
         // Fix for unvisitedHCPs: calculate directly
@@ -3053,7 +3071,7 @@ function calculateMetrics(medicalRepsData, visitsData, hcpClasses) {
             repName: rep,
             area: medicalRepsData[rep].area,
             totalHCPCount,
-            unvisitedHCPs, // Corrected
+            unvisitedHCPs, 
             coverage,
             coveragePercentage,
             frequency,
@@ -3524,7 +3542,7 @@ async function displayLeavesForRep(repName) {
             const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString();
             const endDate = new Date(currentYear, currentMonth, 0).toISOString();
             const { data, error } = await supabaseClient
-                .from('healthcarepro_visits') // Changed from hcps_visits2
+                .from('healthcarepro_visits') 
                 .select('id, hcp_name, specialty, comments, created_at')
                 .eq('medical_rep', repName)
                 .gte('created_at', startDate)
@@ -3535,7 +3553,7 @@ async function displayLeavesForRep(repName) {
             const startDate = new Date(currentYear, 0, 1).toISOString();
             const endDate = new Date(currentYear, 11, 31, 23, 59, 59, 999).toISOString();
              const { data, error } = await supabaseClient
-                .from('healthcarepro_visits') // Changed from hcps_visits2
+                .from('healthcarepro_visits') 
                 .select('id, hcp_name, specialty, comments, created_at')
                 .eq('medical_rep', repName)
                 .gte('created_at', startDate)
@@ -3592,22 +3610,33 @@ async function displayArchivedVisits() {
         
         let filteredArchivedData = allArchivedData;
 
-        // Filter archived visits based on central DM filter
-        if (selectedDistrictManagerFilter) {
+        // Apply filtering based on central DM filter or logged-in user
+        if (loggedInUserRole === 'admin') {
+            if (selectedDistrictManagerFilter) {
+                const dmMedicalReps = new Set();
+                allGoogleSheetData.forEach(row => {
+                    if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+                        dmMedicalReps.add(row['medical rep']);
+                    }
+                });
+                filteredArchivedData = filteredArchivedData.filter(visit => dmMedicalReps.has(visit.medical_rep));
+            }
+            // If admin and no DM filter, filteredArchivedData remains all archived data
+        } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
             const dmMedicalReps = new Set();
             allGoogleSheetData.forEach(row => {
-                if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+                if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
                     dmMedicalReps.add(row['medical rep']);
                 }
             });
             filteredArchivedData = filteredArchivedData.filter(visit => dmMedicalReps.has(visit.medical_rep));
         } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
-            // If a Medical Representative is logged in, show only their archived visits
             filteredArchivedData = filteredArchivedData.filter(visit => visit.medical_rep === loggedInUserDM);
+        } else {
+            filteredArchivedData = []; // Default for unknown/guest: no archived data
         }
 
-
-        if (selectedRep) {
+        if (selectedRep) { // If a specific rep is chosen in KPI tab, further filter by that rep
             filteredArchivedData = filteredArchivedData.filter(visit => visit.medical_rep === selectedRep);
         }
 
@@ -3714,13 +3743,18 @@ function populateDailyReportMedReps() {
         if (selectedDistrictManagerFilter) {
             repsToPopulate = medicalRepsForDailyReport.filter(rep => rep.dm === selectedDistrictManagerFilter);
         } else {
-            repsToPopulate = medicalRepsForDailyReport;
+            repsToPopulate = medicalRepsForDailyReport; // Admin sees all if no DM filter selected
         }
+        medRepSelect.prop('disabled', false); // Admin can select
     } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
         repsToPopulate = medicalRepsForDailyReport.filter(rep => rep.dm === loggedInUserDM);
+        medRepSelect.prop('disabled', false); // DM can select their own reps
     } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
         repsToPopulate = medicalRepsForDailyReport.filter(rep => rep.name === loggedInUserDM);
-        medRepSelect.prop('disabled', true); // Disable selection for MR
+        medRepSelect.prop('disabled', true); // MR sees only themselves and it's disabled
+    } else {
+        // Default for unknown/guest: no reps to select, disabled
+        medRepSelect.prop('disabled', true);
     }
 
     const uniqueRepNames = new Set(repsToPopulate.map(rep => rep.name));
@@ -3740,6 +3774,9 @@ function populateDailyReportMedReps() {
             updateTableStructure(adjustedStartDate, endDate);
             fetchDailyVisits(loggedInUserDM, adjustedStartDate, endDate);
         }
+    } else if (loggedInUserRole === 'District Manager' && loggedInUserDM && repsToPopulate.length > 0) {
+        // If DM is logged in, and there are reps under them, select the first one or keep "Select Medical Rep"
+        medRepSelect.val(''); // Keep it as "Select Medical Rep" initially for DMs
     } else {
         medRepSelect.val('');
     }
@@ -3812,13 +3849,49 @@ async function fetchDailyVisits(repName, startDate, endDate) {
 
     try {
         while (hasMore) {
-            const { data, error } = await supabaseClient
+            let query = supabaseClient
                 .from('healthcarepro_visits')
                 .select('*,brick,comments,visit_place')
-                .eq('medical_rep', repName)
                 .gte('created_at', start.toISOString())
                 .lte('created_at', end.toISOString())
                 .range(offset, offset + PAGE_SIZE - 1);
+
+            // Apply role-based filtering directly in the Supabase query
+            if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
+                const dmReps = new Set();
+                allGoogleSheetData.forEach(row => {
+                    if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
+                        dmReps.add(row['medical rep']);
+                    }
+                });
+                // Ensure the selected rep is one of the DM's reps
+                if (!dmReps.has(repName)) {
+                    allDailyVisits = []; // No data for this rep if not under the DM
+                    hasMore = false;
+                    break;
+                }
+                query = query.eq('medical_rep', repName); // Already filtered by repName, ensure it's valid
+            } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
+                query = query.eq('medical_rep', loggedInUserDM); // Only fetch for the logged-in MR
+            } else if (loggedInUserRole === 'admin' && selectedDistrictManagerFilter) {
+                const dmReps = new Set();
+                allGoogleSheetData.forEach(row => {
+                    if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+                        dmReps.add(row['medical rep']);
+                    }
+                });
+                if (!dmReps.has(repName)) {
+                    allDailyVisits = [];
+                    hasMore = false;
+                    break;
+                }
+                query = query.eq('medical_rep', repName); // Filter by selected rep under the admin's DM filter
+            } else {
+                query = query.eq('medical_rep', repName); // For admin with no DM filter, or unknown, use selected rep
+            }
+
+
+            const { data, error } = await query;
 
             if (error) {
                 throw error;
@@ -4250,32 +4323,75 @@ async function initListsDashboard() {
 function processListsData(googleData, supabaseData) {
     let medicalReps = [...new Set(googleData.map(row => row['medical rep']).filter(rep => rep && !/[\u0600-\u06FF]/.test(rep)))];
     
-    // Filter medical reps based on central DM filter
-    if (selectedDistrictManagerFilter) {
+    // Filter medical reps based on central DM filter OR logged-in user role
+    if (loggedInUserRole === 'admin') {
+        if (selectedDistrictManagerFilter) {
+            const dmReps = new Set();
+            googleData.forEach(row => {
+                if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+                    dmReps.add(row['medical rep']);
+                }
+            });
+            medicalReps = medicalReps.filter(rep => dmReps.has(rep));
+        }
+        // If admin and no DM filter, medicalReps remains all reps
+        $('#lists-dashboard #medicalReps').prop('disabled', false); // Admin can select
+    } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
         const dmReps = new Set();
         googleData.forEach(row => {
-            if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+            if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
                 dmReps.add(row['medical rep']);
             }
         });
         medicalReps = medicalReps.filter(rep => dmReps.has(rep));
+        $('#lists-dashboard #medicalReps').prop('disabled', false); // DM can select their own reps
     } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
-        // If a Medical Representative is logged in, show only their data
         medicalReps = medicalReps.filter(rep => rep === loggedInUserDM);
-        $('#lists-dashboard #medicalReps').prop('disabled', true); // Disable selection for MR
+        $('#lists-dashboard #medicalReps').prop('disabled', true); // MR sees only themselves and it's disabled
+    } else {
+        // Default for unknown/guest: no reps, disabled
+        medicalReps = [];
+        $('#lists-dashboard #medicalReps').prop('disabled', true);
     }
 
     populateSelect('medicalReps', medicalReps, 'Select Representative');
     if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
         $('#lists-dashboard #medicalReps').val(loggedInUserDM);
         populateListsBricks(); // Populate bricks for the auto-selected MR
+    } else if (loggedInUserRole === 'District Manager' && loggedInUserDM && medicalReps.length > 0) {
+        // If DM, pre-select the first rep or keep "Select Representative"
+        $('#lists-dashboard #medicalReps').val(''); // Keep it as "Select Representative" initially for DMs
+    } else {
+        $('#lists-dashboard #medicalReps').val('');
     }
 
     listsVisitCounts = {};
     const currentDate = new Date();
     listsCurrentMonthVisits = supabaseData.filter(visit => {
         const visitDate = new Date(visit.visit_date || visit.created_at);
-        return visitDate.getMonth() === currentDate.getMonth() && visitDate.getFullYear() === currentDate.getFullYear();
+        const isCurrentMonth = visitDate.getMonth() === currentDate.getMonth() && visitDate.getFullYear() === currentDate.getFullYear();
+        
+        // Additional filtering for Supabase data based on user role
+        if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
+            const dmReps = new Set();
+            allGoogleSheetData.forEach(row => {
+                if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
+                    dmReps.add(row['medical rep']);
+                }
+            });
+            return isCurrentMonth && dmReps.has(visit.medical_rep);
+        } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
+            return isCurrentMonth && visit.medical_rep === loggedInUserDM;
+        } else if (loggedInUserRole === 'admin' && selectedDistrictManagerFilter) {
+            const dmReps = new Set();
+            allGoogleSheetData.forEach(row => {
+                if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+                    dmReps.add(row['medical rep']);
+                }
+            });
+            return isCurrentMonth && dmReps.has(visit.medical_rep);
+        }
+        return isCurrentMonth; // Admin with no DM filter, or unknown user
     });
     listsCurrentMonthVisits.forEach(visit => {
         listsVisitCounts[visit.hcp_name] = (listsVisitCounts[visit.hcp_name] || 0) + 1;
@@ -4409,17 +4525,13 @@ function searchListsTable() {
 
 function resetListsData() {
     $('#lists-dashboard #medicalReps, #lists-dashboard #visitOptions, #lists-dashboard #dayFilter, #lists-dashboard #bricksSelect').prop('selectedIndex', 0);
-    listsSelectedBricks = []; // Still keep this if needed for other logic, but not for direct select value
+    listsSelectedBricks = []; 
     $('#lists-dashboard #searchBox').val('');
     $('#lists-dashboard #hcpTable tbody').empty();
     $('#lists-dashboard #hcpTable, #lists-dashboard #listsError, #lists-dashboard #countDisplay, #lists-dashboard #searchContainer').hide();
     
-    // Re-populate medical reps and disable if MR is logged in after reset
-    populateListsMedReps();
-    if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
-        $('#lists-dashboard #medicalReps').val(loggedInUserDM).prop('disabled', true);
-        populateListsBricks(); // Populate bricks for the auto-selected MR
-    }
+    // Re-initialize the lists dashboard to re-populate medical reps and apply role-based disabling
+    initListsDashboard(); 
 }
         
 // --- Requests Management Dashboard Functions ---
@@ -4513,7 +4625,6 @@ function requests_populateDistrictManagers() {
 
 async function requests_fetchAllRequests() {
     try {
-        // Fetch all requests data using pagination
         let allRequests = [];
         const limit = 1000;
         let offset = 0;
@@ -4536,21 +4647,27 @@ async function requests_fetchAllRequests() {
                 hasMoreRequests = false;
             }
         }
-        requests_allRequests = allRequests;
         
         // Apply initial filtering based on central DM filter or logged-in user
-        if (selectedDistrictManagerFilter) {
-            const dmReps = requests_medicalReps.get(selectedDistrictManagerFilter) || new Set();
-            requests_allRequests = requests_allRequests.filter(req => dmReps.has(req.medRep));
+        // This is the primary filtering for the requests data itself
+        if (loggedInUserRole === 'admin') {
+            if (selectedDistrictManagerFilter) {
+                const dmReps = requests_medicalReps.get(selectedDistrictManagerFilter) || new Set();
+                requests_allRequests = allRequests.filter(req => dmReps.has(req.medRep));
+            } else {
+                requests_allRequests = allRequests; // Admin sees all if no DM filter selected
+            }
         } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
             const dmReps = requests_medicalReps.get(loggedInUserDM) || new Set();
-            requests_allRequests = requests_allRequests.filter(req => dmReps.has(req.medRep));
+            requests_allRequests = allRequests.filter(req => dmReps.has(req.medRep));
         } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
-            requests_allRequests = requests_allRequests.filter(req => req.medRep === loggedInUserDM);
+            requests_allRequests = allRequests.filter(req => req.medRep === loggedInUserDM);
+        } else {
+            requests_allRequests = []; // Default for unknown/guest: no requests
         }
 
         document.getElementById("requests_requestCount").textContent = requests_allRequests.length;
-        requests_filterRequests();
+        requests_filterRequests(); // This will apply further UI filters on the already filtered data
     } catch (error) {
         console.error('Error fetching total requests for Requests Dashboard:', error);
         document.getElementById("requests_requestCount").textContent = 'Error';
@@ -4579,6 +4696,8 @@ function requests_filterMedicalRepsForRequests() {
         medRepSelect.disabled = false;
     } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
         repsToPopulate.add(loggedInUserDM);
+        medRepSelect.disabled = true;
+    } else {
         medRepSelect.disabled = true;
     }
 
@@ -4918,18 +5037,33 @@ async function initWeeklyPlanDashboard() {
         let medicalReps = [...new Set(allGoogleSheetData.map(row => row['medical rep']).filter(Boolean))];
         
         // Filter medical reps based on central DM filter
-        if (selectedDistrictManagerFilter) {
+        if (loggedInUserRole === 'admin') {
+            if (selectedDistrictManagerFilter) {
+                const dmReps = new Set();
+                allGoogleSheetData.forEach(row => {
+                    if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+                        dmReps.add(row['medical rep']);
+                    }
+                });
+                medicalReps = medicalReps.filter(rep => dmReps.has(rep));
+            }
+            // If admin and no DM filter, medicalReps remains all reps
+            $('#weeklyPlanMedicalReps').prop('disabled', false); // Admin can select
+        } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
             const dmReps = new Set();
             allGoogleSheetData.forEach(row => {
-                if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+                if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
                     dmReps.add(row['medical rep']);
                 }
             });
             medicalReps = medicalReps.filter(rep => dmReps.has(rep));
+            $('#weeklyPlanMedicalReps').prop('disabled', false); // DM can select their own reps
         } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
-            // If a Medical Representative is logged in, show only their data
             medicalReps = medicalReps.filter(rep => rep === loggedInUserDM);
-            $('#weeklyPlanMedicalReps').prop('disabled', true); // Disable selection for MR
+            $('#weeklyPlanMedicalReps').prop('disabled', true); // MR sees only themselves and it's disabled
+        } else {
+            medicalReps = []; // Default for unknown/guest: no reps, disabled
+            $('#weeklyPlanMedicalReps').prop('disabled', true);
         }
 
         populateSelect('weeklyPlanMedicalReps', medicalReps, 'Select a Medical Rep');
@@ -4999,7 +5133,7 @@ async function retrieveWeeklyPlan() {
     const startDate = document.getElementById('weeklyPlanStartDate').value;
     const endDate = document.getElementById('weeklyPlanEndDate').value;
 
-    if (!selectedRep) {
+    if (!selectedRep && loggedInUserRole !== 'admin') { // Only require selection if not admin
         showAlertDialog('Please select a Medical Representative.', 'warning');
         return;
     }
@@ -5018,15 +5152,60 @@ async function retrieveWeeklyPlan() {
 
     try {
         while(hasMoreWeeklyPlans) {
-            const { data, error } = await supabaseClient
+            let query = supabaseClient
                 .from('weekly_plans')
                 .select('*')
-                .eq('medical_rep_name', selectedRep)
                 .gte('start_date', startDate)
-                .lte('end_date', endDate) // Note: This assumes end_date in DB matches the calculated end_date
-                .order('visit_day', { ascending: true }) // Order by day for consistency
-                .order('visit_time', { ascending: true }) // Order by time for consistency
+                .lte('end_date', endDate) 
+                .order('visit_day', { ascending: true }) 
+                .order('visit_time', { ascending: true }) 
                 .range(offset, offset + limit - 1);
+
+            // Apply role-based filtering directly in the Supabase query if possible
+            if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
+                const dmReps = new Set();
+                allGoogleSheetData.forEach(row => {
+                    if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
+                        dmReps.add(row['medical rep']);
+                    }
+                });
+                // Convert Set to Array for `in` operator
+                const repsArray = Array.from(dmReps);
+                if (repsArray.length > 0) {
+                    query = query.in('medical_rep_name', repsArray);
+                } else {
+                    // If no reps under this DM, return empty data immediately
+                    allWeeklyPlans = [];
+                    hasMoreWeeklyPlans = false;
+                    break; // Exit loop
+                }
+            } else if (loggedInUserRole === 'Medical Representative' && loggedInUserDM) {
+                query = query.eq('medical_rep_name', loggedInUserDM);
+            } else if (loggedInUserRole === 'admin' && selectedDistrictManagerFilter) {
+                 const dmReps = new Set();
+                allGoogleSheetData.forEach(row => {
+                    if (row['District Manager'] === selectedDistrictManagerFilter && row['medical rep']) {
+                        dmReps.add(row['medical rep']);
+                    }
+                });
+                const repsArray = Array.from(dmReps);
+                if (repsArray.length > 0) {
+                    query = query.in('medical_rep_name', repsArray);
+                } else {
+                    allWeeklyPlans = [];
+                    hasMoreWeeklyPlans = false;
+                    break;
+                }
+            }
+            // If admin and no selectedDmFilter, query remains unfiltered for all reps
+
+            // If a specific rep is selected in the dropdown (e.g., by admin or DM)
+            if (selectedRep) {
+                query = query.eq('medical_rep_name', selectedRep);
+            }
+
+
+            const { data, error } = await query;
 
             if (error) throw error;
 
@@ -5346,6 +5525,5 @@ $(document).ready(function() {
     initializeCommonDashboard();
 });
 </script>
-
 </body>
 </html>
