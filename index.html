@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
     <!-- Google Fonts: Inter for a modern, clean look, and Poppins for login title -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Supabase CDN for database interaction -->
@@ -37,6 +37,7 @@
         /* Body and HTML for full height layout */
         html, body {
             height: 100%;
+            overflow-x: hidden; /* Prevent horizontal scroll on mobile menu */
         }
 
         body {
@@ -680,6 +681,233 @@
             box-shadow: var(--shadow-sm);
         }
 
+        /* New Professional Intro Animation Styles */
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--primary-blue-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .intro-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none; /* Disable interactions during fade out */
+        }
+
+        .intro-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* This wrapper will handle the overall fade out */
+            animation: fadeOut 0.5s ease-out 2.5s forwards; /* Starts fading out at 2.5s, finishes at 3s */
+        }
+
+        .intro-logo {
+            max-width: 150px;
+            height: auto;
+            border-radius: 50%; /* Make it circular */
+            opacity: 0; /* Start invisible */
+            transform: scale(0.8); /* Start smaller */
+            animation: fadeInScale 1.5s ease-out forwards; /* Logo animation */
+            margin-bottom: 20px; /* Space between logo and icons */
+        }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* New styles for the icons row */
+        .intro-icons-row {
+            display: flex;
+            gap: 15px; /* Space between icons */
+            opacity: 0; /* Start invisible */
+            animation: fadeIn 0.5s ease-out 1.0s forwards; /* Fade in after logo starts */
+        }
+
+        .intro-icon-item {
+            font-size: 2rem; /* Size of the emoji icons */
+            opacity: 0; /* Start invisible for individual items */
+            transform: translateY(20px); /* Start below */
+            animation: slideInFade 0.5s ease-out forwards; /* Individual icon animation */
+        }
+
+        /* Staggered animation for icons */
+        .intro-icon-item:nth-child(1) { animation-delay: 1.0s; }
+        .intro-icon-item:nth-child(2) { animation-delay: 1.1s; }
+        .intro-icon-item:nth-child(3) { animation-delay: 1.2s; }
+        .intro-icon-item:nth-child(4) { animation-delay: 1.3s; }
+        .intro-icon-item:nth-child(5) { animation-delay: 1.4s; }
+        .intro-icon-item:nth-child(6) { animation-delay: 1.5s; }
+        .intro-icon-item:nth-child(7) { animation-delay: 1.6s; }
+
+
+        @keyframes slideInFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* The overall fadeOut for the entire overlay remains the same, but now applies to intro-content-wrapper */
+        /* The intro-overlay.fade-out class will handle the final full fade out of the entire screen */
+
+        /* Mobile Menu (Side Menu) Styles */
+        .mobile-menu-button {
+            display: none; /* Hidden by default, shown on mobile */
+            background: var(--primary-blue-dark);
+            color: var(--white);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.3s ease;
+            order: 0; /* Place it first in the header */
+        }
+
+        .mobile-menu-button:hover {
+            background: var(--primary-blue-darker);
+        }
+
+        .side-menu-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .side-menu-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -280px; /* Hidden off-screen */
+            width: 250px; /* Width of the side menu */
+            height: 100%;
+            background: var(--white);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            z-index: 1001;
+            transition: left 0.3s ease;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-menu.show {
+            left: 0; /* Slide in */
+        }
+
+        .side-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .side-menu-header h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            color: var(--primary-blue-dark);
+        }
+
+        .close-menu-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-color-dark);
+            cursor: pointer;
+        }
+
+        .side-menu-nav {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto; /* Enable scrolling for many cards */
+            padding-right: 5px; /* Space for scrollbar */
+        }
+
+        .side-menu-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+            text-decoration: none;
+            color: var(--text-color-dark);
+        }
+
+        .side-menu-card:hover {
+            background: #e2e8f0;
+            transform: translateX(3px);
+        }
+
+        .side-menu-card-icon {
+            font-size: 1.2rem;
+            color: var(--primary-blue-dark);
+            opacity: 0.8; /* 80% transparency */
+        }
+
+        .side-menu-card-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .side-menu-logout {
+            margin-top: auto; /* Push to the bottom */
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .side-menu-logout-button {
+            width: 100%;
+            padding: 10px 15px;
+            background: #ef4444;
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .side-menu-logout-button:hover {
+            background: #dc2626;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 1024px) {
             .container {
@@ -781,6 +1009,7 @@
             }
             .logout-button {
                 width: 70px; /* Further decrease width for mobile */
+                display: none; /* Hide logout button from header on mobile, it's in side menu now */
             }
             .banner {
                 padding: 8px 15px;
@@ -818,6 +1047,7 @@
             }
             .main-card-subtitle {
                 font-size: 0.7rem; /* Adjusted subtitle font size */
+                display: none; /* Hide subtitle on mobile cards */
             }
             .full-page-view {
                 height: calc(100vh - 80px);
@@ -853,17 +1083,38 @@
                 flex-direction: column;
                 flex-grow: 1; /* Allow text content to take available space */
             }
+
+            /* Show mobile menu button on mobile */
+            .mobile-menu-button {
+                display: block; 
+            }
         }
     </style>
 </head>
 <body>
+    <!-- New Professional Intro Animation Overlay -->
+    <div id="introOverlay" class="intro-overlay">
+        <div class="intro-content-wrapper"> <!-- New wrapper for centering logo and icons -->
+            <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="intro-logo" onerror="this.onerror=null;this.src='https://placehold.co/150x150/3498db/FFFFFF?text=Logo';">
+            <div class="intro-icons-row">
+                <span class="intro-icon-item">📊</span>
+                <span class="intro-icon-item">📈</span>
+                <span class="intro-icon-item">🏥</span>
+                <span class="intro-icon-item">💲</span>
+                <span class="intro-icon-item">📚</span>
+                <span class="intro-icon-item">⚙️</span>
+                <span class="intro-icon-item">📋</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Full-page Blurred Message Overlay (for login/logout messages) -->
     <div id="fullPageMessageOverlay" class="full-page-message-overlay">
         <p id="fullPageOverlayMessage"></p>
     </div>
 
     <!-- Login Page -->
-    <div id="loginPage" class="login-container">
+    <div id="loginPage" class="login-container hidden">
         <div class="login-box">
             <!-- Paxton Logo for Login Box -->
             <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="login-logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/3498db/FFFFFF?text=Logo';">
@@ -884,7 +1135,11 @@
     <!-- Main Application Content (hidden until login) -->
     <div id="appContent" class="container hidden">
         <div class="header">
-            <!-- Logout button on the left -->
+            <!-- Mobile Menu Button (Hamburger) -->
+            <button id="mobileMenuButton" class="mobile-menu-button">
+                <i class="fas fa-bars"></i>
+            </button>
+            <!-- Logout button on the left (hidden on mobile header) -->
             <div class="header-buttons">
                 <button id="logoutButton" class="header-button logout-button">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -971,14 +1226,6 @@
                     <div class="main-card-text-content">
                         <div class="main-card-title">Master List</div>
                         <div class="main-card-subtitle">View and manage the master data list.</div>
-                    </div>
-                </div>
-                <!-- Coming Soon Card (disabled) -->
-                <div class="main-card disabled">
-                    <div class="main-card-icon">⏳</div>
-                    <div class="main-card-text-content">
-                        <div class="main-card-title">Coming Soon</div>
-                        <div class="main-card-subtitle">Exciting new features are on their way!</div>
                     </div>
                 </div>
             </div>
@@ -1130,6 +1377,27 @@
     <footer class="footer">
         Designed by DrTahaDesigns
     </footer>
+
+    <!-- Side Menu Overlay -->
+    <div id="sideMenuOverlay" class="side-menu-overlay"></div>
+
+    <!-- Side Menu -->
+    <div id="sideMenu" class="side-menu">
+        <div class="side-menu-header">
+            <h3>Navigation</h3>
+            <button id="closeMenuButton" class="close-menu-button">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="side-menu-nav">
+            <!-- Cards will be dynamically inserted here -->
+        </nav>
+        <div class="side-menu-logout">
+            <button id="sideMenuLogoutButton" class="side-menu-logout-button">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
 
     <script>
         // Supabase configuration from your provided keys
@@ -1305,6 +1573,7 @@
             currentActiveViewId = null;
             updateAndShowUserCard(); // Hide user card on logout
             console.log('Showing login page.');
+            closeSideMenu(); // Close side menu if open
         }
 
         /**
@@ -1317,6 +1586,7 @@
             console.log('Showing app content.');
             applyUserPermissions();
             updateAndShowUserCard(); // Show user card when app content is visible
+            populateSideMenu(); // Populate side menu on app content load
         }
 
         /**
@@ -1356,6 +1626,7 @@
                 document.querySelectorAll('.main-card').forEach(card => card.classList.add('hidden'));
                 document.getElementById('logoutButton').classList.add('hidden');
             }
+            populateSideMenu(); // Re-populate side menu after applying permissions
         }
 
         /**
@@ -1448,7 +1719,7 @@
             }
 
             if (loggedInUser) {
-                applyUserPermissions();
+                applyUserPermissions(); // Re-apply permissions to ensure correct card visibility
                 logoutButton.classList.remove('hidden');
             } else {
                  logoutButton.classList.add('hidden');
@@ -1469,6 +1740,7 @@
                 currentActiveViewId = null;
             }
             localStorage.setItem('currentPage', 'home');
+            closeSideMenu(); // Close side menu when navigating home
         }
 
         /**
@@ -1529,7 +1801,7 @@
 
             homeView.classList.add('hidden');
             backButton.classList.remove('hidden');
-            logoutButton.classList.add('hidden');
+            logoutButton.classList.add('hidden'); // Hide header logout button when in a sub-page
             console.log(`Back button visibility set for page: ${page}.`);
 
             if (currentActiveViewId && currentActiveViewId !== viewId) {
@@ -1592,40 +1864,113 @@
                 demoContent.classList.remove('hidden');
                 iframe.classList.add('hidden');
             };
+
+            closeSideMenu(); // Close side menu after selecting a page
+        }
+
+        /**
+         * Opens the mobile side menu.
+         */
+        function openSideMenu() {
+            document.getElementById('sideMenuOverlay').classList.add('show');
+            document.getElementById('sideMenu').classList.add('show');
+        }
+
+        /**
+         * Closes the mobile side menu.
+         */
+        function closeSideMenu() {
+            document.getElementById('sideMenuOverlay').classList.remove('show');
+            document.getElementById('sideMenu').classList.remove('show');
+        }
+
+        /**
+         * Populates the side menu with cards based on main-card elements and user permissions.
+         */
+        function populateSideMenu() {
+            const sideMenuNav = document.querySelector('.side-menu-nav');
+            sideMenuNav.innerHTML = ''; // Clear existing items
+
+            const mainCards = document.querySelectorAll('.home-grid .main-card');
+            
+            mainCards.forEach(card => {
+                // Only add cards that are not hidden by permissions
+                if (!card.classList.contains('hidden')) {
+                    const page = card.dataset.page;
+                    const title = card.querySelector('.main-card-title').textContent;
+                    // Get the actual emoji content from the main-card-icon div
+                    const iconContent = card.querySelector('.main-card-icon').textContent; 
+
+                    const sideMenuCard = document.createElement('div');
+                    sideMenuCard.classList.add('side-menu-card');
+                    if (card.classList.contains('disabled')) {
+                        sideMenuCard.classList.add('disabled');
+                    }
+                    sideMenuCard.dataset.page = page;
+                    sideMenuCard.innerHTML = `
+                        <div class="side-menu-card-icon">${iconContent}</div>
+                        <div class="side-menu-card-title">${title}</div>
+                    `;
+                    sideMenuNav.appendChild(sideMenuCard);
+
+                    // Add click listener to side menu card
+                    if (!card.classList.contains('disabled')) {
+                        sideMenuCard.addEventListener('click', function() {
+                            loadPage(page);
+                        });
+                    }
+                }
+            });
         }
 
         // Initialize the application when DOM is fully loaded
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM loaded, initializing application');
             
+            // Show intro animation
+            const introOverlay = document.getElementById('introOverlay');
+            // The animation duration is 3 seconds (1.5s fadeInScale + 0.5s fadeOut + 0.5s delay before fadeOut starts)
+            // The total time before login page appears is 3 seconds.
+            setTimeout(() => {
+                introOverlay.classList.add('fade-out');
+                // After fade out, remove from DOM to prevent interference
+                setTimeout(() => {
+                    introOverlay.remove();
+                }, 500); // Matches fade-out transition duration
+            }, 3000); // Total duration of animation before starting fade-out
+
             // Fetch Google Sheet data (kept for potential other uses, not directly for user card)
             await fetchGoogleSheetData();
 
             const storedUser = localStorage.getItem('loggedInUser');
             const lastPage = localStorage.getItem('currentPage');
 
-            if (storedUser) {
-                loggedInUser = JSON.parse(storedUser);
-                showAppContent();
+            // Delay showing login/app content until after intro animation
+            setTimeout(() => {
+                if (storedUser) {
+                    loggedInUser = JSON.parse(storedUser);
+                    showAppContent();
 
-                if (lastPage && lastPage !== 'home') {
-                    const targetCard = document.querySelector(`.main-card[data-page="${lastPage}"]`);
-                    if (targetCard && !targetCard.classList.contains('hidden')) {
-                         loadPage(lastPage);
+                    if (lastPage && lastPage !== 'home') {
+                        const targetCard = document.querySelector(`.main-card[data-page="${lastPage}"]`);
+                        if (targetCard && !targetCard.classList.contains('hidden')) {
+                            loadPage(lastPage);
+                        } else {
+                            console.log(`Last page "${lastPage}" is restricted or invalid for current user. Returning to home.`);
+                            showHome();
+                        }
                     } else {
-                        console.log(`Last page "${lastPage}" is restricted or invalid for current user. Returning to home.`);
                         showHome();
                     }
-                } else {
-                    showHome();
-                }
 
-            } else {
-                showLoginPage();
-            }
+                } else {
+                    showLoginPage();
+                }
+            }, 3500); // 3 seconds for intro + 0.5s for fade-out
 
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
+            document.getElementById('sideMenuLogoutButton').addEventListener('click', handleLogout); // Logout from side menu
 
             document.querySelectorAll('.main-card').forEach(card => {
                 card.addEventListener('click', function() {
@@ -1643,6 +1988,11 @@
             document.getElementById('backButton').addEventListener('click', function() {
                 showHome();
             });
+
+            // Mobile menu event listeners
+            document.getElementById('mobileMenuButton').addEventListener('click', openSideMenu);
+            document.getElementById('closeMenuButton').addEventListener('click', closeSideMenu);
+            document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu); // Close when clicking outside menu
         });
     </script>
 </body>
