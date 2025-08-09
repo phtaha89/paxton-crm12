@@ -513,35 +513,50 @@
             }
         }
 
-        // Simulates fetching user data from an external source or parent window
-        // You would replace this with your actual method of getting user information
+        // --- CODE FIX START ---
+
+        // This function simulates getting user information.
+        // You MUST replace this with your actual method of getting the current user's data
+        // from your system.
         function getUserInfo() {
-            // Replace this with a real implementation to get the current user's data.
-            // For this example, we'll return a hardcoded user.
-            // Uncomment the one you want to test.
+            // This example now returns a District Manager name that is present in the sample data.
+            // Replace this line with your own logic.
+            // Example 1: District Manager user
+            return { username: "DM1", title: "District Manager" };
 
-            // Example 1: Admin user (sees all options)
+            // Example 2: Admin user
             // return { username: "Admin User", title: "admin" };
-
-            // Example 2: District Manager (sees only their name)
-            return { username: "Jane Doe", title: "District Manager" };
         }
 
         function handleUserRole() {
             const user = getUserInfo();
             const dmSelect = document.getElementById('districtManager');
 
+            // Log the user info and available DMs to the console for debugging
+            console.log('Current User:', user);
+            console.log('Available District Managers:', districtManagers);
+
             if (user.title === 'District Manager') {
-                // Set the value to the user's name and disable the dropdown
-                dmSelect.value = user.username;
-                dmSelect.disabled = true;
-                // Since the DM is fixed, we can trigger data filtering immediately
-                updateDatesAndDaySelector();
+                // If a District Manager name exists in the fetched data, set it as the value
+                if (districtManagers.includes(user.username)) {
+                    dmSelect.value = user.username;
+                    dmSelect.disabled = true;
+                    console.log(`User is a District Manager. Setting dropdown to "${user.username}" and disabling it.`);
+                    // Since the DM is fixed, we can trigger data filtering immediately
+                    updateDatesAndDaySelector();
+                } else {
+                    // Fallback if the user's name is not in the data, to prevent the error
+                    console.error(`Error: District Manager name "${user.username}" not found in the data.`);
+                    // You might want to handle this case, e.g., by showing a message to the user.
+                }
             } else if (user.title === 'admin') {
                 // The dropdown remains enabled and populated with all DMs
                 dmSelect.disabled = false;
+                console.log('User is an admin. The dropdown is enabled.');
             }
         }
+
+        // --- CODE FIX END ---
 
         function showMessageBox(message, title = 'Notification') {
             const messageBox = document.createElement('div');
