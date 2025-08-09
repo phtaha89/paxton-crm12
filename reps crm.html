@@ -2184,7 +2184,7 @@
         // New Supabase URL for vacations
         const SUPABASE_VACATIONS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/vacations';
         const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
-        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ-EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
         // Global variables for both form and dashboard
         let currentMedRep = null; // This will now be set by the postMessage from parent
@@ -3177,12 +3177,7 @@
                     const currentMonthStart = this.getCurrentMonthStart();
                     let unvisitedCount = 0;
                     googleSheetHcpsForRep.forEach(hcp => {
-                        const hasVisited = globalSupabaseVisits.some(visit => 
-                            visit.hcp_name === hcp['HCPS'] && 
-                            visit.medical_rep === currentMedRep.name && 
-                            new Date(visit.visit_date) >= new Date(currentMonthStart) &&
-                            !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event(') // Exclude AM, Pharmacy and Event visits
-                        );
+                        const hasVisited = globalSupabaseVisits.some(visit => visit.hcp_name === hcp['HCPS'] && visit.medical_rep === currentMedRep.name && new Date(visit.visit_date) >= new Date(currentMonthStart) && !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event('));
                         if (!hasVisited) unvisitedCount++;
                     });
 
