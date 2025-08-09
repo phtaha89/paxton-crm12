@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Plan Submission</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #333;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0.75rem auto;
+            padding: 1.25rem;
+            background-color: #fff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+        input[type="date"], input[type="time"], select, textarea {
+            border: 1px solid #d1d5db;
+            border-radius: 0.4rem;
+            padding: 0.4rem 0.7rem;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: border-color 0.2s;
+            height: 2.2rem;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: auto;
+            min-height: 2.1rem;
+        }
+        input[type="date"]:focus, input[type="time"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.4rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            font-size: 0.85rem;
+        }
+        .btn-primary {
+            background-color: #6366f1;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: #ef4444;
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+            transform: translateY(-1px);
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1.25rem;
+        }
+        th, td {
+            padding: 0.5rem 0.7rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
+            font-size: 0.85rem;
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .rounded-t-lg th:first-child {
+            border-top-left-radius: 0.6rem;
+        }
+        .rounded-t-lg th:last-child {
+            border-top-right-radius: 0.6rem;
+        }
+        .rounded-b-lg tr:last-child td:first-child {
+            border-bottom-left-radius: 0.6rem;
+        }
+        .rounded-b-lg tr:last-child td:last-child {
+            border-bottom-right-radius: 0.6rem;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-size: 1.1rem;
+            color: #6366f1;
+            flex-direction: column;
+        }
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #6366f1;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #visitInputsContainer, #eventInputsContainer, #leavesInputsContainer {
+            padding: 0.75rem;
+            border-radius: 0.6rem;
+        }
+        #visitInputsContainer label, #eventInputsContainer label, #leavesInputsContainer label {
+            font-size: 0.8rem;
+            margin-bottom: 0.1rem;
+        }
+        #visitInputsContainer select, #eventInputsContainer select, #leavesInputsContainer select,
+        #visitInputsContainer input, #eventInputsContainer input, #leavesInputsContainer input,
+        #visitInputsContainer textarea, #eventInputsContainer textarea, #leavesInputsContainer textarea {
+            font-size: 0.85rem;
+            height: 2.1rem;
+            padding: 0.3rem 0.6rem;
+        }
+        #visitInputsContainer textarea, #eventInputsContainer textarea, #leavesInputsContainer textarea {
+            min-height: 2.1rem;
+        }
+        .plan-details-box {
+            padding: 0.5rem;
+            border-radius: 0.4rem;
+            font-size: 0.8rem;
+            position: absolute;
+            width: calc(100% - 14px);
+            box-sizing: border-box;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            z-index: 20;
+            left: 7px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            user-select: none;
+        }
+        .plan-details-box p {
+            margin-bottom: 0.1rem;
+        }
+        .plan-details-box p:last-child {
+            margin-bottom: 0;
+        }
+        .plan-details-box.selected {
+            border: 2px solid #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+        .time-label {
+            font-weight: 500;
+            color: #555;
+            text-align: right;
+            padding-right: 0.5rem;
+            width: 80px;
+            min-width: 80px;
+            position: sticky;
+            left: 0;
+            background-color: #f9fafb;
+            z-index: 1;
+        }
+        .table-cell-hour {
+            height: 40px;
+            position: relative;
+        }
+        .plan-details-box.full-day-entry {
+            background-color: #bfdbfe;
+            border-color: #93c5fd;
+        }
+        .plan-details-box.leave-entry {
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+        }
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            cursor: ns-resize;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 0.4rem;
+            border-bottom-right-radius: 0.4rem;
+            z-index: 25;
+        }
+        .plan-details-box:hover .resize-handle {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .entry-popover {
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 0.75rem;
+            z-index: 30;
+            width: 180px;
+            font-size: 0.8rem;
+            display: none;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: fixed;
+            pointer-events: auto;
+        }
+        .entry-popover p {
+            margin-bottom: 0;
+        }
+        .entry-popover-delete-btn {
+            background-color: #ef4444;
+            color: #fff;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.3rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            align-self: flex-end;
+        }
+        .entry-popover-delete-btn:hover {
+            background-color: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading data...</p>
+    </div>
+    <div class="container">
+        <h1 class="text-xl font-bold text-center mb-5 text-indigo-700 md:text-2xl">Weekly Plan Submission</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-5">
+            <div class="flex flex-col">
+                <label for="districtManager" class="text-gray-700 font-medium mb-1 text-sm">District Manager:</label>
+                <select id="districtManager" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                    <option value="">Select District Manager</option>
+                </select>
+            </div>
+            <div class="flex flex-col">
+                <label for="startDate" class="text-gray-700 font-medium mb-1 text-sm">Week Start Date (Saturday):</label>
+                <input type="date" id="startDate" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+            </div>
+            <div class="flex flex-col">
+                <label for="endDate" class="text-gray-700 font-medium mb-1 text-sm">Week End Date (Thursday):</label>
+                <input type="date" id="endDate" readonly class="bg-gray-100 cursor-not-allowed shadow-sm block w-full text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg shadow-inner mb-5">
+            <h2 class="text-lg font-semibold text-indigo-600 mb-3">Add Daily Plan Entry</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
+                <div class="flex flex-col">
+                    <label for="selectedDay" class="text-gray-700 font-medium mb-1 text-sm">Select Day:</label>
+                    <select id="selectedDay" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select a Day</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="entryTypeSelect" class="text-gray-700 font-medium mb-1 text-sm">Entry Type:</label>
+                    <select id="entryTypeSelect" onchange="handleEntryTypeChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select Type</option>
+                        <option value="Visit">Visit</option>
+                        <option value="Event">Event</option>
+                        <option value="Leave">Leave</option>
+                    </select>
+                </div>
+            </div>
+            <div id="visitInputsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3 p-3 border border-green-200 rounded-md bg-green-50">
+                <div class="flex flex-col">
+                    <label for="visitTypeSelect" class="text-gray-700 font-medium mb-1 text-sm">Visit Type:</label>
+                    <select id="visitTypeSelect" onchange="handleVisitTypeChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select Visit Type</option>
+                        <option value="Single Visit">Single Visit</option>
+                        <option value="Double Visit">Double Visit</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="visitTimeChoice" class="text-gray-700 font-medium mb-1 text-sm">Time Option:</label>
+                    <select id="visitTimeChoice" onchange="handleVisitTimeChoiceChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select Time Option</option>
+                        <option value="Pick a Time">Pick a Time</option>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                        <option value="Full Day">Full Day</option>
+                    </select>
+                </div>
+                <div id="visitTimeInputContainer" class="flex flex-col hidden">
+                    <label for="visitTimeInput" class="text-gray-700 font-medium mb-1 text-sm">Specific Time:</label>
+                    <input type="time" id="visitTimeInput" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                </div>
+                <div id="mrBrickContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3 col-span-full hidden">
+                    <div class="flex flex-col">
+                        <label for="medicalRepSelect" class="text-gray-700 font-medium mb-1 text-sm">Medical Rep:</label>
+                        <select id="medicalRepSelect" onchange="handleMedicalRepChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                            <option value="">Select MR</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="brickSelect" class="text-gray-700 font-medium mb-1 text-sm">Brick:</label>
+                        <select id="brickSelect" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                            <option value="">Select Brick</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex flex-col col-span-full">
+                    <label for="visitDetails" class="text-gray-700 font-medium mb-1 text-sm">Visit Details:</label>
+                    <textarea id="visitDetails" rows="2" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md" placeholder="Add specific details about the visit..."></textarea>
+                </div>
+            </div>
+            <div id="eventInputsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3 p-3 border border-blue-200 rounded-md bg-blue-50">
+                <div class="flex flex-col">
+                    <label for="eventSelect" class="text-gray-700 font-medium mb-1 text-sm">Event Type:</label>
+                    <select id="eventSelect" onchange="handleEventChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select Event</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Training">Training</option>
+                        <option value="Event">Event</option>
+                        <option value="Admin Work">Admin Work</option> <!-- Added Admin Work -->
+                    </select>
+                </div>
+                <div id="adminWorkTypeContainer" class="flex flex-col hidden"> <!-- New container for Admin Work sub-options -->
+                    <label for="adminWorkTypeSelect" class="text-gray-700 font-medium mb-1 text-sm">Admin Work Type:</label>
+                    <select id="adminWorkTypeSelect" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select Type</option>
+                        <option value="Office">Office</option>
+                        <option value="Online">Online</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="eventTimeChoice" class="text-gray-700 font-medium mb-1 text-sm">Time Option:</label>
+                    <select id="eventTimeChoice" onchange="handleEventTimeChoiceChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select Time Option</option>
+                        <option value="Pick a Time">Pick a Time</option>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                        <option value="Full Day">Full Day</option>
+                    </select>
+                </div>
+                <div id="eventTimeInputContainer" class="flex flex-col hidden">
+                    <label for="eventTimeInput" class="text-gray-700 font-medium mb-1 text-sm">Specific Time:</label>
+                    <input type="time" id="eventTimeInput" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                </div>
+                <div class="flex flex-col col-span-full">
+                    <label for="eventDetails" class="text-gray-700 font-medium mb-1 text-sm">Event Details:</label>
+                    <textarea id="eventDetails" rows="2" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md" placeholder="Add specific details about the event..."></textarea>
+                </div>
+            </div>
+            <div id="leavesInputsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3 p-3 border border-red-200 rounded-md bg-red-50">
+                <div class="flex flex-col">
+                    <label for="leaveSelect" class="text-gray-700 font-medium mb-1 text-sm">Leave Type:</label>
+                    <select id="leaveSelect" onchange="handleLeaveChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select Leave Type</option>
+                        <option value="Annual Leave">Annual Leave</option>
+                        <option value="Official Leave">Official Leave</option>
+                        <option value="Sick Leave">Sick Leave</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label for="leaveTimeChoice" class="text-gray-700 font-medium mb-1 text-sm">Time Option:</label>
+                    <select id="leaveTimeChoice" onchange="handleLeaveTimeChoiceChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                        <option value="">Select Time Option</option>
+                        <option value="Pick a Time">Pick a Time</option>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                        <option value="Full Day">Full Day</option>
+                    </select>
+                </div>
+                <div id="leaveTimeInputContainer" class="flex flex-col hidden">
+                    <label for="leaveTimeInput" class="text-gray-700 font-medium mb-1 text-sm">Specific Time:</label>
+                    <input type="time" id="leaveTimeInput" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                </div>
+                <div class="flex flex-col col-span-full">
+                    <label for="leaveDetails" class="text-gray-700 font-medium mb-1 text-sm">Leave Details:</label>
+                    <textarea id="leaveDetails" rows="2" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md" placeholder="Add specific details about the leave..."></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end mt-3 space-x-2">
+                <button type="button" class="btn btn-primary" onclick="addPlanEntry()">Add Entry to Plan</button>
+                <button type="button" class="btn btn-danger" id="deleteEntryButton" style="display:none;">Delete Selected Entries</button>
+            </div>
+        </div>
+        <div class="overflow-x-auto shadow-md rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50 rounded-t-lg">
+                    <tr id="table-header-row">
+                        <th class="w-[80px] time-label">Time</th>
+                    </tr>
+                </thead>
+                <tbody id="plan-table-body" class="bg-white divide-y divide-gray-200 rounded-b-lg">
+                </tbody>
+            </table>
+        </div>
+        <div class="flex justify-end mt-5 space-x-3">
+            <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+            <button type="submit" class="btn btn-primary" onclick="submitPlan()">Submit Plan</button>
+        </div>
+    </div>
+    <div id="global-popover-container" class="fixed inset-0 pointer-events-none z-40"></div>
+    <script>
+        let allData = [];
+        let districtManagers = [];
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+        const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+        const startHour = 9;
+        const endHour = 23;
+        const totalHours = endHour - startHour + 1;
+        let isResizing = false;
+        let currentResizingBox = null;
+        let initialY = 0;
+        let initialHeight = 0;
+        let initialEndHour = 0;
+        let cellHeight = 0;
+
+        const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+        function toggleLoading(show) {
+            document.getElementById('loading-overlay').classList.toggle('hidden', !show);
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const nonEmptyLines = lines.filter(line => line.trim() !== '');
+            if (nonEmptyLines.length === 0) return [];
+            const headers = nonEmptyLines[0].split(',').map(header => header.trim());
+            const data = [];
+            for (let i = 1; i < nonEmptyLines.length; i++) {
+                const currentLine = nonEmptyLines[i].split(',');
+                if (currentLine.length === headers.length) {
+                    const row = {};
+                    for (let j = 0; j < headers.length; j++) {
+                        row[headers[j]] = currentLine[j].trim();
+                    }
+                    data.push(row);
+                }
+            }
+            return data;
+        }
+
+        async function fetchData() {
+            toggleLoading(true);
+            const maxRetries = 5;
+            let retries = 0;
+            let delay = 1000;
+            while (retries < maxRetries) {
+                try {
+                    const response = await fetch(CSV_URL, { mode: 'cors' });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const csvText = await response.text();
+                    allData = parseCSV(csvText);
+                    const managerSet = new Set();
+                    allData.forEach(row => {
+                        if (row['District Manager']) {
+                            managerSet.add(row['District Manager']);
+                        }
+                    });
+                    districtManagers = Array.from(managerSet).sort();
+                    populateDistrictManagers();
+                    return;
+                } catch (error) {
+                    console.error(`Error fetching or parsing data (attempt ${retries + 1}):`, error);
+                    retries++;
+                    if (retries < maxRetries) {
+                        await new Promise(res => setTimeout(res, delay));
+                        delay *= 2;
+                    } else {
+                        showMessageBox(`Failed to load data after multiple attempts. Error: ${error.message}`, 'Error');
+                    }
+                } finally {
+                    if (retries >= maxRetries || allData.length > 0) {
+                        toggleLoading(false);
+                    }
+                }
+            }
+        }
+
+        function showMessageBox(message, title = 'Notification') {
+            const messageBox = document.createElement('div');
+            messageBox.className = 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50';
+            messageBox.innerHTML = `
+                <div class="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-1/3 relative">
+                    <h3 class="text-lg font-bold text-indigo-700 mb-4">${title}</h3>
+                    <div class="text-gray-700 text-sm leading-relaxed">${message}</div>
+                    <div class="mt-6 text-right">
+                        <button type="button" class="btn btn-secondary" onclick="this.closest('.fixed').remove()">Close</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(messageBox);
+        }
+
+        function populateDistrictManagers() {
+            const select = document.getElementById('districtManager');
+            select.innerHTML = '<option value="">Select District Manager</option>';
+            districtManagers.forEach(manager => {
+                const option = document.createElement('option');
+                option.value = manager;
+                option.textContent = manager;
+                select.appendChild(option);
+            });
+        }
+
+        function calculateEndDate(startDateStr) {
+            if (!startDateStr) return '';
+            const startDate = new Date(startDateStr);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 5);
+            return endDate.toISOString().split('T')[0];
+        }
+
+        function setDefaultStartDate() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            let daysUntilSaturday = 6 - dayOfWeek;
+            const nextSaturday = new Date(today);
+            nextSaturday.setDate(today.getDate() + daysUntilSaturday);
+            document.getElementById('startDate').value = nextSaturday.toISOString().split('T')[0];
+        }
+
+        function updateDatesAndDaySelector() {
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            const selectedStartDate = startDateInput.value;
+            endDateInput.value = calculateEndDate(selectedStartDate);
+            populateDaySelector(selectedStartDate);
+            updateTableHeader(selectedStartDate);
+            populateTimeSlotTable(selectedStartDate);
+            fetchExistingPlanData(selectedStartDate);
+        }
+
+        async function fetchExistingPlanData(startDate) {
+            const districtManager = document.getElementById('districtManager').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate || !districtManager) {
+                console.log('Missing required filters.');
+                return;
+            }
+
+            clearPlanTableBody();
+            toggleLoading(true);
+
+            try {
+                // Fetch all entries for this DM in the date range
+                const { data: entries, error: entriesError } = await _supabase
+                    .from('dms_weekly_plans') // Changed table name
+                    .select('*')
+                    .eq('district_manager_name', districtManager)
+                    .gte('start_date', startDate)
+                    .lte('end_date', endDate);
+
+                if (entriesError) throw entriesError;
+
+                populatePlanTable(entries || []);
+
+            } catch (error) {
+                console.error('Error fetching plan data:', error);
+                showMessageBox(`Failed to load plan data. Error: ${error.message}`, 'Error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+
+        document.getElementById('districtManager').addEventListener('change', updateDatesAndDaySelector);
+        document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
+
+
+        function populatePlanTable(entries) {
+            console.log('Populating plan table with entries:', entries);
+
+            clearPlanTableBody();
+
+            if (!entries || entries.length === 0) {
+                console.log('No entries to populate.');
+                return;
+            }
+
+            entries.forEach(entry => {
+                const dayIndex = daysOfWeek.indexOf(entry.entry_day);
+                if (dayIndex === -1) {
+                    console.log('Day not found for entry:', entry);
+                    return;
+                }
+
+                let planDetailsHtml = '';
+                let entryData = {
+                    id: entry.id, // Store the Supabase ID
+                    day: entry.entry_day,
+                    date: entry.entry_day, // Assuming entry_day can also serve as date for display
+                    type: entry.entry_type,
+                    details: entry.details || ''
+                };
+
+                let isFullDay = false;
+                let timeDisplay = getTimeDisplay(entry.start_hour, entry.end_hour, entry.start_time_option, entry.end_time_option);
+
+                if (entry.entry_type === 'Event') {
+                    entryData.event = entry.event_type;
+                    entryData.eventTime = timeDisplay;
+                    entryData.startHour = entry.start_hour;
+                    entryData.endHour = entry.end_hour;
+                    entryData.isLeave = false;
+                    entryData.startTimeOption = entry.start_time_option; // Ensure this is carried over
+                    if (entry.start_time_option === 'Full Day') isFullDay = true;
+
+                    // Handle Admin Work sub-type for display
+                    let adminWorkSubType = '';
+                    if (entry.event_type === 'Admin Work' && entry.details) {
+                        const detailsParts = entry.details.split(' - ');
+                        if (detailsParts.length > 1 && (detailsParts[0] === 'Office' || detailsParts[0] === 'Online')) {
+                            adminWorkSubType = detailsParts[0];
+                            entryData.adminWorkType = adminWorkSubType; // Store for popover
+                        }
+                    }
+
+
+                    planDetailsHtml = `
+                        <div class="p-2 bg-blue-50 border border-blue-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
+                             data-type="Event"
+                             data-event="${entry.event_type}"
+                             data-time="${timeDisplay}"
+                             data-details="${entry.details || ''}"
+                             data-start-hour="${entry.start_hour}"
+                             data-end-hour="${entry.end_hour}"
+                             data-is-leave="false"
+                             data-entry-id="${entry.id}"
+                             data-start-time-option="${entry.start_time_option}">
+                            <p>${entry.event_type}</p>
+                            ${entry.event_type === 'Admin Work' && adminWorkSubType ? `<p><span class="font-semibold">Type:</span> ${adminWorkSubType}</p>` : ''}
+                            ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                        </div>
+                    `;
+                } else if (entry.entry_type === 'Visit') {
+                    entryData.visitType = entry.visit_type;
+                    entryData.visitTime = timeDisplay;
+                    entryData.medicalRep = entry.medical_rep_name || '';
+                    entryData.brick = entry.brick || '';
+                    entryData.startHour = entry.start_hour;
+                    entryData.endHour = entry.end_hour;
+                    entryData.isLeave = false;
+                    entryData.startTimeOption = entry.start_time_option; // Ensure this is carried over
+                    if (entry.start_time_option === 'Full Day') isFullDay = true;
+
+
+                    planDetailsHtml = `
+                        <div class="p-2 bg-green-50 border border-green-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
+                             data-type="Visit"
+                             data-visit-type="${entry.visit_type}"
+                             data-time="${timeDisplay}"
+                             data-mr="${entry.medical_rep_name || ''}"
+                             data-brick="${entry.brick || ''}"
+                             data-details="${entry.details || ''}"
+                             data-start-hour="${entry.start_hour}"
+                             data-end-hour="${entry.end_hour}"
+                             data-is-leave="false"
+                             data-entry-id="${entry.id}"
+                             data-start-time-option="${entry.start_time_option}">
+                            <p>${entry.visit_type}</p>
+                            ${entry.visit_type === 'Double Visit' ? `<p><span class="font-semibold">Brick:</span> ${entry.brick || ''}</p>` : ''}
+                            ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                        </div>
+                    `;
+                } else if (entry.entry_type === 'Leave') {
+                    entryData.leaveType = entry.leave_type;
+                    entryData.leaveTime = timeDisplay;
+                    entryData.startHour = entry.start_hour;
+                    entryData.endHour = entry.end_hour;
+                    entryData.isLeave = true;
+                    entryData.startTimeOption = entry.start_time_option; // Ensure this is carried over
+                    if (entry.start_time_option === 'Full Day') isFullDay = true;
+
+
+                    planDetailsHtml = `
+                        <div class="p-2 bg-red-50 border border-red-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''} leave-entry"
+                             data-type="Leave"
+                             data-leave-type="${entry.leave_type}"
+                             data-time="${timeDisplay}"
+                             data-details="${entry.details || ''}"
+                             data-start-hour="${entry.start_hour}"
+                             data-end-hour="${entry.end_hour}"
+                             data-is-leave="true"
+                             data-entry-id="${entry.id}"
+                             data-start-time-option="${entry.start_time_option}">
+                            <p>${entry.leave_type}</p>
+                            ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                        </div>
+                    `;
+                }
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = planDetailsHtml.trim();
+                const planBoxElement = tempDiv.firstChild;
+
+                const targetCell = document.getElementById(`day-${dayIndex}-hour-${entry.start_hour}`);
+                if (!targetCell) {
+                    console.log('Target cell not found for entry:', entry);
+                    return;
+                }
+
+                if (isFullDay) {
+                    planBoxElement.style.height = `${cellHeight * totalHours + (totalHours - 1) * 1}px`;
+                    planBoxElement.style.top = '0px';
+                    planBoxElement.style.left = '7px';
+                    planBoxElement.style.width = 'calc(100% - 14px)';
+                    planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
+                    targetCell.appendChild(planBoxElement);
+                } else {
+                    const durationHours = entry.end_hour - entry.start_hour + 1;
+                    planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
+                    planBoxElement.style.top = '0px';
+                    planBoxElement.style.left = '7px';
+                    planBoxElement.style.width = 'calc(100% - 14px)';
+                    planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
+                    targetCell.appendChild(planBoxElement);
+
+                    const resizeHandle = planBoxElement.querySelector('.resize-handle');
+                    if (resizeHandle) {
+                        resizeHandle.addEventListener('mousedown', startResize);
+                    }
+                }
+            });
+        }
+
+
+        function getTimeDisplay(startHour, endHour, startTimeOption, endTimeOption) {
+            if (startTimeOption === 'Full Day') {
+                return 'Full Day (9 AM - 11 PM)';
+            } else if (startTimeOption === 'AM') {
+                return `AM (9 AM - 2 PM)`;
+            } else if (startTimeOption === 'PM') {
+                return `PM (2 PM - 11 PM)`;
+            } else {
+                return `${formatHourForDisplay(startHour)} - ${formatHourForDisplay(endHour)}`;
+            }
+        }
+
+        function formatHourForDisplay(hour) {
+            if (hour === 0) return '12 AM';
+            if (hour === 12) return '12 PM';
+            if (hour < 12) return `${hour} AM`;
+            return `${hour - 12} PM`;
+        }
+
+        function clearPlanTableBody() {
+            const planTableBody = document.getElementById('plan-table-body');
+            const allCells = planTableBody.querySelectorAll('.table-cell-hour');
+            allCells.forEach(cell => {
+                cell.innerHTML = '';
+            });
+
+            const startDateInput = document.getElementById('startDate').value;
+            if (!startDateInput) {
+                planTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="${daysOfWeek.length + 1}" class="text-center py-4 text-gray-500" data-empty-message="true">No plan entries yet. Select a day and add an entry.</td>
+                    </tr>
+                `;
+            }
+        }
+
+        async function submitPlan() {
+            const planData = {
+                districtManager: document.getElementById('districtManager').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                weeklyEntries: []
+            };
+
+            if (!planData.districtManager || !planData.startDate) {
+                showMessageBox('Please fill in the District Manager and Week Start Date before submitting.');
+                return;
+            }
+
+            for (let dayIndex = 0; dayIndex < daysOfWeek.length; dayIndex++) {
+                for (let hour = startHour; hour <= endHour; hour++) {
+                    const cell = document.getElementById(`day-${dayIndex}-hour-${hour}`);
+                    if (cell) {
+                        const planBoxes = cell.querySelectorAll('.plan-details-box');
+                        planBoxes.forEach(planBox => {
+                            if (planBox.hasAttribute('data-entry-details')) {
+                                const entry = JSON.parse(planBox.getAttribute('data-entry-details'));
+                                // Only add entries that don't have a Supabase ID (i.e., new entries)
+                                if (!entry.id || entry.id.startsWith('entry-')) { // Check if it's a temporary ID
+                                    planData.weeklyEntries.push(entry);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            if (planData.weeklyEntries.length === 0) {
+                showMessageBox('No new entries to submit. Please add at least one entry to your weekly plan.');
+                return;
+            }
+
+            toggleLoading(true);
+
+            try {
+                const entriesToInsert = planData.weeklyEntries.map(entry => ({
+                    district_manager_name: planData.districtManager,
+                    start_date: planData.startDate,
+                    end_date: planData.endDate,
+                    entry_day: entry.day,
+                    entry_type: entry.type,
+                    start_hour: entry.startHour,
+                    end_hour: entry.endHour,
+                    start_time_option: entry.startTimeOption, // Use the stored startTimeOption
+                    end_time_option: getTimeOption(entry.startHour, entry.endHour), // This might need adjustment if end_time_option is distinct
+                    visit_type: entry.visitType,
+                    medical_rep_name: entry.medicalRep,
+                    brick: entry.brick,
+                    event_type: entry.event,
+                    leave_type: entry.leaveType,
+                    details: entry.details
+                }));
+
+                const { error: insertError } = await _supabase
+                    .from('dms_weekly_plans') // Changed table name
+                    .insert(entriesToInsert);
+
+                if (insertError) {
+                    throw insertError;
+                }
+
+                showMessageBox('Plan submitted successfully!', 'Success');
+                // Refresh the table with latest data after submission
+                fetchExistingPlanData(planData.startDate);
+            }
+            catch (error) {
+                console.error('Error submitting plan:', error);
+                showMessageBox(`Failed to submit plan. Error: ${error.message}`, 'Error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        function getTimeOption(startHour, endHour) {
+            if (startHour === 9 && endHour === 23) {
+                return 'Full Day';
+            } else if (startHour === 9 && endHour === 14) {
+                return 'AM';
+            } else if (startHour === 14 && endHour === 23) {
+                return 'PM';
+            } else {
+                return 'Pick a Time';
+            }
+        }
+
+        function populateDaySelector(startDateStr) {
+            const daySelect = document.getElementById('selectedDay');
+            daySelect.innerHTML = '<option value="">Select a Day</option>';
+            if (startDateStr) {
+                const startDate = new Date(startDateStr);
+                daysOfWeek.forEach((dayName, index) => {
+                    const currentDate = new Date(startDate);
+                    currentDate.setDate(startDate.getDate() + index);
+                    const dateString = currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                    const option = document.createElement('option');
+                    option.value = `${dayName}|${currentDate.toISOString().split('T')[0]}|${index}`;
+                    option.textContent = `${dayName} (${dateString})`;
+                    daySelect.appendChild(option);
+                });
+            }
+        }
+
+        function updateTableHeader(startDateStr) {
+            const tableHeaderRow = document.getElementById('table-header-row');
+            tableHeaderRow.innerHTML = '<th class="w-[80px] time-label">Time</th>';
+            if (startDateStr) {
+                const startDate = new Date(startDateStr);
+                daysOfWeek.forEach((dayName, index) => {
+                    const currentDate = new Date(startDate);
+                    currentDate.setDate(startDate.getDate() + index);
+                    const dateString = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const th = document.createElement('th');
+                    th.classList.add('min-w-[120px]');
+                    th.innerHTML = `<div class="flex flex-col items-center"><span>${dayName}</span><span class="text-xs font-normal text-gray-500">${dateString}</span></div>`;
+                    tableHeaderRow.appendChild(th);
+                });
+            } else {
+                daysOfWeek.forEach(dayName => {
+                    const th = document.createElement('th');
+                    th.classList.add('min-w-[120px]');
+                    th.innerHTML = `<div class="flex flex-col items-center"><span>${dayName}</span><span class="text-xs font-normal text-gray-500">Select Date</span></div>`;
+                    tableHeaderRow.appendChild(th);
+                });
+            }
+        }
+
+        function populateTimeSlotTable(startDateStr) {
+            const planTableBody = document.getElementById('plan-table-body');
+            planTableBody.innerHTML = '';
+            if (!startDateStr) {
+                planTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="${daysOfWeek.length + 1}" class="text-center py-4 text-gray-500" data-empty-message="true">No plan entries yet. Select a day and add an entry.</td>
+                    </tr>
+                `;
+                return;
+            }
+            for (let hour = startHour; hour <= endHour; hour++) {
+                const tr = document.createElement('tr');
+                const timeLabelTd = document.createElement('td');
+                timeLabelTd.classList.add('time-label');
+                timeLabelTd.textContent = `${hour > 12 ? hour - 12 : hour}${hour >= 12 ? ' PM' : ' AM'}`;
+                tr.appendChild(timeLabelTd);
+                for (let dayIndex = 0; dayIndex < daysOfWeek.length; dayIndex++) {
+                    const td = document.createElement('td');
+                    td.id = `day-${dayIndex}-hour-${hour}`;
+                    td.classList.add('table-cell-hour');
+                    tr.appendChild(td);
+                }
+                planTableBody.appendChild(tr);
+            }
+            if (planTableBody.querySelector('.table-cell-hour')) {
+                cellHeight = planTableBody.querySelector('.table-cell-hour').offsetHeight;
+            }
+        }
+
+        function handleEntryTypeChange() {
+            const entryTypeSelect = document.getElementById('entryTypeSelect');
+            const visitInputsContainer = document.getElementById('visitInputsContainer');
+            const eventInputsContainer = document.getElementById('eventInputsContainer');
+            const leavesInputsContainer = document.getElementById('leavesInputsContainer');
+
+            visitInputsContainer.classList.add('hidden');
+            eventInputsContainer.classList.add('hidden');
+            leavesInputsContainer.classList.add('hidden');
+
+            document.getElementById('visitTypeSelect').value = '';
+            document.getElementById('visitTimeChoice').value = '';
+            document.getElementById('visitTimeInput').value = '';
+            document.getElementById('visitTimeInputContainer').classList.add('hidden');
+            document.getElementById('medicalRepSelect').innerHTML = '<option value="">Select MR</option>';
+            document.getElementById('brickSelect').innerHTML = '<option value="">Select Brick</option>';
+            document.getElementById('mrBrickContainer').classList.add('hidden');
+            document.getElementById('visitDetails').value = '';
+
+            document.getElementById('eventSelect').value = '';
+            document.getElementById('eventTimeChoice').value = '';
+            document.getElementById('eventTimeInput').value = '';
+            document.getElementById('eventTimeInputContainer').classList.add('hidden');
+            document.getElementById('eventDetails').value = '';
+            document.getElementById('adminWorkTypeContainer').classList.add('hidden'); // Hide Admin Work sub-options
+            document.getElementById('adminWorkTypeSelect').value = ''; // Clear Admin Work sub-option
+
+            document.getElementById('leaveSelect').value = '';
+            document.getElementById('leaveTimeChoice').value = '';
+            document.getElementById('leaveTimeInput').value = '';
+            document.getElementById('leaveTimeInputContainer').classList.add('hidden');
+            document.getElementById('leaveDetails').value = '';
+
+            if (entryTypeSelect.value === 'Visit') {
+                visitInputsContainer.classList.remove('hidden');
+            } else if (entryTypeSelect.value === 'Event') {
+                eventInputsContainer.classList.remove('hidden');
+            } else if (entryTypeSelect.value === 'Leave') {
+                leavesInputsContainer.classList.remove('hidden');
+            }
+        }
+
+        function handleEventTimeChoiceChange() {
+            const eventTimeChoice = document.getElementById('eventTimeChoice');
+            const eventTimeInputContainer = document.getElementById('eventTimeInputContainer');
+            const eventTimeInput = document.getElementById('eventTimeInput');
+            if (eventTimeChoice.value === 'Pick a Time') {
+                eventTimeInputContainer.classList.remove('hidden');
+            } else {
+                eventTimeInputContainer.classList.add('hidden');
+                eventTimeInput.value = '';
+            }
+        }
+
+        function handleVisitTimeChoiceChange() {
+            const visitTimeChoice = document.getElementById('visitTimeChoice');
+            const visitTimeInputContainer = document.getElementById('visitTimeInputContainer');
+            const visitTimeInput = document.getElementById('visitTimeInput');
+            if (visitTimeChoice.value === 'Pick a Time') {
+                visitTimeInputContainer.classList.remove('hidden');
+            } else {
+                visitTimeInputContainer.classList.add('hidden');
+                visitTimeInput.value = '';
+            }
+        }
+
+        function handleLeaveTimeChoiceChange() {
+            const leaveTimeChoice = document.getElementById('leaveTimeChoice');
+            const leaveTimeInputContainer = document.getElementById('leaveTimeInputContainer');
+            const leaveTimeInput = document.getElementById('leaveTimeInput');
+            if (leaveTimeChoice.value === 'Pick a Time') {
+                leaveTimeInputContainer.classList.remove('hidden');
+            } else {
+                leaveTimeInputContainer.classList.add('hidden');
+                leaveTimeInput.value = '';
+            }
+        }
+
+        function handleEventChange() {
+            const eventSelect = document.getElementById('eventSelect');
+            const adminWorkTypeContainer = document.getElementById('adminWorkTypeContainer');
+            if (eventSelect.value === 'Admin Work') {
+                adminWorkTypeContainer.classList.remove('hidden');
+            } else {
+                adminWorkTypeContainer.classList.add('hidden');
+                document.getElementById('adminWorkTypeSelect').value = ''; // Clear selection when hidden
+            }
+        }
+
+        function handleLeaveChange() {
+        }
+
+        function handleVisitTypeChange() {
+            const visitTypeSelect = document.getElementById('visitTypeSelect');
+            const mrBrickContainer = document.getElementById('mrBrickContainer');
+
+            if (visitTypeSelect.value === 'Double Visit') {
+                mrBrickContainer.classList.remove('hidden');
+                populateMedicalReps();
+            } else if (visitTypeSelect.value === 'Single Visit') {
+                mrBrickContainer.classList.add('hidden');
+                document.getElementById('medicalRepSelect').innerHTML = '<option value="">Select MR</option>';
+                document.getElementById('brickSelect').innerHTML = '<option value="">Select Brick</option>';
+            } else {
+                mrBrickContainer.classList.add('hidden');
+                document.getElementById('medicalRepSelect').innerHTML = '<option value="">Select MR</option>';
+                document.getElementById('brickSelect').innerHTML = '<option value="">Select Brick</option>';
+            }
+        }
+
+        function populateMedicalReps() {
+            const dmSelect = document.getElementById('districtManager');
+            const selectedDM = dmSelect.value;
+            const medicalRepSelect = document.getElementById('medicalRepSelect');
+            medicalRepSelect.innerHTML = '<option value="">Select MR</option>';
+            if (selectedDM) {
+                const mrsForDM = new Set();
+                allData.forEach(row => {
+                    if (row['District Manager'] === selectedDM && row['medical rep']) {
+                        mrsForDM.add(row['medical rep']);
+                    }
+                });
+                Array.from(mrsForDM).sort().forEach(mr => {
+                    const option = document.createElement('option');
+                    option.value = mr;
+                    option.textContent = mr;
+                    medicalRepSelect.appendChild(option);
+                });
+            }
+        }
+
+        function handleMedicalRepChange() {
+            const selectedMR = document.getElementById('medicalRepSelect').value;
+            const brickSelect = document.getElementById('brickSelect');
+            brickSelect.innerHTML = '<option value="">Select Brick</option>';
+            if (selectedMR) {
+                const bricksForMR = new Set();
+                allData.forEach(row => {
+                    if (row['medical rep'] === selectedMR && row['Brick']) {
+                        bricksForMR.add(row['Brick']);
+                    }
+                });
+                Array.from(bricksForMR).sort().forEach(brick => {
+                    const option = document.createElement('option');
+                    option.value = brick;
+                    option.textContent = brick;
+                    brickSelect.appendChild(option);
+                });
+            }
+        }
+
+        function addPlanEntry() {
+            const selectedDayValue = document.getElementById('selectedDay').value;
+            const entryType = document.getElementById('entryTypeSelect').value;
+            const districtManager = document.getElementById('districtManager').value;
+            const startDate = document.getElementById('startDate').value;
+
+            if (!districtManager) {
+                showMessageBox('Please select a District Manager.');
+                return;
+            }
+            if (!startDate) {
+                showMessageBox('Please select a Week Start Date.');
+                return;
+            }
+            if (!selectedDayValue) {
+                showMessageBox('Please select a Day for the entry.');
+                return;
+            }
+            if (!entryType) {
+                showMessageBox('Please select an Entry Type (Visit, Event, or Leave).');
+                return;
+            }
+
+            let planDetailsHtml = '';
+            let entryData = {
+                day: '',
+                date: '',
+                type: entryType,
+                details: ''
+            };
+
+            const [dayName, dateString, dayIndexStr] = selectedDayValue.split('|');
+            const dayIndex = parseInt(dayIndexStr);
+            entryData.day = dayName;
+            entryData.date = dateString;
+            let entryStartHour = -1;
+            let entryEndHour = -1;
+            let timeDisplay = '';
+            let isFullDay = false;
+            let timeChoiceElement;
+            let isLeave = false;
+            let startTimeOption = ''; // To store the selected time option (AM, PM, Full Day, Pick a Time)
+
+            if (entryType === 'Event') {
+                const event = document.getElementById('eventSelect').value;
+                const adminWorkType = document.getElementById('adminWorkTypeSelect').value; // Get Admin Work sub-type
+                timeChoiceElement = document.getElementById('eventTimeChoice');
+                startTimeOption = timeChoiceElement.value;
+
+                if (!event) {
+                    showMessageBox('Please select an Event Type.');
+                    return;
+                }
+                if (event === 'Admin Work' && !adminWorkType) {
+                    showMessageBox('Please select an Admin Work Type (Office or Online).');
+                    return;
+                }
+                if (!startTimeOption) {
+                    showMessageBox('Please select a Time Option for the event.');
+                    return;
+                }
+                if (startTimeOption === 'Pick a Time') {
+                    const eventTimeInput = document.getElementById('eventTimeInput').value;
+                    if (!eventTimeInput) {
+                        showMessageBox('Please select a specific Event Time.');
+                        return;
+                    }
+                    entryStartHour = parseInt(eventTimeInput.split(':')[0]);
+                    entryEndHour = entryStartHour + 1;
+                    if (entryEndHour > endHour) entryEndHour = endHour;
+                    timeDisplay = `${eventTimeInput} - ${formatHourForDisplay(entryEndHour)}`;
+                } else if (startTimeOption === 'AM') {
+                    entryStartHour = 9;
+                    entryEndHour = 14;
+                    timeDisplay = 'AM (9 AM - 2 PM)';
+                } else if (startTimeOption === 'PM') {
+                    entryStartHour = 14;
+                    entryEndHour = 23;
+                    timeDisplay = 'PM (2 PM - 11 PM)';
+                } else if (startTimeOption === 'Full Day') {
+                    entryStartHour = startHour;
+                    entryEndHour = endHour;
+                    timeDisplay = 'Full Day (9 AM - 11 PM)';
+                    isFullDay = true;
+                }
+                let eventDetails = document.getElementById('eventDetails').value;
+                if (event === 'Admin Work' && adminWorkType) {
+                    eventDetails = `${adminWorkType} - ${eventDetails}`; // Prepend sub-type to details
+                    entryData.adminWorkType = adminWorkType; // Store sub-type in entryData
+                }
+
+                entryData.event = event;
+                entryData.eventTime = timeDisplay;
+                entryData.details = eventDetails;
+                entryData.startHour = entryStartHour;
+                entryData.endHour = entryEndHour;
+                entryData.isLeave = isLeave;
+                entryData.startTimeOption = startTimeOption; // Store for Supabase
+                planDetailsHtml = `
+                    <div class="p-2 bg-blue-50 border border-blue-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
+                         data-type="Event"
+                         data-event="${event}"
+                         data-time="${timeDisplay}"
+                         data-details="${eventDetails || ''}"
+                         data-start-hour="${entryStartHour}"
+                         data-end-hour="${entryEndHour}"
+                         data-is-leave="${isLeave}"
+                         data-start-time-option="${startTimeOption}">
+                        <p>${event}</p>
+                        ${event === 'Admin Work' && adminWorkType ? `<p><span class="font-semibold">Type:</span> ${adminWorkType}</p>` : ''}
+                        ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                    </div>
+                `;
+            } else if (entryType === 'Visit') {
+                const visitType = document.getElementById('visitTypeSelect').value;
+                timeChoiceElement = document.getElementById('visitTimeChoice');
+                startTimeOption = timeChoiceElement.value;
+
+                if (!visitType) {
+                    showMessageBox('Please select a Visit Type.');
+                    return;
+                }
+                if (!startTimeOption) {
+                    showMessageBox('Please select a Time Option for the visit.');
+                    return;
+                }
+                if (startTimeOption === 'Pick a Time') {
+                    const visitTimeInput = document.getElementById('visitTimeInput').value;
+                    if (!visitTimeInput) {
+                        showMessageBox('Please select a specific Visit Time.');
+                        return;
+                    }
+                    entryStartHour = parseInt(visitTimeInput.split(':')[0]);
+                    entryEndHour = entryStartHour + 1;
+                    if (entryEndHour > endHour) entryEndHour = endHour;
+                    timeDisplay = `${visitTimeInput} - ${formatHourForDisplay(entryEndHour)}`;
+                } else if (startTimeOption === 'AM') {
+                    entryStartHour = 9;
+                    entryEndHour = 14;
+                    timeDisplay = 'AM (9 AM - 2 PM)';
+                } else if (startTimeOption === 'PM') {
+                    entryStartHour = 14;
+                    entryEndHour = 23;
+                    timeDisplay = 'PM (2 PM - 11 PM)';
+                } else if (startTimeOption === 'Full Day') {
+                    entryStartHour = startHour;
+                    entryEndHour = endHour;
+                    timeDisplay = 'Full Day (9 AM - 11 PM)';
+                    isFullDay = true;
+                }
+                let medicalRep = '';
+                let brick = '';
+                let visitDetails = '';
+                if (visitType === 'Double Visit') {
+                    medicalRep = document.getElementById('medicalRepSelect').value;
+                    brick = document.getElementById('brickSelect').value;
+                    if (!medicalRep || !brick) {
+                        showMessageBox('For Double Visit, please select medical rep and Brick.');
+                        return;
+                    }
+                } else if (visitType === 'Single Visit') {
+                }
+                visitDetails = document.getElementById('visitDetails').value;
+                entryData.visitType = visitType;
+                entryData.visitTime = timeDisplay;
+                entryData.medicalRep = medicalRep;
+                entryData.brick = brick;
+                entryData.details = visitDetails;
+                entryData.startHour = entryStartHour;
+                entryData.endHour = entryEndHour;
+                entryData.isLeave = isLeave;
+                entryData.startTimeOption = startTimeOption; // Store for Supabase
+                planDetailsHtml = `
+                    <div class="p-2 bg-green-50 border border-green-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
+                         data-type="Visit"
+                         data-visit-type="${visitType}"
+                         data-time="${timeDisplay}"
+                         data-mr="${medicalRep}"
+                         data-brick="${brick}"
+                         data-details="${visitDetails || ''}"
+                         data-start-hour="${entryStartHour}"
+                         data-end-hour="${entryEndHour}"
+                         data-is-leave="${isLeave}"
+                         data-start-time-option="${startTimeOption}">
+                        <p>${visitType}</p>
+                        ${visitType === 'Double Visit' ? `<p><span class="font-semibold">Brick:</span> ${brick}</p>` : ''}
+                        ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                    </div>
+                `;
+            } else if (entryType === 'Leave') {
+                const leaveType = document.getElementById('leaveSelect').value;
+                timeChoiceElement = document.getElementById('leaveTimeChoice');
+                startTimeOption = timeChoiceElement.value;
+                if (!leaveType) {
+                    showMessageBox('Please select a Leave Type.');
+                    return;
+                }
+                if (!startTimeOption) {
+                    showMessageBox('Please select a Time Option for the leave.');
+                    return;
+                }
+                isLeave = true;
+                if (startTimeOption === 'Pick a Time') {
+                    const leaveTimeInput = document.getElementById('leaveTimeInput').value;
+                    if (!leaveTimeInput) {
+                        showMessageBox('Please select a specific Leave Time.');
+                        return;
+                    }
+                    entryStartHour = parseInt(leaveTimeInput.split(':')[0]);
+                    entryEndHour = entryStartHour + 1;
+                    if (entryEndHour > endHour) entryEndHour = endHour;
+                    timeDisplay = `${leaveTimeInput} - ${formatHourForDisplay(entryEndHour)}`;
+                } else if (startTimeOption === 'AM') {
+                    entryStartHour = 9;
+                    entryEndHour = 14;
+                    timeDisplay = 'AM (9 AM - 2 PM)';
+                } else if (startTimeOption === 'PM') {
+                    entryStartHour = 14;
+                    entryEndHour = 23;
+                    timeDisplay = 'PM (2 PM - 11 PM)';
+                } else if (startTimeOption === 'Full Day') {
+                    entryStartHour = startHour;
+                    entryEndHour = endHour;
+                    timeDisplay = 'Full Day (9 AM - 11 PM)';
+                    isFullDay = true;
+                }
+                const leaveDetails = document.getElementById('leaveDetails').value;
+                entryData.leaveType = leaveType;
+                entryData.leaveTime = timeDisplay;
+                entryData.details = leaveDetails;
+                entryData.startHour = entryStartHour;
+                entryData.endHour = entryEndHour;
+                entryData.isLeave = isLeave;
+                entryData.startTimeOption = startTimeOption; // Store for Supabase
+                planDetailsHtml = `
+                    <div class="p-2 bg-red-50 border border-red-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''} ${isLeave ? 'leave-entry' : ''}"
+                         data-type="Leave"
+                         data-leave-type="${leaveType}"
+                         data-time="${timeDisplay}"
+                         data-details="${leaveDetails || ''}"
+                         data-start-hour="${entryStartHour}"
+                         data-end-hour="${entryEndHour}"
+                         data-is-leave="${isLeave}"
+                         data-start-time-option="${startTimeOption}">
+                        <p>${leaveType}</p>
+                        ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                    </div>
+                `;
+            }
+
+            let effectiveRangeStartForNewEntry = startHour;
+            let effectiveRangeEndForNewEntry = endHour;
+            if (startTimeOption === 'AM') {
+                effectiveRangeStartForNewEntry = 9;
+                effectiveRangeEndForNewEntry = 14;
+            } else if (startTimeOption === 'PM') {
+                effectiveRangeStartForNewEntry = 14;
+                effectiveRangeEndForNewEntry = 23;
+            }
+
+            if (entryStartHour < effectiveRangeStartForNewEntry) {
+                entryStartHour = effectiveRangeStartForNewEntry;
+            }
+            if (entryEndHour > effectiveRangeEndForNewEntry) {
+                entryEndHour = effectiveRangeEndForNewEntry;
+            }
+
+            if (!isFullDay) {
+                const existingEntriesOnDay = [];
+                for (let hour = startHour; hour <= endHour; hour++) {
+                    const cell = document.getElementById(`day-${dayIndex}-hour-${hour}`);
+                    if (cell) {
+                        const boxesInCell = cell.querySelectorAll('.plan-details-box:not(.full-day-entry)');
+                        boxesInCell.forEach(box => {
+                            const data = JSON.parse(box.getAttribute('data-entry-details'));
+                            if (data.startHour === hour) {
+                                existingEntriesOnDay.push(data);
+                            }
+                        });
+                    }
+                }
+                existingEntriesOnDay.sort((a, b) => a.startHour - b.startHour);
+                let proposedStartHourForAdjustment = entryStartHour;
+                let proposedEndHourForAdjustment = entryEndHour;
+                const originalDurationHours = entryEndHour - entryStartHour + 1;
+                let foundNonOverlappingSlot = false;
+                let currentCheckStartHour = proposedStartHourForAdjustment;
+                while (currentCheckStartHour <= effectiveRangeEndForNewEntry) {
+                    let overlapsWithAnyExisting = false;
+                    let nextAvailableHourAfterOverlap = currentCheckStartHour;
+                    for (const existingEntry of existingEntriesOnDay) {
+                        const proposedEndForThisCheck = currentCheckStartHour + originalDurationHours - 1;
+                        if (currentCheckStartHour <= existingEntry.endHour && proposedEndForThisCheck >= existingEntry.startHour) {
+                            overlapsWithAnyExisting = true;
+                            nextAvailableHourAfterOverlap = Math.max(nextAvailableHourAfterOverlap, existingEntry.endHour + 1);
+                        }
+                    }
+                    if (!overlapsWithAnyExisting) {
+                        if ((currentCheckStartHour + originalDurationHours - 1) <= effectiveRangeEndForNewEntry) {
+                            proposedStartHourForAdjustment = currentCheckStartHour;
+                            proposedEndHourForAdjustment = currentCheckStartHour + originalDurationHours - 1;
+                            foundNonOverlappingSlot = true;
+                            break;
+                        } else {
+                            if (startTimeOption === 'AM' || startTimeOption === 'PM') {
+                                proposedStartHourForAdjustment = currentCheckStartHour;
+                                proposedEndHourForAdjustment = effectiveRangeEndForNewEntry;
+                                if (proposedStartHourForAdjustment <= proposedEndHourForAdjustment) {
+                                    foundNonOverlappingSlot = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    currentCheckStartHour = nextAvailableHourAfterOverlap;
+                    if (currentCheckStartHour > effectiveRangeEndForNewEntry) {
+                        break;
+                    }
+                }
+                if (!foundNonOverlappingSlot || proposedStartHourForAdjustment > proposedEndHourForAdjustment) {
+                    showMessageBox('Could not find an available non-overlapping time slot for this entry within the selected time option (AM/PM/Pick a Time). Please adjust existing entries or choose a different time.');
+                    return;
+                }
+                entryStartHour = proposedStartHourForAdjustment;
+                entryEndHour = proposedEndHourForAdjustment;
+                entryData.startHour = entryStartHour;
+                entryData.endHour = entryEndHour;
+
+                if (startTimeOption === 'AM') {
+                    timeDisplay = `AM (${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour)})`;
+                } else if (startTimeOption === 'PM') {
+                    timeDisplay = `PM (${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour)})`;
+                } else if (startTimeOption === 'Pick a Time') {
+                    const originalInputTime = document.getElementById(entryType === 'Event' ? 'eventTimeInput' : (entryType === 'Visit' ? 'visitTimeInput' : 'leaveTimeInput')).value;
+                    timeDisplay = `${originalInputTime} - ${formatHourForDisplay(entryEndHour)}`;
+                }
+
+                if (entryType === 'Event') {
+                    entryData.eventTime = timeDisplay;
+                } else if (entryType === 'Visit') {
+                    entryData.visitTime = timeDisplay;
+                } else if (entryType === 'Leave') {
+                    entryData.leaveTime = timeDisplay;
+                }
+            } else {
+                for (let hourToClear = startHour; hourToClear <= endHour; hourToClear++) {
+                    const cellToClear = document.getElementById(`day-${dayIndex}-hour-${hourToClear}`);
+                    if (cellToClear) {
+                        const existingNonFullDayBoxes = cellToClear.querySelectorAll('.plan-details-box:not(.full-day-entry)');
+                        existingNonFullDayBoxes.forEach(box => box.remove());
+                    }
+                }
+            }
+
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = planDetailsHtml.trim();
+            const planBoxElement = tempDiv.firstChild;
+
+            const targetCell = document.getElementById(`day-${dayIndex}-hour-${entryStartHour}`);
+            if (!targetCell) {
+                showMessageBox('Error: Could not find the target cell for the selected time.');
+                return;
+            }
+
+            if (isFullDay) {
+                planBoxElement.style.height = `${cellHeight * totalHours + (totalHours - 1) * 1}px`;
+                planBoxElement.style.top = `${(startHour - startHour) * cellHeight + (startHour - startHour) * 1}px`;
+                planBoxElement.style.left = '7px';
+                planBoxElement.style.width = 'calc(100% - 14px)';
+                planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-full-day-${Date.now()}`); // Temporary ID for new entries
+                planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
+                targetCell.appendChild(planBoxElement);
+            } else {
+                const existingBoxesInCell = targetCell.querySelectorAll('.plan-details-box:not(.full-day-entry)').length;
+                const offset = existingBoxesInCell * 10;
+                planBoxElement.style.left = `${7 + offset}px`;
+                planBoxElement.style.width = `calc(100% - 14px - ${offset}px)`;
+                const durationHours = entryEndHour - entryStartHour + 1;
+                planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
+                planBoxElement.style.top = `0px`;
+                planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-${entryStartHour}-${Date.now()}`); // Temporary ID for new entries
+                planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
+                targetCell.appendChild(planBoxElement);
+
+                const resizeHandle = planBoxElement.querySelector('.resize-handle');
+                if (resizeHandle) {
+                    resizeHandle.addEventListener('mousedown', startResize);
+                }
+            }
+
+            document.getElementById('selectedDay').value = '';
+            document.getElementById('entryTypeSelect').value = '';
+            handleEntryTypeChange();
+        }
+
+        async function deleteSelectedEntries() {
+            const selectedBoxes = document.querySelectorAll('.plan-details-box.selected');
+            if (selectedBoxes.length === 0) {
+                showMessageBox('No entries selected for deletion.');
+                return;
+            }
+
+            const idsToDelete = [];
+            selectedBoxes.forEach(box => {
+                const entryId = box.getAttribute('data-entry-id');
+                if (entryId && !entryId.startsWith('entry-')) { // Only delete from Supabase if it's a real ID
+                    idsToDelete.push(entryId);
+                }
+                box.remove(); // Remove from UI immediately
+            });
+
+            if (idsToDelete.length > 0) {
+                toggleLoading(true);
+                try {
+                    const { error } = await _supabase
+                        .from('dms_weekly_plans') // Changed table name
+                        .delete()
+                        .in('id', idsToDelete);
+
+                    if (error) {
+                        throw error;
+                    }
+                    showMessageBox('Selected entries deleted successfully from database!', 'Success');
+                } catch (error) {
+                    console.error('Error deleting entries from Supabase:', error);
+                    showMessageBox(`Failed to delete entries from database. Error: ${error.message}`, 'Error');
+                } finally {
+                    toggleLoading(false);
+                }
+            }
+            updateDeleteButtonVisibility();
+            hideAllPopovers();
+        }
+
+        const deleteEntryButton = document.getElementById('deleteEntryButton');
+        deleteEntryButton.addEventListener('click', deleteSelectedEntries);
+
+        function updateDeleteButtonVisibility() {
+            const selectedBoxes = document.querySelectorAll('.plan-details-box.selected');
+            if (selectedBoxes.length > 0) { // Show if at least one is selected
+                deleteEntryButton.style.display = 'block';
+            } else {
+                deleteEntryButton.style.display = 'none';
+            }
+        }
+
+        function hideDeleteButton() {
+            deleteEntryButton.style.display = 'none';
+        }
+
+        function displayEntryPopover(planBoxElement) {
+            hideAllPopovers();
+            const popover = document.createElement('div');
+            popover.className = 'entry-popover';
+            const entryData = JSON.parse(planBoxElement.getAttribute('data-entry-details'));
+            let contentHtml = '';
+            const type = entryData.type;
+            if (type === 'Event') {
+                contentHtml = `
+                    <p><span class="font-semibold">Event:</span> ${entryData.event}</p>
+                    ${entryData.event === 'Admin Work' && entryData.adminWorkType ? `<p><span class="font-semibold">Type:</span> ${entryData.adminWorkType}</p>` : ''}
+                    <p><span class="font-semibold">Time:</span> ${entryData.eventTime}</p>
+                    <p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>
+                `;
+            } else if (type === 'Visit') {
+                contentHtml = `
+                    <p><span class="font-semibold">Visit Type:</span> ${entryData.visitType}</p>
+                    <p><span class="font-semibold">Time:</span> ${entryData.visitTime}</p>
+                    ${entryData.visitType === 'Double Visit' ? `<p><span class="font-semibold">MR:</span> ${entryData.medicalRep}</p><p><span class="font-semibold">Brick:</span> ${entryData.brick}</p>` : ''}
+                    <p><span class="font-semibold">General Details:</span> ${entryData.details || 'N/A'}</p>
+                `;
+            } else if (type === 'Leave') {
+                contentHtml = `
+                    <p><span class="font-semibold">Leave Type:</span> ${entryData.leaveType}</p>
+                    <p><span class="font-semibold">Time:</span> ${entryData.leaveTime}</p>
+                    <p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>
+                `;
+            }
+            popover.innerHTML = `
+                ${contentHtml}
+                <button type="button" class="entry-popover-delete-btn">Delete</button>
+            `;
+            const rect = planBoxElement.getBoundingClientRect();
+            const containerRect = document.getElementById('global-popover-container').getBoundingClientRect();
+            popover.style.left = `${rect.right + 10}px`;
+            popover.style.top = `${rect.top}px`;
+            document.getElementById('global-popover-container').appendChild(popover);
+            popover.style.display = 'flex';
+            popover.querySelector('.entry-popover-delete-btn').addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const entryId = planBoxElement.getAttribute('data-entry-id');
+                if (entryId && !entryId.startsWith('entry-')) { // Only delete from Supabase if it's a real ID
+                    toggleLoading(true);
+                    try {
+                        const { error } = await _supabase
+                            .from('dms_weekly_plans') // Changed table name
+                            .delete()
+                            .eq('id', entryId);
+
+                        if (error) {
+                            throw error;
+                        }
+                        showMessageBox('Entry deleted successfully from database!', 'Success');
+                        planBoxElement.remove(); // Remove from UI after successful DB deletion
+                    } catch (error) {
+                        console.error('Error deleting entry from Supabase:', error);
+                        showMessageBox(`Failed to delete entry from database. Error: ${error.message}`, 'Error');
+                    } finally {
+                        toggleLoading(false);
+                    }
+                } else {
+                    planBoxElement.remove(); // Just remove from UI if it's a new, unsaved entry
+                }
+                hideAllPopovers();
+                updateDeleteButtonVisibility();
+            });
+        }
+
+        function hideAllPopovers() {
+            document.getElementById('global-popover-container').innerHTML = '';
+        }
+
+        function startResize(event) {
+            if (!event.target.classList.contains('resize-handle')) {
+                return;
+            }
+            isResizing = true;
+            currentResizingBox = event.target.closest('.plan-details-box');
+            initialY = event.clientY;
+            initialHeight = currentResizingBox.offsetHeight;
+            initialEndHour = parseInt(currentResizingBox.dataset.endHour);
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
+        }
+
+        function doResize(event) {
+            if (!isResizing) return;
+            const deltaY = event.clientY - initialY;
+            let newHeight = initialHeight + deltaY;
+            let newDurationHours = Math.max(1, Math.round(newHeight / cellHeight));
+            let newEndHour = parseInt(currentResizingBox.dataset.startHour) + newDurationHours - 1;
+            newEndHour = Math.min(newEndHour, endHour);
+            newDurationHours = newEndHour - parseInt(currentResizingBox.dataset.startHour) + 1;
+            currentResizingBox.style.height = `${newDurationHours * cellHeight + (newDurationHours - 1) * 1}px`;
+            currentResizingBox.dataset.endHour = newEndHour;
+            const entryData = JSON.parse(currentResizingBox.getAttribute('data-entry-details'));
+            entryData.endHour = newEndHour;
+
+            let updatedTimeDisplay = '';
+            const startTimeOption = currentResizingBox.dataset.startTimeOption; // Get the original time option
+
+            if (startTimeOption === 'AM') {
+                 updatedTimeDisplay = `AM (9 AM - ${formatHourForDisplay(newEndHour)})`;
+            } else if (startTimeOption === 'PM') {
+                 updatedTimeDisplay = `PM (2 PM - ${formatHourForDisplay(newEndHour)})`;
+            } else if (startTimeOption === 'Pick a Time') {
+                // For 'Pick a Time', retain the original start time part
+                const originalTime = currentResizingBox.dataset.time;
+                const startTimePart = originalTime.split(' - ')[0];
+                updatedTimeDisplay = `${startTimePart} - ${formatHourForDisplay(newEndHour)}`;
+            } else {
+                // Fallback for other cases or if startTimeOption is not set
+                updatedTimeDisplay = `${formatHourForDisplay(entryData.startHour)} - ${formatHourForDisplay(newEndHour)}`;
+            }
+
+            if (entryData.type === 'Event') {
+                entryData.eventTime = updatedTimeDisplay;
+            } else if (entryData.type === 'Visit') {
+                entryData.visitTime = updatedTimeDisplay;
+            } else if (entryData.type === 'Leave') {
+                entryData.leaveTime = updatedTimeDisplay;
+            }
+            currentResizingBox.setAttribute('data-entry-details', JSON.stringify(entryData));
+        }
+
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener('mousemove', doResize);
+            document.removeEventListener('mouseup', stopResize);
+
+            if (currentResizingBox) {
+                const entryData = JSON.parse(currentResizingBox.getAttribute('data-entry-details'));
+                const entryId = currentResizingBox.getAttribute('data-entry-id');
+
+                // Only update Supabase if the entry has a real ID (not a temporary one)
+                if (entryId && !entryId.startsWith('entry-')) {
+                    updateSupabaseEntry(entryId, entryData.endHour, entryData.type, entryData.eventTime || entryData.visitTime || entryData.leaveTime);
+                }
+            }
+            currentResizingBox = null;
+        }
+
+        async function updateSupabaseEntry(id, newEndHour, entryType, newTimeDisplay) {
+            toggleLoading(true);
+            try {
+                let updateData = {
+                    end_hour: newEndHour,
+                    // Assuming start_hour is not changing, and end_time_option is derived from the new end_hour
+                    end_time_option: getTimeOption(JSON.parse(currentResizingBox.getAttribute('data-entry-details')).startHour, newEndHour)
+                };
+
+                const { error } = await _supabase
+                    .from('dms_weekly_plans')
+                    .update(updateData)
+                    .eq('id', id);
+
+                if (error) {
+                    throw error;
+                }
+                showMessageBox('Entry updated successfully in database!', 'Success');
+            } catch (error) {
+                console.error('Error updating entry in Supabase:', error);
+                showMessageBox(`Failed to update entry in database. Error: ${error.message}`, 'Error');
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+
+        document.getElementById('plan-table-body').addEventListener('click', (event) => {
+            const targetBox = event.target.closest('.plan-details-box');
+            if (targetBox) {
+                if (!event.ctrlKey && !event.metaKey) {
+                    document.querySelectorAll('.plan-details-box.selected').forEach(box => {
+                        if (box !== targetBox) {
+                            box.classList.remove('selected');
+                        }
+                    });
+                    hideAllPopovers();
+                }
+                targetBox.classList.toggle('selected');
+
+                if (targetBox.classList.contains('selected')) {
+                    displayEntryPopover(targetBox);
+                } else {
+                    hideAllPopovers();
+                }
+            } else {
+                document.querySelectorAll('.plan-details-box.selected').forEach(box => {
+                    box.classList.remove('selected');
+                });
+                hideAllPopovers();
+            }
+            updateDeleteButtonVisibility();
+        });
+
+        document.addEventListener('click', (event) => {
+            const isClickOutsideDeleteButton = deleteEntryButton.style.display === 'block' && !deleteEntryButton.contains(event.target);
+            const isClickOutsidePlanBox = !event.target.closest('.plan-details-box');
+            const isClickOutsidePopover = !event.target.closest('.entry-popover');
+            if (isClickOutsideDeleteButton && isClickOutsidePlanBox && isClickOutsidePopover) {
+                document.querySelectorAll('.plan-details-box.selected').forEach(box => {
+                    box.classList.remove('selected');
+                });
+                hideDeleteButton();
+                hideAllPopovers();
+            }
+            updateDeleteButtonVisibility();
+        });
+
+        document.getElementById('districtManager').addEventListener('change', () => {
+            if (document.getElementById('visitTypeSelect').value === 'Double Visit') {
+                populateMedicalReps();
+            }
+        });
+
+        document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
+
+        function clearForm() {
+            document.getElementById('districtManager').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('selectedDay').innerHTML = '<option value="">Select a Day</option>';
+            document.getElementById('entryTypeSelect').value = '';
+            handleEntryTypeChange();
+            updateTableHeader('');
+            populateTimeSlotTable('');
+            document.querySelectorAll('.plan-details-box.selected').forEach(box => box.classList.remove('selected'));
+            hideDeleteButton();
+            hideAllPopovers();
+        }
+
+        window.onload = async function() {
+    // This is the provided code that handles fetching data and populating the dropdown.
+    await fetchData();
+    setDefaultStartDate();
+    updateDatesAndDaySelector();
+
+    // Get the user's data from a hypothetical function
+    const userData = await getUserData();
+
+    // Check if the user's title is "District Manager"
+    if (userData && userData.title === 'District Manager') {
+        const districtManagerDropdown = document.getElementById('districtManager');
+
+        // Check if a dropdown option exists for the user's username
+        let userOptionExists = false;
+        for (const option of districtManagerDropdown.options) {
+            if (option.value === userData.username) {
+                userOptionExists = true;
+                break;
+            }
+        }
+
+        // If an option exists for the user, filter the dropdown to only show that option
+        if (userOptionExists) {
+            // Store the currently selected value before clearing
+            const selectedValue = districtManagerDropdown.value;
+
+            // Clear all options
+            districtManagerDropdown.innerHTML = '';
+
+            // Add the default "Select District Manager" option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select District Manager';
+            districtManagerDropdown.appendChild(defaultOption);
+
+            // Add the user's specific option
+            const userOption = document.createElement('option');
+            userOption.value = userData.username;
+            userOption.textContent = userData.username;
+            districtManagerDropdown.appendChild(userOption);
+
+            // Reselect the user's option if it was previously selected
+            if (selectedValue === userData.username) {
+                districtManagerDropdown.value = userData.username;
+            }
+
+            // Lock the dropdown to prevent the user from changing it
+            districtManagerDropdown.disabled = true;
+        } else {
+            // Handle the case where the user's username is not in the list of district managers
+            // For example, by disabling the dropdown and showing a message
+            districtManagerDropdown.disabled = true;
+            districtManagerDropdown.innerHTML = '<option value="">User not found</option>';
+        }
+    }
+};
+
+// Assuming the getUserData() function is implemented elsewhere and looks something like this:
+/*
+async function getUserData() {
+    // Replace with your actual API call or local storage retrieval
+    return {
+        username: 'John Doe',
+        title: 'District Manager'
+    };
+}
+*/
+
+
+    </script>
+
+</body>
+</html>
