@@ -513,18 +513,23 @@
             }
         }
         
-        // This function simulates getting user information from a parent iframe.
-        // It's the same logic as your master list.
+        // This function now uses the window.postMessage API to get user info from the parent.
+        // It's a placeholder for the actual event listener.
         function getLoggedInUserFromParent() {
-            // This is a placeholder. You need to implement the actual logic
-            // for receiving user data from the parent iframe.
-            // For now, we'll return a hardcoded user to demonstrate the functionality.
-            // Replace this with your own logic to retrieve user data.
-            return { username: "DM1", title: "District Manager" };
+            return new Promise((resolve, reject) => {
+                const handleMessage = (event) => {
+                    if (event.data && event.data.type === 'loggedInUser' && event.data.user) {
+                        window.removeEventListener('message', handleMessage);
+                        resolve(event.data.user);
+                    }
+                };
+                window.addEventListener('message', handleMessage);
+                // In a real scenario, you'd send a request message to the parent here
+                // to get the user data, and the parent would respond with the message above.
+                // For this example, the parent 'index.html' already sends a message on load.
+            });
         }
-
-        // --- NEW/MODIFIED CODE HERE ---
-
+        
         function handleUserRole() {
             const dmSelect = document.getElementById('districtManager');
             // Log the user info and available DMs to the console for debugging
@@ -562,8 +567,6 @@
             }
         }
         
-        // --- END OF NEW/MODIFIED CODE ---
-
         function showMessageBox(message, title = 'Notification') {
             const messageBox = document.createElement('div');
             messageBox.className = 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50';
@@ -1846,8 +1849,7 @@
             hideAllPopovers();
         }
         
-        // Listen for messages from the parent window (your main CRM app)
-        // This is the same logic as in your master list.
+        // Listen for messages from the parent window to get user data
         window.addEventListener('message', function(event) {
             // IMPORTANT: For security, always verify the origin of the message
             // In a production environment, replace '*' with the actual origin of your main CRM app.
@@ -1857,12 +1859,14 @@
                 loggedInUser = event.data.user; // Store the logged-in user globally
                 console.log('Weekly Plan received user data:', loggedInUser);
                 
-                // Initialize the app with the received user data for initial filtering
+                // Now that we have the user info, fetch the data and handle the UI
                 fetchData(); 
             }
         });
         
         window.onload = () => {
+            // No need to call fetchData directly on load anymore, the message listener will handle it.
+            // But we can call it here as a fallback in case the message isn't received.
             fetchData();
             setDefaultStartDate();
             document.getElementById('startDate').dispatchEvent(new Event('change'));
