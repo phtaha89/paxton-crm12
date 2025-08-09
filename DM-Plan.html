@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
+        /* All existing CSS styles remain unchanged */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f3f4f6;
@@ -332,6 +333,7 @@
                     <div class="flex flex-col">
                         <label for="brickSelect" class="text-gray-700 font-medium mb-1 text-sm">Brick:</label>
                         <select id="brickSelect" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
+                            <option value="">Select Brick</option>
                         </select>
                     </div>
                 </div>
@@ -348,10 +350,10 @@
                         <option value="Meeting">Meeting</option>
                         <option value="Training">Training</option>
                         <option value="Event">Event</option>
-                        <option value="Admin Work">Admin Work</option> <!-- Added Admin Work -->
+                        <option value="Admin Work">Admin Work</option>
                     </select>
                 </div>
-                <div id="adminWorkTypeContainer" class="flex flex-col hidden"> <!-- New container for Admin Work sub-options -->
+                <div id="adminWorkTypeContainer" class="flex flex-col hidden">
                     <label for="adminWorkTypeSelect" class="text-gray-700 font-medium mb-1 text-sm">Admin Work Type:</label>
                     <select id="adminWorkTypeSelect" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
                         <option value="">Select Type</option>
@@ -432,6 +434,7 @@
     <script>
         let allData = [];
         let districtManagers = [];
+        let loggedInUser = null; // New global variable to store logged-in user data
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
         const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
         const startHour = 9;
@@ -443,7 +446,6 @@
         let initialHeight = 0;
         let initialEndHour = 0;
         let cellHeight = 0;
-        let loggedInUser = null; // Variable to hold user info
 
         const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
@@ -492,10 +494,7 @@
                         }
                     });
                     districtManagers = Array.from(managerSet).sort();
-                    populateDistrictManagers();
-                    // This call will be moved to after the user role is determined
-                    // updateDatesAndDaySelector(); 
-                    return;
+                    return; // Exit on success
                 } catch (error) {
                     console.error(`Error fetching or parsing data (attempt ${retries + 1}):`, error);
                     retries++;
@@ -513,60 +512,49 @@
             }
         }
         
-        // This function now uses the window.postMessage API to get user info from the parent.
-        // It's a placeholder for the actual event listener.
-        function getLoggedInUserFromParent() {
-            return new Promise((resolve, reject) => {
-                const handleMessage = (event) => {
-                    if (event.data && event.data.type === 'loggedInUser' && event.data.user) {
-                        window.removeEventListener('message', handleMessage);
-                        resolve(event.data.user);
-                    }
-                };
-                window.addEventListener('message', handleMessage);
-                // In a real scenario, you'd send a request message to the parent here
-                // to get the user data, and the parent would respond with the message above.
-                // For this example, the parent 'index.html' already sends a message on load.
-            });
+        // This function now handles the initial setup after receiving user data
+        async function initializeApp(user) {
+            loggedInUser = user;
+            await fetchData(); // Fetch all data first
+            filterAndPopulateDMs(user);
+            setDefaultStartDate();
+            updateDatesAndDaySelector(); // Call this to trigger initial table and data load
+            handleEntryTypeChange();
         }
-        
-        function handleUserRole() {
-            const dmSelect = document.getElementById('districtManager');
-            // Log the user info and available DMs to the console for debugging
-            console.log('Current User:', loggedInUser);
-            console.log('Available District Managers:', districtManagers);
 
-            if (loggedInUser && loggedInUser.title === 'District Manager') {
-                // If the user is a District Manager, check if their name is in the list
-                const dmName = loggedInUser.username;
-                const dmExists = districtManagers.some(manager => manager === dmName);
+        // New function to handle filtering and populating the DM dropdown
+        function filterAndPopulateDMs(user) {
+            const select = document.getElementById('districtManager');
+            select.innerHTML = '<option value="">Select District Manager</option>';
+            select.disabled = false; // Reset to enabled
 
-                if (dmExists) {
-                    // Set the value and disable the dropdown
-                    dmSelect.value = dmName;
-                    dmSelect.disabled = true;
-                    console.log(`User is a District Manager. Setting dropdown to "${dmName}" and disabling it.`);
-                    // Trigger the data loading for this specific DM
-                    updateDatesAndDaySelector();
-                } else {
-                    console.error(`Error: District Manager name "${dmName}" from user card was not found in the data.`);
-                    showMessageBox(`Your District Manager name ("${dmName}") was not found in the data. Please contact support.`, 'Data Error');
-                    // In this case, the dropdown is left as is, and no data is loaded
-                }
-
-            } else if (loggedInUser && loggedInUser.title === 'admin') {
-                // If the user is an admin, enable the dropdown and do not pre-select
-                dmSelect.disabled = false;
-                console.log('User is an admin. The dropdown is enabled.');
-                // We still need to load data initially, but without a specific filter.
-                updateDatesAndDaySelector();
+            if (user && user.title === 'admin') {
+                // If user is an admin, show all DMs
+                districtManagers.forEach(manager => {
+                    const option = document.createElement('option');
+                    option.value = manager;
+                    option.textContent = manager;
+                    select.appendChild(option);
+                });
+            } else if (user && user.title === 'District Manager') {
+                // If user is a DM, show only their name and disable the dropdown
+                const option = document.createElement('option');
+                option.value = user.username;
+                option.textContent = user.username;
+                select.appendChild(option);
+                select.value = user.username;
+                select.disabled = true;
             } else {
-                // No user info or role is not DM/admin, keep dropdown enabled and show all
-                dmSelect.disabled = false;
-                updateDatesAndDaySelector();
+                // For any other role, show all DMs
+                 districtManagers.forEach(manager => {
+                    const option = document.createElement('option');
+                    option.value = manager;
+                    option.textContent = manager;
+                    select.appendChild(option);
+                });
             }
         }
-        
+
         function showMessageBox(message, title = 'Notification') {
             const messageBox = document.createElement('div');
             messageBox.className = 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50';
@@ -582,16 +570,8 @@
             document.body.appendChild(messageBox);
         }
 
-        function populateDistrictManagers() {
-            const select = document.getElementById('districtManager');
-            select.innerHTML = '<option value="">Select District Manager</option>';
-            districtManagers.forEach(manager => {
-                const option = document.createElement('option');
-                option.value = manager;
-                option.textContent = manager;
-                select.appendChild(option);
-            });
-        }
+        // Removed the original `populateDistrictManagers` as it is replaced by `filterAndPopulateDMs`
+        // function populateDistrictManagers() { ... }
 
         function calculateEndDate(startDateStr) {
             if (!startDateStr) return '';
@@ -1036,8 +1016,8 @@
             document.getElementById('eventTimeInput').value = '';
             document.getElementById('eventTimeInputContainer').classList.add('hidden');
             document.getElementById('eventDetails').value = '';
-            document.getElementById('adminWorkTypeContainer').classList.add('hidden'); // Hide Admin Work sub-options
-            document.getElementById('adminWorkTypeSelect').value = ''; // Clear Admin Work sub-option
+            document.getElementById('adminWorkTypeContainer').classList.add('hidden');
+            document.getElementById('adminWorkTypeSelect').value = '';
 
             document.getElementById('leaveSelect').value = '';
             document.getElementById('leaveTimeChoice').value = '';
@@ -1097,7 +1077,7 @@
                 adminWorkTypeContainer.classList.remove('hidden');
             } else {
                 adminWorkTypeContainer.classList.add('hidden');
-                document.getElementById('adminWorkTypeSelect').value = ''; // Clear selection when hidden
+                document.getElementById('adminWorkTypeSelect').value = '';
             }
         }
 
@@ -1170,7 +1150,7 @@
             const startDate = document.getElementById('startDate').value;
 
             if (!districtManager) {
-                showMessageBox('Please fill in the District Manager before adding an entry.');
+                showMessageBox('Please select a District Manager.');
                 return;
             }
             if (!startDate) {
@@ -1204,11 +1184,11 @@
             let isFullDay = false;
             let timeChoiceElement;
             let isLeave = false;
-            let startTimeOption = ''; // To store the selected time option (AM, PM, Full Day, Pick a Time)
-
+            let startTimeOption = '';
+            
             if (entryType === 'Event') {
                 const event = document.getElementById('eventSelect').value;
-                const adminWorkType = document.getElementById('adminWorkTypeSelect').value; // Get Admin Work sub-type
+                const adminWorkType = document.getElementById('adminWorkTypeSelect').value;
                 timeChoiceElement = document.getElementById('eventTimeChoice');
                 startTimeOption = timeChoiceElement.value;
 
@@ -1250,8 +1230,8 @@
                 }
                 let eventDetails = document.getElementById('eventDetails').value;
                 if (event === 'Admin Work' && adminWorkType) {
-                    eventDetails = `${adminWorkType} - ${eventDetails}`; // Prepend sub-type to details
-                    entryData.adminWorkType = adminWorkType; // Store sub-type in entryData
+                    eventDetails = `${adminWorkType} - ${eventDetails}`;
+                    entryData.adminWorkType = adminWorkType;
                 }
 
                 entryData.event = event;
@@ -1260,7 +1240,7 @@
                 entryData.startHour = entryStartHour;
                 entryData.endHour = entryEndHour;
                 entryData.isLeave = isLeave;
-                entryData.startTimeOption = startTimeOption; // Store for Supabase
+                entryData.startTimeOption = startTimeOption;
                 planDetailsHtml = `
                     <div class="p-2 bg-blue-50 border border-blue-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
                          data-type="Event"
@@ -1334,7 +1314,7 @@
                 entryData.startHour = entryStartHour;
                 entryData.endHour = entryEndHour;
                 entryData.isLeave = isLeave;
-                entryData.startTimeOption = startTimeOption; // Store for Supabase
+                entryData.startTimeOption = startTimeOption;
                 planDetailsHtml = `
                     <div class="p-2 bg-green-50 border border-green-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
                          data-type="Visit"
@@ -1396,7 +1376,7 @@
                 entryData.startHour = entryStartHour;
                 entryData.endHour = entryEndHour;
                 entryData.isLeave = isLeave;
-                entryData.startTimeOption = startTimeOption; // Store for Supabase
+                entryData.startTimeOption = startTimeOption;
                 planDetailsHtml = `
                     <div class="p-2 bg-red-50 border border-red-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''} ${isLeave ? 'leave-entry' : ''}"
                          data-type="Leave"
@@ -1532,7 +1512,7 @@
                 planBoxElement.style.top = `${(startHour - startHour) * cellHeight + (startHour - startHour) * 1}px`;
                 planBoxElement.style.left = '7px';
                 planBoxElement.style.width = 'calc(100% - 14px)';
-                planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-full-day-${Date.now()}`); // Temporary ID for new entries
+                planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-full-day-${Date.now()}`);
                 planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
                 targetCell.appendChild(planBoxElement);
             } else {
@@ -1543,7 +1523,7 @@
                 const durationHours = entryEndHour - entryStartHour + 1;
                 planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
                 planBoxElement.style.top = `0px`;
-                planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-${entryStartHour}-${Date.now()}`); // Temporary ID for new entries
+                planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-${entryStartHour}-${Date.now()}`);
                 planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
                 targetCell.appendChild(planBoxElement);
 
@@ -1568,17 +1548,17 @@
             const idsToDelete = [];
             selectedBoxes.forEach(box => {
                 const entryId = box.getAttribute('data-entry-id');
-                if (entryId && !entryId.startsWith('entry-')) { // Only delete from Supabase if it's a real ID
+                if (entryId && !entryId.startsWith('entry-')) {
                     idsToDelete.push(entryId);
                 }
-                box.remove(); // Remove from UI immediately
+                box.remove();
             });
 
             if (idsToDelete.length > 0) {
                 toggleLoading(true);
                 try {
                     const { error } = await _supabase
-                        .from('dms_weekly_plans') // Changed table name
+                        .from('dms_weekly_plans')
                         .delete()
                         .in('id', idsToDelete);
 
@@ -1602,7 +1582,7 @@
 
         function updateDeleteButtonVisibility() {
             const selectedBoxes = document.querySelectorAll('.plan-details-box.selected');
-            if (selectedBoxes.length > 0) { // Show if at least one is selected
+            if (selectedBoxes.length > 0) {
                 deleteEntryButton.style.display = 'block';
             } else {
                 deleteEntryButton.style.display = 'none';
@@ -1654,11 +1634,11 @@
             popover.querySelector('.entry-popover-delete-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const entryId = planBoxElement.getAttribute('data-entry-id');
-                if (entryId && !entryId.startsWith('entry-')) { // Only delete from Supabase if it's a real ID
+                if (entryId && !entryId.startsWith('entry-')) {
                     toggleLoading(true);
                     try {
                         const { error } = await _supabase
-                            .from('dms_weekly_plans') // Changed table name
+                            .from('dms_weekly_plans')
                             .delete()
                             .eq('id', entryId);
 
@@ -1666,7 +1646,7 @@
                             throw error;
                         }
                         showMessageBox('Entry deleted successfully from database!', 'Success');
-                        planBoxElement.remove(); // Remove from UI after successful DB deletion
+                        planBoxElement.remove();
                     } catch (error) {
                         console.error('Error deleting entry from Supabase:', error);
                         showMessageBox(`Failed to delete entry from database. Error: ${error.message}`, 'Error');
@@ -1674,7 +1654,7 @@
                         toggleLoading(false);
                     }
                 } else {
-                    planBoxElement.remove(); // Just remove from UI if it's a new, unsaved entry
+                    planBoxElement.remove();
                 }
                 hideAllPopovers();
                 updateDeleteButtonVisibility();
@@ -1712,19 +1692,17 @@
             entryData.endHour = newEndHour;
 
             let updatedTimeDisplay = '';
-            const startTimeOption = currentResizingBox.dataset.startTimeOption; // Get the original time option
+            const startTimeOption = currentResizingBox.dataset.startTimeOption;
 
             if (startTimeOption === 'AM') {
                  updatedTimeDisplay = `AM (9 AM - ${formatHourForDisplay(newEndHour)})`;
             } else if (startTimeOption === 'PM') {
                  updatedTimeDisplay = `PM (2 PM - ${formatHourForDisplay(newEndHour)})`;
             } else if (startTimeOption === 'Pick a Time') {
-                // For 'Pick a Time', retain the original start time part
                 const originalTime = currentResizingBox.dataset.time;
                 const startTimePart = originalTime.split(' - ')[0];
                 updatedTimeDisplay = `${startTimePart} - ${formatHourForDisplay(newEndHour)}`;
             } else {
-                // Fallback for other cases or if startTimeOption is not set
                 updatedTimeDisplay = `${formatHourForDisplay(entryData.startHour)} - ${formatHourForDisplay(newEndHour)}`;
             }
 
@@ -1747,7 +1725,6 @@
                 const entryData = JSON.parse(currentResizingBox.getAttribute('data-entry-details'));
                 const entryId = currentResizingBox.getAttribute('data-entry-id');
 
-                // Only update Supabase if the entry has a real ID (not a temporary one)
                 if (entryId && !entryId.startsWith('entry-')) {
                     updateSupabaseEntry(entryId, entryData.endHour, entryData.type, entryData.eventTime || entryData.visitTime || entryData.leaveTime);
                 }
@@ -1760,7 +1737,6 @@
             try {
                 let updateData = {
                     end_hour: newEndHour,
-                    // Assuming start_hour is not changing, and end_time_option is derived from the new end_hour
                     end_time_option: getTimeOption(JSON.parse(currentResizingBox.getAttribute('data-entry-details')).startHour, newEndHour)
                 };
 
@@ -1832,11 +1808,7 @@
         document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
 
         function clearForm() {
-            // Check if the user is a District Manager before clearing the form
-            if (loggedInUser && loggedInUser.title !== 'District Manager') {
-                document.getElementById('districtManager').value = '';
-                document.getElementById('districtManager').disabled = false;
-            }
+            document.getElementById('districtManager').value = '';
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             document.getElementById('selectedDay').innerHTML = '<option value="">Select a Day</option>';
@@ -1847,34 +1819,26 @@
             document.querySelectorAll('.plan-details-box.selected').forEach(box => box.classList.remove('selected'));
             hideDeleteButton();
             hideAllPopovers();
+            // Re-apply the initial DM filter on clear
+            if (loggedInUser) {
+                filterAndPopulateDMs(loggedInUser);
+                setDefaultStartDate();
+                updateDatesAndDaySelector();
+            }
         }
-        
-        // Listen for messages from the parent window to get user data
+
+        // The original `window.onload` is replaced with a `message` event listener.
+        // This listens for user data from the parent `index.html` page.
         window.addEventListener('message', function(event) {
-            // IMPORTANT: For security, always verify the origin of the message
-            // In a production environment, replace '*' with the actual origin of your main CRM app.
-            // Example: if (event.origin !== 'https://your-crm-app.com') return;
-            
-            if (event.data && event.data.type === 'loggedInUser') {
-                loggedInUser = event.data.user; // Store the logged-in user globally
-                console.log('Weekly Plan received user data:', loggedInUser);
-                
-                // Now that we have the user info, fetch the data and handle the UI
-                fetchData(); 
+            // For security, always verify the origin in a real application
+            // Check if the message is the user permissions data for this page
+            if (event.data && event.data.type === 'dmPlanningUserPermissions') {
+                console.log('DM-Plan received user data:', event.data.user);
+                // Initialize the app with the received user data
+                initializeApp(event.data.user);
             }
         });
-        
-        window.onload = () => {
-            // No need to call fetchData directly on load anymore, the message listener will handle it.
-            // But we can call it here as a fallback in case the message isn't received.
-            fetchData();
-            setDefaultStartDate();
-            document.getElementById('startDate').dispatchEvent(new Event('change'));
-            handleEntryTypeChange();
-        };
-
 
     </script>
-
 </body>
 </html>
