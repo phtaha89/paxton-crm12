@@ -493,6 +493,8 @@
                     });
                     districtManagers = Array.from(managerSet).sort();
                     populateDistrictManagers();
+                    // Call the new function to handle user roles after data is fetched
+                    handleUserRole();
                     return;
                 } catch (error) {
                     console.error(`Error fetching or parsing data (attempt ${retries + 1}):`, error);
@@ -508,6 +510,36 @@
                         toggleLoading(false);
                     }
                 }
+            }
+        }
+
+        // Simulates fetching user data from an external source or parent window
+        // You would replace this with your actual method of getting user information
+        function getUserInfo() {
+            // Replace this with a real implementation to get the current user's data.
+            // For this example, we'll return a hardcoded user.
+            // Uncomment the one you want to test.
+
+            // Example 1: Admin user (sees all options)
+            // return { username: "Admin User", title: "admin" };
+
+            // Example 2: District Manager (sees only their name)
+            return { username: "Jane Doe", title: "District Manager" };
+        }
+
+        function handleUserRole() {
+            const user = getUserInfo();
+            const dmSelect = document.getElementById('districtManager');
+
+            if (user.title === 'District Manager') {
+                // Set the value to the user's name and disable the dropdown
+                dmSelect.value = user.username;
+                dmSelect.disabled = true;
+                // Since the DM is fixed, we can trigger data filtering immediately
+                updateDatesAndDaySelector();
+            } else if (user.title === 'admin') {
+                // The dropdown remains enabled and populated with all DMs
+                dmSelect.disabled = false;
             }
         }
 
@@ -1114,7 +1146,7 @@
             const startDate = document.getElementById('startDate').value;
 
             if (!districtManager) {
-                showMessageBox('Please select a District Manager.');
+                showMessageBox('Please fill in the District Manager before adding an entry.');
                 return;
             }
             if (!startDate) {
@@ -1776,7 +1808,13 @@
         document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
 
         function clearForm() {
-            document.getElementById('districtManager').value = '';
+            // Check if the user is a District Manager before clearing the form
+            const user = getUserInfo();
+            const dmSelect = document.getElementById('districtManager');
+            if (user.title !== 'District Manager') {
+                dmSelect.value = '';
+                dmSelect.disabled = false;
+            }
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             document.getElementById('selectedDay').innerHTML = '<option value="">Select a Day</option>';
@@ -1789,74 +1827,15 @@
             hideAllPopovers();
         }
 
-        window.onload = async function() {
-    // This is the provided code that handles fetching data and populating the dropdown.
-    await fetchData();
-    setDefaultStartDate();
-    updateDatesAndDaySelector();
-
-    // Get the user's data from a hypothetical function
-    const userData = await getUserData();
-
-    // Check if the user's title is "District Manager"
-    if (userData && userData.title === 'District Manager') {
-        const districtManagerDropdown = document.getElementById('districtManager');
-
-        // Check if a dropdown option exists for the user's username
-        let userOptionExists = false;
-        for (const option of districtManagerDropdown.options) {
-            if (option.value === userData.username) {
-                userOptionExists = true;
-                break;
-            }
-        }
-
-        // If an option exists for the user, filter the dropdown to only show that option
-        if (userOptionExists) {
-            // Store the currently selected value before clearing
-            const selectedValue = districtManagerDropdown.value;
-
-            // Clear all options
-            districtManagerDropdown.innerHTML = '';
-
-            // Add the default "Select District Manager" option
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select District Manager';
-            districtManagerDropdown.appendChild(defaultOption);
-
-            // Add the user's specific option
-            const userOption = document.createElement('option');
-            userOption.value = userData.username;
-            userOption.textContent = userData.username;
-            districtManagerDropdown.appendChild(userOption);
-
-            // Reselect the user's option if it was previously selected
-            if (selectedValue === userData.username) {
-                districtManagerDropdown.value = userData.username;
-            }
-
-            // Lock the dropdown to prevent the user from changing it
-            districtManagerDropdown.disabled = true;
-        } else {
-            // Handle the case where the user's username is not in the list of district managers
-            // For example, by disabling the dropdown and showing a message
-            districtManagerDropdown.disabled = true;
-            districtManagerDropdown.innerHTML = '<option value="">User not found</option>';
-        }
-    }
-};
-
-// Assuming the getUserData() function is implemented elsewhere and looks something like this:
-/*
-async function getUserData() {
-    // Replace with your actual API call or local storage retrieval
-    return {
-        username: 'John Doe',
-        title: 'District Manager'
-    };
-}
-*/
+        window.onload = () => {
+            fetchData();
+            setDefaultStartDate();
+            // The call to updateDatesAndDaySelector is now handled by handleUserRole
+            // when a DM is detected, or by the event listener if an admin selects a DM.
+            // It will also be called when the startDate changes.
+            document.getElementById('startDate').dispatchEvent(new Event('change'));
+            handleEntryTypeChange();
+        };
 
 
     </script>
