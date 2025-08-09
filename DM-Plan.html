@@ -332,7 +332,6 @@
                     <div class="flex flex-col">
                         <label for="brickSelect" class="text-gray-700 font-medium mb-1 text-sm">Brick:</label>
                         <select id="brickSelect" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
-                            <option value="">Select Brick</option>
                         </select>
                     </div>
                 </div>
@@ -444,6 +443,7 @@
         let initialHeight = 0;
         let initialEndHour = 0;
         let cellHeight = 0;
+        let loggedInUser = null; // Variable to hold user info
 
         const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
@@ -493,8 +493,8 @@
                     });
                     districtManagers = Array.from(managerSet).sort();
                     populateDistrictManagers();
-                    // Call the new function to handle user roles after data is fetched
-                    handleUserRole();
+                    // This call will be moved to after the user role is determined
+                    // updateDatesAndDaySelector(); 
                     return;
                 } catch (error) {
                     console.error(`Error fetching or parsing data (attempt ${retries + 1}):`, error);
@@ -512,51 +512,57 @@
                 }
             }
         }
-
-        // --- CODE FIX START ---
-
-        // This function simulates getting user information.
-        // You MUST replace this with your actual method of getting the current user's data
-        // from your system.
-        function getUserInfo() {
-            // This example now returns a District Manager name that is present in the sample data.
-            // Replace this line with your own logic.
-            // Example 1: District Manager user
+        
+        // This function simulates getting user information from a parent iframe.
+        // It's the same logic as your master list.
+        function getLoggedInUserFromParent() {
+            // This is a placeholder. You need to implement the actual logic
+            // for receiving user data from the parent iframe.
+            // For now, we'll return a hardcoded user to demonstrate the functionality.
+            // Replace this with your own logic to retrieve user data.
             return { username: "DM1", title: "District Manager" };
-
-            // Example 2: Admin user
-            // return { username: "Admin User", title: "admin" };
         }
+
+        // --- NEW/MODIFIED CODE HERE ---
 
         function handleUserRole() {
-            const user = getUserInfo();
             const dmSelect = document.getElementById('districtManager');
-
             // Log the user info and available DMs to the console for debugging
-            console.log('Current User:', user);
+            console.log('Current User:', loggedInUser);
             console.log('Available District Managers:', districtManagers);
 
-            if (user.title === 'District Manager') {
-                // If a District Manager name exists in the fetched data, set it as the value
-                if (districtManagers.includes(user.username)) {
-                    dmSelect.value = user.username;
+            if (loggedInUser && loggedInUser.title === 'District Manager') {
+                // If the user is a District Manager, check if their name is in the list
+                const dmName = loggedInUser.username;
+                const dmExists = districtManagers.some(manager => manager === dmName);
+
+                if (dmExists) {
+                    // Set the value and disable the dropdown
+                    dmSelect.value = dmName;
                     dmSelect.disabled = true;
-                    console.log(`User is a District Manager. Setting dropdown to "${user.username}" and disabling it.`);
-                    // Since the DM is fixed, we can trigger data filtering immediately
+                    console.log(`User is a District Manager. Setting dropdown to "${dmName}" and disabling it.`);
+                    // Trigger the data loading for this specific DM
                     updateDatesAndDaySelector();
                 } else {
-                    // Fallback if the user's name is not in the data, to prevent the error
-                    console.error(`Error: District Manager name "${user.username}" not found in the data.`);
-                    // You might want to handle this case, e.g., by showing a message to the user.
+                    console.error(`Error: District Manager name "${dmName}" from user card was not found in the data.`);
+                    showMessageBox(`Your District Manager name ("${dmName}") was not found in the data. Please contact support.`, 'Data Error');
+                    // In this case, the dropdown is left as is, and no data is loaded
                 }
-            } else if (user.title === 'admin') {
-                // The dropdown remains enabled and populated with all DMs
+
+            } else if (loggedInUser && loggedInUser.title === 'admin') {
+                // If the user is an admin, enable the dropdown and do not pre-select
                 dmSelect.disabled = false;
                 console.log('User is an admin. The dropdown is enabled.');
+                // We still need to load data initially, but without a specific filter.
+                updateDatesAndDaySelector();
+            } else {
+                // No user info or role is not DM/admin, keep dropdown enabled and show all
+                dmSelect.disabled = false;
+                updateDatesAndDaySelector();
             }
         }
-
-        // --- CODE FIX END ---
+        
+        // --- END OF NEW/MODIFIED CODE ---
 
         function showMessageBox(message, title = 'Notification') {
             const messageBox = document.createElement('div');
@@ -1824,11 +1830,9 @@
 
         function clearForm() {
             // Check if the user is a District Manager before clearing the form
-            const user = getUserInfo();
-            const dmSelect = document.getElementById('districtManager');
-            if (user.title !== 'District Manager') {
-                dmSelect.value = '';
-                dmSelect.disabled = false;
+            if (loggedInUser && loggedInUser.title !== 'District Manager') {
+                document.getElementById('districtManager').value = '';
+                document.getElementById('districtManager').disabled = false;
             }
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
@@ -1841,13 +1845,26 @@
             hideDeleteButton();
             hideAllPopovers();
         }
-
+        
+        // Listen for messages from the parent window (your main CRM app)
+        // This is the same logic as in your master list.
+        window.addEventListener('message', function(event) {
+            // IMPORTANT: For security, always verify the origin of the message
+            // In a production environment, replace '*' with the actual origin of your main CRM app.
+            // Example: if (event.origin !== 'https://your-crm-app.com') return;
+            
+            if (event.data && event.data.type === 'loggedInUser') {
+                loggedInUser = event.data.user; // Store the logged-in user globally
+                console.log('Weekly Plan received user data:', loggedInUser);
+                
+                // Initialize the app with the received user data for initial filtering
+                fetchData(); 
+            }
+        });
+        
         window.onload = () => {
             fetchData();
             setDefaultStartDate();
-            // The call to updateDatesAndDaySelector is now handled by handleUserRole
-            // when a DM is detected, or by the event listener if an admin selects a DM.
-            // It will also be called when the startDate changes.
             document.getElementById('startDate').dispatchEvent(new Event('change'));
             handleEntryTypeChange();
         };
