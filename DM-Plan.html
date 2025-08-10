@@ -181,29 +181,28 @@
             text-align: left;
             font-size: 13px;
         }
-
+        
+        .time-cell {
+            background: #f8f9fa;
+            font-weight: 500;
+            position: sticky;
+            left: 0;
+            z-index: 30; /* Higher z-index to stay on top of events */
+            min-width: 60px; /* Reduced width for a more compact timeline */
+        }
+        
         th {
             background: #f8f9fa;
             font-weight: 600;
             color: #495057;
             position: sticky;
             top: 0;
-            z-index: 10;
-        }
-
-        .time-cell {
-            background: #f8f9fa;
-            font-weight: 500;
-            position: sticky;
-            left: 0;
-            z-index: 5;
-            min-width: 70px;
+            z-index: 31; /* Header row should be on top of the fixed time column too */
         }
         
-        .table-cell-hour {
-            height: 35px; /* Fixed height for each time slot */
-            position: relative;
-            vertical-align: top;
+        th:first-child,
+        .time-cell {
+            min-width: 60px; /* Match the width of the time column cells */
         }
         
         /* Sticky headers and columns */
@@ -222,18 +221,14 @@
         .scrollable-table-container tbody td:first-child {
             background-color: #fff;
             z-index: 30;
-            min-width: 60px; /* Reduced width for a more compact timeline */
         }
         
-        .scrollable-table-container thead th:first-child {
-            min-width: 60px; /* Match the width of the time column cells */
+        .table-cell-hour {
+            height: 35px; /* Fixed height for each time slot */
+            position: relative;
+            vertical-align: top;
         }
         
-        /* The header row's cells need to be sticky as well */
-        .scrollable-table-container thead th {
-            z-index: 31;
-        }
-
         /* Plan entry boxes */
         .plan-box {
             position: absolute;
@@ -910,7 +905,7 @@
                              data-start-time-option="${entry.start_time_option}">
                             <p>${entry.event_type}</p>
                             ${entry.event_type === 'Admin Work' && adminWorkSubType ? `<p><span class="font-semibold">Type:</span> ${adminWorkSubType}</p>` : ''}
-                            ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                            ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
                         </div>
                     `;
                 } else if (entry.entry_type === 'Visit') {
@@ -938,7 +933,7 @@
                              data-start-time-option="${entry.start_time_option}">
                             <p>${entry.visit_type}</p>
                             ${entry.visit_type === 'Double Visit' ? `<p><span class="font-semibold">Brick:</span> ${entry.brick || ''}</p>` : ''}
-                            ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                            ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
                         </div>
                     `;
                 } else if (entry.entry_type === 'Leave') {
@@ -960,7 +955,7 @@
                              data-is-leave="${isLeave}"
                              data-start-time-option="${entry.start_time_option}">
                             <p>${entry.leave_type}</p>
-                            ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                            ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
                         </div>
                     `;
                 }
@@ -1195,7 +1190,7 @@
                     currentDate.setDate(startDate.getDate() + index);
                     const dateString = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     const th = document.createElement('th');
-                    th.innerHTML = `<div><span>${dayName}</span><span class="text-xs font-normal text-gray-500">${dateString}</span></div>`;
+                    th.innerHTML = `<div><span>${dayName}</span><span class="text-xs font-normal text-gray-500">(${dateString})</span></div>`;
                     tableHeaderRow.appendChild(th);
                 });
             } else {
@@ -1498,7 +1493,7 @@
                          data-start-time-option="${startTimeOption}">
                         <p>${event}</p>
                         ${event === 'Admin Work' && adminWorkType ? `<p><span class="font-semibold">Type:</span> ${adminWorkType}</p>` : ''}
-                        ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                        ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
                     </div>
                 `;
             } else if (entryType === 'Visit') {
@@ -1574,7 +1569,7 @@
                              data-start-time-option="${startTimeOption}">
                         <p>${visitType}</p>
                         ${visitType === 'Double Visit' ? `<p><span class="font-semibold">Brick:</span> ${brick}</p>` : ''}
-                        ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                        ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
                     </div>
                 `;
             } else if (entryType === 'Leave') {
@@ -1633,7 +1628,7 @@
                          data-is-leave="${isLeave}"
                          data-start-time-option="${startTimeOption}">
                         <p>${leaveType}</p>
-                        ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
+                        ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
                     </div>
                 `;
             }
@@ -1949,12 +1944,9 @@
             currentResizingBox.dataset.time = updatedTimeDisplay;
             
             // Update the display text inside the box immediately
-            const pTags = currentResizingBox.querySelectorAll('p');
-            // We only update the time if it's a simple 'Visit' or 'Event' that doesn't have other details
-            if (pTags.length > 1 && (pTags[1].innerHTML.includes('Brick:') || pTags[1].innerHTML.includes('Type:'))) {
-                 // Do not update the display of a sub-type
-            } else if (pTags.length > 1) {
-                 pTags[1].textContent = updatedTimeDisplay;
+            const planTimeElement = currentResizingBox.querySelector('.plan-time');
+            if(planTimeElement) {
+                planTimeElement.textContent = updatedTimeDisplay;
             }
         }
 
