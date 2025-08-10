@@ -1459,9 +1459,8 @@
                         return;
                     }
                     entryStartHour = parseInt(eventTimeInput.split(':')[0]);
-                    entryEndHour = entryStartHour + 1;
-                    if (entryEndHour > endHour) entryEndHour = endHour;
-                    timeDisplay = `${eventTimeInput} - ${formatHourForDisplay(entryEndHour)}`;
+                    entryEndHour = entryStartHour;
+                    timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`; // Fixed: display end time as start time + 1 hour
                 } else if (startTimeOption === 'AM') {
                     entryStartHour = 9;
                     entryEndHour = 14;
@@ -1524,9 +1523,8 @@
                         return;
                     }
                     entryStartHour = parseInt(visitTimeInput.split(':')[0]);
-                    entryEndHour = entryStartHour + 1;
-                    if (entryEndHour > endHour) entryEndHour = endHour;
-                    timeDisplay = `${visitTimeInput} - ${formatHourForDisplay(entryEndHour)}`;
+                    entryEndHour = entryStartHour; // Fixed: start and end hour are the same for new entry
+                    timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`;
                 } else if (startTimeOption === 'AM') {
                     entryStartHour = 9;
                     entryEndHour = 14;
@@ -1600,9 +1598,8 @@
                         return;
                     }
                     entryStartHour = parseInt(leaveTimeInput.split(':')[0]);
-                    entryEndHour = entryStartHour + 1;
-                    if (entryEndHour > endHour) entryEndHour = endHour;
-                    timeDisplay = `${leaveTimeInput} - ${formatHourForDisplay(entryEndHour)}`;
+                    entryEndHour = entryStartHour;
+                    timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`;
                 } else if (startTimeOption === 'AM') {
                     entryStartHour = 9;
                     entryEndHour = 14;
@@ -1682,7 +1679,7 @@
                     let overlapsWithAnyExisting = false;
                     let nextAvailableHourAfterOverlap = currentCheckStartHour;
                     for (const existingEntry of existingEntriesOnDay) {
-                        const proposedEndForThisCheck = currentCheckStartHour + originalDurationHours - 1;
+                        const proposedEndForThisCheck = currentCheckStartHour + originalDurationHours; // Use +1 for the last hour
                         if (currentCheckStartHour <= existingEntry.endHour && proposedEndForThisCheck >= existingEntry.startHour) {
                             overlapsWithAnyExisting = true;
                             nextAvailableHourAfterOverlap = Math.max(nextAvailableHourAfterOverlap, existingEntry.endHour + 1);
@@ -1718,14 +1715,14 @@
                 entryEndHour = proposedEndHourForAdjustment;
                 entryData.startHour = entryStartHour;
                 entryData.endHour = entryEndHour;
-
-                if (startTimeOption === 'AM') {
-                    timeDisplay = `AM (${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour)})`;
-                } else if (startTimeOption === 'PM') {
-                    timeDisplay = `PM (${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour)})`;
-                } else if (startTimeOption === 'Pick a Time') {
+                
+                // Fixed: update timeDisplay correctly after slot adjustment
+                if (startTimeOption === 'Pick a Time') {
                     const originalInputTime = document.getElementById(entryType === 'Event' ? 'eventTimeInput' : (entryType === 'Visit' ? 'visitTimeInput' : 'leaveTimeInput')).value;
-                    timeDisplay = `${originalInputTime} - ${formatHourForDisplay(entryEndHour)}`;
+                    const startHourParsed = parseInt(originalInputTime.split(':')[0]);
+                    timeDisplay = `${formatHourForDisplay(startHourParsed)} - ${formatHourForDisplay(entryEndHour + 1)}`;
+                } else {
+                    timeDisplay = getTimeDisplay(entryStartHour, entryEndHour, startTimeOption, null);
                 }
 
                 if (entryData.type === 'Event') {
@@ -1847,20 +1844,20 @@
                 contentHtml = `
                     <p><span class="font-semibold">Event:</span> ${entryData.event}</p>
                     ${entryData.event === 'Admin Work' && entryData.adminWorkType ? `<p><span class="font-semibold">Type:</span> ${entryData.adminWorkType}</p>` : ''}
-                    <p><span class="font-semibold">Time:</span> ${entryData.eventTime}</p>
+                    <p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption, null)}</p>
                     <p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>
                 `;
             } else if (type === 'Visit') {
                 contentHtml = `
                     <p><span class="font-semibold">Visit Type:</span> ${entryData.visitType}</p>
-                    <p><span class="font-semibold">Time:</span> ${entryData.visitTime}</p>
+                    <p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption, null)}</p>
                     ${entryData.visitType === 'Double Visit' ? `<p><span class="font-semibold">MR:</span> ${entryData.medicalRep}</p><p><span class="font-semibold">Brick:</span> ${entryData.brick}</p>` : ''}
                     <p><span class="font-semibold">General Details:</span> ${entryData.details || 'N/A'}</p>
                 `;
             } else if (type === 'Leave') {
                 contentHtml = `
                     <p><span class="font-semibold">Leave Type:</span> ${entryData.leaveType}</p>
-                    <p><span class="font-semibold">Time:</span> ${entryData.leaveTime}</p>
+                    <p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption, null)}</p>
                     <p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>
                 `;
             }
@@ -1939,17 +1936,20 @@
             
             let newHeight = initialHeight + deltaY;
             let newDurationHours = Math.max(1, Math.round(newHeight / cellHeight));
-            let newEndHour = parseInt(currentResizingBox.dataset.startHour) + newDurationHours - 1;
-            newEndHour = Math.min(newEndHour, endHour);
-            newDurationHours = newEndHour - parseInt(currentResizingBox.dataset.startHour) + 1;
-            currentResizingBox.style.height = `${newDurationHours * cellHeight + (newDurationHours - 1) * 1}px`;
             
+            const startHour = parseInt(currentResizingBox.dataset.startHour);
+            const newEndHour = Math.min(startHour + newDurationHours, endHour); // Fixed calculation of newEndHour
+            
+            const effectiveNewDurationHours = newEndHour - startHour; // Fixed: calculate duration based on newEndHour
+            
+            currentResizingBox.style.height = `${(effectiveNewDurationHours + 1) * cellHeight + effectiveNewDurationHours * 1}px`; // Fixed: calculate height based on new duration
+
             const entryData = JSON.parse(currentResizingBox.getAttribute('data-entry-details'));
             entryData.endHour = newEndHour;
             currentResizingBox.setAttribute('data-entry-details', JSON.stringify(entryData));
             
             const startTimeOption = currentResizingBox.dataset.startTimeOption;
-            let updatedTimeDisplay = getTimeDisplay(entryData.startHour, entryData.endHour, startTimeOption, null);
+            let updatedTimeDisplay = getTimeDisplay(startHour, newEndHour, startTimeOption, null);
             currentResizingBox.dataset.time = updatedTimeDisplay;
             
             // Update the display text inside the box immediately
