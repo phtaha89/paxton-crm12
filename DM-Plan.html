@@ -207,7 +207,7 @@
         }
         
         /* Sticky headers and columns */
-        .scrollable-table-container thead th:first-child,
+        .scrollable-table-container thead th,
         .scrollable-table-container tbody td:first-child {
             position: sticky;
             left: 0;
@@ -215,9 +215,23 @@
             background-color: #f8f9fa;
         }
         
+        .scrollable-table-container thead th {
+             z-index: 31; /* Header row should be on top of the fixed time column too */
+        }
+
         .scrollable-table-container tbody td:first-child {
             background-color: #fff;
             z-index: 30;
+            min-width: 60px; /* Reduced width for a more compact timeline */
+        }
+        
+        .scrollable-table-container thead th:first-child {
+            min-width: 60px; /* Match the width of the time column cells */
+        }
+        
+        /* The header row's cells need to be sticky as well */
+        .scrollable-table-container thead th {
+            z-index: 31;
         }
 
         /* Plan entry boxes */
@@ -349,7 +363,42 @@
             font-size: 13px;
             max-width: 250px;
         }
+        
+        .modal-box {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
 
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #007bff;
+        }
+
+        .modal-content p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
         .popover p {
             margin-bottom: 6px;
         }
@@ -704,18 +753,17 @@
         }
 
         function showMessageBox(message, title = 'Notification') {
-            const messageBox = document.createElement('div');
-            messageBox.className = 'fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50';
-            messageBox.innerHTML = `
-                <div class="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-1/3 relative">
-                    <h3 class="text-lg font-bold text-indigo-700 mb-4">${title}</h3>
-                    <div class="text-gray-700 text-sm leading-relaxed">${message}</div>
-                    <div class="mt-6 text-right">
-                        <button type="button" class="btn btn-secondary" onclick="this.closest('.fixed').remove()">Close</button>
-                    </div>
+            // New modal styling to match the new CSS
+            const modalBox = document.createElement('div');
+            modalBox.className = 'modal-box';
+            modalBox.innerHTML = `
+                <div class="modal-content">
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-box').remove()">Close</button>
                 </div>
             `;
-            document.body.appendChild(messageBox);
+            document.body.appendChild(modalBox);
         }
 
         function calculateEndDate(startDateStr) {
@@ -1900,12 +1948,13 @@
             let updatedTimeDisplay = getTimeDisplay(entryData.startHour, entryData.endHour, startTimeOption, null);
             currentResizingBox.dataset.time = updatedTimeDisplay;
             
-            // Update the display text inside the box
-            const detailsElement = currentResizingBox.querySelector('p:last-of-type');
-            if (detailsElement && detailsElement.innerHTML.includes('<span')) {
-                // If it's a visit/event with a sub-type
-            } else if (detailsElement) {
-                detailsElement.textContent = updatedTimeDisplay;
+            // Update the display text inside the box immediately
+            const pTags = currentResizingBox.querySelectorAll('p');
+            // We only update the time if it's a simple 'Visit' or 'Event' that doesn't have other details
+            if (pTags.length > 1 && (pTags[1].innerHTML.includes('Brick:') || pTags[1].innerHTML.includes('Type:'))) {
+                 // Do not update the display of a sub-type
+            } else if (pTags.length > 1) {
+                 pTags[1].textContent = updatedTimeDisplay;
             }
         }
 
