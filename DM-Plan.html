@@ -207,14 +207,15 @@
         .time-label {
             font-weight: 500;
             color: #555;
-            text-align: right;
+            text-align: left;
+            padding-left: 0.5rem;
             padding-right: 0.5rem;
-            width: 80px; /* Reduced width */
-            min-width: 80px; /* Reduced min-width */
+            width: fit-content; /* Auto-fit width */
+            min-width: 65px;
             position: sticky;
             left: 0;
             background-color: #f9fafb;
-            z-index: 3;
+            z-index: 30; /* Increased z-index to fix overlapping */
         }
         .table-cell-hour {
             height: 30px;
@@ -272,24 +273,24 @@
         .scrollable-table-container {
             position: relative;
             overflow-x: auto;
-            overflow-y: hidden;
+            overflow-y: auto;
             height: 500px;
         }
         .scrollable-table-container table {
             width: 100%;
             min-width: 800px;
         }
-        /* Adjusted fixed column styling */
+        /* Adjusted fixed column styling to fix overlapping */
         .scrollable-table-container thead th:first-child,
         .scrollable-table-container tbody td:first-child {
             position: sticky;
             left: 0;
-            z-index: 2;
+            z-index: 30; /* Increased to be higher than plan boxes */
             background-color: #f9fafb;
         }
         .scrollable-table-container tbody td:first-child {
             background-color: #fff;
-            z-index: 2;
+            z-index: 30; /* Increased to be higher than plan boxes */
         }
 
         /* Adjusted layout for form fields to be full width */
@@ -641,6 +642,11 @@
             
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - daysSinceSaturday);
+
+            if (dayOfWeek === 5) { // If today is Friday, go to the next week's Saturday
+                startOfWeek.setDate(startOfWeek.getDate() + 7);
+            }
+
             document.getElementById('startDate').value = startOfWeek.toISOString().split('T')[0];
         }
 
@@ -820,9 +826,8 @@
                              data-details="${entry.details || ''}"
                              data-start-hour="${entry.start_hour}"
                              data-end-hour="${entry.end_hour}"
-                             data-is-leave="true"
-                             data-entry-id="${entry.id}"
-                             data-start-time-option="${entry.start_time_option}">
+                             data-is-leave="${isLeave}"
+                             data-start-time-option="${startTimeOption}">
                             <p>${entry.leave_type}</p>
                             ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
                         </div>
@@ -1736,7 +1741,7 @@
             const clientY = event.touches ? event.touches[0].clientY : event.clientY;
             initialY = clientY;
             initialHeight = currentResizingBox.offsetHeight;
-            initialEndHour = parseInt(currentResizingBox.dataset.end-hour);
+            initialEndHour = parseInt(currentResizingBox.dataset.endHour);
             document.addEventListener('mousemove', doResize);
             document.addEventListener('mouseup', stopResize);
             document.addEventListener('touchmove', doResize, { passive: false });
@@ -1749,16 +1754,16 @@
             const deltaY = clientY - initialY;
             let newHeight = initialHeight + deltaY;
             let newDurationHours = Math.max(1, Math.round(newHeight / cellHeight));
-            let newEndHour = parseInt(currentResizingBox.dataset.start-hour) + newDurationHours - 1;
+            let newEndHour = parseInt(currentResizingBox.dataset.startHour) + newDurationHours - 1;
             newEndHour = Math.min(newEndHour, endHour);
-            newDurationHours = newEndHour - parseInt(currentResizingBox.dataset.start-hour) + 1;
+            newDurationHours = newEndHour - parseInt(currentResizingBox.dataset.startHour) + 1;
             currentResizingBox.style.height = `${newDurationHours * cellHeight + (newDurationHours - 1) * 1}px`;
             currentResizingBox.dataset.endHour = newEndHour;
             const entryData = JSON.parse(currentResizingBox.getAttribute('data-entry-details'));
             entryData.endHour = newEndHour;
 
             let updatedTimeDisplay = '';
-            const startTimeOption = currentResizingBox.dataset.start-time-option;
+            const startTimeOption = currentResizingBox.dataset.startTimeOption;
 
             if (startTimeOption === 'AM') {
                  updatedTimeDisplay = `AM (9 AM - ${formatHourForDisplay(newEndHour)})`;
