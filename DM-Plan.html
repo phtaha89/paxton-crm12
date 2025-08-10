@@ -52,11 +52,11 @@
             font-size: 0.85rem;
         }
         .btn-primary {
-            background-color: #6366f1;
+            background-color: #4f46e5;
             color: #fff;
         }
         .btn-primary:hover {
-            background-color: #4f46e5;
+            background-color: #4338ca;
             transform: translateY(-1px);
         }
         .btn-danger {
@@ -73,6 +73,17 @@
         }
         .btn-secondary:hover {
             background-color: #d1d5db;
+            transform: translateY(-1px);
+        }
+        .btn-toggle {
+            background-color: #d1d5db;
+            color: #374151;
+        }
+        .btn-toggle.active {
+            background-color: #10b981;
+            color: #fff;
+        }
+        .btn-toggle:hover {
             transform: translateY(-1px);
         }
         table {
@@ -157,12 +168,15 @@
         #visitInputsContainer textarea, #eventInputsContainer textarea, #leavesInputsContainer textarea {
             min-height: 2.1rem;
         }
+        
+        /* Adjusted CSS for plan details boxes */
         .plan-details-box {
             padding: 0.5rem;
             border-radius: 0.4rem;
             font-size: 0.8rem;
             position: absolute;
-            width: calc(100% - 14px);
+            /* width and left are now relative to the parent cell */
+            width: calc(100% - 10px); 
             box-sizing: border-box;
             overflow: hidden;
             display: flex;
@@ -170,21 +184,43 @@
             justify-content: center;
             align-items: flex-start;
             z-index: 20;
-            left: 7px;
+            left: 5px; /* Centered within the cell */
             border: 1px solid transparent;
             cursor: pointer;
             user-select: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s ease-in-out;
         }
+        
+        .plan-details-box.selected {
+            border: 2px solid #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Updated colors for professional theme */
+        .plan-details-box.visit-entry {
+            background-color: #ecfdf5; /* Light green */
+            border-color: #6ee7b7;
+        }
+        .plan-details-box.event-entry {
+            background-color: #eff6ff; /* Light blue */
+            border-color: #93c5fd;
+        }
+        .plan-details-box.leave-entry {
+            background-color: #fef2f2; /* Light red */
+            border-color: #fca5a5;
+        }
+
         .plan-details-box p {
             margin-bottom: 0.1rem;
         }
         .plan-details-box p:last-child {
             margin-bottom: 0;
         }
-        .plan-details-box.selected {
-            border: 2px solid #6366f1;
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        .plan-details-box.full-day-entry {
+            /* Inherits colors from above */
         }
+
         .time-label {
             font-weight: 500;
             color: #555;
@@ -201,14 +237,7 @@
             height: 40px;
             position: relative;
         }
-        .plan-details-box.full-day-entry {
-            background-color: #bfdbfe;
-            border-color: #93c5fd;
-        }
-        .plan-details-box.leave-entry {
-            background-color: #fee2e2;
-            border-color: #fca5a5;
-        }
+        
         .resize-handle {
             position: absolute;
             bottom: 0;
@@ -220,6 +249,7 @@
             border-bottom-left-radius: 0.4rem;
             border-bottom-right-radius: 0.4rem;
             z-index: 25;
+            transition: background-color 0.2s;
         }
         .plan-details-box:hover .resize-handle {
             background-color: rgba(0, 0, 0, 0.2);
@@ -300,7 +330,7 @@
                     </select>
                 </div>
             </div>
-            <div id="visitInputsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3 p-3 border border-green-200 rounded-md bg-green-50">
+            <div id="visitInputsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3 p-3 border border-emerald-200 rounded-md bg-emerald-50">
                 <div class="flex flex-col">
                     <label for="visitTypeSelect" class="text-gray-700 font-medium mb-1 text-sm">Visit Type:</label>
                     <select id="visitTypeSelect" onchange="handleVisitTypeChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
@@ -339,10 +369,10 @@
                 </div>
                 <div class="flex flex-col col-span-full">
                     <label for="visitDetails" class="text-gray-700 font-medium mb-1 text-sm">Visit Details:</label>
-                    <textarea id="visitDetails" rows="2" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md" placeholder="Add specific details about the visit..."></textarea>
+                    <textarea id="visitDetails" rows="2" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-30- rounded-md" placeholder="Add specific details about the visit..."></textarea>
                 </div>
             </div>
-            <div id="eventInputsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3 p-3 border border-blue-200 rounded-md bg-blue-50">
+            <div id="eventInputsContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-3 p-3 border border-indigo-200 rounded-md bg-indigo-50">
                 <div class="flex flex-col">
                     <label for="eventSelect" class="text-gray-700 font-medium mb-1 text-sm">Event Type:</label>
                     <select id="eventSelect" onchange="handleEventChange()" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full text-sm border-gray-300 rounded-md">
@@ -411,6 +441,7 @@
             </div>
             <div class="flex justify-end mt-3 space-x-2">
                 <button type="button" class="btn btn-primary" onclick="addPlanEntry()">Add Entry to Plan</button>
+                <button type="button" class="btn btn-secondary" id="toggleMultiSelectBtn">Toggle Multi-Select</button>
                 <button type="button" class="btn btn-danger" id="deleteEntryButton" style="display:none;">Delete Selected Entries</button>
             </div>
         </div>
@@ -446,6 +477,7 @@
         let initialHeight = 0;
         let initialEndHour = 0;
         let cellHeight = 0;
+        let isMultiSelectMode = false; // New state variable for multi-select
 
         const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
@@ -570,9 +602,6 @@
             document.body.appendChild(messageBox);
         }
 
-        // Removed the original `populateDistrictManagers` as it is replaced by `filterAndPopulateDMs`
-        // function populateDistrictManagers() { ... }
-
         function calculateEndDate(startDateStr) {
             if (!startDateStr) return '';
             const startDate = new Date(startDateStr);
@@ -689,7 +718,7 @@
 
 
                     planDetailsHtml = `
-                        <div class="p-2 bg-blue-50 border border-blue-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
+                        <div class="p-2 border rounded-md text-sm plan-details-box event-entry ${isFullDay ? 'full-day-entry' : ''}"
                              data-type="Event"
                              data-event="${entry.event_type}"
                              data-time="${timeDisplay}"
@@ -717,7 +746,7 @@
 
 
                     planDetailsHtml = `
-                        <div class="p-2 bg-green-50 border border-green-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
+                        <div class="p-2 border rounded-md text-sm plan-details-box visit-entry ${isFullDay ? 'full-day-entry' : ''}"
                              data-type="Visit"
                              data-visit-type="${entry.visit_type}"
                              data-time="${timeDisplay}"
@@ -745,7 +774,7 @@
 
 
                     planDetailsHtml = `
-                        <div class="p-2 bg-red-50 border border-red-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''} leave-entry"
+                        <div class="p-2 border rounded-md text-sm plan-details-box leave-entry ${isFullDay ? 'full-day-entry' : ''}"
                              data-type="Leave"
                              data-leave-type="${entry.leave_type}"
                              data-time="${timeDisplay}"
@@ -774,16 +803,12 @@
                 if (isFullDay) {
                     planBoxElement.style.height = `${cellHeight * totalHours + (totalHours - 1) * 1}px`;
                     planBoxElement.style.top = '0px';
-                    planBoxElement.style.left = '7px';
-                    planBoxElement.style.width = 'calc(100% - 14px)';
                     planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
                     targetCell.appendChild(planBoxElement);
                 } else {
                     const durationHours = entry.end_hour - entry.start_hour + 1;
                     planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
                     planBoxElement.style.top = '0px';
-                    planBoxElement.style.left = '7px';
-                    planBoxElement.style.width = 'calc(100% - 14px)';
                     planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
                     targetCell.appendChild(planBoxElement);
 
@@ -1242,7 +1267,7 @@
                 entryData.isLeave = isLeave;
                 entryData.startTimeOption = startTimeOption;
                 planDetailsHtml = `
-                    <div class="p-2 bg-blue-50 border border-blue-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
+                    <div class="p-2 border rounded-md text-sm plan-details-box event-entry ${isFullDay ? 'full-day-entry' : ''}"
                          data-type="Event"
                          data-event="${event}"
                          data-time="${timeDisplay}"
@@ -1316,7 +1341,7 @@
                 entryData.isLeave = isLeave;
                 entryData.startTimeOption = startTimeOption;
                 planDetailsHtml = `
-                    <div class="p-2 bg-green-50 border border-green-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''}"
+                    <div class="p-2 border rounded-md text-sm plan-details-box visit-entry ${isFullDay ? 'full-day-entry' : ''}"
                          data-type="Visit"
                          data-visit-type="${visitType}"
                          data-time="${timeDisplay}"
@@ -1378,7 +1403,7 @@
                 entryData.isLeave = isLeave;
                 entryData.startTimeOption = startTimeOption;
                 planDetailsHtml = `
-                    <div class="p-2 bg-red-50 border border-red-200 rounded-md text-sm plan-details-box ${isFullDay ? 'full-day-entry' : ''} ${isLeave ? 'leave-entry' : ''}"
+                    <div class="p-2 border rounded-md text-sm plan-details-box leave-entry ${isFullDay ? 'full-day-entry' : ''}"
                          data-type="Leave"
                          data-leave-type="${leaveType}"
                          data-time="${timeDisplay}"
@@ -1480,11 +1505,11 @@
                     timeDisplay = `${originalInputTime} - ${formatHourForDisplay(entryEndHour)}`;
                 }
 
-                if (entryType === 'Event') {
+                if (entryData.type === 'Event') {
                     entryData.eventTime = timeDisplay;
-                } else if (entryType === 'Visit') {
+                } else if (entryData.type === 'Visit') {
                     entryData.visitTime = timeDisplay;
-                } else if (entryType === 'Leave') {
+                } else if (entryData.type === 'Leave') {
                     entryData.leaveTime = timeDisplay;
                 }
             } else {
@@ -1510,16 +1535,14 @@
             if (isFullDay) {
                 planBoxElement.style.height = `${cellHeight * totalHours + (totalHours - 1) * 1}px`;
                 planBoxElement.style.top = `${(startHour - startHour) * cellHeight + (startHour - startHour) * 1}px`;
-                planBoxElement.style.left = '7px';
-                planBoxElement.style.width = 'calc(100% - 14px)';
                 planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-full-day-${Date.now()}`);
                 planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
                 targetCell.appendChild(planBoxElement);
             } else {
                 const existingBoxesInCell = targetCell.querySelectorAll('.plan-details-box:not(.full-day-entry)').length;
                 const offset = existingBoxesInCell * 10;
-                planBoxElement.style.left = `${7 + offset}px`;
-                planBoxElement.style.width = `calc(100% - 14px - ${offset}px)`;
+                planBoxElement.style.left = `5px`;
+                planBoxElement.style.width = `calc(100% - 10px)`;
                 const durationHours = entryEndHour - entryStartHour + 1;
                 planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
                 planBoxElement.style.top = `0px`;
@@ -1757,11 +1780,23 @@
             }
         }
 
+        // New event listener for the multi-select toggle button
+        const toggleMultiSelectBtn = document.getElementById('toggleMultiSelectBtn');
+        toggleMultiSelectBtn.addEventListener('click', () => {
+            isMultiSelectMode = !isMultiSelectMode;
+            toggleMultiSelectBtn.classList.toggle('active', isMultiSelectMode);
+            if (isMultiSelectMode) {
+                toggleMultiSelectBtn.textContent = 'Multi-Select ON';
+            } else {
+                toggleMultiSelectBtn.textContent = 'Toggle Multi-Select';
+            }
+        });
+
 
         document.getElementById('plan-table-body').addEventListener('click', (event) => {
             const targetBox = event.target.closest('.plan-details-box');
             if (targetBox) {
-                if (!event.ctrlKey && !event.metaKey) {
+                if (!event.ctrlKey && !event.metaKey && !isMultiSelectMode) {
                     document.querySelectorAll('.plan-details-box.selected').forEach(box => {
                         if (box !== targetBox) {
                             box.classList.remove('selected');
@@ -1777,9 +1812,11 @@
                     hideAllPopovers();
                 }
             } else {
-                document.querySelectorAll('.plan-details-box.selected').forEach(box => {
-                    box.classList.remove('selected');
-                });
+                if (!isMultiSelectMode) {
+                    document.querySelectorAll('.plan-details-box.selected').forEach(box => {
+                        box.classList.remove('selected');
+                    });
+                }
                 hideAllPopovers();
             }
             updateDeleteButtonVisibility();
@@ -1789,7 +1826,9 @@
             const isClickOutsideDeleteButton = deleteEntryButton.style.display === 'block' && !deleteEntryButton.contains(event.target);
             const isClickOutsidePlanBox = !event.target.closest('.plan-details-box');
             const isClickOutsidePopover = !event.target.closest('.entry-popover');
-            if (isClickOutsideDeleteButton && isClickOutsidePlanBox && isClickOutsidePopover) {
+            const isClickOutsideMultiSelectButton = toggleMultiSelectBtn.contains(event.target);
+
+            if (isClickOutsideDeleteButton && isClickOutsidePlanBox && isClickOutsidePopover && !isClickOutsideMultiSelectButton) {
                 document.querySelectorAll('.plan-details-box.selected').forEach(box => {
                     box.classList.remove('selected');
                 });
@@ -1798,6 +1837,7 @@
             }
             updateDeleteButtonVisibility();
         });
+
 
         document.getElementById('districtManager').addEventListener('change', () => {
             if (document.getElementById('visitTypeSelect').value === 'Double Visit') {
