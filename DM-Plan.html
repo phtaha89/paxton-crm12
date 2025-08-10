@@ -209,15 +209,15 @@
             color: #555;
             text-align: right;
             padding-right: 0.5rem;
-            width: 80px;
-            min-width: 80px;
+            width: 80px; /* Reduced width */
+            min-width: 80px; /* Reduced min-width */
             position: sticky;
             left: 0;
             background-color: #f9fafb;
-            z-index: 3; /* Increased z-index */
+            z-index: 3;
         }
         .table-cell-hour {
-            height: 30px; /* Further decreased cell height */
+            height: 30px;
             position: relative;
         }
         
@@ -243,13 +243,13 @@
             border-radius: 0.5rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             padding: 0.75rem;
-            z-index: 100; /* Increased z-index */
+            z-index: 100;
             width: 180px;
             font-size: 0.8rem;
             display: none;
             flex-direction: column;
             gap: 0.5rem;
-            position: fixed; /* Fixed position is correct, but needs correct calculation */
+            position: fixed;
             pointer-events: auto;
         }
         .entry-popover p {
@@ -273,11 +273,13 @@
             position: relative;
             overflow-x: auto;
             overflow-y: hidden;
+            height: 500px;
         }
         .scrollable-table-container table {
             width: 100%;
             min-width: 800px;
         }
+        /* Adjusted fixed column styling */
         .scrollable-table-container thead th:first-child,
         .scrollable-table-container tbody td:first-child {
             position: sticky;
@@ -287,6 +289,7 @@
         }
         .scrollable-table-container tbody td:first-child {
             background-color: #fff;
+            z-index: 2;
         }
 
         /* Adjusted layout for form fields to be full width */
@@ -633,19 +636,14 @@
         
         function setDefaultStartDate() {
             const today = new Date();
-            const dayOfWeek = today.getDay();
-            let daysUntilSaturday;
-
-            if (dayOfWeek === 6) { // Saturday
-                daysUntilSaturday = 0;
-            } else if (dayOfWeek < 6) { // Sunday (0) to Friday (5)
-                daysUntilSaturday = 6 - dayOfWeek;
-            }
+            const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+            let daysSinceSaturday = (dayOfWeek + 1) % 7; // 0=Sat, 1=Sun, ..., 6=Fri
             
-            const nextSaturday = new Date(today);
-            nextSaturday.setDate(today.getDate() + daysUntilSaturday);
-            document.getElementById('startDate').value = nextSaturday.toISOString().split('T')[0];
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - daysSinceSaturday);
+            document.getElementById('startDate').value = startOfWeek.toISOString().split('T')[0];
         }
+
 
         function updateDatesAndDaySelector() {
             const startDateInput = document.getElementById('startDate');
@@ -843,7 +841,8 @@
 
                 if (isFullDay) {
                     planBoxElement.style.height = `${cellHeight * totalHours + (totalHours - 1) * 1}px`;
-                    planBoxElement.style.top = '0px';
+                    planBoxElement.style.top = `${(startHour - startHour) * cellHeight + (startHour - startHour) * 1}px`;
+                    planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-full-day-${Date.now()}`);
                     planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
                     targetCell.appendChild(planBoxElement);
                 } else {
@@ -1383,16 +1382,16 @@
                 entryData.startTimeOption = startTimeOption;
                 planDetailsHtml = `
                     <div class="p-2 border rounded-md text-sm plan-details-box visit-entry ${isFullDay ? 'full-day-entry' : ''}"
-                         data-type="Visit"
-                         data-visit-type="${visitType}"
-                         data-time="${timeDisplay}"
-                         data-mr="${medicalRep}"
-                         data-brick="${brick}"
-                         data-details="${visitDetails || ''}"
-                         data-start-hour="${entryStartHour}"
-                         data-end-hour="${entryEndHour}"
-                         data-is-leave="${isLeave}"
-                         data-start-time-option="${startTimeOption}">
+                             data-type="Visit"
+                             data-visit-type="${visitType}"
+                             data-time="${timeDisplay}"
+                             data-mr="${medicalRep}"
+                             data-brick="${brick}"
+                             data-details="${visitDetails || ''}"
+                             data-start-hour="${entryStartHour}"
+                             data-end-hour="${entryEndHour}"
+                             data-is-leave="${isLeave}"
+                             data-start-time-option="${startTimeOption}">
                         <p>${visitType}</p>
                         ${visitType === 'Double Visit' ? `<p><span class="font-semibold">Brick:</span> ${brick}</p>` : ''}
                         ${!isFullDay ? '<div class="resize-handle"></div>' : ''}
@@ -1734,7 +1733,8 @@
             }
             isResizing = true;
             currentResizingBox = event.target.closest('.plan-details-box');
-            initialY = event.clientY;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+            initialY = clientY;
             initialHeight = currentResizingBox.offsetHeight;
             initialEndHour = parseInt(currentResizingBox.dataset.end-hour);
             document.addEventListener('mousemove', doResize);
@@ -1825,24 +1825,48 @@
             }
         }
 
+        let lastClickTime = 0;
+        let popoverVisible = false;
 
         document.getElementById('plan-table-body').addEventListener('click', (event) => {
+            const currentTime = new Date().getTime();
             const targetBox = event.target.closest('.plan-details-box');
-            if (targetBox) {
-                targetBox.classList.toggle('selected');
+            
+            // If it's a double-click, let the dblclick event handler take over
+            if (currentTime - lastClickTime < 300) {
+                return;
+            }
 
-                if (targetBox.classList.contains('selected')) {
+            // Single click logic
+            if (targetBox) {
+                const isSelected = targetBox.classList.contains('selected');
+                hideAllPopovers();
+
+                // If it's already selected from a double-click, don't show popover again
+                if (!isSelected) {
+                    // Clear other selections
+                    document.querySelectorAll('.plan-details-box.selected').forEach(box => {
+                        box.classList.remove('selected');
+                    });
                     displayEntryPopover(targetBox);
                 } else {
                     hideAllPopovers();
                 }
             } else {
-                document.querySelectorAll('.plan-details-box.selected').forEach(box => {
-                    box.classList.remove('selected');
-                });
                 hideAllPopovers();
+                document.querySelectorAll('.plan-details-box.selected').forEach(box => box.classList.remove('selected'));
             }
             updateDeleteButtonVisibility();
+            lastClickTime = currentTime;
+        });
+
+        document.getElementById('plan-table-body').addEventListener('dblclick', (event) => {
+            const targetBox = event.target.closest('.plan-details-box');
+            if (targetBox) {
+                hideAllPopovers();
+                targetBox.classList.toggle('selected');
+                updateDeleteButtonVisibility();
+            }
         });
 
         document.addEventListener('click', (event) => {
@@ -1862,17 +1886,16 @@
             updateDeleteButtonVisibility();
         });
         
-        document.querySelector('.scrollable-table-container').addEventListener('scroll', () => {
-            hideAllPopovers();
-        });
+        // Hide popovers on scroll
+        const scrollContainer = document.querySelector('.scrollable-table-container');
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', () => {
+                hideAllPopovers();
+            });
+        }
 
 
-        document.getElementById('districtManager').addEventListener('change', () => {
-            if (document.getElementById('visitTypeSelect').value === 'Double Visit') {
-                populateMedicalReps();
-            }
-        });
-
+        document.getElementById('districtManager').addEventListener('change', updateDatesAndDaySelector);
         document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
 
         function clearForm() {
