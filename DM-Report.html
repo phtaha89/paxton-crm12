@@ -405,6 +405,11 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <script>
+        let allSheetData = []; // To store the raw data from the Google Sheet
+        let submittedReports = []; // To store all reports fetched from Supabase
+        let myChart = null; // To store the chart instance
+        let loggedInUser = null; // To store user data from the parent iframe
+
         document.addEventListener('DOMContentLoaded', () => {
             // Supabase configuration
             const SUPABASE_URL = "https://plmevfyxpngzymvzvkzn.supabase.co";
@@ -414,10 +419,7 @@
             const REPORTS_TABLE = 'dm_report'; // Name of the new Supabase table
 
             const googleSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv";
-            let allSheetData = []; // To store the raw data from the Google Sheet
-            let submittedReports = []; // To store all reports fetched from Supabase
-            let myChart = null; // To store the chart instance
-
+            
             // Get form and modal elements
             const reportContentDiv = document.getElementById('report-content');
             const analysisPageDiv = document.getElementById('analysis-page');
@@ -524,18 +526,7 @@
                         complete: (results) => {
                             // Slice to remove the header row, then store the data
                             allSheetData = results.data.slice(1);
-
-                            // Map to specified column indices: B (index 1), D (index 3), J (index 9)
-                            const dmNames = [...new Set(allSheetData.map(item => item[1]).filter(Boolean))];
-
-                            // Populate District Manager dropdown
-                            dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
-                            dmNames.forEach(name => {
-                                const option = document.createElement('option');
-                                option.value = name;
-                                option.textContent = name;
-                                dmNameSelect.appendChild(option);
-                            });
+                            filterAndPopulateDMs(loggedInUser);
                         }
                     });
                 } catch (error) {
@@ -543,9 +534,39 @@
                     dmNameSelect.innerHTML = `<option value="" disabled selected>Failed to load data</option>`;
                 }
             };
+            
+            // New function to handle DM dropdown based on user role
+            const filterAndPopulateDMs = (user) => {
+                const dmNames = [...new Set(allSheetData.map(item => item[1]).filter(Boolean))];
 
-            // Initial fetch of DM data and reports from Supabase
-            fetchData();
+                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                dmNameSelect.disabled = false;
+
+                if (user && user.title === 'admin') {
+                    dmNames.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        dmNameSelect.appendChild(option);
+                    });
+                } else if (user && user.title === 'District Manager') {
+                    const userDmName = user.username;
+                    const option = document.createElement('option');
+                    option.value = userDmName;
+                    option.textContent = userDmName;
+                    dmNameSelect.appendChild(option);
+                    dmNameSelect.value = userDmName;
+                    dmNameSelect.disabled = true;
+                    // Auto-enable radio buttons and load reports for the logged-in DM
+                    activityRadios.forEach(radio => radio.disabled = false);
+                    updateAssociatedDropdowns();
+                    fetchReportsFromSupabase(userDmName);
+                } else {
+                     // Fallback for non-DM/Admin users if needed, though permission handling in index.html should prevent this
+                     dmNameSelect.innerHTML = `<option value="" disabled selected>No DM available</option>`;
+                     dmNameSelect.disabled = true;
+                }
+            };
 
             // Function to fetch all reports from Supabase and render them
             const fetchReportsFromSupabase = async (dmName = '') => {
@@ -613,10 +634,16 @@
             };
 
             // Event listener for DM name dropdown
-            dmNameSelect.addEventListener('change', () => {
-                activityRadios.forEach(radio => radio.disabled = false);
-                updateAssociatedDropdowns();
-                fetchReportsFromSupabase(dmNameSelect.value);
+            dmNameSelect.addEventListener('change', async () => {
+                const dmName = dmNameSelect.value;
+                if (dmName) {
+                    activityRadios.forEach(radio => radio.disabled = false);
+                    updateAssociatedDropdowns();
+                    await fetchReportsFromSupabase(dmName);
+                } else {
+                    activityRadios.forEach(radio => radio.disabled = true);
+                    updateFormVisibility();
+                }
             });
 
             const updateFormVisibility = () => {
@@ -993,14 +1020,19 @@
                 activityRadios.forEach(radio => radio.checked = false);
                 activityRadios.forEach(radio => radio.disabled = true);
                 updateFormVisibility();
-                dmNameSelect.value = '';
-                updateAssociatedDropdowns();
+                // Check if the user is a DM, if so, retain the DM name
+                if (loggedInUser && loggedInUser.title === 'District Manager') {
+                    dmNameSelect.value = loggedInUser.username;
+                    updateAssociatedDropdowns();
+                    activityRadios.forEach(radio => radio.disabled = false);
+                } else {
+                    dmNameSelect.value = '';
+                    updateAssociatedDropdowns();
+                }
                 submittedReports = [];
                 renderReports(submittedReports);
                 selectedVisitsInput.value = '';
                 reportDetailsSection.classList.add('hidden');
-                // The message below was removed as requested.
-                // showMessage('Info', 'All local data has been reset. Data in the database is not affected.');
             });
 
             // Retrieve button functionality
@@ -1171,10 +1203,6 @@
                 }
             });
 
-            printButton.addEventListener('click', () => {
-                window.print();
-            });
-
             downloadXLSXButton.addEventListener('click', async () => {
                 const dmName = dmNameSelect.value;
                 if (!dmName) {
@@ -1198,18 +1226,37 @@
                 XLSX.writeFile(workbook, `Monthly Report for ${dmName}.xlsx`);
             });
 
-            dmNameSelect.addEventListener('change', async () => {
-                const dmName = dmNameSelect.value;
-                if (dmName) {
-                    activityRadios.forEach(radio => radio.disabled = false);
-                    updateAssociatedDropdowns();
-                    await fetchReportsFromSupabase(dmName);
-                } else {
-                    activityRadios.forEach(radio => radio.disabled = true);
-                    updateFormVisibility();
-                }
-            });
+            // This is now handled by the initializeApp function to prevent a DM from changing the value
+            // dmNameSelect.addEventListener('change', async () => {
+            //     const dmName = dmNameSelect.value;
+            //     if (dmName) {
+            //         activityRadios.forEach(radio => radio.disabled = false);
+            //         updateAssociatedDropdowns();
+            //         await fetchReportsFromSupabase(dmName);
+            //     } else {
+            //         activityRadios.forEach(radio => radio.disabled = true);
+            //         updateFormVisibility();
+            //     }
+            // });
 
+        });
+
+        // New function to initialize the app with user data from the parent
+        const initializeApp = (user) => {
+            loggedInUser = user;
+            if (loggedInUser) {
+                console.log('DM-Report received user data:', loggedInUser);
+                // Call fetchData to get the CSV and then populate DMs based on role
+                fetchData();
+            }
+        };
+
+        // Event listener for messages from the parent window
+        window.addEventListener('message', function(event) {
+            // Check the message type to ensure it's the right one
+            if (event.data && event.data.type === 'dmReportUserPermissions') {
+                initializeApp(event.data.user);
+            }
         });
     </script>
 </body>
