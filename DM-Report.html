@@ -513,7 +513,7 @@
             setInterval(updateLiveTime, 1000);
 
             // Function to fetch and parse CSV data and populate initial DM dropdown
-            const fetchData = async () => {
+            const fetchData = async (user) => {
                 try {
                     const response = await fetch(googleSheetUrl);
                     if (!response.ok) throw new Error('Network response was not ok.');
@@ -526,7 +526,7 @@
                         complete: (results) => {
                             // Slice to remove the header row, then store the data
                             allSheetData = results.data.slice(1);
-                            filterAndPopulateDMs(loggedInUser);
+                            filterAndPopulateDMs(user);
                         }
                     });
                 } catch (error) {
@@ -541,15 +541,18 @@
 
                 dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
                 dmNameSelect.disabled = false;
+                dmNameSelect.classList.remove('bg-gray-200');
 
-                if (user && user.title === 'admin') {
+                if (user && user.title.toLowerCase() === 'admin') {
                     dmNames.forEach(name => {
                         const option = document.createElement('option');
                         option.value = name;
                         option.textContent = name;
                         dmNameSelect.appendChild(option);
                     });
-                } else if (user && user.title === 'District Manager') {
+                    // Auto-enable radio buttons for admin after data loads
+                    activityRadios.forEach(radio => radio.disabled = false);
+                } else if (user && user.title.toLowerCase() === 'district manager') {
                     const userDmName = user.username;
                     const option = document.createElement('option');
                     option.value = userDmName;
@@ -557,21 +560,21 @@
                     dmNameSelect.appendChild(option);
                     dmNameSelect.value = userDmName;
                     dmNameSelect.disabled = true;
+                    dmNameSelect.classList.add('bg-gray-200');
                     // Auto-enable radio buttons and load reports for the logged-in DM
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns();
                     fetchReportsFromSupabase(userDmName);
                 } else {
-                     // Fallback for non-DM/Admin users if needed, though permission handling in index.html should prevent this
+                     // Fallback for other users, though permission handling in index.html should prevent this
                      dmNameSelect.innerHTML = `<option value="" disabled selected>No DM available</option>`;
                      dmNameSelect.disabled = true;
+                     dmNameSelect.classList.add('bg-gray-200');
                 }
             };
 
             // Function to fetch all reports from Supabase and render them
             const fetchReportsFromSupabase = async (dmName = '') => {
-                // The query is already a single request, which is efficient.
-                // Added `.order` to sort by `created_at` in descending order.
                 let query = supabase.from(REPORTS_TABLE).select('*').order('created_at', { ascending: false });
                 if (dmName) {
                     query = query.eq('dm_name', dmName);
@@ -1021,7 +1024,7 @@
                 activityRadios.forEach(radio => radio.disabled = true);
                 updateFormVisibility();
                 // Check if the user is a DM, if so, retain the DM name
-                if (loggedInUser && loggedInUser.title === 'District Manager') {
+                if (loggedInUser && loggedInUser.title.toLowerCase() === 'district manager') {
                     dmNameSelect.value = loggedInUser.username;
                     updateAssociatedDropdowns();
                     activityRadios.forEach(radio => radio.disabled = false);
@@ -1247,7 +1250,7 @@
             if (loggedInUser) {
                 console.log('DM-Report received user data:', loggedInUser);
                 // Call fetchData to get the CSV and then populate DMs based on role
-                fetchData();
+                fetchData(loggedInUser);
             }
         };
 
