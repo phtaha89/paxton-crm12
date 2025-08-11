@@ -637,6 +637,18 @@
             };
 
             // Event listener for DM name dropdown
+            // This is now handled by the initializeApp function to prevent a DM from changing the value
+            // dmNameSelect.addEventListener('change', async () => {
+            //     const dmName = dmNameSelect.value;
+            //     if (dmName) {
+            //         activityRadios.forEach(radio => radio.disabled = false);
+            //         updateAssociatedDropdowns();
+            //         await fetchReportsFromSupabase(dmName);
+            //     } else {
+            //         activityRadios.forEach(radio => radio.disabled = true);
+            //         updateFormVisibility();
+            //     }
+            // });
             dmNameSelect.addEventListener('change', async () => {
                 const dmName = dmNameSelect.value;
                 if (dmName) {
