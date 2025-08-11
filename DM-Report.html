@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>District Manager Reporting System</title>
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem; /* Base font size for smaller view */
+        }
+        label, input, select, textarea, button {
+            font-size: 0.875rem; /* Smaller font for form elements */
+        }
+        th, td {
+            font-size: 0.75rem; /* Even smaller font for table */
+            padding: 0.25rem 0.5rem; /* Reduced padding for table cells */
+        }
+        .container {
+            max-width: 900px;
+        }
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .form-border-visits {
+            border-left: 4px solid #ECFAE5;
+        }
+        .form-border-events {
+            border-left: 4px solid #E8F9FF;
+        }
+        .form-border-leaves {
+            border-left: 4px solid #FFE6E1;
+        }
+        /* Full-screen analysis page styling */
+        #analysis-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #f3f4f6;
+            z-index: 40;
+            overflow-y: auto;
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #analysis-page.active {
+            transform: translateX(0);
+        }
+        @media print {
+            body > *:not(#analysis-page) {
+                display: none;
+            }
+            #analysis-page {
+                position: static;
+                transform: none;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-2 md:p-4">
+
+    <!-- Main Report Content -->
+    <div id="report-content" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">District Manager Reporting</h1>
+
+        <form id="report-form" class="space-y-4">
+
+            <!-- District Manager Name and Live Date -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="dm-name" class="block text-xs font-medium text-gray-700">District Manager Name</label>
+                    <select id="dm-name" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                        <option value="" disabled selected>Loading...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700">Date and Time</label>
+                    <div id="live-time" class="mt-1 p-1 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-center font-semibold text-gray-600">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Type Radio Buttons -->
+            <div class="mt-4">
+                <label class="block text-xs font-medium text-gray-700">Activity Type</label>
+                <div class="mt-1 grid grid-cols-3 gap-2 md:gap-4">
+                    <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                        <input type="radio" name="activity-type" value="Visits" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                        <span class="ml-1 text-gray-700 text-xs">Visits</span>
+                    </label>
+                    <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                        <input type="radio" name="activity-type" value="Event" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                        <span class="ml-1 text-gray-700 text-xs">Event</span>
+                    </label>
+                    <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                        <input type="radio" name="activity-type" value="Leave" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                        <span class="ml-1 text-gray-700 text-xs">Leave</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Conditional Forms -->
+            <div id="conditional-forms">
+
+                <!-- Visits Form -->
+                <div id="visits-form" class="p-4 rounded-md shadow-inner space-y-4 hidden form-border-visits" >
+                    <h3 class="text-sm font-semibold text-gray-800">Visits Details</h3>
+                    <div>
+                        <label for="visit-type" class="block text-xs font-medium text-gray-700">Visit Type</label>
+                        <select id="visit-type" name="visit-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                            <option value="Double Visit">Double Visit</option>
+                            <option value="Single Visit">Single Visit</option>
+                        </select>
+                    </div>
+
+                    <!-- Double Visit Form -->
+                    <div id="double-visit-form" class="space-y-2">
+                        <!-- Option to choose between manual entry or today's visits -->
+                        <div id="double-visit-options" class="space-y-2">
+                            <div>
+                                <label for="med-rep-name" class="block text-xs font-medium text-gray-700">Medical Rep Name</label>
+                                <select id="med-rep-name" name="med-rep-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="" disabled selected>Select DM first</option>
+                                </select>
+                            </div>
+                            <div id="double-visit-mode" class="hidden space-y-2">
+                                <label class="block text-xs font-medium text-gray-700">Select Report Mode</label>
+                                <div class="flex items-center space-x-4">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="double-visit-mode" value="manual" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                        <span class="ml-1 text-gray-700 text-xs">Add Manually</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="double-visit-mode" value="visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                        <span class="ml-1 text-gray-700 text-xs">Select from Today's Visits</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Double Visit Form (hidden by default) -->
+                        <div id="manual-double-visit-form" class="space-y-2 hidden">
+                            <div>
+                                <label for="period-double" class="block text-xs font-medium text-gray-700">Period</label>
+                                <select id="period-double" name="period-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                    <option value="Full Day">Full Day</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="brick-double" class="block text-xs font-medium text-gray-700">Brick</label>
+                                <select id="brick-double" name="brick-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="" disabled selected>Select Medical Rep first</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
+                                <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Visits Modal Trigger (hidden by default) -->
+                        <div id="visits-modal-trigger" class="space-y-2 hidden">
+                            <div>
+                                <label for="period-double-visits" class="block text-xs font-medium text-gray-700">Period</label>
+                                <select id="period-double-visits" name="period-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                    <option value="Full Day">Full Day</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="brick-double-visits" class="block text-xs font-medium text-gray-700">Brick</label>
+                                <select id="brick-double-visits" name="brick-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="" disabled selected>Select Medical Rep first</option>
+                                </select>
+                            </div>
+                            <button type="button" id="open-visits-modal" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                                Select Today's Visits
+                            </button>
+                        </div>
+                        <input type="hidden" id="selected-visits-double" name="selected-visits-double">
+                    </div>
+
+                    <!-- Single Visit Form -->
+                    <div id="single-visit-form" class="space-y-2 hidden">
+                        <div>
+                            <label for="period-single" class="block text-xs font-medium text-gray-700">Period</label>
+                            <select id="period-single" name="period-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+                                <option value="Full Day">Full Day</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
+                            <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="" disabled selected>Select DM first</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
+                            <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Form -->
+                <div id="event-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-events">
+                    <h3 class="text-sm font-semibold text-gray-800">Event Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div>
+                            <label for="event-type" class="block text-xs font-medium text-gray-700">Event Type</label>
+                            <select id="event-type" name="event-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="Meeting">Meeting</option>
+                                <option value="Event">Event</option>
+                                <option value="Admin Work">Admin Work</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="period-event" class="block text-xs font-medium text-gray-700">Period</label>
+                            <select id="period-event" name="period-event" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+                                <option value="Full Day">Full Day</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
+                        <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- Leave Form -->
+                <div id="leave-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-leaves">
+                    <h3 class="text-sm font-semibold text-gray-800">Leave Details</h3>
+                    <div>
+                        <label for="leave-type" class="block text-xs font-medium text-gray-700">Leave Type</label>
+                        <select id="leave-type" name="leave-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                            <option value="Annual Leave">Annual Leave</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Casual Leave">Casual Leave</option>
+                            <option value="Official Leave">Official Leave</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="period-leave" class="block text-xs font-medium text-gray-700">Period</label>
+                        <select id="period-leave" name="period-leave" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+                                <option value="Full Day">Full Day</option>
+                        </select>
+                    </div>
+                    <!-- New comment box for leave form -->
+                    <div>
+                        <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
+                        <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mt-4">
+                <button type="submit" class="w-full md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
+                    Submit
+                </button>
+                <button type="button" id="reset-button" class="w-full md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                    Reset
+                </button>
+                <button type="button" id="retrieve-button" class="w-full md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                    Retrieve
+                </button>
+                <!-- New Analyze Button -->
+                <button type="button" id="analyze-button" class="w-full md:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                    Analyze Report
+                </button>
+            </div>
+        </form>
+
+        <!-- New Submitted Data Table -->
+        <div id="report-details-section" class="mt-8 hidden">
+            <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4">
+                <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
+                <div class="flex space-x-2 w-full md:w-auto">
+                    <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                </div>
+            </div>
+            <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+                <table id="reports-table" class="min-w-full divide-y divide-gray-200">
+                    <thead id="reports-table-head" class="bg-gray-100">
+                        <!-- Headers will be dynamically generated here -->
+                    </thead>
+                    <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Submitted data will be appended here -->
+                    </tbody>
+                </table>
+                <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Full-Screen Analysis Page -->
+    <div id="analysis-page" class="hidden p-4">
+        <div class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl md:text-3xl font-bold text-gray-800">Monthly Report Analysis</h2>
+                <div class="flex space-x-2">
+                    <button id="print-button" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition">Print</button>
+                    <button id="download-xlsx-button" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-sm transition">Download XLSX</button>
+                    <button id="back-button" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">Back</button>
+                </div>
+            </div>
+
+            <div id="analysis-content" class="space-y-6">
+                <!-- Analysis summary and details will be rendered here dynamically -->
+                <div class="bg-gray-50 p-4 rounded-md shadow-inner">
+                    <h3 class="text-lg font-semibold mb-2">Summary for <span id="current-month-span"></span></h3>
+                    <ul id="summary-list" class="list-disc list-inside space-y-1">
+                        <!-- Summary items will be added here -->
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-md shadow-inner">
+                    <h3 class="text-lg font-semibold mb-2">Double Visits by Medical Rep</h3>
+                    <ul id="double-visit-list" class="list-disc list-inside space-y-1">
+                        <!-- Double visit details will be added here -->
+                    </ul>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-md shadow-inner">
+                    <h3 class="text-lg font-semibold mb-2">Activity Ratio Chart</h3>
+                    <div class="w-full h-80 flex items-center justify-center">
+                        <canvas id="activity-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal for Double Visit -->
+    <div id="visit-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Select Today's Visits</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Visits will be dynamically loaded here -->
+            </div>
+            <div class="flex justify-end space-x-2 border-t pt-4">
+                <button id="save-visits" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">Save</button>
+                <button id="cancel-visits" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Modal for errors and success messages -->
+    <div id="message-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/4">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="message-title" class="text-lg font-semibold text-gray-800">Message</h3>
+                <button id="close-message-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="message-content" class="text-sm text-gray-700">
+                <!-- Message content here -->
+            </div>
+            <div class="flex justify-end border-t pt-4 mt-4">
+                <button id="ok-message-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PapaParse and html2pdf CDNs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chart.js CDN for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <!-- SheetJS for XLSX download -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Supabase configuration
+            const SUPABASE_URL = "https://plmevfyxpngzymvzvkzn.supabase.co";
+            const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c";
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const TABLE_NAME = 'healthcarepro_visits'; // Name of the Google Sheet data table
+            const REPORTS_TABLE = 'dm_report'; // Name of the new Supabase table
+
+            const googleSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv";
+            let allSheetData = []; // To store the raw data from the Google Sheet
+            let submittedReports = []; // To store all reports fetched from Supabase
+            let myChart = null; // To store the chart instance
+
+            // Get form and modal elements
+            const reportContentDiv = document.getElementById('report-content');
+            const analysisPageDiv = document.getElementById('analysis-page');
+            const form = document.getElementById('report-form');
+            const dmNameSelect = document.getElementById('dm-name');
+            const liveTimeDiv = document.getElementById('live-time');
+            const activityRadios = document.getElementsByName('activity-type');
+            const visitsForm = document.getElementById('visits-form');
+            const eventForm = document.getElementById('event-form');
+            const leaveForm = document.getElementById('leave-form');
+            const visitTypeSelect = document.getElementById('visit-type');
+
+            const doubleVisitForm = document.getElementById('double-visit-form');
+            const doubleVisitModeRadios = document.getElementsByName('double-visit-mode');
+            const doubleVisitModeDiv = document.getElementById('double-visit-mode');
+            const manualDoubleVisitForm = document.getElementById('manual-double-visit-form');
+            const visitsModalTriggerDiv = document.getElementById('visits-modal-trigger');
+            const openVisitsModalBtn = document.getElementById('open-visits-modal');
+            const singleVisitForm = document.getElementById('single-visit-form');
+
+            const medRepNameSelect = document.getElementById('med-rep-name');
+            const brickDoubleSelect = document.getElementById('brick-double');
+            const brickDoubleVisitsSelect = document.getElementById('brick-double-visits');
+            const brickSingleSelect = document.getElementById('brick-single');
+            const reportsTableHeader = document.getElementById('reports-table-head');
+            const reportsTableBody = document.getElementById('reports-table-body');
+            const noReportsMessage = document.getElementById('no-reports-message');
+            const resetButton = document.getElementById('reset-button');
+            const retrieveButton = document.getElementById('retrieve-button');
+            const analyzeButton = document.getElementById('analyze-button');
+            const leaveTypeSelect = document.getElementById('leave-type');
+            const searchBox = document.getElementById('search-box');
+            const reportDetailsSection = document.getElementById('report-details-section');
+
+            // Modal elements
+            const visitModal = document.getElementById('visit-modal');
+            const modalContent = document.getElementById('modal-content');
+            const closeModalBtn = document.getElementById('close-modal');
+            const saveVisitsBtn = document.getElementById('save-visits');
+            const cancelVisitsBtn = document.getElementById('cancel-visits');
+            const selectedVisitsInput = document.getElementById('selected-visits-double');
+
+            // Message Modal elements
+            const messageModal = document.getElementById('message-modal');
+            const messageTitle = document.getElementById('message-title');
+            const messageContent = document.getElementById('message-content');
+            const closeMessageModalBtn = document.getElementById('close-message-modal');
+            const okMessageModalBtn = document.getElementById('ok-message-modal');
+
+            // Analysis Page elements
+            const backButton = document.getElementById('back-button');
+            const printButton = document.getElementById('print-button');
+            const downloadXLSXButton = document.getElementById('download-xlsx-button');
+            const summaryList = document.getElementById('summary-list');
+            const doubleVisitList = document.getElementById('double-visit-list');
+            const currentMonthSpan = document.getElementById('current-month-span');
+            const activityChartCtx = document.getElementById('activity-chart').getContext('2d');
+
+            // Function to show custom message modal
+            const showMessage = (title, message) => {
+                messageTitle.textContent = title;
+                messageContent.textContent = message;
+                messageModal.classList.remove('hidden');
+            };
+
+            const hideMessage = () => {
+                messageModal.classList.add('hidden');
+            };
+
+            closeMessageModalBtn.addEventListener('click', hideMessage);
+            okMessageModalBtn.addEventListener('click', hideMessage);
+
+
+            // Function to update live Cairo time
+            const updateLiveTime = () => {
+                const now = new Date();
+                const options = {
+                    day: 'numeric', month: 'long', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    hour12: true
+                };
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    ...options,
+                    timeZone: 'Africa/Cairo'
+                });
+                liveTimeDiv.textContent = formatter.format(now);
+            };
+
+            // Initial call and set interval for live time
+            updateLiveTime();
+            setInterval(updateLiveTime, 1000);
+
+            // Function to fetch and parse CSV data and populate initial DM dropdown
+            const fetchData = async () => {
+                try {
+                    const response = await fetch(googleSheetUrl);
+                    if (!response.ok) throw new Error('Network response was not ok.');
+                    const csvText = await response.text();
+
+                    Papa.parse(csvText, {
+                        header: false, // Set to false to access data by index
+                        dynamicTyping: true,
+                        skipEmptyLines: true,
+                        complete: (results) => {
+                            // Slice to remove the header row, then store the data
+                            allSheetData = results.data.slice(1);
+
+                            // Map to specified column indices: B (index 1), D (index 3), J (index 9)
+                            const dmNames = [...new Set(allSheetData.map(item => item[1]).filter(Boolean))];
+
+                            // Populate District Manager dropdown
+                            dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                            dmNames.forEach(name => {
+                                const option = document.createElement('option');
+                                option.value = name;
+                                option.textContent = name;
+                                dmNameSelect.appendChild(option);
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    dmNameSelect.innerHTML = `<option value="" disabled selected>Failed to load data</option>`;
+                }
+            };
+
+            // Initial fetch of DM data and reports from Supabase
+            fetchData();
+
+            // Function to fetch all reports from Supabase and render them
+            const fetchReportsFromSupabase = async (dmName = '') => {
+                // The query is already a single request, which is efficient.
+                // Added `.order` to sort by `created_at` in descending order.
+                let query = supabase.from(REPORTS_TABLE).select('*').order('created_at', { ascending: false });
+                if (dmName) {
+                    query = query.eq('dm_name', dmName);
+                }
+
+                const { data, error } = await query;
+                if (error) {
+                    console.error('Error fetching reports:', error);
+                    showMessage('Error', 'Failed to retrieve reports from the database.');
+                    return;
+                }
+                submittedReports = data || [];
+                renderReports(submittedReports, dmName);
+            };
+
+            // Function to populate Med Rep and Brick dropdowns based on selected DM
+            const updateAssociatedDropdowns = () => {
+                const selectedDm = dmNameSelect.value;
+                if (!selectedDm) {
+                    medRepNameSelect.innerHTML = `<option value="" disabled selected>Select DM first</option>`;
+                    brickDoubleSelect.innerHTML = `<option value="" disabled selected>Select DM first</option>`;
+                    brickDoubleVisitsSelect.innerHTML = `<option value="" disabled selected>Select DM first</option>`;
+                    brickSingleSelect.innerHTML = `<option value="" disabled selected>Select DM first</option>`;
+                    return;
+                }
+
+                const filteredData = allSheetData.filter(row => row[1] === selectedDm);
+
+                const medRepNames = [...new Set(filteredData.map(item => item[3]).filter(Boolean))]; // Column D is index 3
+                const dmBricks = [...new Set(filteredData.map(item => item[9]).filter(Boolean))]; // Column J is index 9
+
+                // Populate Medical Rep dropdown
+                medRepNameSelect.innerHTML = `<option value="" disabled selected>Select Med Rep</option>`;
+                medRepNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    medRepNameSelect.appendChild(option);
+                });
+
+                // Populate all bricks for the selected DM in the single visit form
+                const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+
+                // Event listener for Med Rep dropdown to populate brick dropdowns
+                medRepNameSelect.addEventListener('change', (e) => {
+                    const selectedMedRep = e.target.value;
+                    const filteredBricks = allSheetData.filter(row => row[3] === selectedMedRep).map(item => item[9]).filter(Boolean);
+                    const uniqueBricks = [...new Set(filteredBricks)];
+
+                    const brickOptions = uniqueBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                    brickDoubleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
+                    brickDoubleVisitsSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
+
+                    doubleVisitModeDiv.classList.remove('hidden');
+                    manualDoubleVisitForm.classList.add('hidden');
+                    visitsModalTriggerDiv.classList.add('hidden');
+                    doubleVisitModeRadios.forEach(radio => radio.checked = false);
+                });
+            };
+
+            // Event listener for DM name dropdown
+            dmNameSelect.addEventListener('change', () => {
+                activityRadios.forEach(radio => radio.disabled = false);
+                updateAssociatedDropdowns();
+                fetchReportsFromSupabase(dmNameSelect.value);
+            });
+
+            const updateFormVisibility = () => {
+                const selectedActivity = document.querySelector('input[name="activity-type"]:checked')?.value;
+                visitsForm.classList.add('hidden');
+                eventForm.classList.add('hidden');
+                leaveForm.classList.add('hidden');
+
+                if (selectedActivity === 'Visits') {
+                    visitsForm.classList.remove('hidden');
+                    updateVisitTypeVisibility();
+                } else if (selectedActivity === 'Event') {
+                    eventForm.classList.remove('hidden');
+                } else if (selectedActivity === 'Leave') {
+                    leaveForm.classList.remove('hidden');
+                }
+            };
+
+            const updateVisitTypeVisibility = () => {
+                const selectedVisitType = visitTypeSelect.value;
+                doubleVisitForm.classList.add('hidden');
+                singleVisitForm.classList.add('hidden');
+
+                if (selectedVisitType === 'Double Visit') {
+                    doubleVisitForm.classList.remove('hidden');
+                    manualDoubleVisitForm.classList.add('hidden');
+                    visitsModalTriggerDiv.classList.add('hidden');
+                } else if (selectedVisitType === 'Single Visit') {
+                    singleVisitForm.classList.remove('hidden');
+                }
+            };
+
+            doubleVisitModeRadios.forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    if (event.target.value === 'manual') {
+                        manualDoubleVisitForm.classList.remove('hidden');
+                        visitsModalTriggerDiv.classList.add('hidden');
+                    } else if (event.target.value === 'visits') {
+                        manualDoubleVisitForm.classList.add('hidden');
+                        visitsModalTriggerDiv.classList.remove('hidden');
+                    }
+                });
+            });
+
+            activityRadios.forEach(radio => {
+                radio.addEventListener('change', updateFormVisibility);
+            });
+            visitTypeSelect.addEventListener('change', updateVisitTypeVisibility);
+
+            visitsForm.classList.add('hidden');
+            eventForm.classList.add('hidden');
+            leaveForm.classList.add('hidden');
+
+            const formatHeader = (key) => {
+                return key.replace(/([A-Z])/g, ' $1')
+                          .replace(/^./, str => str.toUpperCase());
+            };
+
+            // Function to render the reports table with corrected date/time formatting
+            const renderReports = (reports, dmName = '', searchTerm = '') => {
+                reportsTableHeader.innerHTML = '';
+                reportsTableBody.innerHTML = '';
+                let filteredReports = dmName ? reports.filter(report => report.dm_name === dmName) : [];
+
+                if (searchTerm) {
+                    const lowerCaseSearch = searchTerm.toLowerCase();
+                    filteredReports = filteredReports.filter(report =>
+                        Object.values(report).some(value =>
+                            String(value).toLowerCase().includes(lowerCaseSearch)
+                        )
+                    );
+                }
+
+                if (filteredReports.length === 0) {
+                    noReportsMessage.classList.remove('hidden');
+                    return;
+                }
+                noReportsMessage.classList.add('hidden');
+
+                // Get all headers from the first report, and add the new 'Day & Date' header
+                const headers = Object.keys(filteredReports[0]).filter(key => key !== 'dm_name' && key !== 'id');
+                // The day_date is now correctly formatted from the UTC timestamp
+                const allHeaders = ['day_date', ...headers];
+
+                const headerRow = document.createElement('tr');
+                headerRow.innerHTML = allHeaders.map(header => {
+                    let headerText = formatHeader(header);
+                    if (header === 'day_date') {
+                        headerText = 'Day & Date';
+                    } else if (header === 'activity_type') {
+                        headerText = 'Activity Type';
+                    } else if (header === 'created_at') {
+                        headerText = 'Time'; // Changed to just "Time" for clarity
+                    } else if (header === 'med_rep') {
+                        headerText = 'Med Rep';
+                    }
+                    return `<th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${headerText}</th>`;
+                }).join('');
+                reportsTableHeader.appendChild(headerRow);
+
+                filteredReports.forEach(report => {
+                    const newRow = document.createElement('tr');
+                    newRow.className = 'hover:bg-gray-100 transition duration-150 ease-in-out border-l-4';
+
+                    if (report.activity_type.includes('Visits')) {
+                        newRow.style.borderColor = '#ECFAE5';
+                    } else if (report.activity_type.includes('Event')) {
+                        newRow.style.borderColor = '#E8F9FF';
+                    } else if (report.activity_type.includes('Leave')) {
+                        newRow.style.borderColor = '#FFE6E1';
+                    }
+
+                    // Loop through the new headers array
+                    allHeaders.forEach(key => {
+                        const newCell = document.createElement('td');
+                        newCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
+                        if (key === 'comment') {
+                            newCell.className = 'px-3 py-2 whitespace-normal text-gray-500';
+                        }
+
+                        let cellContent = report[key] || 'N/A';
+
+                        // Logic for the new 'Day & Date' and 'created_at' column
+                        if (key === 'day_date' && report.created_at) {
+                            const date = new Date(report.created_at);
+                            // Set the timezone to UTC to display the correct day and date from the database
+                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+                            const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
+                            cellContent = `${dayName} - ${formattedDate}`;
+                        } else if (key === 'created_at' && report.created_at) {
+                             const date = new Date(report.created_at);
+                             // Use UTC methods to get the hours, minutes, and seconds from the database
+                             const hours = date.getUTCHours();
+                             const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+                             const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+                             const ampm = hours >= 12 ? 'PM' : 'AM';
+                             const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+                             cellContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
+                        } else {
+                            cellContent = report[key] || 'N/A';
+                        }
+                        newCell.textContent = cellContent;
+                        newRow.appendChild(newCell);
+                    });
+                    reportsTableBody.appendChild(newRow);
+                });
+            };
+
+            const fetchTodaysVisits = async (medRepName) => {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                const day = now.getDate().toString().padStart(2, '0');
+                const todayString = `${year}-${month}-${day}`;
+
+                const { data, error } = await supabase
+                    .from(TABLE_NAME)
+                    .select('hcp_name, specialty, visit_place, visit_date, comments')
+                    .eq('medical_rep', medRepName)
+                    .gte('visit_date', todayString + 'T00:00:00.000Z')
+                    .lte('visit_date', todayString + 'T23:59:59.999Z');
+
+                if (error) {
+                    console.error('Error fetching data:', error);
+                    return null;
+                }
+                return data;
+            };
+
+            openVisitsModalBtn.addEventListener('click', async () => {
+                const selectedMedRep = medRepNameSelect.value;
+                if (selectedMedRep) {
+                    const visits = await fetchTodaysVisits(selectedMedRep);
+                    if (visits && visits.length > 0) {
+                        modalContent.innerHTML = '';
+                        const selectAllItem = document.createElement('div');
+                        selectAllItem.className = 'flex items-center space-x-2 p-2 border rounded-md bg-gray-100';
+                        selectAllItem.innerHTML = `
+                            <input type="checkbox" id="select-all-visits" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                            <label for="select-all-visits" class="text-sm font-bold text-gray-800 flex-grow">Select All</label>
+                        `;
+                        modalContent.appendChild(selectAllItem);
+
+                        visits.forEach(visit => {
+                            const visitItem = document.createElement('div');
+                            visitItem.className = 'flex items-center space-x-2 p-2 border rounded-md hover:bg-gray-50 transition';
+                            visitItem.innerHTML = `
+                                <input type="checkbox" data-visit='${JSON.stringify(visit)}' class="form-checkbox h-4 w-4 text-blue-600 rounded visit-checkbox">
+                                <label class="text-sm font-medium text-gray-700 flex-grow">
+                                    <span class="font-bold">${visit.hcp_name}</span> - ${visit.specialty} (${visit.visit_place})
+                                </label>
+                            `;
+                            modalContent.appendChild(visitItem);
+                        });
+                        visitModal.classList.remove('hidden');
+
+                        document.getElementById('select-all-visits').addEventListener('change', (e) => {
+                            const isChecked = e.target.checked;
+                            modalContent.querySelectorAll('.visit-checkbox').forEach(checkbox => {
+                                checkbox.checked = isChecked;
+                            });
+                        });
+                    } else {
+                        showMessage('Info', 'No visits found for this medical rep today.');
+                    }
+                }
+            });
+
+            const hideModal = () => {
+                visitModal.classList.add('hidden');
+                modalContent.innerHTML = '';
+            };
+
+            closeModalBtn.addEventListener('click', hideModal);
+            cancelVisitsBtn.addEventListener('click', hideModal);
+
+            saveVisitsBtn.addEventListener('click', async () => {
+                const selectedCheckboxes = modalContent.querySelectorAll('input[type="checkbox"].visit-checkbox:checked');
+                const selectedVisitsData = Array.from(selectedCheckboxes).map(cb => JSON.parse(cb.dataset.visit));
+
+                selectedVisitsInput.value = JSON.stringify(selectedVisitsData);
+
+                const summaryComment = selectedVisitsData.length > 0
+                    ? `Double Visit with ${medRepNameSelect.value}. Visited: ${selectedVisitsData.map(v => v.hcp_name).join(', ')}`
+                    : `Double Visit with ${medRepNameSelect.value}. No specific visits selected.`;
+
+                const dmName = dmNameSelect.value;
+                const newReport = {
+                    dm_name: dmName,
+                    activity_type: `Visits (Double Visit)`,
+                    period: document.getElementById('period-double-visits').value,
+                    brick: brickDoubleVisitsSelect.value,
+                    med_rep: medRepNameSelect.value,
+                    comment: summaryComment
+                };
+
+                const { error } = await supabase.from(REPORTS_TABLE).insert([newReport]);
+                if (error) {
+                    showMessage('Error', 'Failed to submit report.');
+                    console.error('Submission error:', error);
+                    return;
+                }
+
+                showMessage('Success', 'Report submitted successfully!');
+                await fetchReportsFromSupabase(dmName);
+                hideModal();
+                form.reset();
+                dmNameSelect.value = dmName;
+                updateAssociatedDropdowns();
+                selectedVisitsInput.value = '';
+                updateFormVisibility();
+                activityRadios.forEach(radio => radio.disabled = false);
+            });
+
+
+            // This is the fixed submit button logic
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const dmName = dmNameSelect.value;
+                if (!dmName) {
+                    showMessage('Error', 'Please select a District Manager before submitting.');
+                    return;
+                }
+
+                const activityType = document.querySelector('input[name="activity-type"]:checked')?.value;
+                let newReport = null;
+                let errorMessage = '';
+
+                if (!activityType) {
+                    showMessage('Error', 'Please select an activity type.');
+                    return;
+                }
+
+                if (activityType === 'Visits') {
+                    const visitType = visitTypeSelect.value;
+                    if (visitType === 'Double Visit') {
+                        const selectedMode = document.querySelector('input[name="double-visit-mode"]:checked')?.value;
+                        if (selectedMode === 'manual') {
+                            if (!medRepNameSelect.value || !brickDoubleSelect.value || !document.getElementById('details-double-manual').value) {
+                                errorMessage = 'Please fill all fields for the Double Visit form.';
+                            } else {
+                                newReport = {
+                                    dm_name: dmName,
+                                    activity_type: `Visits (Double Visit)`,
+                                    period: document.getElementById('period-double').value,
+                                    brick: brickDoubleSelect.value,
+                                    med_rep: medRepNameSelect.value,
+                                    comment: document.getElementById('details-double-manual').value,
+                                };
+                            }
+                        } else {
+                            errorMessage = 'Please use the modal to select visits and submit.';
+                        }
+                    } else if (visitType === 'Single Visit') {
+                        if (!brickSingleSelect.value || !document.getElementById('details-single').value) {
+                            errorMessage = 'Please fill all fields for the Single Visit form.';
+                        } else {
+                            newReport = {
+                                dm_name: dmName,
+                                activity_type: `Visits (Single Visit)`,
+                                period: document.getElementById('period-single').value,
+                                brick: brickSingleSelect.value,
+                                med_rep: 'N/A',
+                                comment: document.getElementById('details-single').value,
+                            };
+                        }
+                    }
+                } else if (activityType === 'Event') {
+                    const eventType = document.getElementById('event-type').value;
+                    const period = document.getElementById('period-event').value;
+                    const comment = document.getElementById('details-event').value;
+
+                    if (!eventType || !period || !comment) {
+                        errorMessage = 'Please fill all fields for the Event form.';
+                    } else {
+                        newReport = {
+                            dm_name: dmName,
+                            activity_type: `Event (${eventType})`,
+                            period,
+                            brick: 'N/A',
+                            med_rep: 'N/A',
+                            comment,
+                        };
+                    }
+                } else if (activityType === 'Leave') {
+                    const leaveType = leaveTypeSelect.value;
+                    const period = document.getElementById('period-leave').value;
+                    const leaveComment = document.getElementById('details-leave').value;
+
+                    if (!leaveType || !period || !leaveComment) {
+                        errorMessage = 'Please fill all fields for the Leave form.';
+                    } else {
+                        newReport = {
+                            dm_name: dmName,
+                            activity_type: `Leave (${leaveType})`,
+                            period,
+                            brick: 'N/A',
+                            med_rep: 'N/A',
+                            comment: leaveComment,
+                        };
+                    }
+                }
+
+                if (errorMessage) {
+                    showMessage('Error', errorMessage);
+                    return;
+                }
+
+                if (newReport) {
+                    const { error } = await supabase.from(REPORTS_TABLE).insert([newReport]);
+                    if (error) {
+                        showMessage('Error', 'Failed to submit report.');
+                        console.error('Submission error:', error);
+                        return;
+                    }
+
+                    showMessage('Success', 'Report submitted successfully!');
+                    await fetchReportsFromSupabase(dmName);
+
+                    form.reset();
+                    activityRadios.forEach(radio => radio.checked = false);
+                    updateFormVisibility();
+                    dmNameSelect.value = dmName;
+                    updateAssociatedDropdowns();
+                    selectedVisitsInput.value = '';
+                    activityRadios.forEach(radio => radio.disabled = false);
+                }
+            });
+
+            // Reset button functionality
+            resetButton.addEventListener('click', () => {
+                form.reset();
+                activityRadios.forEach(radio => radio.checked = false);
+                activityRadios.forEach(radio => radio.disabled = true);
+                updateFormVisibility();
+                dmNameSelect.value = '';
+                updateAssociatedDropdowns();
+                submittedReports = [];
+                renderReports(submittedReports);
+                selectedVisitsInput.value = '';
+                reportDetailsSection.classList.add('hidden');
+                // The message below was removed as requested.
+                // showMessage('Info', 'All local data has been reset. Data in the database is not affected.');
+            });
+
+            // Retrieve button functionality
+            retrieveButton.addEventListener('click', async () => {
+                const dmName = dmNameSelect.value;
+                if (dmName) {
+                    reportDetailsSection.classList.remove('hidden');
+                    await fetchReportsFromSupabase(dmName);
+                    showMessage('Info', `Displaying all reports for ${dmName}.`);
+                } else {
+                    showMessage('Info', 'Please select a District Manager to retrieve reports.');
+                }
+            });
+
+            // Search functionality
+            searchBox.addEventListener('keyup', (event) => {
+                const dmName = dmNameSelect.value;
+                if (dmName) {
+                    const searchTerm = event.target.value;
+                    renderReports(submittedReports, dmName, searchTerm);
+                }
+            });
+
+            // --- NEW ANALYSIS PAGE LOGIC ---
+
+            const renderAnalysisPage = async () => {
+                const now = new Date();
+                const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                currentMonthSpan.textContent = month;
+
+                const selectedDm = dmNameSelect.value;
+                if (!selectedDm) {
+                    showMessage('Error', 'Please select a District Manager to analyze the reports.');
+                    return;
+                }
+
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+                const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+
+                const { data: monthlyReports, error } = await supabase
+                    .from(REPORTS_TABLE)
+                    .select('*')
+                    .eq('dm_name', selectedDm)
+                    .gte('created_at', startOfMonth)
+                    .lte('created_at', endOfMonth);
+
+                if (error) {
+                    showMessage('Error', 'Failed to fetch data for analysis.');
+                    console.error('Analysis fetch error:', error);
+                    return;
+                }
+
+                const analysis = {
+                    totalReports: monthlyReports.length,
+                    visits: { single: 0, double: 0 },
+                    events: {},
+                    leaves: {},
+                    doubleVisitsByRep: {}
+                };
+
+                monthlyReports.forEach(report => {
+                    const activity = report.activity_type;
+                    if (activity.includes('Visits')) {
+                        if (activity.includes('Single Visit')) analysis.visits.single++;
+                        if (activity.includes('Double Visit')) {
+                            analysis.visits.double++;
+                            const medRep = report.med_rep;
+                            if (medRep && medRep !== 'N/A') {
+                                analysis.doubleVisitsByRep[medRep] = (analysis.doubleVisitsByRep[medRep] || 0) + 1;
+                            }
+                        }
+                    } else if (activity.includes('Event')) {
+                        const eventType = activity.split('(')[1].replace(')', '');
+                        analysis.events[eventType] = (analysis.events[eventType] || 0) + 1;
+                    } else if (activity.includes('Leave')) {
+                        const leaveType = activity.split('(')[1].replace(')', '');
+                        analysis.leaves[leaveType] = (analysis.leaves[leaveType] || 0) + 1;
+                    }
+                });
+
+                const totalActivities = analysis.visits.single + analysis.visits.double + Object.values(analysis.events).reduce((a, b) => a + b, 0) + Object.values(analysis.leaves).reduce((a, b) => a + b, 0);
+
+                summaryList.innerHTML = '';
+                const renderSummaryItem = (label, count) => {
+                    if (count > 0) {
+                        const ratio = totalActivities > 0 ? ((count / totalActivities) * 100).toFixed(2) : 0;
+                        summaryList.innerHTML += `<li><strong>${label}:</strong> ${count} report(s) (${ratio}%)</li>`;
+                    }
+                };
+
+                renderSummaryItem('Single Visits', analysis.visits.single);
+                renderSummaryItem('Double Visits', analysis.visits.double);
+                for (const event in analysis.events) {
+                    renderSummaryItem(event, analysis.events[event]);
+                }
+                for (const leave in analysis.leaves) {
+                    renderSummaryItem(leave, analysis.leaves[leave]);
+                }
+                if (totalActivities === 0) {
+                    summaryList.innerHTML = `<li>No reports found for ${selectedDm} this month.</li>`;
+                }
+
+                doubleVisitList.innerHTML = '';
+                if (Object.keys(analysis.doubleVisitsByRep).length > 0) {
+                    for (const medRep in analysis.doubleVisitsByRep) {
+                        const count = analysis.doubleVisitsByRep[medRep];
+                        doubleVisitList.innerHTML += `<li><strong>${medRep}:</strong> ${count} double visit(s)</li>`;
+                    }
+                } else {
+                    doubleVisitList.innerHTML = `<li>No double visits recorded for this month.</li>`;
+                }
+
+                const chartLabels = ['Single Visits', 'Double Visits', ...Object.keys(analysis.events), ...Object.keys(analysis.leaves)];
+                const chartData = [analysis.visits.single, analysis.visits.double, ...Object.values(analysis.events), ...Object.values(analysis.leaves)];
+
+                if (myChart) {
+                    myChart.destroy();
+                }
+
+                myChart = new Chart(activityChartCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Monthly Activity Report',
+                            data: chartData,
+                            backgroundColor: [
+                                '#3B82F6',
+                                '#6366F1',
+                                '#8B5CF6',
+                                '#EC4899',
+                                '#F43F5E',
+                                '#EF4444',
+                                '#F97316',
+                                '#EAB308',
+                                '#22C55E',
+                            ],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Monthly Activity Breakdown'
+                            }
+                        }
+                    }
+                });
+
+                reportContentDiv.classList.add('hidden');
+                analysisPageDiv.classList.remove('hidden');
+                analysisPageDiv.classList.add('active');
+            };
+
+            analyzeButton.addEventListener('click', renderAnalysisPage);
+
+            backButton.addEventListener('click', () => {
+                analysisPageDiv.classList.add('hidden');
+                analysisPageDiv.classList.remove('active');
+                reportContentDiv.classList.remove('hidden');
+                if (myChart) {
+                    myChart.destroy();
+                }
+            });
+
+            printButton.addEventListener('click', () => {
+                window.print();
+            });
+
+            downloadXLSXButton.addEventListener('click', async () => {
+                const dmName = dmNameSelect.value;
+                if (!dmName) {
+                    showMessage('Error', 'Please select a District Manager before downloading.');
+                    return;
+                }
+
+                const { data: dmReports, error } = await supabase
+                    .from(REPORTS_TABLE)
+                    .select('*')
+                    .eq('dm_name', dmName);
+
+                if (error || dmReports.length === 0) {
+                    showMessage('Error', 'No data to download for the selected DM.');
+                    return;
+                }
+
+                const worksheet = XLSX.utils.json_to_sheet(dmReports);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Monthly Report');
+                XLSX.writeFile(workbook, `Monthly Report for ${dmName}.xlsx`);
+            });
+
+            dmNameSelect.addEventListener('change', async () => {
+                const dmName = dmNameSelect.value;
+                if (dmName) {
+                    activityRadios.forEach(radio => radio.disabled = false);
+                    updateAssociatedDropdowns();
+                    await fetchReportsFromSupabase(dmName);
+                } else {
+                    activityRadios.forEach(radio => radio.disabled = true);
+                    updateFormVisibility();
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
