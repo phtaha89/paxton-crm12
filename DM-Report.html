@@ -405,6 +405,10 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <script>
+        // Global variable to store logged-in user data
+        let loggedInUser = null;
+        let allDmNames = [];
+
         document.addEventListener('DOMContentLoaded', () => {
             // Supabase configuration
             const SUPABASE_URL = "https://plmevfyxpngzymvzvkzn.supabase.co";
@@ -525,17 +529,8 @@
                             // Slice to remove the header row, then store the data
                             allSheetData = results.data.slice(1);
 
-                            // Map to specified column indices: B (index 1), D (index 3), J (index 9)
-                            const dmNames = [...new Set(allSheetData.map(item => item[1]).filter(Boolean))];
-
-                            // Populate District Manager dropdown
-                            dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
-                            dmNames.forEach(name => {
-                                const option = document.createElement('option');
-                                option.value = name;
-                                option.textContent = name;
-                                dmNameSelect.appendChild(option);
-                            });
+                            // Map to specified column indices: B (index 1)
+                            allDmNames = [...new Set(allSheetData.map(item => item[1]).filter(Boolean))];
                         }
                     });
                 } catch (error) {
@@ -544,13 +539,8 @@
                 }
             };
 
-            // Initial fetch of DM data and reports from Supabase
-            fetchData();
-
             // Function to fetch all reports from Supabase and render them
             const fetchReportsFromSupabase = async (dmName = '') => {
-                // The query is already a single request, which is efficient.
-                // Added `.order` to sort by `created_at` in descending order.
                 let query = supabase.from(REPORTS_TABLE).select('*').order('created_at', { ascending: false });
                 if (dmName) {
                     query = query.eq('dm_name', dmName);
@@ -614,9 +604,15 @@
 
             // Event listener for DM name dropdown
             dmNameSelect.addEventListener('change', () => {
-                activityRadios.forEach(radio => radio.disabled = false);
-                updateAssociatedDropdowns();
-                fetchReportsFromSupabase(dmNameSelect.value);
+                const dmName = dmNameSelect.value;
+                if (dmName) {
+                    activityRadios.forEach(radio => radio.disabled = false);
+                    updateAssociatedDropdowns();
+                    fetchReportsFromSupabase(dmName);
+                } else {
+                    activityRadios.forEach(radio => radio.disabled = true);
+                    updateFormVisibility();
+                }
             });
 
             const updateFormVisibility = () => {
@@ -696,9 +692,7 @@
                 }
                 noReportsMessage.classList.add('hidden');
 
-                // Get all headers from the first report, and add the new 'Day & Date' header
                 const headers = Object.keys(filteredReports[0]).filter(key => key !== 'dm_name' && key !== 'id');
-                // The day_date is now correctly formatted from the UTC timestamp
                 const allHeaders = ['day_date', ...headers];
 
                 const headerRow = document.createElement('tr');
@@ -729,7 +723,6 @@
                         newRow.style.borderColor = '#FFE6E1';
                     }
 
-                    // Loop through the new headers array
                     allHeaders.forEach(key => {
                         const newCell = document.createElement('td');
                         newCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
@@ -739,21 +732,18 @@
 
                         let cellContent = report[key] || 'N/A';
 
-                        // Logic for the new 'Day & Date' and 'created_at' column
                         if (key === 'day_date' && report.created_at) {
                             const date = new Date(report.created_at);
-                            // Set the timezone to UTC to display the correct day and date from the database
                             const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
                             const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric', timeZone: 'UTC' });
                             cellContent = `${dayName} - ${formattedDate}`;
                         } else if (key === 'created_at' && report.created_at) {
                              const date = new Date(report.created_at);
-                             // Use UTC methods to get the hours, minutes, and seconds from the database
                              const hours = date.getUTCHours();
                              const minutes = date.getUTCMinutes().toString().padStart(2, '0');
                              const seconds = date.getUTCSeconds().toString().padStart(2, '0');
                              const ampm = hours >= 12 ? 'PM' : 'AM';
-                             const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+                             const formattedHours = hours % 12 || 12;
                              cellContent = `${formattedHours}:${minutes}:${seconds} ${ampm}`;
                         } else {
                             cellContent = report[key] || 'N/A';
@@ -993,14 +983,12 @@
                 activityRadios.forEach(radio => radio.checked = false);
                 activityRadios.forEach(radio => radio.disabled = true);
                 updateFormVisibility();
-                dmNameSelect.value = '';
+                // dmNameSelect.value = ''; // This line is commented to retain the selected DM
                 updateAssociatedDropdowns();
                 submittedReports = [];
                 renderReports(submittedReports);
                 selectedVisitsInput.value = '';
                 reportDetailsSection.classList.add('hidden');
-                // The message below was removed as requested.
-                // showMessage('Info', 'All local data has been reset. Data in the database is not affected.');
             });
 
             // Retrieve button functionality
@@ -1198,18 +1186,56 @@
                 XLSX.writeFile(workbook, `Monthly Report for ${dmName}.xlsx`);
             });
 
-            dmNameSelect.addEventListener('change', async () => {
-                const dmName = dmNameSelect.value;
-                if (dmName) {
-                    activityRadios.forEach(radio => radio.disabled = false);
-                    updateAssociatedDropdowns();
-                    await fetchReportsFromSupabase(dmName);
-                } else {
-                    activityRadios.forEach(radio => radio.disabled = true);
-                    updateFormVisibility();
+            // This is a new event listener to handle messages from the parent window.
+            // The `postMessage` from the parent will trigger this code.
+            window.addEventListener('message', async function(event) {
+                // Check for the specific message type for user permissions
+                if (event.data && event.data.type === 'dmReportUserPermissions') {
+                    console.log('DM Report received user data:', event.data.user);
+                    loggedInUser = event.data.user;
+                    // Initialize the application with the user data
+                    await initializeReportSystem(loggedInUser);
                 }
             });
 
+            async function initializeReportSystem(user) {
+                // First, fetch the Google Sheet data to get the full list of DMs.
+                await fetchData();
+                
+                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+
+                if (user.title.toLowerCase() === 'admin') {
+                    // Admin can see all DMs and the dropdown is enabled.
+                    dmNameSelect.disabled = false;
+                    allDmNames.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        dmNameSelect.appendChild(option);
+                    });
+                    // No default selection for admin, they must choose.
+                } else if (user.title.toLowerCase() === 'district manager') {
+                    // A District Manager sees only their name, and the dropdown is disabled.
+                    dmNameSelect.disabled = true;
+                    const option = document.createElement('option');
+                    option.value = user.username;
+                    option.textContent = user.username;
+                    option.selected = true; // Select the user's name
+                    dmNameSelect.appendChild(option);
+
+                    // Immediately load the reports for the logged-in DM
+                    activityRadios.forEach(radio => radio.disabled = false);
+                    updateAssociatedDropdowns();
+                    reportDetailsSection.classList.remove('hidden');
+                    await fetchReportsFromSupabase(user.username);
+                }
+            }
+
+            // The original DOMContentLoaded logic is now moved into the message listener.
+            // The initial state of the form is set here, waiting for the message.
+            dmNameSelect.disabled = true;
+            activityRadios.forEach(radio => radio.disabled = true);
+            updateFormVisibility();
         });
     </script>
 </body>
