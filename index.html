@@ -998,7 +998,7 @@
             .main-card {
                 min-height: 100px;
                 padding: 15px;
-                flex-direction: row; /* Changed to row for horizontal layout */
+                flex-direction: row; /* Aligns items horizontally */
                 justify-content: flex-start;
                 text-align: left;
                 gap: 15px;
@@ -1124,7 +1124,9 @@
                 <div class="error-title">CRM Page Not Found</div>
                 <div class="error-text">The CRM file could not be loaded. Please check its path.</div>
             </div>
-            <!-- The content of the CRM page will load here directly -->
+            <div class="iframe-container-fpv">
+                <iframe src="" class="hidden"></iframe>
+            </div>
         </div>
 
         <div id="dashboardView" class="full-page-view hidden">
@@ -1136,6 +1138,9 @@
                 <div class="error-icon">⚠️</div>
                 <div class="error-title">Dashboard Page Not Found</div>
                 <div class="error-text">The Dashboard file could not be loaded. Please check its path.</div>
+            </div>
+            <div class="iframe-container-fpv">
+                <iframe src="" class="hidden"></iframe>
             </div>
         </div>
 
@@ -1164,6 +1169,9 @@
                 <div class="error-title">UPA Codes Page Not Found</div>
                 <div class="error-text">The UPA Codes file could not be loaded. Please check its path.</div>
             </div>
+            <div class="iframe-container-fpv">
+                <iframe src="" class="hidden"></iframe>
+            </div>
         </div>
 
         <div id="priceListView" class="full-page-view hidden">
@@ -1175,6 +1183,9 @@
                 <div class="error-icon">⚠️</div>
                 <div class="error-title">Price List Page Not Found</div>
                 <div class="error-text">The Price List file could not be loaded. Please check its path.</div>
+            </div>
+            <div class="iframe-container-fpv">
+                <iframe src="" class="hidden"></iframe>
             </div>
         </div>
 
@@ -1188,6 +1199,9 @@
                 <div class="error-title">Products Knowledge Page Not Found</div>
                 <div class="error-text">The Products Knowledge file could not be loaded. Please check its path.</div>
             </div>
+            <div class="iframe-container-fpv">
+                <iframe src="" class="hidden"></iframe>
+            </div>
         </div>
 
         <div id="adminView" class="full-page-view hidden">
@@ -1200,6 +1214,9 @@
                 <div class="error-title">Admin Page Not Found</div>
                 <div class="error-text">The Admin file could not be loaded. Please check its path.</div>
             </div>
+            <div class="iframe-container-fpv">
+                <iframe src="" class="hidden"></iframe>
+            </div>
         </div>
 
         <div id="masterListView" class="full-page-view hidden">
@@ -1211,6 +1228,9 @@
                 <div class="error-icon">⚠️</div>
                 <div class="error-title">Master List Page Not Found</div>
                 <div class="error-text">The Master List file could not be loaded. Please check its path.</div>
+            </div>
+            <div class="iframe-container-fpv">
+                <iframe src="" class="hidden"></iframe>
             </div>
         </div>
 
@@ -1266,8 +1286,8 @@
         const navConfig = {
             'home': {
                 pages: [
-                    { id: 'crm', title: 'CRM', subtitle: 'Hcps related affairs.', icon: '📊', viewId: 'crmView', fileName: 'reps%20crm.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
-                    { id: 'dashboard', title: 'Dashboard', subtitle: 'View key performance indicators and analytics.', icon: '📈', viewId: 'dashboardView', fileName: 'final%20dashboard.html', roles: ['admin', 'District Manager'] },
+                    { id: 'crm', title: 'CRM', subtitle: 'Hcps related affairs.', icon: '📊', viewId: 'crmView', fileName: 'reps crm.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
+                    { id: 'dashboard', title: 'Dashboard', subtitle: 'View key performance indicators and analytics.', icon: '📈', viewId: 'dashboardView', fileName: 'final dashboard.html', roles: ['admin', 'District Manager'] },
                     {
                         id: 'dm-crm',
                         title: 'DM CRM',
@@ -1282,11 +1302,11 @@
                             { id: 'dm-report', title: 'DM Report', subtitle: 'View and generate reports for the district.', icon: '📄', viewId: 'nestedIframeView', fileName: 'DM-Report.html', isNested: true, roles: ['admin', 'District Manager'] }
                         ]
                     },
-                    { id: 'master-list', title: 'Master List', subtitle: 'View and manage the master data list.', icon: '📋', viewId: 'masterListView', fileName: 'master%20list.html', roles: ['admin', 'District Manager'] },
+                    { id: 'master-list', title: 'Master List', subtitle: 'View and manage the master data list.', icon: '📋', viewId: 'masterListView', fileName: 'master list.html', roles: ['admin', 'District Manager'] },
                     { id: 'upa-codes', title: 'UPA Codes', subtitle: 'Access UPA Codes and affairs.', icon: '🏥', viewId: 'upaCodesView', fileName: 'upa-codes.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'price-list', title: 'Price List', subtitle: 'products pricing information.', icon: '💲', viewId: 'priceListView', fileName: 'price-list.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
-                    { id: 'products-knowledge', title: 'Products Knowledge', subtitle: 'Detailed information about our products.', icon: '📚', viewId: 'productsKnowledgeView', fileName: 'Products%20knowledge.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
-                    { id: 'admin', title: 'Admin Panel', subtitle: 'Manage users and system settings.', icon: '⚙️', viewId: 'adminView', fileName: 'admin%20users.html', roles: ['admin'] },
+                    { id: 'products-knowledge', title: 'Products Knowledge', subtitle: 'Detailed information about our products.', icon: '📚', viewId: 'productsKnowledgeView', fileName: 'Products knowledge.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
+                    { id: 'admin', title: 'Admin Panel', subtitle: 'Manage users and system settings.', icon: '⚙️', viewId: 'adminView', fileName: 'admin users.html', roles: ['admin'] },
                     { id: 'coming-soon', title: 'Coming Soon', subtitle: 'Exciting new features are on their way!', icon: '⏳', isPlaceholder: true, roles: ['admin', 'District Manager', 'Medical Representative'] }
                 ]
             }
@@ -1588,8 +1608,8 @@
                     activeView.classList.remove('active');
                     setTimeout(() => {
                         activeView.classList.add('hidden');
-                        // No iframe to clear, content is removed
-                        activeView.innerHTML = '';
+                        const prevIframe = activeView.querySelector('iframe');
+                        if (prevIframe) prevIframe.src = 'about:blank';
                     }, 300);
                 }
                 currentActiveViewId = null;
@@ -1643,14 +1663,17 @@
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
-                    prevActiveView.classList.add('hidden');
-                    prevActiveView.innerHTML = '';
+                    setTimeout(() => {
+                        prevActiveView.classList.add('hidden');
+                        const prevIframe = prevActiveView.querySelector('iframe');
+                        if (prevIframe) prevIframe.src = 'about:blank';
+                    }, 300);
                 }
             }
 
             currentActiveViewId = viewId;
             targetView.classList.remove('hidden');
-            targetView.classList.add('active');
+            setTimeout(() => targetView.classList.add('active'), 10);
 
             if (page === 'dm-crm') {
                 const dmCrmSubGrid = document.getElementById('dmCrmSubGrid');
@@ -1701,7 +1724,7 @@
                     };
 
                     iframe.onerror = function() {
-                        console.error(`Failed to load ${config.title} iframe from ${iframeFileName}. Displaying error state.`);
+                        console.error(`Failed to load ${config.title} iframe from ${iframeFileName}. Displaying error state.`, error);
                         loadingOverlay.classList.remove('show');
                         errorState.classList.add('show');
                     };
@@ -1711,15 +1734,21 @@
                 // Handle non-nested pages to load content directly
                 const loadingOverlay = targetView.querySelector('.loading');
                 const errorState = targetView.querySelector('.error-state');
+                const iframe = targetView.querySelector('iframe');
+                const demoContent = targetView.querySelector('.demo-content');
                 
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
+                iframe.classList.add('hidden');
+                
+                // Construct the URL, ensuring spaces are encoded
+                const encodedFileName = fileName.replace(/ /g, '%20');
                 
                 // Fetch and insert content from the external file
-                fetch(fileName)
+                fetch(encodedFileName)
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error('File not found');
+                            throw new Error(`File not found: ${encodedFileName}`);
                         }
                         return response.text();
                     })
@@ -1743,10 +1772,10 @@
                         });
                         
                         localStorage.setItem('currentPage', page);
-                        console.log(`${config.title} content loaded successfully from ${fileName}.`);
+                        console.log(`${config.title} content loaded successfully from ${encodedFileName}.`);
                     })
                     .catch(error => {
-                        console.error(`Failed to load ${config.title} from ${fileName}. Displaying error state.`, error);
+                        console.error(`Failed to load ${config.title} from ${encodedFileName}. Displaying error state.`, error);
                         loadingOverlay.classList.remove('show');
                         errorState.classList.add('show');
                     });
