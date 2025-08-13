@@ -137,7 +137,7 @@
 
         <!-- Tab Content Containers -->
         <div id="dm-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6">
-            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">District Manager Reporting</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">District Manager Reporting</h1>
 
             <form id="report-form" class="space-y-4">
 
@@ -279,7 +279,7 @@
                             <div>
                                 <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
                                 <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
-                            </div>
+                                </div>
                         </div>
                     </div>
 
@@ -1157,21 +1157,29 @@
 
             // Reset button functionality
             resetButton.addEventListener('click', () => {
+                const dmName = dmNameSelect.value; // Store the current DM name
+                
                 form.reset();
-                activityRadios.forEach(radio => radio.checked = false);
-                activityRadios.forEach(radio => radio.disabled = true);
+                activityRadios.forEach(radio => {
+                    radio.checked = false;
+                    radio.disabled = true;
+                });
+
+                // Reset conditional forms and table
                 updateFormVisibility();
-                const dmName = dmNameSelect.value;
-                dmNameSelect.value = dmName;
-                updateAssociatedDropdowns();
-                submittedReports = [];
-                renderReports(submittedReports);
-                selectedVisitsInput.value = '';
                 reportDetailsSection.classList.add('hidden');
-                // Re-enable the activity radios after reset if a DM is selected.
-                if (dmNameSelect.value) {
+                reportsTableBody.innerHTML = '';
+                reportsTableHeader.innerHTML = '';
+                noReportsMessage.classList.remove('hidden');
+
+                // Restore the DM selection and re-enable radios
+                dmNameSelect.value = dmName;
+                if (dmName) {
                     activityRadios.forEach(radio => radio.disabled = false);
+                    updateAssociatedDropdowns();
                 }
+                
+                selectedVisitsInput.value = '';
             });
 
             // Retrieve button functionality
