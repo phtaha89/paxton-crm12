@@ -48,312 +48,414 @@
         .form-border-leaves {
             border-left: 4px solid #FFE6E1;
         }
-        /* Full-screen analysis page styling */
-        #analysis-page {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #f3f4f6;
-            z-index: 40;
-            overflow-y: auto;
-            transition: transform 0.3s ease-in-out;
-            transform: translateX(100%);
+        /* Tab navigation styling */
+        .tab-button {
+            border-radius: 0.5rem 0.5rem 0 0;
+            transition: background-color 0.2s, color 0.2s;
         }
-        #analysis-page.active {
-            transform: translateX(0);
+        .tab-button.active {
+            background-color: #ffffff;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        .tab-button:not(.active) {
+            background-color: #e5e7eb;
+            color: #6b7280;
+        }
+        /* Full-screen analysis page styling (now part of the tab content) */
+        #monthly-details-tab-content {
+            background-color: #f3f4f6;
+            overflow-y: auto;
         }
         @media print {
-            body > *:not(#analysis-page) {
+            body > *:not(#report-content, #monthly-details-tab-content, #main-app) {
                 display: none;
             }
-            #analysis-page {
-                position: static;
-                transform: none;
-                height: auto;
+            #monthly-details-tab-content.hidden, #dm-report-tab-content.hidden {
+                display: block !important;
             }
+            #main-app {
+                box-shadow: none;
+                padding: 0;
+            }
+            .container {
+                max-width: none;
+                width: 100%;
+            }
+            .tab-button, .flex.justify-between.items-center.mb-4 {
+                display: none;
+            }
+            .print-hidden {
+                display: none;
+            }
+        }
+        /* CSS to improve the rendering of the select dropdown */
+        #dm-name {
+            min-height: 2.5rem; /* Ensures a minimum height for the dropdown */
+            border-width: 1px;
+            border-color: #d1d5db;
+        }
+        
+        /* New CSS for smaller monthly details tab */
+        #monthly-details-tab-content h2, #monthly-details-tab-content h3 {
+            font-size: 1.25rem; /* Reduced main titles */
+        }
+        #analysis-summary-boxes > div {
+            padding: 0.75rem; /* Smaller padding for the boxes */
+        }
+        #analysis-summary-boxes > div h3 {
+            font-size: 1rem; /* Smaller heading inside boxes */
+        }
+        #analysis-summary-boxes > div div {
+            font-size: 1.5rem; /* Smaller count size */
+        }
+        #analysis-summary-boxes > div .text-sm {
+            font-size: 0.75rem; /* Smaller descriptions */
+        }
+        #filed-visits-details-section h3 {
+            font-size: 1rem; /* Smaller heading for details section */
+        }
+        #double-visits-details div, #single-visits-details div {
+            font-size: 0.75rem; /* Smaller text inside detail divs */
+            padding: 0.5rem;
+        }
+        /* New chart styling */
+        #activity-chart-container {
+            max-width: 28rem; /* Set a max width for the container */
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-2 md:p-4">
 
-    <!-- Main Report Content -->
-    <div id="report-content" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
-        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">District Manager Reporting</h1>
+    <!-- Main Content Container with Tabs -->
+    <div id="main-app" class="container mx-auto bg-white rounded-2xl shadow-2xl space-y-4">
 
-        <form id="report-form" class="space-y-4">
+        <!-- Tab Navigation -->
+        <div class="flex border-b border-gray-200 print-hidden">
+            <button id="dm-report-tab" class="tab-button active px-4 py-2 text-sm md:text-base font-medium">DM Report</button>
+            <button id="monthly-details-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">Monthly Details</button>
+        </div>
 
-            <!-- District Manager Name and Live Date -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="dm-name" class="block text-xs font-medium text-gray-700">District Manager Name</label>
-                    <select id="dm-name" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                        <option value="" disabled selected>Loading...</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-700">Date and Time</label>
-                    <div id="live-time" class="mt-1 p-1 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-center font-semibold text-gray-600">
-                        Loading...
-                    </div>
-                </div>
-            </div>
+        <!-- Tab Content Containers -->
+        <div id="dm-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">District Manager Reporting</h1>
 
-            <!-- Activity Type Radio Buttons -->
-            <div class="mt-4">
-                <label class="block text-xs font-medium text-gray-700">Activity Type</label>
-                <div class="mt-1 grid grid-cols-3 gap-2 md:gap-4">
-                    <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                        <input type="radio" name="activity-type" value="Visits" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                        <span class="ml-1 text-gray-700 text-xs">Visits</span>
-                    </label>
-                    <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                        <input type="radio" name="activity-type" value="Event" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                        <span class="ml-1 text-gray-700 text-xs">Event</span>
-                    </label>
-                    <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                        <input type="radio" name="activity-type" value="Leave" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                        <span class="ml-1 text-gray-700 text-xs">Leave</span>
-                    </label>
-                </div>
-            </div>
+            <form id="report-form" class="space-y-4">
 
-            <!-- Conditional Forms -->
-            <div id="conditional-forms">
-
-                <!-- Visits Form -->
-                <div id="visits-form" class="p-4 rounded-md shadow-inner space-y-4 hidden form-border-visits" >
-                    <h3 class="text-sm font-semibold text-gray-800">Visits Details</h3>
+                <!-- District Manager Name and Live Date -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="visit-type" class="block text-xs font-medium text-gray-700">Visit Type</label>
-                        <select id="visit-type" name="visit-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                            <option value="Double Visit">Double Visit</option>
-                            <option value="Single Visit">Single Visit</option>
+                        <label for="dm-name" class="block text-xs font-medium text-gray-700">District Manager Name</label>
+                        <select id="dm-name" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                            <option value="" disabled selected>Loading...</option>
                         </select>
                     </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Date and Time</label>
+                        <div id="live-time" class="mt-1 p-1 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-center font-semibold text-gray-600">
+                            Loading...
+                        </div>
+                    </div>
+                </div>
 
-                    <!-- Double Visit Form -->
-                    <div id="double-visit-form" class="space-y-2">
-                        <!-- Option to choose between manual entry or today's visits -->
-                        <div id="double-visit-options" class="space-y-2">
+                <!-- Activity Type Radio Buttons -->
+                <div class="mt-4">
+                    <label class="block text-xs font-medium text-gray-700">Activity Type</label>
+                    <div class="mt-1 grid grid-cols-3 gap-2 md:gap-4">
+                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="activity-type" value="Visits" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-1 text-gray-700 text-xs">Visits</span>
+                        </label>
+                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="activity-type" value="Event" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-1 text-gray-700 text-xs">Event</span>
+                        </label>
+                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="activity-type" value="Leave" disabled class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-1 text-gray-700 text-xs">Leave</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Conditional Forms -->
+                <div id="conditional-forms">
+
+                    <!-- Visits Form -->
+                    <div id="visits-form" class="p-4 rounded-md shadow-inner space-y-4 hidden form-border-visits" >
+                        <h3 class="text-sm font-semibold text-gray-800">Visits Details</h3>
+                        <div>
+                            <label for="visit-type" class="block text-xs font-medium text-gray-700">Visit Type</label>
+                            <select id="visit-type" name="visit-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="Double Visit">Double Visit</option>
+                                <option value="Single Visit">Single Visit</option>
+                            </select>
+                        </div>
+
+                        <!-- Double Visit Form -->
+                        <div id="double-visit-form" class="space-y-2">
+                            <!-- Option to choose between manual entry or today's visits -->
+                            <div id="double-visit-options" class="space-y-2">
+                                <div>
+                                    <label for="med-rep-name" class="block text-xs font-medium text-gray-700">Medical Rep Name</label>
+                                    <select id="med-rep-name" name="med-rep-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                        <option value="" disabled selected>Select DM first</option>
+                                    </select>
+                                </div>
+                                <div id="double-visit-mode" class="hidden space-y-2">
+                                    <label class="block text-xs font-medium text-gray-700">Select Report Mode</label>
+                                    <div class="flex items-center space-x-4">
+                                        <label class="flex items-center">
+                                            <input type="radio" name="double-visit-mode" value="manual" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-1 text-gray-700 text-xs">Add Manually</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="double-visit-mode" value="visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-1 text-gray-700 text-xs">Select from Today's Visits</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Manual Double Visit Form (hidden by default) -->
+                            <div id="manual-double-visit-form" class="space-y-2 hidden">
+                                <div>
+                                    <label for="period-double" class="block text-xs font-medium text-gray-700">Period</label>
+                                    <select id="period-double" name="period-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                        <option value="Full Day" selected>Full Day</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="brick-double" class="block text-xs font-medium text-gray-700">Brick</label>
+                                    <select id="brick-double" name="brick-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                        <option value="" disabled selected>Select Medical Rep first</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
+                                    <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Visits Modal Trigger (hidden by default) -->
+                            <div id="visits-modal-trigger" class="space-y-2 hidden">
+                                <div>
+                                    <label for="period-double-visits" class="block text-xs font-medium text-gray-700">Period</label>
+                                    <select id="period-double-visits" name="period-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                        <option value="Full Day" selected>Full Day</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="brick-double-visits" class="block text-xs font-medium text-gray-700">Brick</label>
+                                    <select id="brick-double-visits" name="brick-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                        <option value="" disabled selected>Select Medical Rep first</option>
+                                    </select>
+                                </div>
+                                <button type="button" id="open-visits-modal" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                                    Select Today's Visits
+                                </button>
+                            </div>
+                            <input type="hidden" id="selected-visits-double" name="selected-visits-double">
+                        </div>
+
+                        <!-- Single Visit Form -->
+                        <div id="single-visit-form" class="space-y-2 hidden">
                             <div>
-                                <label for="med-rep-name" class="block text-xs font-medium text-gray-700">Medical Rep Name</label>
-                                <select id="med-rep-name" name="med-rep-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <label for="period-single" class="block text-xs font-medium text-gray-700">Period</label>
+                                <select id="period-single" name="period-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                    <option value="Full Day" selected>Full Day</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
+                                <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
                                     <option value="" disabled selected>Select DM first</option>
                                 </select>
                             </div>
-                            <div id="double-visit-mode" class="hidden space-y-2">
-                                <label class="block text-xs font-medium text-gray-700">Select Report Mode</label>
-                                <div class="flex items-center space-x-4">
-                                    <label class="flex items-center">
-                                        <input type="radio" name="double-visit-mode" value="manual" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                        <span class="ml-1 text-gray-700 text-xs">Add Manually</span>
-                                    </label>
-                                    <label class="flex items-center">
-                                        <input type="radio" name="double-visit-mode" value="visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                        <span class="ml-1 text-gray-700 text-xs">Select from Today's Visits</span>
-                                    </label>
-                                </div>
+                            <div>
+                                <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
+                                <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Manual Double Visit Form (hidden by default) -->
-                        <div id="manual-double-visit-form" class="space-y-2 hidden">
+                    <!-- Event Form -->
+                    <div id="event-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-events">
+                        <h3 class="text-sm font-semibold text-gray-800">Event Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                             <div>
-                                <label for="period-double" class="block text-xs font-medium text-gray-700">Period</label>
-                                <select id="period-double" name="period-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <label for="event-type" class="block text-xs font-medium text-gray-700">Event Type</label>
+                                <select id="event-type" name="event-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Event">Event</option>
+                                    <option value="Admin Work">Admin Work</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="period-event" class="block text-xs font-medium text-gray-700">Period</label>
+                                <select id="period-event" name="period-event" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
                                     <option value="AM">AM</option>
                                     <option value="PM">PM</option>
-                                    <option value="Full Day">Full Day</option>
+                                    <option value="Full Day" selected>Full Day</option>
                                 </select>
-                            </div>
-                            <div>
-                                <label for="brick-double" class="block text-xs font-medium text-gray-700">Brick</label>
-                                <select id="brick-double" name="brick-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                    <option value="" disabled selected>Select Medical Rep first</option>
-                                </select>
-                            </div>
-                             <div>
-                                <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
-                                <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
                         </div>
+                        <div>
+                            <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
+                            <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
 
-                        <!-- Visits Modal Trigger (hidden by default) -->
-                        <div id="visits-modal-trigger" class="space-y-2 hidden">
-                            <div>
-                                <label for="period-double-visits" class="block text-xs font-medium text-gray-700">Period</label>
-                                <select id="period-double-visits" name="period-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                    <!-- Leave Form -->
+                    <div id="leave-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-leaves">
+                        <h3 class="text-sm font-semibold text-gray-800">Leave Details</h3>
+                        <div>
+                            <label for="leave-type" class="block text-xs font-medium text-gray-700">Leave Type</label>
+                            <select id="leave-type" name="leave-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="Annual Leave">Annual Leave</option>
+                                <option value="Sick Leave">Sick Leave</option>
+                                <option value="Casual Leave">Casual Leave</option>
+                                <option value="Official Leave">Official Leave</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="period-leave" class="block text-xs font-medium text-gray-700">Period</label>
+                            <select id="period-leave" name="period-leave" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
                                     <option value="AM">AM</option>
                                     <option value="PM">PM</option>
-                                    <option value="Full Day">Full Day</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="brick-double-visits" class="block text-xs font-medium text-gray-700">Brick</label>
-                                <select id="brick-double-visits" name="brick-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                    <option value="" disabled selected>Select Medical Rep first</option>
-                                </select>
-                            </div>
-                            <button type="button" id="open-visits-modal" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
-                                Select Today's Visits
-                            </button>
-                        </div>
-                        <input type="hidden" id="selected-visits-double" name="selected-visits-double">
-                    </div>
-
-                    <!-- Single Visit Form -->
-                    <div id="single-visit-form" class="space-y-2 hidden">
-                        <div>
-                            <label for="period-single" class="block text-xs font-medium text-gray-700">Period</label>
-                            <select id="period-single" name="period-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                <option value="AM">AM</option>
-                                <option value="PM">PM</option>
-                                <option value="Full Day">Full Day</option>
+                                    <option value="Full Day" selected>Full Day</option>
                             </select>
                         </div>
+                        <!-- New comment box for leave form -->
                         <div>
-                            <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
-                            <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                <option value="" disabled selected>Select DM first</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
-                            <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
+                            <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Event Form -->
-                <div id="event-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-events">
-                    <h3 class="text-sm font-semibold text-gray-800">Event Details</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <div>
-                            <label for="event-type" class="block text-xs font-medium text-gray-700">Event Type</label>
-                            <select id="event-type" name="event-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                <option value="Meeting">Meeting</option>
-                                <option value="Event">Event</option>
-                                <option value="Admin Work">Admin Work</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="period-event" class="block text-xs font-medium text-gray-700">Period</label>
-                            <select id="period-event" name="period-event" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                <option value="AM">AM</option>
-                                <option value="PM">PM</option>
-                                <option value="Full Day">Full Day</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
-                        <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                <!-- Buttons -->
+                <div class="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mt-4 print-hidden">
+                    <button type="submit" class="w-full md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
+                        Submit
+                    </button>
+                    <button type="button" id="reset-button" class="w-full md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                        Reset
+                    </button>
+                    <button type="button" id="retrieve-button" class="w-full md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                        Retrieve
+                    </button>
+                </div>
+            </form>
+
+            <!-- New Submitted Data Table -->
+            <div id="report-details-section" class="mt-8 hidden">
+                <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4 print-hidden">
+                    <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
+                    <div class="flex space-x-2 w-full md:w-auto">
+                        <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
                     </div>
                 </div>
-
-                <!-- Leave Form -->
-                <div id="leave-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-leaves">
-                    <h3 class="text-sm font-semibold text-gray-800">Leave Details</h3>
-                    <div>
-                        <label for="leave-type" class="block text-xs font-medium text-gray-700">Leave Type</label>
-                        <select id="leave-type" name="leave-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                            <option value="Annual Leave">Annual Leave</option>
-                            <option value="Sick Leave">Sick Leave</option>
-                            <option value="Casual Leave">Casual Leave</option>
-                            <option value="Official Leave">Official Leave</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="period-leave" class="block text-xs font-medium text-gray-700">Period</label>
-                        <select id="period-leave" name="period-leave" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                <option value="AM">AM</option>
-                                <option value="PM">PM</option>
-                                <option value="Full Day">Full Day</option>
-                        </select>
-                    </div>
-                    <!-- New comment box for leave form -->
-                    <div>
-                        <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
-                        <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
-                    </div>
+                <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+                    <table id="reports-table" class="min-w-full divide-y divide-gray-200">
+                        <thead id="reports-table-head" class="bg-gray-100">
+                            <!-- Headers will be dynamically generated here -->
+                        </thead>
+                        <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Submitted data will be appended here -->
+                        </tbody>
+                    </table>
+                    <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
                 </div>
-
-            </div>
-
-            <!-- Buttons -->
-            <div class="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mt-4">
-                <button type="submit" class="w-full md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
-                    Submit
-                </button>
-                <button type="button" id="reset-button" class="w-full md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
-                    Reset
-                </button>
-                <button type="button" id="retrieve-button" class="w-full md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
-                    Retrieve
-                </button>
-                <!-- New Analyze Button -->
-                <button type="button" id="analyze-button" class="w-full md:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
-                    Analyze Report
-                </button>
-            </div>
-        </form>
-
-        <!-- New Submitted Data Table -->
-        <div id="report-details-section" class="mt-8 hidden">
-            <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4">
-                <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
-                <div class="flex space-x-2 w-full md:w-auto">
-                    <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-                </div>
-            </div>
-            <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-                <table id="reports-table" class="min-w-full divide-y divide-gray-200">
-                    <thead id="reports-table-head" class="bg-gray-100">
-                        <!-- Headers will be dynamically generated here -->
-                    </thead>
-                    <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
-                        <!-- Submitted data will be appended here -->
-                    </tbody>
-                </table>
-                <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
             </div>
         </div>
-    </div>
 
-    <!-- New Full-Screen Analysis Page -->
-    <div id="analysis-page" class="hidden p-4">
-        <div class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl md:text-3xl font-bold text-gray-800">Monthly Report Analysis</h2>
-                <div class="flex space-x-2">
-                    <button id="print-button" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition">Print</button>
-                    <button id="download-xlsx-button" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-sm transition">Download XLSX</button>
-                    <button id="back-button" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">Back</button>
-                </div>
-            </div>
-
-            <div id="analysis-content" class="space-y-6">
-                <!-- Analysis summary and details will be rendered here dynamically -->
-                <div class="bg-gray-50 p-4 rounded-md shadow-inner">
-                    <h3 class="text-lg font-semibold mb-2">Summary for <span id="current-month-span"></span></h3>
-                    <ul id="summary-list" class="list-disc list-inside space-y-1">
-                        <!-- Summary items will be added here -->
-                    </ul>
+        <!-- New Full-Screen Analysis Page (Now a tab) -->
+        <div id="monthly-details-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
+            <div class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
+                <div class="flex justify-between items-center mb-4 print-hidden">
+                    <h2 id="monthly-report-title" class="text-xl md:text-3xl font-bold text-gray-800"></h2>
+                    <div class="flex space-x-2">
+                        <!-- Print Button with Icon -->
+                        <button id="print-button" class="px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition" title="Print Report">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-printer"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                        </button>
+                        <!-- Download Button with Icon -->
+                        <button id="download-xlsx-button" class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-sm transition" title="Download XLSX">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="bg-gray-50 p-4 rounded-md shadow-inner">
-                    <h3 class="text-lg font-semibold mb-2">Double Visits by Medical Rep</h3>
-                    <ul id="double-visit-list" class="list-disc list-inside space-y-1">
-                        <!-- Double visit details will be added here -->
-                    </ul>
-                </div>
+                <div id="analysis-content" class="space-y-6">
+                    <!-- Three Summary Boxes -->
+                    <div id="analysis-summary-boxes" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Filed Visits Box -->
+                        <div id="filed-visits-box" class="bg-blue-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-blue-600">
+                            <h3 class="font-semibold text-lg mb-1">Filed Visits</h3>
+                            <div class="text-3xl font-bold"><span id="filed-visits-count">0</span></div>
+                            <div class="text-sm">Total Filed Days</div>
+                        </div>
+                        <!-- Events Box -->
+                        <div id="events-box" class="bg-purple-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-purple-600">
+                            <h3 class="font-semibold text-lg mb-1">Events</h3>
+                            <div class="text-3xl font-bold"><span id="events-count">0</span></div>
+                            <div class="text-sm">Total Event Days</div>
+                        </div>
+                        <!-- Leaves Box -->
+                        <div id="leaves-box" class="bg-red-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-red-600">
+                            <h3 class="font-semibold text-lg mb-1">Leaves</h3>
+                            <div class="text-3xl font-bold"><span id="leaves-count">0</span></div>
+                            <div class="text-sm">Total Leave Days</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Details Sections -->
+                    <div id="filed-visits-details-section" class="mt-8 hidden">
+                        <h3 id="filed-visits-details-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
+                        <div id="double-visits-details" class="space-y-2">
+                            <!-- Double visits per med rep will be loaded here -->
+                        </div>
+                        <div id="single-visits-details" class="space-y-2 mt-4">
+                            <!-- Single visits will be loaded here -->
+                        </div>
+                    </div>
 
-                <div class="bg-gray-50 p-4 rounded-md shadow-inner">
-                    <h3 class="text-lg font-semibold mb-2">Activity Ratio Chart</h3>
-                    <div class="w-full h-80 flex items-center justify-center">
-                        <canvas id="activity-chart"></canvas>
+                    <div id="events-details-section" class="mt-8 hidden">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Event Details</h3>
+                        <div id="events-details" class="space-y-2">
+                            <!-- Events will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div id="leaves-details-section" class="mt-8 hidden">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Details</h3>
+                        <div id="leaves-details" class="space-y-2">
+                            <!-- Leaves will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div id="analysis-summary-section">
+                        <div class="bg-gray-50 p-4 rounded-md shadow-inner">
+                            <h3 class="text-lg font-semibold mb-2">Chart Details</h3>
+                            <ul id="double-visit-list" class="list-disc list-inside space-y-1">
+                                <!-- Double visit details will be added here -->
+                            </ul>
+                        </div>
+
+                        <div class="w-full h-80 flex items-center justify-center">
+                            
+                            <div id="activity-chart-container" class="w-full h-80 flex items-center justify-center">
+                                <canvas id="activity-chart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -393,6 +495,22 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal for displaying visit dates -->
+    <div id="dates-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="dates-modal-title" class="text-lg font-semibold text-gray-800">Visit Dates</h3>
+                <button id="close-dates-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="dates-modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Dates will be dynamically loaded here -->
+            </div>
+            <div class="flex justify-end border-t pt-4">
+                <button id="ok-dates-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
+            </div>
+        </div>
+    </div>
 
     <!-- PapaParse and html2pdf CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -408,8 +526,10 @@
         // Global variable to store logged-in user data
         let loggedInUser = null;
         let allDmNames = [];
+        let allMonthlyReports = []; // Store the fetched monthly reports
+        let myChart = null; // To store the chart instance
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Supabase configuration
             const SUPABASE_URL = "https://plmevfyxpngzymvzvkzn.supabase.co";
             const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c";
@@ -420,11 +540,15 @@
             const googleSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv";
             let allSheetData = []; // To store the raw data from the Google Sheet
             let submittedReports = []; // To store all reports fetched from Supabase
-            let myChart = null; // To store the chart instance
-
+            
             // Get form and modal elements
-            const reportContentDiv = document.getElementById('report-content');
-            const analysisPageDiv = document.getElementById('analysis-page');
+            const mainAppDiv = document.getElementById('main-app');
+            const dmReportTabContent = document.getElementById('dm-report-tab-content');
+            const monthlyDetailsTabContent = document.getElementById('monthly-details-tab-content');
+            const dmReportTabButton = document.getElementById('dm-report-tab');
+            const monthlyDetailsTabButton = document.getElementById('monthly-details-tab');
+            const reportDetailsSection = document.getElementById('report-details-section');
+
             const form = document.getElementById('report-form');
             const dmNameSelect = document.getElementById('dm-name');
             const liveTimeDiv = document.getElementById('live-time');
@@ -451,10 +575,8 @@
             const noReportsMessage = document.getElementById('no-reports-message');
             const resetButton = document.getElementById('reset-button');
             const retrieveButton = document.getElementById('retrieve-button');
-            const analyzeButton = document.getElementById('analyze-button');
-            const leaveTypeSelect = document.getElementById('leave-type');
             const searchBox = document.getElementById('search-box');
-            const reportDetailsSection = document.getElementById('report-details-section');
+            const leaveTypeSelect = document.getElementById('leave-type');
 
             // Modal elements
             const visitModal = document.getElementById('visit-modal');
@@ -470,15 +592,41 @@
             const messageContent = document.getElementById('message-content');
             const closeMessageModalBtn = document.getElementById('close-message-modal');
             const okMessageModalBtn = document.getElementById('ok-message-modal');
+            
+            // New modal for visit dates
+            const datesModal = document.getElementById('dates-modal');
+            const datesModalTitle = document.getElementById('dates-modal-title');
+            const datesModalContent = document.getElementById('dates-modal-content');
+            const closeDatesModalBtn = document.getElementById('close-dates-modal');
+            const okDatesModalBtn = document.getElementById('ok-dates-modal');
 
             // Analysis Page elements
-            const backButton = document.getElementById('back-button');
             const printButton = document.getElementById('print-button');
             const downloadXLSXButton = document.getElementById('download-xlsx-button');
             const summaryList = document.getElementById('summary-list');
             const doubleVisitList = document.getElementById('double-visit-list');
             const currentMonthSpan = document.getElementById('current-month-span');
             const activityChartCtx = document.getElementById('activity-chart').getContext('2d');
+            const retrieveMonthlyButton = document.getElementById('retrieve-monthly-button');
+            const analysisSummarySection = document.getElementById('analysis-summary-section');
+            const monthlyReportTitle = document.getElementById('monthly-report-title');
+            
+            const filedVisitsBox = document.getElementById('filed-visits-box');
+            const filedVisitsCountSpan = document.getElementById('filed-visits-count');
+            const eventsBox = document.getElementById('events-box');
+            const eventsCountSpan = document.getElementById('events-count');
+            const leavesBox = document.getElementById('leaves-box');
+            const leavesCountSpan = document.getElementById('leaves-count');
+            
+            const filedVisitsDetailsSection = document.getElementById('filed-visits-details-section');
+            const filedVisitsDetailsTitle = document.getElementById('filed-visits-details-title');
+            const doubleVisitsDetailsDiv = document.getElementById('double-visits-details');
+            const singleVisitsDetailsDiv = document.getElementById('single-visits-details');
+            const eventsDetailsSection = document.getElementById('events-details-section');
+            const eventsDetailsDiv = document.getElementById('events-details');
+            const leavesDetailsSection = document.getElementById('leaves-details-section');
+            const leavesDetailsDiv = document.getElementById('leaves-details');
+            const activityChartContainer = document.getElementById('activity-chart-container');
 
             // Function to show custom message modal
             const showMessage = (title, message) => {
@@ -493,7 +641,20 @@
 
             closeMessageModalBtn.addEventListener('click', hideMessage);
             okMessageModalBtn.addEventListener('click', hideMessage);
+            
+            // New modal functions
+            const showDatesModal = (title, dates) => {
+                datesModalTitle.textContent = title;
+                datesModalContent.innerHTML = dates.map(date => `<p class="text-sm text-gray-700 p-1 border-b">${date}</p>`).join('');
+                datesModal.classList.remove('hidden');
+            };
 
+            const hideDatesModal = () => {
+                datesModal.classList.add('hidden');
+            };
+
+            closeDatesModalBtn.addEventListener('click', hideDatesModal);
+            okDatesModalBtn.addEventListener('click', hideDatesModal);
 
             // Function to update live Cairo time
             const updateLiveTime = () => {
@@ -513,8 +674,20 @@
             // Initial call and set interval for live time
             updateLiveTime();
             setInterval(updateLiveTime, 1000);
+            
+            // Function to populate DM dropdown after data is fetched
+            const populateDmDropdown = (dmNames) => {
+                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                dmNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    dmNameSelect.appendChild(option);
+                });
+                dmNameSelect.disabled = false;
+            };
 
-            // Function to fetch and parse CSV data and populate initial DM dropdown
+            // Function to fetch and parse CSV data
             const fetchData = async () => {
                 try {
                     const response = await fetch(googleSheetUrl);
@@ -531,6 +704,9 @@
 
                             // Map to specified column indices: B (index 1)
                             allDmNames = [...new Set(allSheetData.map(item => item[1]).filter(Boolean))];
+
+                            // Populate the dropdown once the data is ready
+                            populateDmDropdown(allDmNames);
                         }
                     });
                 } catch (error) {
@@ -538,6 +714,8 @@
                     dmNameSelect.innerHTML = `<option value="" disabled selected>Failed to load data</option>`;
                 }
             };
+            
+            await fetchData();
 
             // Function to fetch all reports from Supabase and render them
             const fetchReportsFromSupabase = async (dmName = '') => {
@@ -608,10 +786,14 @@
                 if (dmName) {
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns();
-                    fetchReportsFromSupabase(dmName);
+                    // Do not automatically fetch reports here, wait for the retrieve button
+                    reportDetailsSection.classList.add('hidden');
+                    submittedReports = [];
+                    renderReports(submittedReports);
                 } else {
                     activityRadios.forEach(radio => radio.disabled = true);
                     updateFormVisibility();
+                    reportDetailsSection.classList.add('hidden');
                 }
             });
 
@@ -898,8 +1080,11 @@
                                     comment: document.getElementById('details-double-manual').value,
                                 };
                             }
-                        } else {
+                        } else if (selectedMode === 'visits') {
+                             // This case is handled by the modal's save button, so this part is an error
                             errorMessage = 'Please use the modal to select visits and submit.';
+                        } else {
+                            errorMessage = 'Please select a report mode for the Double Visit.';
                         }
                     } else if (visitType === 'Single Visit') {
                         if (!brickSingleSelect.value || !document.getElementById('details-single').value) {
@@ -914,6 +1099,8 @@
                                 comment: document.getElementById('details-single').value,
                             };
                         }
+                    } else {
+                        errorMessage = 'Please select a visit type.';
                     }
                 } else if (activityType === 'Event') {
                     const eventType = document.getElementById('event-type').value;
@@ -983,7 +1170,8 @@
                 activityRadios.forEach(radio => radio.checked = false);
                 activityRadios.forEach(radio => radio.disabled = true);
                 updateFormVisibility();
-                // dmNameSelect.value = ''; // This line is commented to retain the selected DM
+                const dmName = dmNameSelect.value;
+                dmNameSelect.value = dmName;
                 updateAssociatedDropdowns();
                 submittedReports = [];
                 renderReports(submittedReports);
@@ -1012,97 +1200,287 @@
                 }
             });
 
-            // --- NEW ANALYSIS PAGE LOGIC ---
+            // --- TAB NAVIGATION AND MONTHLY ANALYSIS LOGIC ---
+
+            // Tab functionality
+            dmReportTabButton.addEventListener('click', () => {
+                dmReportTabButton.classList.add('active');
+                monthlyDetailsTabButton.classList.remove('active');
+                dmReportTabContent.classList.remove('hidden');
+                monthlyDetailsTabContent.classList.add('hidden');
+            });
+
+            monthlyDetailsTabButton.addEventListener('click', () => {
+                const selectedDm = dmNameSelect.value;
+                if (!selectedDm) {
+                    showMessage('Error', 'Please select a District Manager before viewing Monthly Details.');
+                    dmReportTabButton.click(); // Revert to the DM Report tab
+                    return;
+                }
+
+                dmReportTabButton.classList.remove('active');
+                monthlyDetailsTabButton.classList.add('active');
+                dmReportTabContent.classList.add('hidden');
+                monthlyDetailsTabContent.classList.remove('hidden');
+                
+                // Immediately fetch and render the analysis data
+                renderAnalysisPage();
+            });
+            
+            filedVisitsBox.addEventListener('click', () => {
+                // Hide other sections
+                eventsDetailsSection.classList.add('hidden');
+                leavesDetailsSection.classList.add('hidden');
+                
+                filedVisitsDetailsSection.classList.toggle('hidden');
+            });
+
+            eventsBox.addEventListener('click', () => {
+                // Hide other sections
+                filedVisitsDetailsSection.classList.add('hidden');
+                leavesDetailsSection.classList.add('hidden');
+                
+                eventsDetailsSection.classList.toggle('hidden');
+            });
+
+            leavesBox.addEventListener('click', () => {
+                // Hide other sections
+                filedVisitsDetailsSection.classList.add('hidden');
+                eventsDetailsSection.classList.add('hidden');
+                
+                leavesDetailsSection.classList.toggle('hidden');
+            });
+
 
             const renderAnalysisPage = async () => {
-                const now = new Date();
-                const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-                currentMonthSpan.textContent = month;
-
                 const selectedDm = dmNameSelect.value;
                 if (!selectedDm) {
                     showMessage('Error', 'Please select a District Manager to analyze the reports.');
                     return;
                 }
 
-                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-                const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
+                const now = new Date();
+                const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                monthlyReportTitle.textContent = `Current Month Report Details for ${month}`;
 
+                // Corrected data fetching logic to ensure all reports for the month are included.
+                const startOfMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
+                const endOfMonth = new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999));
+                
                 const { data: monthlyReports, error } = await supabase
                     .from(REPORTS_TABLE)
                     .select('*')
                     .eq('dm_name', selectedDm)
-                    .gte('created_at', startOfMonth)
-                    .lte('created_at', endOfMonth);
+                    .gte('created_at', startOfMonth.toISOString())
+                    .lte('created_at', endOfMonth.toISOString());
 
                 if (error) {
                     showMessage('Error', 'Failed to fetch data for analysis.');
                     console.error('Analysis fetch error:', error);
                     return;
                 }
+                
+                allMonthlyReports = monthlyReports || [];
 
+                if (allMonthlyReports.length === 0) {
+                     showMessage('Info', `No reports found for ${selectedDm} this month.`);
+                     analysisSummarySection.classList.add('hidden');
+                     if (myChart) myChart.destroy();
+                     return;
+                }
+                
                 const analysis = {
-                    totalReports: monthlyReports.length,
-                    visits: { single: 0, double: 0 },
+                    visits: { single: {}, double: {} },
                     events: {},
-                    leaves: {},
-                    doubleVisitsByRep: {}
+                    leaves: {}
                 };
-
-                monthlyReports.forEach(report => {
+                
+                const activityCounts = {
+                    'Visits (Single Visit)': 0,
+                    'Visits (Double Visit)': 0,
+                    'Event (Meeting)': 0,
+                    'Event (Event)': 0,
+                    'Event (Admin Work)': 0,
+                    'Leave (Annual Leave)': 0,
+                    'Leave (Sick Leave)': 0,
+                    'Leave (Casual Leave)': 0,
+                    'Leave (Official Leave)': 0,
+                };
+                
+                allMonthlyReports.forEach(report => {
                     const activity = report.activity_type;
+                    const date = new Date(report.created_at).toLocaleDateString('en-US', { timeZone: 'UTC' });
+
                     if (activity.includes('Visits')) {
-                        if (activity.includes('Single Visit')) analysis.visits.single++;
+                        if (activity.includes('Single Visit')) {
+                            // Single visits: count as one day if multiple on same day
+                            if (!analysis.visits.single[date]) {
+                                analysis.visits.single[date] = 1;
+                                activityCounts['Visits (Single Visit)']++;
+                            }
+                        }
                         if (activity.includes('Double Visit')) {
-                            analysis.visits.double++;
                             const medRep = report.med_rep;
                             if (medRep && medRep !== 'N/A') {
-                                analysis.doubleVisitsByRep[medRep] = (analysis.doubleVisitsByRep[medRep] || 0) + 1;
+                                // Double visits: count as one visit per med rep per day
+                                if (!analysis.visits.double[date]) {
+                                    analysis.visits.double[date] = {};
+                                }
+                                if (!analysis.visits.double[date][medRep]) {
+                                    analysis.visits.double[date][medRep] = { count: 1, dates: [date] };
+                                    activityCounts['Visits (Double Visit)']++;
+                                } else {
+                                    // Add only unique dates for a specific medical rep.
+                                    if (!analysis.visits.double[date][medRep].dates.includes(date)) {
+                                        analysis.visits.double[date][medRep].dates.push(date);
+                                    }
+                                }
                             }
                         }
                     } else if (activity.includes('Event')) {
                         const eventType = activity.split('(')[1].replace(')', '');
-                        analysis.events[eventType] = (analysis.events[eventType] || 0) + 1;
+                        const fullEventType = `Event (${eventType})`;
+                        if (!analysis.events[fullEventType]) {
+                            analysis.events[fullEventType] = {};
+                        }
+                         if (!analysis.events[fullEventType][date]) {
+                            analysis.events[fullEventType][date] = 1;
+                            activityCounts[fullEventType]++;
+                        }
                     } else if (activity.includes('Leave')) {
                         const leaveType = activity.split('(')[1].replace(')', '');
-                        analysis.leaves[leaveType] = (analysis.leaves[leaveType] || 0) + 1;
+                        const fullLeaveType = `Leave (${leaveType})`;
+                        if (!analysis.leaves[fullLeaveType]) {
+                            analysis.leaves[fullLeaveType] = {};
+                        }
+                        if (!analysis.leaves[fullLeaveType][date]) {
+                            analysis.leaves[fullLeaveType][date] = 1;
+                            activityCounts[fullLeaveType]++;
+                        }
                     }
                 });
-
-                const totalActivities = analysis.visits.single + analysis.visits.double + Object.values(analysis.events).reduce((a, b) => a + b, 0) + Object.values(analysis.leaves).reduce((a, b) => a + b, 0);
-
-                summaryList.innerHTML = '';
-                const renderSummaryItem = (label, count) => {
-                    if (count > 0) {
-                        const ratio = totalActivities > 0 ? ((count / totalActivities) * 100).toFixed(2) : 0;
-                        summaryList.innerHTML += `<li><strong>${label}:</strong> ${count} report(s) (${ratio}%)</li>`;
+                
+                // Consolidate counts for the boxes
+                const totalSingleVisits = Object.keys(analysis.visits.single).length;
+                let totalDoubleVisits = 0;
+                let totalDoubleVisitDates = {};
+                for (const date in analysis.visits.double) {
+                    for (const medRep in analysis.visits.double[date]) {
+                        totalDoubleVisits++;
+                        if(!totalDoubleVisitDates[medRep]) {
+                            totalDoubleVisitDates[medRep] = [];
+                        }
+                        // Add only unique dates
+                        if (!totalDoubleVisitDates[medRep].includes(date)) {
+                            totalDoubleVisitDates[medRep].push(date);
+                        }
                     }
-                };
+                }
+                const totalEvents = Object.values(analysis.events).reduce((sum, dates) => sum + Object.keys(dates).length, 0);
+                const totalLeaves = Object.values(analysis.leaves).reduce((sum, dates) => sum + Object.keys(dates).length, 0);
+                const totalFiledVisits = totalSingleVisits + totalDoubleVisits;
+                
+                filedVisitsCountSpan.textContent = totalFiledVisits;
+                eventsCountSpan.textContent = totalEvents;
+                leavesCountSpan.textContent = totalLeaves;
+                
+                // Add hover effect for filed visits box
+                filedVisitsBox.title = `Single Visits: ${totalSingleVisits}, Double Visits: ${totalDoubleVisits}`;
 
-                renderSummaryItem('Single Visits', analysis.visits.single);
-                renderSummaryItem('Double Visits', analysis.visits.double);
-                for (const event in analysis.events) {
-                    renderSummaryItem(event, analysis.events[event]);
-                }
-                for (const leave in analysis.leaves) {
-                    renderSummaryItem(leave, analysis.leaves[leave]);
-                }
-                if (totalActivities === 0) {
-                    summaryList.innerHTML = `<li>No reports found for ${selectedDm} this month.</li>`;
-                }
-
-                doubleVisitList.innerHTML = '';
-                if (Object.keys(analysis.doubleVisitsByRep).length > 0) {
-                    for (const medRep in analysis.doubleVisitsByRep) {
-                        const count = analysis.doubleVisitsByRep[medRep];
-                        doubleVisitList.innerHTML += `<li><strong>${medRep}:</strong> ${count} double visit(s)</li>`;
+                // Render double visit details section
+                filedVisitsDetailsTitle.textContent = `Filed Visits for ${month}`;
+                doubleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Double Visits</h4>`;
+                const doubleVisitsByRep = {};
+                
+                for(const date in analysis.visits.double) {
+                    for(const medRep in analysis.visits.double[date]) {
+                        if (!doubleVisitsByRep[medRep]) {
+                            doubleVisitsByRep[medRep] = [];
+                        }
+                        doubleVisitsByRep[medRep].push(date);
                     }
+                }
+
+                if (Object.keys(doubleVisitsByRep).length > 0) {
+                    for (const medRep in doubleVisitsByRep) {
+                         const uniqueDates = [...new Set(doubleVisitsByRep[medRep])];
+                         const doubleVisitItem = document.createElement('div');
+                         doubleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                         doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${uniqueDates.length} double visit(s)`;
+                         doubleVisitItem.addEventListener('click', () => {
+                             showDatesModal(`Double Visits with ${medRep}`, uniqueDates);
+                         });
+                         doubleVisitsDetailsDiv.appendChild(doubleVisitItem);
+                     }
                 } else {
-                    doubleVisitList.innerHTML = `<li>No double visits recorded for this month.</li>`;
+                    doubleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No double visits recorded this month.</p>`;
+                }
+                
+                // Render single visit details
+                singleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Single Visits</h4>`;
+                const singleVisitDates = Object.keys(analysis.visits.single);
+                if (singleVisitDates.length > 0) {
+                     const singleVisitItem = document.createElement('div');
+                     singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                     singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${singleVisitDates.length} day(s)`;
+                     singleVisitItem.addEventListener('click', () => {
+                         showDatesModal(`Single Visit Dates`, singleVisitDates);
+                     });
+                     singleVisitsDetailsDiv.appendChild(singleVisitItem);
+                } else {
+                    singleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No single visits recorded this month.</p>`;
+                }
+                
+                // Render event details section
+                eventsDetailsDiv.innerHTML = '';
+                const eventTypes = Object.keys(analysis.events);
+                if (eventTypes.length > 0) {
+                    eventTypes.forEach(eventType => {
+                        const eventDates = Object.keys(analysis.events[eventType]);
+                        const eventItem = document.createElement('div');
+                        eventItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                        eventItem.innerHTML = `<span class="font-bold">${eventType.replace('Event (', '').replace(')', '')}:</span> ${eventDates.length} day(s)`;
+                        eventItem.addEventListener('click', () => {
+                             showDatesModal(`${eventType.replace('Event (', '').replace(')', '')} Dates`, eventDates);
+                         });
+                         eventsDetailsDiv.appendChild(eventItem);
+                    });
+                } else {
+                    eventsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No events recorded this month.</p>`;
+                }
+                
+                // Render leave details section
+                leavesDetailsDiv.innerHTML = '';
+                const leaveTypes = Object.keys(analysis.leaves);
+                if (leaveTypes.length > 0) {
+                    leaveTypes.forEach(leaveType => {
+                        const leaveDates = Object.keys(analysis.leaves[leaveType]);
+                        const leaveItem = document.createElement('div');
+                        leaveItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                        leaveItem.innerHTML = `<span class="font-bold">${leaveType.replace('Leave (', '').replace(')', '')}:</span> ${leaveDates.length} day(s)`;
+                        leaveItem.addEventListener('click', () => {
+                             showDatesModal(`${leaveType.replace('Leave (', '').replace(')', '')} Dates`, leaveDates);
+                         });
+                         leavesDetailsDiv.appendChild(leaveItem);
+                    });
+                } else {
+                    leavesDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No leaves recorded this month.</p>`;
                 }
 
-                const chartLabels = ['Single Visits', 'Double Visits', ...Object.keys(analysis.events), ...Object.keys(analysis.leaves)];
-                const chartData = [analysis.visits.single, analysis.visits.double, ...Object.values(analysis.events), ...Object.values(analysis.leaves)];
+                // Chart data from activityCounts
+                const chartLabels = Object.keys(activityCounts);
+                const chartData = Object.values(activityCounts);
+                
+                // Filter out labels and data with a count of 0 for a cleaner chart
+                const filteredChartData = [];
+                const filteredChartLabels = [];
+                for (let i = 0; i < chartData.length; i++) {
+                    if (chartData[i] > 0) {
+                        filteredChartData.push(chartData[i]);
+                        filteredChartLabels.push(chartLabels[i]);
+                    }
+                }
+
 
                 if (myChart) {
                     myChart.destroy();
@@ -1111,20 +1489,20 @@
                 myChart = new Chart(activityChartCtx, {
                     type: 'pie',
                     data: {
-                        labels: chartLabels,
+                        labels: filteredChartLabels,
                         datasets: [{
                             label: 'Monthly Activity Report',
-                            data: chartData,
+                            data: filteredChartData,
                             backgroundColor: [
-                                '#3B82F6',
-                                '#6366F1',
-                                '#8B5CF6',
-                                '#EC4899',
-                                '#F43F5E',
-                                '#EF4444',
-                                '#F97316',
-                                '#EAB308',
-                                '#22C55E',
+                                '#3B82F6', // Single Visits
+                                '#6366F1', // Double Visits
+                                '#8B5CF6', // Meeting
+                                '#EC4899', // Event
+                                '#F43F5E', // Admin Work
+                                '#EF4444', // Annual Leave
+                                '#F97316', // Sick Leave
+                                '#EAB308', // Casual Leave
+                                '#22C55E', // Official Leave
                             ],
                             hoverOffset: 4
                         }]
@@ -1133,59 +1511,20 @@
                         responsive: true,
                         plugins: {
                             legend: {
-                                position: 'top',
+                                position: 'right', // Change to 'right' for vertical legend
                             },
                             title: {
                                 display: true,
                                 text: 'Monthly Activity Breakdown'
                             }
-                        }
+                        },
+                         maintainAspectRatio: false, // Prevents stretching
                     }
                 });
 
-                reportContentDiv.classList.add('hidden');
-                analysisPageDiv.classList.remove('hidden');
-                analysisPageDiv.classList.add('active');
+                analysisSummarySection.classList.remove('hidden');
             };
-
-            analyzeButton.addEventListener('click', renderAnalysisPage);
-
-            backButton.addEventListener('click', () => {
-                analysisPageDiv.classList.add('hidden');
-                analysisPageDiv.classList.remove('active');
-                reportContentDiv.classList.remove('hidden');
-                if (myChart) {
-                    myChart.destroy();
-                }
-            });
-
-            printButton.addEventListener('click', () => {
-                window.print();
-            });
-
-            downloadXLSXButton.addEventListener('click', async () => {
-                const dmName = dmNameSelect.value;
-                if (!dmName) {
-                    showMessage('Error', 'Please select a District Manager before downloading.');
-                    return;
-                }
-
-                const { data: dmReports, error } = await supabase
-                    .from(REPORTS_TABLE)
-                    .select('*')
-                    .eq('dm_name', dmName);
-
-                if (error || dmReports.length === 0) {
-                    showMessage('Error', 'No data to download for the selected DM.');
-                    return;
-                }
-
-                const worksheet = XLSX.utils.json_to_sheet(dmReports);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Monthly Report');
-                XLSX.writeFile(workbook, `Monthly Report for ${dmName}.xlsx`);
-            });
-
+            
             // This is a new event listener to handle messages from the parent window.
             // The `postMessage` from the parent will trigger this code.
             window.addEventListener('message', async function(event) {
@@ -1201,7 +1540,7 @@
             async function initializeReportSystem(user) {
                 // First, fetch the Google Sheet data to get the full list of DMs.
                 await fetchData();
-                
+
                 dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
 
                 if (user.title.toLowerCase() === 'admin') {
