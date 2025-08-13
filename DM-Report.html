@@ -707,8 +707,6 @@
                     dmNameSelect.innerHTML = `<option value="" disabled selected>Failed to load data</option>`;
                 }
             };
-            
-            await fetchData();
 
             // Function to fetch all reports from Supabase and render them
             const fetchReportsFromSupabase = async (dmName = '') => {
@@ -756,7 +754,7 @@
                 const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                 brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
             };
-
+            
             // Event listener for Med Rep dropdown to populate brick dropdowns - Moved out of `updateAssociatedDropdowns`
             medRepNameSelect.addEventListener('change', (e) => {
                 const selectedMedRep = e.target.value;
