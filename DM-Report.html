@@ -68,8 +68,8 @@
             overflow-y: auto;
         }
         @media print {
-            body > *:not(#report-content, #monthly-details-tab-content, #main-app) {
-                display: none;
+            body > *:not(#main-app) {
+                display: none !important;
             }
             #monthly-details-tab-content.hidden, #dm-report-tab-content.hidden {
                 display: block !important;
@@ -82,11 +82,8 @@
                 max-width: none;
                 width: 100%;
             }
-            .tab-button, .flex.justify-between.items-center.mb-4 {
-                display: none;
-            }
-            .print-hidden {
-                display: none;
+            .print-hidden, .flex.justify-between.items-center.mb-4.print-hidden {
+                display: none !important;
             }
         }
         /* CSS to improve the rendering of the select dropdown */
@@ -684,7 +681,6 @@
                     option.textContent = name;
                     dmNameSelect.appendChild(option);
                 });
-                dmNameSelect.disabled = false;
             };
 
             // Function to fetch and parse CSV data
@@ -704,9 +700,6 @@
 
                             // Map to specified column indices: B (index 1)
                             allDmNames = [...new Set(allSheetData.map(item => item[1]).filter(Boolean))];
-
-                            // Populate the dropdown once the data is ready
-                            populateDmDropdown(allDmNames);
                         }
                     });
                 } catch (error) {
@@ -762,23 +755,23 @@
                 // Populate all bricks for the selected DM in the single visit form
                 const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                 brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
-
-                // Event listener for Med Rep dropdown to populate brick dropdowns
-                medRepNameSelect.addEventListener('change', (e) => {
-                    const selectedMedRep = e.target.value;
-                    const filteredBricks = allSheetData.filter(row => row[3] === selectedMedRep).map(item => item[9]).filter(Boolean);
-                    const uniqueBricks = [...new Set(filteredBricks)];
-
-                    const brickOptions = uniqueBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                    brickDoubleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
-                    brickDoubleVisitsSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
-
-                    doubleVisitModeDiv.classList.remove('hidden');
-                    manualDoubleVisitForm.classList.add('hidden');
-                    visitsModalTriggerDiv.classList.add('hidden');
-                    doubleVisitModeRadios.forEach(radio => radio.checked = false);
-                });
             };
+
+            // Event listener for Med Rep dropdown to populate brick dropdowns - Moved out of `updateAssociatedDropdowns`
+            medRepNameSelect.addEventListener('change', (e) => {
+                const selectedMedRep = e.target.value;
+                const filteredBricks = allSheetData.filter(row => row[3] === selectedMedRep).map(item => item[9]).filter(Boolean);
+                const uniqueBricks = [...new Set(filteredBricks)];
+
+                const brickOptions = uniqueBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                brickDoubleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
+                brickDoubleVisitsSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
+
+                doubleVisitModeDiv.classList.remove('hidden');
+                manualDoubleVisitForm.classList.add('hidden');
+                visitsModalTriggerDiv.classList.add('hidden');
+                doubleVisitModeRadios.forEach(radio => radio.checked = false);
+            });
 
             // Event listener for DM name dropdown
             dmNameSelect.addEventListener('change', () => {
@@ -1177,6 +1170,10 @@
                 renderReports(submittedReports);
                 selectedVisitsInput.value = '';
                 reportDetailsSection.classList.add('hidden');
+                // Re-enable the activity radios after reset if a DM is selected.
+                if (dmNameSelect.value) {
+                    activityRadios.forEach(radio => radio.disabled = false);
+                }
             });
 
             // Retrieve button functionality
