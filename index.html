@@ -718,19 +718,6 @@
             object-fit: cover;
         }
 
-        .intro-logo-container::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 1.5s linear infinite;
-        }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -1276,46 +1263,60 @@
         // Supabase configuration from your provided keys
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+
+        // Initialize Supabase client
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let currentActiveViewId = null;
-        let loggedInUser = null;
-        let googleSheetData = [];
-        let lastPageHistory = [];
+
+        // Global variables to manage application state
+        let currentActiveViewId = null; // Stores the ID of the currently active full-page view
+        // Stores user data: { username, title }
+        let loggedInUser = null; 
+        // googleSheetData is no longer used for user card display, but kept if other parts of the app need it.
+        let googleSheetData = []; 
+        let lastPageHistory = []; // To track navigation for the back button
+
+        // Google Sheet URL (kept for potential future use or other app parts)
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
+        // Configuration for all pages and their permissions
         const navConfig = {
             'home': {
                 pages: [
-                    // FIX: Corrected file names to match the attached image
                     { id: 'crm', title: 'CRM', subtitle: 'Hcps related affairs.', icon: '📊', viewId: 'crmView', fileName: 'reps crm.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'dashboard', title: 'Dashboard', subtitle: 'View key performance indicators and analytics.', icon: '📈', viewId: 'dashboardView', fileName: 'final dashboard.html', roles: ['admin', 'District Manager'] },
-                    {
-                        id: 'dm-crm',
-                        title: 'DM CRM',
-                        subtitle: 'District Manager related affairs.',
-                        icon: '�',
-                        viewId: 'dmCrmView',
-                        fileName: null,
+                    { 
+                        id: 'dm-crm', 
+                        title: 'DM CRM', 
+                        subtitle: 'District Manager related affairs.', 
+                        icon: '👔', 
+                        viewId: 'dmCrmView', 
+                        fileName: null, 
                         isGroup: true,
                         roles: ['admin', 'District Manager'],
                         subPages: [
                             { id: 'dm-planning', title: 'DM Planning', subtitle: 'Plan and schedule district manager activities.', icon: '📅', viewId: 'nestedIframeView', fileName: 'DM-Plan.html', isNested: true, roles: ['admin', 'District Manager'] },
-                            { id: 'dm-report', title: 'DM Report', subtitle: 'View and generate reports for the district.', icon: '📄', viewId: 'nestedIframeView', fileName: 'DM-Report.html', isNested: true, roles: ['admin', 'District Manager'] }
+                            { id: 'dm-report', title: 'DM Report', subtitle: 'View and generate reports for the district.', icon: '📄', viewId: 'nestedIframeView', fileName: 'DM-Report.html', isNested: true, roles: ['admin', 'District Manager'] },
+                            { id: 'coaching-report', title: 'Coaching Report', subtitle: 'Access coaching and performance reports.', icon: '🎓', viewId: 'nestedIframeView', fileName: null, isNested: true, roles: ['admin', 'District Manager'] }
                         ]
                     },
-                    { id: 'master-list', title: 'Master List', subtitle: 'View and manage the master data list.', icon: '📋', viewId: 'masterListView', fileName: 'master list.html', roles: ['admin', 'District Manager'] },
                     { id: 'upa-codes', title: 'UPA Codes', subtitle: 'Access UPA Codes and affairs.', icon: '🏥', viewId: 'upaCodesView', fileName: 'upa-codes.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'price-list', title: 'Price List', subtitle: 'products pricing information.', icon: '💲', viewId: 'priceListView', fileName: 'price-list.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'products-knowledge', title: 'Products Knowledge', subtitle: 'Detailed information about our products.', icon: '📚', viewId: 'productsKnowledgeView', fileName: 'Products knowledge.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'admin', title: 'Admin Panel', subtitle: 'Manage users and system settings.', icon: '⚙️', viewId: 'adminView', fileName: 'admin users.html', roles: ['admin'] },
+                    { id: 'master-list', title: 'Master List', subtitle: 'View and manage the master data list.', icon: '📋', viewId: 'masterListView', fileName: 'master list.html', roles: ['admin', 'District Manager'] },
                     { id: 'coming-soon', title: 'Coming Soon', subtitle: 'Exciting new features are on their way!', icon: '⏳', isPlaceholder: true, roles: ['admin', 'District Manager', 'Medical Representative'] }
                 ]
             }
         };
 
+        /**
+         * Fetches and parses the Google Sheet CSV data.
+         * This function is kept for potential future use, but its data is no longer
+         * directly used for the user card's area/governorate display as per the request.
+         */
         async function fetchGoogleSheetData() {
             try {
-                const response = await fetch(new URL(GOOGLE_SHEET_URL, window.location.href).href);
+                const response = await fetch(GOOGLE_SHEET_URL);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -1343,16 +1344,16 @@
                 const dmNameColIndex = getColumnIndex(headerRow, ['District Manager', 'DistrictManager', 'DM Name'], 1);
                 const governorateColIndex = getColumnIndex(headerRow, ['Governorate'], 2);
                 const mrNameColIndex = getColumnIndex(headerRow, ['Medical Representative', 'MedicalRep', 'MR Name', 'medical rep'], 3);
-                const areaColIndex = getColumnIndex(headerRow, ['area'], 4);
+                const areaColIndex = getColumnIndex(headerRow, ['area'], 4); 
                 const generalNameColIndex = getColumnIndex(headerRow, ['Name', 'GeneralName'], 0);
 
                 let tempSheetData = {};
 
                 dataRows.forEach((row, rowIndex) => {
                     const columns = row.split(',').map(col => col.trim());
-
+                    
                     let sheetUsername = '';
-                    let sheetTitle = '';
+                    let sheetTitle = ''; 
 
                     const dmName = columns[dmNameColIndex];
                     const mrName = columns[mrNameColIndex];
@@ -1370,7 +1371,7 @@
 
                     if (sheetUsername) {
                         const lowerCaseUsername = sheetUsername.toLowerCase();
-                        if (!tempSheetData[lowerCaseUsername]) {
+                        if (!tempSheetData[lowerCaseUsername]) { 
                             tempSheetData[lowerCaseUsername] = {
                                 username: sheetUsername,
                                 title: sheetTitle,
@@ -1379,14 +1380,14 @@
                             };
                         }
                         const currentGovernorate = columns[governorateColIndex];
-                        const currentarea = columns[areaColIndex];
+                        const currentarea = columns[areaColIndex]; 
 
                         if (currentGovernorate) {
                             currentGovernorate.split(',').forEach(g => {
                                 if (g.trim()) tempSheetData[lowerCaseUsername].governorates.add(g.trim());
                             });
                         }
-                        if (currentarea) {
+                        if (currentarea) { 
                             currentarea.split(',').forEach(a => {
                                 if (a.trim()) tempSheetData[lowerCaseUsername].areas.add(a.trim());
                             });
@@ -1396,7 +1397,7 @@
 
                 googleSheetData = Object.values(tempSheetData).map(entry => ({
                     username: entry.username,
-                    title: entry.title,
+                    title: entry.title, 
                     governorate: Array.from(entry.governorates),
                     area: Array.from(entry.areas)
                 }));
@@ -1407,21 +1408,31 @@
             }
         }
 
+        /**
+         * Updates the user card with logged-in user's information (only name and title from Supabase).
+         */
         function updateAndShowUserCard() {
             const userCard = document.getElementById('userCard');
             const userCardName = document.getElementById('userCardName');
             const userCardTitle = document.getElementById('userCardTitle');
-            const userCardLocation = document.getElementById('userCardLocation');
+            const userCardLocation = document.getElementById('userCardLocation'); // Keep reference to clear it
+
             if (loggedInUser) {
                 userCardName.textContent = loggedInUser.username;
                 userCardTitle.textContent = loggedInUser.title;
-                if (userCardLocation) userCardLocation.textContent = '';
+                if (userCardLocation) userCardLocation.textContent = ''; // Ensure it's empty
                 userCard.classList.remove('hidden');
             } else {
                 userCard.classList.add('hidden');
             }
         }
 
+        /**
+         * Displays a blurred full-page message overlay.
+         * @param {string} message The message to display.
+         * @param {number} duration The duration in milliseconds to show the message.
+         * @param {function} callback Optional callback function to execute after the message disappears.
+         */
         function showBlurredMessage(message, duration, callback = null) {
             const fullPageMessageOverlay = document.getElementById('fullPageMessageOverlay');
             const fullPageOverlayMessage = document.getElementById('fullPageOverlayMessage');
@@ -1432,45 +1443,62 @@
             setTimeout(() => {
                 fullPageMessageOverlay.classList.remove('show');
                 if (callback) {
-                    setTimeout(callback, 400);
+                    setTimeout(callback, 400); // Small delay to allow fade out transition
                 }
             }, duration);
         }
 
+        /**
+         * Displays the login page and hides the main application content.
+         * Clears any stored user data and page state.
+         */
         function showLoginPage() {
             document.getElementById('loginPage').classList.remove('hidden');
             document.getElementById('appContent').classList.add('hidden');
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
-            localStorage.clear();
-            sessionStorage.clear();
+            // Clear all relevant local storage data on logout
+            localStorage.clear(); // Clears all localStorage for this domain
+            sessionStorage.clear(); // Clears all sessionStorage for this domain
             loggedInUser = null;
             currentActiveViewId = null;
-            updateAndShowUserCard();
+            updateAndShowUserCard(); // Hide user card on logout
             console.log('Showing login page.');
-            closeSideMenu();
+            closeSideMenu(); // Close side menu if open
             lastPageHistory = [];
         }
 
+        /**
+         * Displays the main application content and hides the login page.
+         * Applies role-based UI restrictions.
+         */
         function showAppContent() {
             document.getElementById('loginPage').classList.add('hidden');
             document.getElementById('appContent').classList.remove('hidden');
             console.log('Showing app content.');
             applyUserPermissions();
-            updateAndShowUserCard();
-            populateSideMenu();
+            updateAndShowUserCard(); // Show user card when app content is visible
+            populateSideMenu(); // Populate side menu on app content load
         }
 
+        /**
+         * Applies UI restrictions (hiding/disabling cards and buttons) based on the logged-in user's title.
+         */
         function applyUserPermissions() {
+            // Renders the main grid based on the user's role
             renderMainGrid();
+            // Renders the side menu based on the user's role
             populateSideMenu();
         }
 
+        /**
+         * Renders the main grid cards based on user permissions.
+         */
         function renderMainGrid() {
             const homeGrid = document.querySelector('#homeView .home-grid');
             const pages = navConfig.home.pages;
-            homeGrid.innerHTML = '';
+            homeGrid.innerHTML = ''; // Clear existing cards
 
             const userRole = loggedInUser ? loggedInUser.title : null;
 
@@ -1505,6 +1533,7 @@
                 }
             });
 
+            // Re-attach event listeners to the new cards
             document.querySelectorAll('.main-card').forEach(card => {
                 card.addEventListener('click', function() {
                     const page = this.dataset.page;
@@ -1516,7 +1545,10 @@
                 });
             });
         }
-
+        
+        /**
+         * Handles the user login process by fetching credentials from Supabase.
+         */
         async function handleLogin() {
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
@@ -1533,8 +1565,8 @@
             try {
                 const { data, error } = await supabase
                     .from('users')
-                    .select('username, title, password')
-                    .eq('username', usernameInput)
+                    .select('username, title, password') 
+                    .eq('username', usernameInput) 
                     .limit(1);
 
                 let supabaseUser = null;
@@ -1549,7 +1581,7 @@
                     return;
                 }
 
-                // FIX: Trim the password from Supabase and compare
+                // FIX: Trim the password from Supabase to prevent mismatches from trailing spaces
                 if (supabaseUser.password.trim() !== passwordInput) {
                     loginError.textContent = 'Invalid username or password.';
                     loginError.style.display = 'block';
@@ -1559,8 +1591,8 @@
 
                 console.log('Supabase user data:', supabaseUser);
 
-                loggedInUser = {
-                    username: supabaseUser.username,
+                loggedInUser = { 
+                    username: supabaseUser.username, 
                     title: supabaseUser.title
                 };
                 localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
@@ -1568,7 +1600,7 @@
                 sessionStorage.setItem('dashboardPassword', passwordInput);
 
                 console.log('Final loggedInUser object:', loggedInUser);
-
+                
                 showBlurredMessage(`Welcome ${loggedInUser.username}!`, 1500, showAppContent);
 
             } catch (err) {
@@ -1578,30 +1610,37 @@
             }
         }
 
+        /**
+         * Handles user logout. Clears session and returns to login page.
+         */
         function handleLogout() {
             console.log('User logged out.');
             showBlurredMessage('See you soon!', 1500, showLoginPage);
         }
 
+        /**
+         * Shows the home view and hides any active full-page view.
+         * Resets the current page in local storage to 'home'.
+         */
         function showHome() {
             console.log('Showing home view');
             const homeView = document.getElementById('homeView');
             const backButton = document.getElementById('backButton');
             const logoutButton = document.getElementById('logoutButton');
-
+            
             if (homeView) {
                 homeView.classList.remove('hidden');
             }
-
+            
             if (backButton) {
                 backButton.classList.add('hidden');
             }
 
             if (loggedInUser) {
-                applyUserPermissions();
+                applyUserPermissions(); // Re-apply permissions to ensure correct card visibility
                 logoutButton.classList.remove('hidden');
             } else {
-                logoutButton.classList.add('hidden');
+                 logoutButton.classList.add('hidden');
             }
 
             if (currentActiveViewId) {
@@ -1612,39 +1651,50 @@
                         activeView.classList.add('hidden');
                         const iframe = activeView.querySelector('iframe');
                         const demoContent = activeView.querySelector('.demo-content');
-                        if (iframe) iframe.src = 'about:blank';
+                        if (iframe) iframe.classList.add('hidden');
                         if (demoContent) demoContent.classList.remove('hidden');
+                        
+                        // Clear iframe source
+                        if (iframe) {
+                            iframe.src = 'about:blank';
+                        }
                     }, 300);
                 }
                 currentActiveViewId = null;
             }
-
+            
             localStorage.setItem('currentPage', 'home');
-            lastPageHistory = [];
-            closeSideMenu();
+            lastPageHistory = []; // Clear history when going to home
+            closeSideMenu(); // Close side menu when navigating home
         }
 
+        /**
+         * Loads a specific page view into its corresponding iframe.
+         * @param {string} page - The page identifier (e.g., 'crm', 'dashboard').
+         */
         function loadPage(page) {
+            // Fix: Add a check for invalid page identifiers at the start
             if (!page || page === 'null') {
                 console.error('Error: Invalid page identifier. Returning to home.');
                 showHome();
                 return;
             }
             console.log(`Attempting to load page: ${page}`);
-
-            const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
-            const config = allPages.find(p => p.id === page);
+            
+            const pages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
+            const config = pages.find(p => p.id === page);
 
             if (!config || (config.roles && !config.roles.includes(loggedInUser.title))) {
                 console.error(`Error: Page "${page}" is restricted or unknown.`);
+                // Show a message to the user that they don't have permission
                 showBlurredMessage('You do not have permission to view this page.', 2000);
                 return;
             }
 
-            const { viewId, fileName, isNested } = config;
-            
-            // Push current page to history if not home and not a nested page
-            if (currentActiveViewId && currentActiveViewId !== 'homeView' && !isNested) {
+            const { viewId, displayName, fileName, isNested } = config;
+
+            // Push current page to history if not home or a nested page
+            if (currentActiveViewId !== 'homeView' && !isNested) {
                 lastPageHistory.push(currentActiveViewId);
             }
 
@@ -1662,49 +1712,56 @@
 
             homeView.classList.add('hidden');
             backButton.classList.remove('hidden');
-            logoutButton.classList.add('hidden');
+            logoutButton.classList.add('hidden'); 
 
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
-                    prevActiveView.classList.add('hidden');
-                    const prevIframe = prevActiveView.querySelector('iframe');
-                    if (prevIframe) prevIframe.src = 'about:blank';
+                    setTimeout(() => {
+                        prevActiveView.classList.add('hidden');
+                        const prevIframe = prevActiveView.querySelector('iframe');
+                        if (prevIframe) prevIframe.src = 'about:blank';
+                    }, 300);
                 }
             }
 
             currentActiveViewId = viewId;
             targetView.classList.remove('hidden');
-            targetView.classList.add('active');
+            setTimeout(() => targetView.classList.add('active'), 10);
 
+            // Handle the DM CRM page which contains a sub-grid
             if (page === 'dm-crm') {
                 const dmCrmSubGrid = document.getElementById('dmCrmSubGrid');
                 const loadingOverlay = dmCrmView.querySelector('.loading');
                 if (dmCrmSubGrid) renderSubCards(dmCrmSubGrid, navConfig.home.pages.find(p => p.id === 'dm-crm').subPages);
                 if (loadingOverlay) loadingOverlay.classList.remove('show');
                 localStorage.setItem('currentPage', page);
-            } else if (isNested) {
+            } 
+            // Handle the nested iframes for DM CRM sub-pages
+            else if (isNested) {
                 const iframe = nestedIframeView.querySelector('iframe');
                 const loadingOverlay = nestedIframeView.querySelector('.loading');
                 const errorState = nestedIframeView.querySelector('.error-state');
+                const demoContent = nestedIframeView.querySelector('.demo-content');
 
                 if (dmCrmView) dmCrmView.classList.add('hidden');
                 if (iframe) iframe.classList.add('hidden');
+                if (demoContent) demoContent.classList.add('hidden');
                 if (loadingOverlay) loadingOverlay.classList.add('show');
                 if (errorState) errorState.classList.remove('show');
 
                 let iframeFileName = fileName || '';
-
+                
                 if (iframeFileName) {
-                    // FIX: Construct a robust URL before setting iframe.src
                     iframe.src = iframeFileName;
                     iframe.onload = function() {
-                        console.log(`${config.title} iframe loaded successfully from ${iframeFileName}.`);
+                        console.log(`${displayName} iframe loaded successfully from ${iframeFileName}.`);
                         loadingOverlay.classList.remove('show');
                         iframe.classList.remove('hidden');
                         localStorage.setItem('currentPage', page);
 
+                        // Post a message to the iframe with user data and permissions
                         if (page === 'dm-planning' && loggedInUser) {
                             iframe.contentWindow.postMessage({
                                 type: 'dmPlanningUserPermissions',
@@ -1727,12 +1784,23 @@
                     };
 
                     iframe.onerror = function() {
-                        console.error(`Failed to load ${config.title} iframe from ${iframeFileName}. Displaying error state.`);
+                        console.error(`Failed to load ${displayName} iframe from ${iframeFileName}. Displaying error state.`);
                         loadingOverlay.classList.remove('show');
                         errorState.classList.add('show');
                     };
+                } else {
+                    // Show demo content if no file is specified
+                    loadingOverlay.classList.remove('show');
+                    iframe.classList.add('hidden');
+                    if (demoContent) {
+                        demoContent.classList.remove('hidden');
+                        demoContent.querySelector('h2').textContent = config.displayNameOverride;
+                        demoContent.querySelector('p').textContent = `This would be your ${config.displayNameOverride} interface. Currently showing demo content since the external file is not available.`;
+                    }
                 }
-            } else {
+            }
+            // Handle other pages with direct iframes
+            else {
                 const loadingOverlay = targetView.querySelector('.loading');
                 const errorState = targetView.querySelector('.error-state');
                 const iframeContainer = targetView.querySelector('.iframe-container-fpv');
@@ -1741,45 +1809,60 @@
 
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
+                demoContent.classList.add('hidden');
+                iframe.classList.remove('hidden');
                 
-                // Fix: Check if iframe exists before setting its class.
-                if (iframe) iframe.classList.add('hidden');
-                
-                // FIX: No need for `new URL()` here, as the environment provides a safe URL for the uploaded files.
-                fetch(fileName)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('File not found');
-                        }
-                        return response.text();
-                    })
-                    .then(content => {
-                        targetView.innerHTML = content;
-                        loadingOverlay.classList.remove('show');
+                localStorage.setItem('currentPage', page);
+                iframe.src = fileName;
 
-                        const scripts = targetView.querySelectorAll('script');
-                        scripts.forEach(script => {
-                            const newScript = document.createElement('script');
-                            if (script.src) {
-                                newScript.src = script.src;
-                            } else {
-                                newScript.textContent = script.textContent;
-                            }
-                            document.body.appendChild(newScript).parentNode.removeChild(newScript);
-                        });
-                        
-                        localStorage.setItem('currentPage', page);
-                        console.log(`${config.title} content loaded successfully from ${fileName}.`);
-                    })
-                    .catch(error => {
-                        console.error(`Failed to load ${config.title} from ${fileName}. Displaying error state.`, error);
-                        loadingOverlay.classList.remove('show');
-                        errorState.classList.add('show');
-                    });
+                iframe.onload = function() {
+                    console.log(`${displayName} iframe loaded successfully from ${fileName}.`);
+                    loadingOverlay.classList.remove('show');
+                    errorState.classList.remove('show');
+
+                    // THIS IS THE CRUCIAL PART: Sending user data to the iframe
+                    if (loggedInUser && (page === 'crm' || page === 'dashboard' || page === 'master-list')) {
+                        console.log(`Sending login data to ${displayName} iframe via postMessage. User data:`, loggedInUser);
+                        if (page === 'dashboard') {
+                            const dashboardUsername = sessionStorage.getItem('dashboardUsername');
+                            const dashboardPassword = sessionStorage.getItem('dashboardPassword');
+                            iframe.contentWindow.postMessage({ 
+                                type: 'dashboardLogin', 
+                                username: dashboardUsername, 
+                                password: dashboardPassword,
+                                user: loggedInUser
+                            }, '*'); 
+                        } else if (page === 'crm' && loggedInUser.title === 'admin') {
+                            // For CRM, if admin, send loggedInUser and all Google Sheet data
+                            iframe.contentWindow.postMessage({ 
+                                type: 'loggedInUser', 
+                                user: loggedInUser,
+                                allGoogleSheetData: googleSheetData // Send the full data for admin
+                            }, '*');
+                        } else {
+                            // For other cases (e.g., CRM for non-admin, Master List)
+                            iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*');
+                        }
+                    }
+                };
+
+                iframe.onerror = function() {
+                    console.error(`Failed to load ${displayName} iframe from ${fileName}. Displaying demo content.`);
+                    loadingOverlay.classList.remove('show');
+                    errorState.classList.add('show');
+                    demoContent.classList.remove('hidden');
+                    iframe.classList.add('hidden');
+                };
             }
-            closeSideMenu();
+            closeSideMenu(); // Close side menu after selecting a page
         }
 
+        /**
+         * Renders a set of cards into a specified container.
+         * @param {HTMLElement} container - The DOM element to render cards into.
+         * @param {Array} pages - An array of page objects to render as cards.
+         * @param {boolean} isSubCard - Whether these are sub-cards for nested display.
+         */
         function renderSubCards(container, pages) {
             container.innerHTML = '';
             const userRole = loggedInUser ? loggedInUser.title : null;
@@ -1803,6 +1886,7 @@
                 }
             });
 
+            // Re-attach listeners for the new sub-cards
             container.querySelectorAll('.main-card').forEach(card => {
                 card.addEventListener('click', function() {
                     const page = this.dataset.page;
@@ -1813,19 +1897,28 @@
             });
         }
 
+        /**
+         * Opens the mobile side menu.
+         */
         function openSideMenu() {
             document.getElementById('sideMenuOverlay').classList.add('show');
             document.getElementById('sideMenu').classList.add('show');
         }
 
+        /**
+         * Closes the mobile side menu.
+         */
         function closeSideMenu() {
             document.getElementById('sideMenuOverlay').classList.remove('show');
             document.getElementById('sideMenu').classList.remove('show');
         }
 
+        /**
+         * Populates the side menu with cards based on main-card elements and user permissions.
+         */
         function populateSideMenu() {
             const sideMenuNav = document.querySelector('.side-menu-nav');
-            sideMenuNav.innerHTML = '';
+            sideMenuNav.innerHTML = ''; // Clear existing items
             const userRole = loggedInUser ? loggedInUser.title : null;
 
             navConfig.home.pages.forEach(page => {
@@ -1864,11 +1957,13 @@
                         groupContainer.appendChild(subItemsContainer);
                         sideMenuNav.appendChild(groupContainer);
 
+                        // Add toggle functionality for the group
                         groupToggle.addEventListener('click', () => {
                             groupToggle.classList.toggle('open');
                             subItemsContainer.classList.toggle('show');
                         });
 
+                        // Add click listeners to sub-items
                         subItemsContainer.querySelectorAll('.side-menu-sub-item').forEach(subItem => {
                             subItem.addEventListener('click', function() {
                                 loadPage(this.dataset.page);
@@ -1879,7 +1974,7 @@
                         const sideMenuCard = document.createElement('div');
                         sideMenuCard.classList.add('side-menu-card');
                         if (page.isPlaceholder) {
-                            sideMenuCard.classList.add('disabled');
+                             sideMenuCard.classList.add('disabled');
                         }
                         sideMenuCard.dataset.page = page.id;
                         sideMenuCard.innerHTML = `
@@ -1897,35 +1992,43 @@
                 }
             });
         }
-
+        
+        // Initialize the application when DOM is fully loaded
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM loaded, initializing application');
-
-            const introOverlay = document.getElementById('introOverlay');
-            const introDuration = 2500;
             
+            // Show intro animation
+            const introOverlay = document.getElementById('introOverlay');
+            // The animation duration is 3 seconds (1.5s fadeInScale + 0.5s fadeOut + 0.5s delay before fadeOut starts)
+            // The total time before login page appears is 3 seconds.
             setTimeout(() => {
                 introOverlay.classList.add('fade-out');
+                // After fade out, remove from DOM to prevent interference
                 setTimeout(() => {
                     introOverlay.remove();
-                }, 500);
-            }, introDuration);
+                }, 500); // Matches fade-out transition duration
+            }, 3000); // Total duration of animation before starting fade-out
 
+            // Fetch Google Sheet data (kept for potential other uses, not directly for user card)
             await fetchGoogleSheetData();
 
             const storedUser = localStorage.getItem('loggedInUser');
+            // Fix: Explicitly check for null and 'null' string
             const lastPage = localStorage.getItem('currentPage');
 
+            // Delay showing login/app content until after intro animation
             setTimeout(() => {
                 if (storedUser) {
                     loggedInUser = JSON.parse(storedUser);
                     showAppContent();
 
                     if (lastPage && lastPage !== 'home' && lastPage !== 'null') {
+                        // Find the page in the configuration
                         const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
                         const targetPage = allPages.find(p => p.id === lastPage);
 
                         if (targetPage && (targetPage.roles.includes(loggedInUser.title) || loggedInUser.title === 'admin')) {
+                            // If the last page was a nested page, load its parent first
                             if (targetPage.isNested) {
                                 loadPage('dm-crm');
                                 setTimeout(() => loadPage(lastPage), 500);
@@ -1943,16 +2046,15 @@
                 } else {
                     showLoginPage();
                 }
-            }, 3500);
+            }, 3500); // 3 seconds for intro + 0.5s for fade-out
 
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
-            document.getElementById('sideMenuLogoutButton').addEventListener('click', handleLogout);
+            document.getElementById('sideMenuLogoutButton').addEventListener('click', handleLogout); // Logout from side menu
 
             document.getElementById('backButton').addEventListener('click', function() {
-                 // FIX: The logic was flawed. Now, it correctly checks for nested pages and uses lastPageHistory.
+                // If on a nested page, go back to the parent grid
                 if (currentActiveViewId === 'nestedIframeView') {
-                    // This logic for nested pages is correct. We go back to the parent DM CRM grid.
                     const nestedIframeView = document.getElementById('nestedIframeView');
                     const dmCrmView = document.getElementById('dmCrmView');
                     if (nestedIframeView) nestedIframeView.classList.add('hidden');
@@ -1961,9 +2063,9 @@
                         dmCrmView.classList.add('active');
                         currentActiveViewId = 'dmCrmView';
                         localStorage.setItem('currentPage', 'dm-crm');
+                        // lastPageHistory.pop(); // Remove the last nested page from history
                     }
                 } else if (lastPageHistory.length > 0) {
-                     // FIX: Use the last page from the history to navigate back
                      const lastPage = lastPageHistory.pop();
                      loadPage(lastPage);
                 }
@@ -1972,11 +2074,11 @@
                 }
             });
 
+            // Mobile menu event listeners
             document.getElementById('mobileMenuButton').addEventListener('click', openSideMenu);
             document.getElementById('closeMenuButton').addEventListener('click', closeSideMenu);
-            document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
+            document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu); // Close when clicking outside menu
         });
     </script>
 </body>
 </html>
-�
