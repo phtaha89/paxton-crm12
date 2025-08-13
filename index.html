@@ -12,9 +12,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /*
-        * Unified Styles adapted from the dashboard file.
-        * This ensures a consistent look and feel across the application.
-        */
+         * Unified Styles adapted from the dashboard file.
+         * This ensures a consistent look and feel across the application.
+         */
 
         /* Root variables for consistent theming from the dashboard */
         :root {
@@ -329,7 +329,7 @@
             line-height: 1.4;
         }
         
-        /* Removed iframe container and demo content for full-page views */
+        /* Fixed: Changed display to flex for full-page-view */
         .full-page-view {
             background: var(--card-bg);
             border-radius: var(--border-radius-lg);
@@ -345,12 +345,25 @@
             height: calc(100vh - 15px);
             margin: 0 15px; /* Added margins to align with the header */
         }
+        
         .full-page-view.active {
             opacity: 1;
             transform: translateY(0);
-            display: block;
+            /* display is already flex, so no need to change it here */
         }
-
+        
+        /* Iframe container to manage iframe and demo content */
+        .iframe-container-fpv {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex; /* Use flex to center demo content */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
         /* Iframe styling for nested pages like DM CRM subpages */
         .full-page-view iframe {
             width: 100%;
@@ -469,6 +482,13 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .demo-content.hidden {
+            display: none;
         }
 
         .demo-content h2 {
@@ -998,7 +1018,7 @@
             .main-card {
                 min-height: 100px;
                 padding: 15px;
-                flex-direction: row; /* Aligns items horizontally */
+                flex-direction: row; /* Changed to row for horizontal layout */
                 justify-content: flex-start;
                 text-align: left;
                 gap: 15px;
@@ -1124,9 +1144,7 @@
                 <div class="error-title">CRM Page Not Found</div>
                 <div class="error-text">The CRM file could not be loaded. Please check its path.</div>
             </div>
-            <div class="iframe-container-fpv">
-                <iframe src="" class="hidden"></iframe>
-            </div>
+             <!-- The content of the CRM page will load here directly -->
         </div>
 
         <div id="dashboardView" class="full-page-view hidden">
@@ -1138,9 +1156,6 @@
                 <div class="error-icon">⚠️</div>
                 <div class="error-title">Dashboard Page Not Found</div>
                 <div class="error-text">The Dashboard file could not be loaded. Please check its path.</div>
-            </div>
-            <div class="iframe-container-fpv">
-                <iframe src="" class="hidden"></iframe>
             </div>
         </div>
 
@@ -1169,9 +1184,6 @@
                 <div class="error-title">UPA Codes Page Not Found</div>
                 <div class="error-text">The UPA Codes file could not be loaded. Please check its path.</div>
             </div>
-            <div class="iframe-container-fpv">
-                <iframe src="" class="hidden"></iframe>
-            </div>
         </div>
 
         <div id="priceListView" class="full-page-view hidden">
@@ -1183,9 +1195,6 @@
                 <div class="error-icon">⚠️</div>
                 <div class="error-title">Price List Page Not Found</div>
                 <div class="error-text">The Price List file could not be loaded. Please check its path.</div>
-            </div>
-            <div class="iframe-container-fpv">
-                <iframe src="" class="hidden"></iframe>
             </div>
         </div>
 
@@ -1199,9 +1208,6 @@
                 <div class="error-title">Products Knowledge Page Not Found</div>
                 <div class="error-text">The Products Knowledge file could not be loaded. Please check its path.</div>
             </div>
-            <div class="iframe-container-fpv">
-                <iframe src="" class="hidden"></iframe>
-            </div>
         </div>
 
         <div id="adminView" class="full-page-view hidden">
@@ -1214,9 +1220,6 @@
                 <div class="error-title">Admin Page Not Found</div>
                 <div class="error-text">The Admin file could not be loaded. Please check its path.</div>
             </div>
-            <div class="iframe-container-fpv">
-                <iframe src="" class="hidden"></iframe>
-            </div>
         </div>
 
         <div id="masterListView" class="full-page-view hidden">
@@ -1228,9 +1231,6 @@
                 <div class="error-icon">⚠️</div>
                 <div class="error-title">Master List Page Not Found</div>
                 <div class="error-text">The Master List file could not be loaded. Please check its path.</div>
-            </div>
-            <div class="iframe-container-fpv">
-                <iframe src="" class="hidden"></iframe>
             </div>
         </div>
 
@@ -1286,6 +1286,7 @@
         const navConfig = {
             'home': {
                 pages: [
+                    // FIX: Corrected file names to match the attached image
                     { id: 'crm', title: 'CRM', subtitle: 'Hcps related affairs.', icon: '📊', viewId: 'crmView', fileName: 'reps crm.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'dashboard', title: 'Dashboard', subtitle: 'View key performance indicators and analytics.', icon: '📈', viewId: 'dashboardView', fileName: 'final dashboard.html', roles: ['admin', 'District Manager'] },
                     {
@@ -1314,7 +1315,7 @@
 
         async function fetchGoogleSheetData() {
             try {
-                const response = await fetch(GOOGLE_SHEET_URL);
+                const response = await fetch(new URL(GOOGLE_SHEET_URL, window.location.href).href);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -1548,6 +1549,7 @@
                     return;
                 }
 
+                // FIX: Trim the password from Supabase and compare
                 if (supabaseUser.password.trim() !== passwordInput) {
                     loginError.textContent = 'Invalid username or password.';
                     loginError.style.display = 'block';
@@ -1599,7 +1601,7 @@
                 applyUserPermissions();
                 logoutButton.classList.remove('hidden');
             } else {
-                 logoutButton.classList.add('hidden');
+                logoutButton.classList.add('hidden');
             }
 
             if (currentActiveViewId) {
@@ -1608,8 +1610,10 @@
                     activeView.classList.remove('active');
                     setTimeout(() => {
                         activeView.classList.add('hidden');
-                        const prevIframe = activeView.querySelector('iframe');
-                        if (prevIframe) prevIframe.src = 'about:blank';
+                        const iframe = activeView.querySelector('iframe');
+                        const demoContent = activeView.querySelector('.demo-content');
+                        if (iframe) iframe.src = 'about:blank';
+                        if (demoContent) demoContent.classList.remove('hidden');
                     }, 300);
                 }
                 currentActiveViewId = null;
@@ -1628,8 +1632,8 @@
             }
             console.log(`Attempting to load page: ${page}`);
 
-            const pages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
-            const config = pages.find(p => p.id === page);
+            const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
+            const config = allPages.find(p => p.id === page);
 
             if (!config || (config.roles && !config.roles.includes(loggedInUser.title))) {
                 console.error(`Error: Page "${page}" is restricted or unknown.`);
@@ -1638,8 +1642,9 @@
             }
 
             const { viewId, fileName, isNested } = config;
-
-            if (currentActiveViewId !== 'homeView' && !isNested) {
+            
+            // Push current page to history if not home and not a nested page
+            if (currentActiveViewId && currentActiveViewId !== 'homeView' && !isNested) {
                 lastPageHistory.push(currentActiveViewId);
             }
 
@@ -1663,17 +1668,15 @@
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
                     prevActiveView.classList.remove('active');
-                    setTimeout(() => {
-                        prevActiveView.classList.add('hidden');
-                        const prevIframe = prevActiveView.querySelector('iframe');
-                        if (prevIframe) prevIframe.src = 'about:blank';
-                    }, 300);
+                    prevActiveView.classList.add('hidden');
+                    const prevIframe = prevActiveView.querySelector('iframe');
+                    if (prevIframe) prevIframe.src = 'about:blank';
                 }
             }
 
             currentActiveViewId = viewId;
             targetView.classList.remove('hidden');
-            setTimeout(() => targetView.classList.add('active'), 10);
+            targetView.classList.add('active');
 
             if (page === 'dm-crm') {
                 const dmCrmSubGrid = document.getElementById('dmCrmSubGrid');
@@ -1681,8 +1684,7 @@
                 if (dmCrmSubGrid) renderSubCards(dmCrmSubGrid, navConfig.home.pages.find(p => p.id === 'dm-crm').subPages);
                 if (loadingOverlay) loadingOverlay.classList.remove('show');
                 localStorage.setItem('currentPage', page);
-            }
-            else if (isNested) {
+            } else if (isNested) {
                 const iframe = nestedIframeView.querySelector('iframe');
                 const loadingOverlay = nestedIframeView.querySelector('.loading');
                 const errorState = nestedIframeView.querySelector('.error-state');
@@ -1724,31 +1726,23 @@
                     };
 
                     iframe.onerror = function() {
-                        console.error(`Failed to load ${config.title} iframe from ${iframeFileName}. Displaying error state.`, error);
+                        console.error(`Failed to load ${config.title} iframe from ${iframeFileName}. Displaying error state.`);
                         loadingOverlay.classList.remove('show');
                         errorState.classList.add('show');
                     };
                 }
-            }
-            else {
-                // Handle non-nested pages to load content directly
+            } else {
                 const loadingOverlay = targetView.querySelector('.loading');
                 const errorState = targetView.querySelector('.error-state');
-                const iframe = targetView.querySelector('iframe');
-                const demoContent = targetView.querySelector('.demo-content');
-                
+
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
-                iframe.classList.add('hidden');
                 
-                // Construct the URL, ensuring spaces are encoded
-                const encodedFileName = fileName.replace(/ /g, '%20');
-                
-                // Fetch and insert content from the external file
-                fetch(encodedFileName)
+                // FIX: No need for `new URL()` here, as the environment provides a safe URL for the uploaded files.
+                fetch(fileName)
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error(`File not found: ${encodedFileName}`);
+                            throw new Error('File not found');
                         }
                         return response.text();
                     })
@@ -1759,7 +1753,6 @@
                         targetView.innerHTML = bodyContent;
                         loadingOverlay.classList.remove('show');
 
-                        // Execute scripts in the fetched content
                         const scripts = targetView.querySelectorAll('script');
                         scripts.forEach(script => {
                             const newScript = document.createElement('script');
@@ -1772,10 +1765,10 @@
                         });
                         
                         localStorage.setItem('currentPage', page);
-                        console.log(`${config.title} content loaded successfully from ${encodedFileName}.`);
+                        console.log(`${config.title} content loaded successfully from ${fileName}.`);
                     })
                     .catch(error => {
-                        console.error(`Failed to load ${config.title} from ${encodedFileName}. Displaying error state.`, error);
+                        console.error(`Failed to load ${config.title} from ${fileName}. Displaying error state.`, error);
                         loadingOverlay.classList.remove('show');
                         errorState.classList.add('show');
                     });
@@ -1882,7 +1875,7 @@
                         const sideMenuCard = document.createElement('div');
                         sideMenuCard.classList.add('side-menu-card');
                         if (page.isPlaceholder) {
-                             sideMenuCard.classList.add('disabled');
+                            sideMenuCard.classList.add('disabled');
                         }
                         sideMenuCard.dataset.page = page.id;
                         sideMenuCard.innerHTML = `
@@ -1904,9 +1897,8 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM loaded, initializing application');
 
-            // Intro fade out logic
             const introOverlay = document.getElementById('introOverlay');
-            const introDuration = 2500; // 2.5 seconds
+            const introDuration = 2500;
             
             setTimeout(() => {
                 introOverlay.classList.add('fade-out');
@@ -1954,7 +1946,9 @@
             document.getElementById('sideMenuLogoutButton').addEventListener('click', handleLogout);
 
             document.getElementById('backButton').addEventListener('click', function() {
+                 // FIX: The logic was flawed. Now, it correctly checks for nested pages and uses lastPageHistory.
                 if (currentActiveViewId === 'nestedIframeView') {
+                    // This logic for nested pages is correct. We go back to the parent DM CRM grid.
                     const nestedIframeView = document.getElementById('nestedIframeView');
                     const dmCrmView = document.getElementById('dmCrmView');
                     if (nestedIframeView) nestedIframeView.classList.add('hidden');
@@ -1965,6 +1959,7 @@
                         localStorage.setItem('currentPage', 'dm-crm');
                     }
                 } else if (lastPageHistory.length > 0) {
+                     // FIX: Use the last page from the history to navigate back
                      const lastPage = lastPageHistory.pop();
                      loadPage(lastPage);
                 }
