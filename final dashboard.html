@@ -20,6 +20,8 @@
             color: var(--text);
             background-color: #eef2f7; /* Light gray background */
             font-size: 0.9rem;
+            display: flex; /* Use flexbox for the main layout */
+            min-height: 100vh;
         }
 
         /* Root variables for consistent theming */
@@ -47,15 +49,148 @@
             --visit-time-weekly: #dc2626; /* Red for visit time */
         }
         
-        /* Common Layout Classes */
+        /* New Layout for PC: Vertical Sidebar and Content */
+        .main-container {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 250px;
+            min-width: 250px;
+            background: var(--card-bg);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            padding: 1.5rem 1rem;
+            transition: transform 0.3s ease, width 0.3s ease;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+            min-width: 70px;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            padding: 1rem;
+            transition: margin-left 0.3s ease;
+        }
+        
+        /* Sidebar Toggle Button */
+        .sidebar-toggle-button {
+            position: absolute;
+            top: 1rem;
+            right: -15px; /* Position it outside the sidebar */
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, background 0.2s ease;
+            z-index: 100;
+        }
+
+        .sidebar-toggle-button:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .sidebar-toggle-button i {
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-toggle-button i {
+            transform: rotate(180deg);
+        }
+
+        /* Sidebar Navigation Links */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0.75rem;
+            color: var(--text);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: var(--hover-bg);
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link.active {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.2);
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+            transition: font-size 0.3s ease;
+        }
+
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0.8rem 0.5rem;
+        }
+        
+        .sidebar.collapsed .nav-link span {
+            display: none;
+        }
+
+        .sidebar.collapsed .nav-link:hover span {
+             display: block; /* Show tooltip on hover */
+             position: absolute;
+             left: 70px;
+             background: rgba(0,0,0,0.8);
+             color: white;
+             padding: 0.2rem 0.5rem;
+             border-radius: 4px;
+             white-space: nowrap;
+             z-index: 10;
+        }
+
+        .sidebar-header {
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .sidebar.collapsed .sidebar-header h2 {
+            display: none;
+        }
+        
+        /* Utility Classes */
         .dashboard-container {
-            max-width: 1600px; /* Increased width for PC */
+            max-width: 1600px;
             margin: 0 auto;
             padding: 1rem;
         }
 
         .common-header {
-            background: linear-gradient(135deg, #1a365d 0%, #3182ce 100%); /* Requests header gradient */
+            background: linear-gradient(135deg, #1a365d 0%, #3182ce 100%);
             padding: 1rem 1.5rem;
             border-radius: 18px;
             margin-bottom: 1.5rem;
@@ -90,15 +225,15 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             flex-grow: 1;
             text-align: left;
-            position: relative; /* For z-index */
-            z-index: 2; /* Ensure text is above grain */
+            position: relative;
+            z-index: 2;
         }
         .common-header p {
             font-size: 0.85rem;
             opacity: 0.9;
             font-weight: 300;
-            position: relative; /* For z-index */
-            z-index: 2; /* Ensure text is above grain */
+            position: relative;
+            z-index: 2;
         }
 
         .common-card {
@@ -110,7 +245,7 @@
             transition: all 0.3s ease;
             overflow: hidden;
             border: 1px solid rgba(226, 232, 240, 0.8);
-            padding: 1rem; /* Default padding for cards */
+            padding: 1rem;
         }
 
         .common-card:hover {
@@ -179,7 +314,7 @@
         }
         .common-filter-group label {
             font-weight: 600;
-            color: #718096; /* Default label color */
+            color: #718096;
             font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 0.04em;
@@ -193,7 +328,7 @@
             transition: all 0.2s;
             width: 100%;
             color: var(--text);
-            appearance: none; /* For select dropdown arrow */
+            appearance: none;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%234a5568' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3csvg%3e");
             background-repeat: no-repeat;
             background-position: right 0.6rem center;
@@ -204,15 +339,15 @@
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
         }
-        /* Style for filter controls inside common-header */
+        
         .common-header .filter-controls .common-filter-group label {
-            color: white; /* Make labels white */
-            font-size: 0.75rem; /* Smaller label font */
+            color: white;
+            font-size: 0.75rem;
         }
         .common-header .filter-controls .common-filter-input {
-            padding: 0.35rem 0.6rem; /* Smaller padding */
-            font-size: 0.8rem; /* Smaller font size */
-            height: 32px; /* Fixed height for better alignment */
+            padding: 0.35rem 0.6rem;
+            font-size: 0.8rem;
+            height: 32px;
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
@@ -221,7 +356,7 @@
             color: rgba(255, 255, 255, 0.7);
         }
         .common-header .filter-controls .common-filter-input option {
-            background-color: #1a365d; /* Dark background for options */
+            background-color: #1a365d;
             color: white;
         }
         .common-header .filter-controls .common-filter-input:focus {
@@ -240,11 +375,11 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
         .common-button:hover {
             transform: translateY(-1px);
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
         }
         .common-button-primary {
             background: var(--primary);
@@ -275,253 +410,7 @@
         .common-button-success:hover {
             background: #16a34a;
         }
-
-        /* Login Page Styles */
-        #login-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: #91C8E4;
-        }
-
-        #login-form-container {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-        }
-
-        #login-form-container h2 {
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        #login-form-container .form-group {
-            margin-bottom: 1.25rem;
-            text-align: left;
-        }
-
-        #login-form-container label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #475569;
-            font-size: 0.825rem;
-        }
-
-        #login-form-container input, #login-form-container select {
-            width: 100%;
-            padding: 0.6rem 1rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 18px;
-            font-size: 0.75rem;
-            transition: all 0.2s;
-        }
-
-        #login-form-container input:focus, #login-form-container select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        #login-form-container button {
-            width: 100%;
-            padding: 0.5rem;
-            border: none;
-            border-radius: 18px;
-            background-color: #3b82f6;
-            color: white;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        #login-form-container button:hover {
-            background-color: #2563eb;
-        }
-
-        #login-error {
-            color: #ef4444;
-            margin-top: 1rem;
-            height: 1rem;
-            font-size: 0.825rem;
-        }
-
-        .toggle-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-            gap: 0.5rem;
-        }
-
-        .toggle-label {
-            font-size: 0.85rem;
-            color: #475569;
-            font-weight: 500;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 20px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: #3b82f6;
-        }
-
-        input:focus + .slider {
-            box-shadow: 0 0 1px #3b82f6;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(20px);
-        }
-
-        /* Tab styles */
-        .tabs {
-            display: flex;
-            margin-bottom: 1rem;
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .tab-button {
-            flex: 1;
-            min-width: fit-content;
-            padding: 10px 16px;
-            cursor: pointer;
-            text-align: center;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--secondary);
-            background-color: var(--card-bg);
-            border: none;
-            transition: all 0.3s ease;
-            position: relative;
-            outline: none;
-        }
-
-        .tab-button::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: transparent;
-            transition: background-color 0.3s ease;
-        }
-
-        .tab-button:hover {
-            background-color: var(--hover-bg);
-            color: var(--primary);
-        }
-
-        .tab-button.active {
-            color: var(--primary);
-            background-color: var(--background);
-        }
-
-        .tab-button.active::after {
-            background-color: var(--primary);
-        }
         
-        /* User Info Bar */
-        .user-info-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background-color: #fff;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        #loggedInUser {
-            font-weight: 600;
-            color: var(--text);
-            font-size: 0.85rem;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0;
-        }
-        
-        #loggedInUserGovernorates {
-            font-size: 0.7rem;
-            font-weight: 400;
-            color: #64748b;
-            margin-top: 0.2rem;
-        }
-
-        #logoutButton {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.7rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        
-        #logoutButton:hover {
-            background-color: #c53030;
-        }
-
         .tab-content {
             display: none;
             padding: 8px;
@@ -531,7 +420,6 @@
             display: block;
         }
 
-        /* KPI Dashboard Specific Styles */
         .kpi-table-tabs {
             position: relative;
             display: flex;
@@ -668,7 +556,7 @@
 
         .first-visit-of-day { background-color: #d1fae5 !important; }
         .event-training-meeting { background-color: #fed7aa !important; font-weight: bold; }
-        .leave-row { background-color: #fee2e2 !important; font-weight: bold; } /* Changed to light red */
+        .leave-row { background-color: #fee2e2 !important; font-weight: bold; }
         .am-specialty-hcp { color: #a52a2a; font-weight: bold; }
 
         .unvisited { color: #e67a00; font-weight: bold; }
@@ -744,7 +632,7 @@
             margin-bottom: 0.6rem;
             display: flex;
             justify-content: center;
-            align-items: center; /* Align items in search box */
+            align-items: center;
         }
 
         .search-box input {
@@ -763,8 +651,8 @@
             width: auto;
             flex-wrap: nowrap;
             align-items: center;
-            position: relative; /* For z-index of elements inside header */
-            z-index: 2; /* Ensure filters are above grain */
+            position: relative;
+            z-index: 2;
         }
         .filter-controls select {
             padding: 7px 10px;
@@ -804,11 +692,10 @@
             transform: rotate(60deg);
         }
 
-        /* KPI Footer Buttons */
         .kpi-footer-icon-button {
             background: none;
             border: none;
-            font-size: 1.2rem; /* Larger icon size */
+            font-size: 1.2rem;
             cursor: pointer;
             transition: color 0.2s, transform 0.2s;
             padding: 0.5rem;
@@ -838,7 +725,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            align-items: center; /* Center tables */
+            align-items: center;
         }
         .section-container {
             background: var(--card-bg);
@@ -847,7 +734,7 @@
             overflow: hidden;
             margin-bottom: 16px;
             min-width: 100%;
-            max-width: 100%; /* Ensure it doesn't overflow */
+            max-width: 100%;
         }
         .daily-report-table {
             width: 100%;
@@ -913,7 +800,7 @@
             color: #666;
         }
         .hcp-cell.event { background-color: #ffe5b4; }
-        .hcp-cell.leave-entry { background-color: #fee2e2; font-weight: bold; } /* Changed to light red */
+        .hcp-cell.leave-entry { background-color: #fee2e2; font-weight: bold; }
         .comment-box {
             display: none;
             position: relative;
@@ -937,7 +824,6 @@
             border-width: 8px;
             border-style: solid;
             border-color: #d1b8e6 transparent transparent transparent;
-            
         }
         .comment-box.top::after {
             content: '';
@@ -970,9 +856,8 @@
             border-color: transparent transparent #e6d5f5 transparent;
         }
 
-        /* Daily Report Section Headers - New Style */
         .daily-report-section-header {
-            background: linear-gradient(135deg, #0ea5e9, #38bdf8); /* Default blue gradient */
+            background: linear-gradient(135deg, #0ea5e9, #38bdf8);
             padding: 0.75rem 1rem;
             border-radius: 18px 18px 0 0;
             color: white;
@@ -1004,32 +889,27 @@
             background: linear-gradient(135deg, #10b981, #34d399);
         }
 
-        /* Daily Report Header Filter Controls */
-        #daily-report .filter-controls .common-filter-group {
-            flex-grow: 1; /* Allow groups to grow */
-            min-width: 150px; /* Ensure minimum width */
-        }
         .daily-report-icon-button {
             background: none;
             border: none;
-            font-size: 1.2rem; /* Larger icon size */
+            font-size: 1.2rem;
             cursor: pointer;
             transition: color 0.2s, transform 0.2s;
-            width: 32px; /* Same width as input */
-            height: 32px; /* Same height as input */
-            border-radius: 0.375rem; /* Match input border-radius */
+            width: 32px;
+            height: 32px;
+            border-radius: 0.375rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white; /* Icon color */
-            background-color: rgba(255, 255, 255, 0.2); /* Match input background */
-            border: 1px solid rgba(255, 255, 255, 0.3); /* Match input border */
+            color: white;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
         .daily-report-icon-button:hover {
             transform: translateY(-1px);
             opacity: 0.8;
-            color: var(--accent); /* Hover color */
+            color: var(--accent);
             background-color: rgba(255, 255, 255, 0.3);
         }
         .daily-report-header-buttons {
@@ -1038,7 +918,7 @@
             align-items: center;
             flex-wrap: wrap;
         }
-         /* Add this to your existing styles */
+        
     .clinic-hcp {
         background-color: #F0F2BD !important;
     }
@@ -1046,7 +926,10 @@
         font-weight: bold;
         color: var(--danger);
     }
-
+    .unvisited-hcp {
+        font-weight: bold;
+        color: #e67a00;
+    }
 
         /* Lists Dashboard Specific Styles */
         .custom-select {
@@ -1168,7 +1051,7 @@
             position: relative;
             overflow: hidden;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 18px 18px 0 0; /* Rounded top corners */
+            border-radius: 18px 18px 0 0;
         }
         .requests-header::before {
             content: '';
@@ -1430,7 +1313,7 @@
             font-size: 0.65rem;
             color: #718096;
             margin-top: auto;
-            border-radius: 0 0 18px 18px; /* Rounded bottom corners */
+            border-radius: 0 0 18px 18px;
         }
         .empty-state {
             text-align: center;
@@ -1459,10 +1342,9 @@
             color: #718096;
         }
         
-        /* Requests Card Action Buttons */
         .request-card-actions {
             display: flex;
-            justify-content: flex-end; /* Align to the right */
+            justify-content: flex-end;
             gap: 0.5rem;
             margin-top: 0.7rem;
             padding-top: 0.7rem;
@@ -1474,7 +1356,7 @@
             border: none;
             font-size: 1.1rem;
             cursor: pointer;
-            color: var(--secondary); /* Default color */
+            color: var(--secondary);
             transition: color 0.2s, transform 0.2s;
             padding: 0.3rem;
             border-radius: 50%;
@@ -1544,13 +1426,13 @@
             width: 100%;
             padding: 0.5rem;
             margin: 0.25rem 0;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             transition: all 0.2s;
             cursor: pointer;
         }
         .hcp-box:hover, .specialty-box:hover, .special-speciality-box:hover {
             transform: translateY(-2px);
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
         }
         .specialty-box {
             background: var(--specialty-bg-weekly);
@@ -1677,19 +1559,50 @@
         }
 
         /* Mobile optimizations */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 250px;
+                min-width: 250px;
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .sidebar-toggle-button {
+                display: block;
+                position: fixed; /* Keep it in the top left */
+                top: 1rem;
+                left: 1rem;
+                right: auto;
+                background: #3b82f6;
+                z-index: 1001; /* Above the sidebar */
+                border-radius: 0.5rem;
+                width: 40px;
+                height: 40px;
+                border: none;
+            }
+
+            .main-container {
+                flex-direction: column;
+            }
+
             .dashboard-container { padding: 0.5rem; }
             .common-header { padding: 1rem 0.6rem; }
             .common-header h1 { font-size: 1.4rem; }
-            /* Adjusted font size for KPI Overview title and rep name */
+            
             #kpi-dashboard .common-card h2 {
-                font-size: 1rem; /* Fixed smaller size for mobile */
-                flex-direction: column; /* Stack elements vertically */
-                align-items: flex-start; /* Align to start when stacked */
+                font-size: 1rem;
+                flex-direction: column;
+                align-items: flex-start;
             }
             #selectedRepName {
-                font-size: 0.9rem; /* Fixed smaller size for mobile */
-                margin-top: 0.2rem; /* Add some space below the main title */
+                font-size: 0.9rem;
+                margin-top: 0.2rem;
             }
 
             .common-table th, .common-table td { padding: 0.35rem; font-size: 0.65rem; }
@@ -1740,575 +1653,535 @@
             .weekly-plan-grid .common-card { padding: 0.75rem; margin-bottom: 0.5rem; }
             .weekly-plan-table th, .weekly-plan-table td { padding: 0.25rem; font-size: 0.7rem; }
             .weekly-plan-table-container { max-height: 300px; overflow-y: auto; }
-        }
 
-        /* KPI Month Dropdown Width for PC */
-        @media (min-width: 769px) {
-            #monthSelect {
-                max-width: 150px; /* Adjust as needed */
+            .sidebar.collapsed {
+                width: 0;
+                min-width: 0;
+            }
+            .content-area {
+                margin-left: 0;
             }
         }
        
     </style>
 </head>
 <body>
-    <div id="login-page">
-        <div id="login-form-container">
-            <h2 id="loginTitle"><i class=""></i> Dashboard 🔐</h2>
-            <form id="loginForm">
-                <div class="toggle-container">
-                    <span class="toggle-label">Select from List</span>
-                    <label class="switch">
-                        <input type="checkbox" id="adminLoginToggle">
-                        <span class="slider round"></span>
-                    </label>
-                    <span class="toggle-label">Admin Login</span>
-                </div>
-
-                <div class="form-group" id="dmSelectGroup">
-                    <label for="username">District Manager</label>
-                    <select id="username" required>
-                        <!-- District Managers will be populated here -->
-                    </select>
-                </div>
-                <div class="form-group" id="adminUsernameGroup" style="display: none;">
-                    <label for="adminUsername">Admin Username</label>
-                    <input type="text" id="adminUsername" placeholder="Enter admin username">
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required>
-                </div>
-                <button type="submit">Login</button>
-                <p id="login-error"></p>
-            </form>
+    <div class="main-container">
+        <!-- Vertical Sidebar -->
+        <div id="side-nav" class="sidebar">
+            <button id="sidebarToggle" class="sidebar-toggle-button">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="sidebar-header">
+                <h2>Unified Dashboard</h2>
+            </div>
+            <nav id="nav-links">
+                <a href="#" class="nav-link active" data-tab="kpi-dashboard" onclick="openTab(event, 'kpi-dashboard')">
+                    <i class="fas fa-chart-line"></i><span>KPI Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-tab="daily-report" onclick="openTab(event, 'daily-report')">
+                    <i class="fas fa-calendar-alt"></i><span>Daily Report</span>
+                </a>
+                <a href="#" class="nav-link" data-tab="lists-dashboard" onclick="openTab(event, 'lists-dashboard')">
+                    <i class="fas fa-list-alt"></i><span>Lists</span>
+                </a>
+                <a href="#" class="nav-link" data-tab="requests-dashboard" onclick="openTab(event, 'requests-dashboard')">
+                    <i class="fas fa-paper-plane"></i><span>Requests</span>
+                </a>
+                <a href="#" class="nav-link" data-tab="weekly-plan-dashboard" onclick="openTab(event, 'weekly-plan-dashboard')">
+                    <i class="fas fa-calendar-week"></i><span>Weekly Plan</span>
+                </a>
+            </nav>
         </div>
-    </div>
 
-    <div id="dashboard-content" style="display: none;">
-        <div class="dashboard-container">
-            <!-- User Info Bar - Moved above tabs -->
-            <div class="user-info-bar">
-                <span id="loggedInUser">
-                    Welcome, <span id="loggedInUsernameDisplay"></span> 
-                    <span id="loggedInUserGovernorates" class="small-font"></span>
-                </span>
-                <div>
-                    <button id="logoutButton"><i class="fas fa-sign-out-alt"></i> Log Out</button>
-                </div>
-            </div>
-
-            <div class="tabs">
-                <button class="tab-button active" onclick="openTab(event, 'kpi-dashboard')">KPI Dashboard</button>
-                <button class="tab-button" onclick="openTab(event, 'daily-report')">Daily Report</button>
-                <button class="tab-button" onclick="openTab(event, 'lists-dashboard')">Lists</button>
-                <button class="tab-button" onclick="openTab(event, 'requests-dashboard')">Requests</button>
-                <button class="tab-button" onclick="openTab(event, 'weekly-plan-dashboard')">Weekly Plan</button>
-            </div>
-            
-            <div id="kpi-dashboard" class="tab-content active">
-                <header class="common-header">
-                    <div class="flex justify-between items-center w-full flex-wrap gap-2">
-                        <h1>KPI Dashboard</h1>
-                        <div class="filter-controls">
-                            <div class="common-filter-group">
-                                <select id="monthSelect" class="common-filter-input"></select>
-                            </div>
-                            <div id="kpiDmFilterContainer" class="flex gap-2 items-center">
+        <div id="dashboard-content" class="content-area">
+            <div class="dashboard-container">
+                <div id="kpi-dashboard" class="tab-content active">
+                    <header class="common-header">
+                        <div class="flex justify-between items-center w-full flex-wrap gap-2">
+                            <h1>KPI Dashboard</h1>
+                            <div class="filter-controls">
                                 <div class="common-filter-group">
-                                    <select id="kpiDistrictManagerSelect" class="common-filter-input">
-                                        <!-- Options populated by JS -->
-                                    </select>
+                                    <select id="monthSelect" class="common-filter-input"></select>
                                 </div>
-                                <button id="syncKpiData" class="sync-button" title="Sync Latest Data"><i class="fas fa-sync-alt"></i></button>
+                                <div id="kpiDmFilterContainer" class="flex gap-2 items-center">
+                                    <div class="common-filter-group">
+                                        <select id="kpiDistrictManagerSelect" class="common-filter-input">
+                                            <!-- Options populated by JS -->
+                                        </select>
+                                    </div>
+                                    <button id="syncKpiData" class="sync-button" title="Sync Latest Data"><i class="fas fa-sync-alt"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="common-card">
+                        <div class="kpi-table-tabs">
+                            <button class="kpi-tab-button active" data-tab-id="pm-visits-table" onclick="openKpiTab(event, 'pm-visits-table')">PM Visits</button>
+                            <button class="kpi-tab-button" data-tab-id="am-visits-table" onclick="openKpiTab(event, 'am-visits-table')">AM Visits</button>
+                        </div>
+
+                        <div id="pm-visits-table" class="kpi-table-content active">
+                            <div class="common-table-container">
+                                <table class="common-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-rep"><i class="fas fa-user"></i> Representative</th>
+                                            <th class="col-area"><i class="fas fa-map-marker-alt"></i> area</th>
+                                            <th class="col-hcp"><i class="fas fa-users"></i> Total HCPs (PM)</th>
+                                            <th class="col-unvisited"><i class="fas fa-user-slash"></i> Unvisited (PM)</th>
+                                            <th class="col-coverage"><i class="fas fa-percentage"></i> Coverage (PM)</th>
+                                            <th class="col-progress"><i class="fas fa-chart-pie"></i> Progress (PM)</th>
+                                            <th class="col-frequency"><i class="fas fa-history"></i> Frequency (PM)</th>
+                                            <th class="col-progress"><i class="fas fa-chart-line"></i> Progress (PM)</th>
+                                            <th class="col-working-days"><i class="fas fa-calendar-day"></i> Working Days</th>
+                                            <th class="col-average-visits"><i class="fas fa-calendar-alt"></i> PM Call Rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="privateVisitsTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="am-visits-table" class="kpi-table-content">
+                            <div class="common-table-container">
+                                <table class="common-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-rep"><i class="fas fa-user"></i> Representative</th>
+                                            <th class="col-area"><i class="fas fa-map-marker-alt"></i> area</th>
+                                            <th class="col-hcp"><i class="fas fa-users"></i> Total HCPs (AM)</th>
+                                            <th class="col-unvisited"><i class="fas fa-user-slash"></i> Unvisited (AM)</th>
+                                            <th class="col-coverage"><i class="fas fa-percentage"></i> Coverage (AM)</th>
+                                            <th class="col-progress"><i class="fas fa-chart-pie"></i> Progress (AM)</th>
+                                            <th class="col-frequency"><i class="fas fa-history"></i> Frequency (AM)</th>
+                                            <th class="col-progress"><i class="fas fa-chart-line"></i> Progress (AM)</th>
+                                            <th class="col-working-days"><i class="fas fa-calendar-day"></i> Working Days</th>
+                                            <th class="col-average-visits"><i class="fas fa-calendar-alt"></i> AM Call Rate</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="amVisitsTableBody">
+                                        <!-- Data will be populated here -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                </header>
 
-                <!-- KPI Tables Container with Tabs -->
-                <div class="common-card">
-                    <div class="kpi-table-tabs">
-                        <button class="kpi-tab-button active" data-tab-id="pm-visits-table" onclick="openKpiTab(event, 'pm-visits-table')">PM Visits</button>
-                        <button class="kpi-tab-button" data-tab-id="am-visits-table" onclick="openKpiTab(event, 'am-visits-table')">AM Visits</button>
-                    </div>
 
-                    <!-- PM Visits Table (Class A-B HCPs) -->
-                    <div id="pm-visits-table" class="kpi-table-content active">
+                    <div class="common-card" id="visitsTableContainer" style="display: none;">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-calendar-check"></i> HCP Visits Overview - <span id="selectedRepName" class="small-font"></span></h2>
+                            <div class="action-buttons">
+                                <button id="listButton" title="Show All Visits"><i class="fas fa-list"></i></button>
+                                <button id="leavesButton" title="Show Leaves"><i class="fas fa-ban"></i></button>
+                                <button id="archivedButton" title="Show Archived Visits"><i class="fas fa-box-archive"></i></button>
+                            </div>
+                        </div>
+                        <div id="leavesFilterOptions">
+                            <label><input type="radio" name="leaveFilter" value="currentMonth" checked> Current Month</label>
+                            <label><input type="radio" name="leaveFilter" value="allYear"> All Year</label>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Search for HCP Name, Specialty, Brick, etc." class="common-filter-input">
+                            <button id="clearSearchButton" class="kpi-footer-icon-button secondary" title="Clear Search" style="margin-left: 0.5rem;"><i class="fas fa-times"></i></button>
+                        </div>
                         <div class="common-table-container">
-                            <table class="common-table">
+                            <table id="visitsTable" class="common-table">
                                 <thead>
-                                    <tr>
-                                        <th class="col-rep"><i class="fas fa-user"></i> Representative</th>
-                                        <th class="col-area"><i class="fas fa-map-marker-alt"></i> area</th>
-                                        <th class="col-hcp"><i class="fas fa-users"></i> Total HCPs (PM)</th>
-                                        <th class="col-unvisited"><i class="fas fa-user-slash"></i> Unvisited (PM)</th>
-                                        <th class="col-coverage"><i class="fas fa-percentage"></i> Coverage (PM)</th>
-                                        <th class="col-progress"><i class="fas fa-chart-pie"></i> Progress (PM)</th>
-                                        <th class="col-frequency"><i class="fas fa-history"></i> Frequency (PM)</th>
-                                        <th class="col-progress"><i class="fas fa-chart-line"></i> Progress (PM)</th>
-                                        <th class="col-working-days"><i class="fas fa-calendar-day"></i> Working Days</th>
-                                        <th class="col-average-visits"><i class="fas fa-calendar-alt"></i> PM Call Rate</th>
+                                    <tr id="visitsTableHeader">
+                                        <th><i class="fas fa-user-doctor"></i> HCP Name</th>
+                                        <th><i class="fas fa-stethoscope"></i> Specialty</th>
+                                        <th><i class="fas fa-building"></i> Brick</th>
+                                        <th><i class="fas fa-map-marker-alt"></i> Visit Place</th>
+                                        <th><i class="fas fa-bullseye"></i> Target</th>
+                                        <th><i class="fas fa-clock"></i> Remaining</th>
+                                        <th><i class="fas fa-comments"></i> Comments</th>
+                                        <th><i class="fas fa-calendar-alt"></i> Visit Time</th>
+                                        <th class="action-column">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="privateVisitsTableBody">
+                                <tbody>
                                     <!-- Data will be populated here -->
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-
-                    <!-- AM Visits Table (UPA - Private Class HCPs) -->
-                    <div id="am-visits-table" class="kpi-table-content">
-                        <div class="common-table-container">
-                            <table class="common-table">
-                                <thead>
-                                    <tr>
-                                        <th class="col-rep"><i class="fas fa-user"></i> Representative</th>
-                                        <th class="col-area"><i class="fas fa-map-marker-alt"></i> area</th>
-                                        <th class="col-hcp"><i class="fas fa-users"></i> Total HCPs (AM)</th>
-                                        <th class="col-unvisited"><i class="fas fa-user-slash"></i> Unvisited (AM)</th>
-                                        <th class="col-coverage"><i class="fas fa-percentage"></i> Coverage (AM)</th>
-                                        <th class="col-progress"><i class="fas fa-chart-pie"></i> Progress (AM)</th>
-                                        <th class="col-frequency"><i class="fas fa-history"></i> Frequency (AM)</th>
-                                        <th class="col-progress"><i class="fas fa-chart-line"></i> Progress (AM)</th>
-                                        <th class="col-working-days"><i class="fas fa-calendar-day"></i> Working Days</th>
-                                        <th class="col-average-visits"><i class="fas fa-calendar-alt"></i> AM Call Rate</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="amVisitsTableBody">
-                                    <!-- Data will be populated here -->
-                                </tbody>
-                            </table>
+                        <div class="flex justify-end gap-2 p-4">
+                            <button id="downloadExcelVisits" class="kpi-footer-icon-button success" title="Download as Excel"><i class="fas fa-file-excel"></i></button>
+                            <button id="printVisits" class="kpi-footer-icon-button secondary" title="Print Table"><i class="fas fa-print"></i></button>
                         </div>
                     </div>
                 </div>
 
-
-                <div class="common-card" id="visitsTableContainer" style="display: none;">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-calendar-check"></i> HCP Visits Overview - <span id="selectedRepName" class="small-font"></span></h2>
-                        <div class="action-buttons">
-                            <button id="listButton" title="Show All Visits"><i class="fas fa-list"></i></button>
-                            <button id="leavesButton" title="Show Leaves"><i class="fas fa-ban"></i></button>
-                            <button id="archivedButton" title="Show Archived Visits"><i class="fas fa-box-archive"></i></button>
-                        </div>
-                    </div>
-                    <div id="leavesFilterOptions">
-                        <label><input type="radio" name="leaveFilter" value="currentMonth" checked> Current Month</label>
-                        <label><input type="radio" name="leaveFilter" value="allYear"> All Year</label>
-                    </div>
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Search for HCP Name, Specialty, Brick, etc." class="common-filter-input">
-                        <button id="clearSearchButton" class="kpi-footer-icon-button secondary" title="Clear Search" style="margin-left: 0.5rem;"><i class="fas fa-times"></i></button>
-                    </div>
-                    <div class="common-table-container">
-                        <table id="visitsTable" class="common-table">
-                            <thead>
-                                <tr id="visitsTableHeader">
-                                    <th><i class="fas fa-user-doctor"></i> HCP Name</th>
-                                    <th><i class="fas fa-stethoscope"></i> Specialty</th>
-                                    <th><i class="fas fa-building"></i> Brick</th>
-                                    <th><i class="fas fa-map-marker-alt"></i> Visit Place</th>
-                                    <th><i class="fas fa-bullseye"></i> Target</th>
-                                    <th><i class="fas fa-clock"></i> Remaining</th>
-                                    <th><i class="fas fa-comments"></i> Comments</th>
-                                    <th><i class="fas fa-calendar-alt"></i> Visit Time</th>
-                                    <th class="action-column">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Data will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="flex justify-end gap-2 p-4">
-                        <button id="downloadExcelVisits" class="kpi-footer-icon-button success" title="Download as Excel"><i class="fas fa-file-excel"></i></button>
-                        <button id="printVisits" class="kpi-footer-icon-button secondary" title="Print Table"><i class="fas fa-print"></i></button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="daily-report" class="tab-content">
-                <header class="common-header">
-                    <div class="requests-header-content">
-                        <h1><i class="fas fa-calendar-alt"></i> Daily Report</h1>
-                    </div>
-                    <div class="filter-controls mt-4 daily-report-header-buttons">
-                        <div class="common-filter-group">
-                            <select id="dailyMedRepSelect" class="common-filter-input">
-                                <option value="">Select Medical Representative</option>
-                            </select>
-                        </div>
-                        <div class="common-filter-group">
-                            <input type="date" id="dailyStartDate" class="common-filter-input">
-                        </div>
-                        <button id="dailyReportDownloadExcel" class="daily-report-icon-button" title="Export to Excel"><i class="fas fa-file-excel"></i></button>
-                    </div>
-                </header>
-
-                <div class="loading-indicator">
-                    <i class="fas fa-spinner fa-spin"></i> Loading data...
-                </div>
-
-                <div class="daily-report-print-header" style="display:none;">
-                    <h2 id="printRepName"></h2>
-                    <p id="printDateRange"></p>
-                </div>
-
-                <div class="daily-report-content">
-                    <div class="tables-container">
-                        <!-- AM Section -->
-                        <div class="section-container">
-                            <div class="daily-report-section-header">
-                                <i class="fas fa-sun"></i> AM Activities
-                            </div>
-                            <div class="common-table-container">
-                                <table class="daily-report-table" id="amTable">
-                                    <thead>
-                                        <tr>
-                                            <th class="count-column">Count</th>
-                                            <!-- Day headers will be appended here by JS -->
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="section-am">
-                                            <td class="count-column">0</td>
-                                            <!-- Daily cells will be appended here by JS -->
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- AM Details Section -->
-                        <div class="section-container">
-                            <div class="daily-report-section-header">
-                                <i class="fas fa-info-circle"></i> AM Details
-                            </div>
-                            <div class="common-table-container">
-                                <table class="daily-report-table" id="amDetailsTable">
-                                    <thead>
-                                        <tr>
-                                            <th class="count-column">Count</th>
-                                            <!-- Day headers will be appended here by JS -->
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="section-am-details">
-                                            <td class="count-column">0</td>
-                                            <!-- Daily cells will be appended here by JS -->
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- PM Section -->
-                        <div class="section-container">
-                            <div class="daily-report-section-header pm-gradient">
-                                <i class="fas fa-moon"></i> PM Activities
-                            </div>
-                            <div class="common-table-container">
-                                <table class="daily-report-table" id="pmTable">
-                                    <thead>
-                                        <tr>
-                                            <th class="count-column">Count</th>
-                                            <!-- Day headers will be appended here by JS -->
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="section-pm">
-                                            <td class="count-column">0</td>
-                                            <!-- Daily cells will be appended here by JS -->
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Pharmacy Section -->
-                        <div class="section-container">
-                            <div class="daily-report-section-header pharmacy-gradient">
-                                <i class="fas fa-prescription-bottle-medical"></i> Pharmacy Activities
-                            </div>
-                            <div class="common-table-container">
-                                <table class="daily-report-table" id="pharmacyTable">
-                                    <thead>
-                                        <tr>
-                                            <th class="count-column">Count</th>
-                                            <!-- Day headers will be appended here by JS -->
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="section-pharmacy">
-                                            <td class="count-column">0</td>
-                                            <!-- Daily cells will be appended here by JS -->
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="lists-dashboard" class="tab-content">
-                <header class="common-header">
-                    <div class="requests-header-content">
-                        <h1><i class="fas fa-list-alt"></i> Medical Team Lists</h1>
-                    </div>
-                    <div class="filter-controls mt-4">
-                        <div class="common-filter-group">
-                            <select id="medicalReps" class="common-filter-input">
-                                <option value="">Select Representative</option>
-                            </select>
-                        </div>
-
-                        <div class="common-filter-group">
-                            <select id="bricksSelect" class="common-filter-input">
-                                <option value="">Select Brick</option>
-                            </select>
-                        </div>
-
-                        <div class="common-filter-group">
-                            <select id="visitOptions" class="common-filter-input">
-                                <option value="">Select Display Option</option>
-                                <option value="unvisited">Unvisited HCPs</option>
-                                <option value="remaining">Remaining Visits</option>
-                                <option value="full">Full List</option>
-                            </select>
-                        </div>
-
-                        <div class="common-filter-group">
-                            <select id="dayFilter" class="common-filter-input">
-                                <option value="">All Days</option>
-                                <option value="Saturday">Saturday</option>
-                                <option value="Sunday">Sunday</option>
-                                <option value="Monday">Monday</option>
-                                <option value="Tuesday">Tuesday</option>
-                                <option value="Wednesday">Wednesday</option>
-                                <option value="Thursday">Thursday</option>
-                            </select>
-                        </div>
-                    </div>
-                </header>
-                
-                <div class="common-card p-4 sm:p-6">
-                    <div id="listsLoading" class="flex items-center space-x-2" style="display:none;">
-                        <div class="loading-spinner"></div>
-                        <span class="text-sm text-gray-600">Loading data...</span>
-                    </div>
-
-                    <div id="listsContent">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                            <div id="countDisplay" class="status-count hidden w-full sm:w-auto"></div>
-                            <div class="flex gap-2">
-                                <button id="filterButton" class="common-button common-button-primary">
-                                    Apply Filters
-                                </button>
-                                <button id="resetButton" class="common-button common-button-secondary">
-                                    Reset
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="listsError" class="hidden text-red-600 mb-4 p-4 bg-red-50 rounded-lg"></div>
-
-                        <!-- Search box above the table - initially hidden -->
-                        <div id="searchContainer" class="mb-4 hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                            <input type="text" id="searchBox" class="search-box common-filter-input" placeholder="Search in table data...">
-                        </div>
-
-                        <div class="lists-table-container">
-                            <table id="hcpTable" class="hidden min-w-full lists-table">
-                                <thead>
-                                    <tr>
-                                        <th class="sticky-col">HCP Name</th>
-                                        <th>Specialty</th>
-                                        <th>Class</th>
-                                        <th>Total Visits</th>
-                                        <th>Remaining</th>
-                                        <th>Brick</th>
-                                        <th>Address</th>
-                                        <th>Contact</th>
-                                        <th>Sat</th>
-                                        <th>Sun</th>
-                                        <th>Mon</th>
-                                        <th>Tue</th>
-                                        <th>Wed</th>
-                                        <th>Thu</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="requests-dashboard" class="tab-content">
-                <div class="common-card" style="padding: 0;">
-                    <div class="requests-header">
+                <div id="daily-report" class="tab-content">
+                    <header class="common-header">
                         <div class="requests-header-content">
-                            <h1>Requests</h1>
+                            <h1><i class="fas fa-calendar-alt"></i> Daily Report</h1>
+                        </div>
+                        <div class="filter-controls mt-4 daily-report-header-buttons">
+                            <div class="common-filter-group">
+                                <select id="dailyMedRepSelect" class="common-filter-input">
+                                    <option value="">Select Medical Representative</option>
+                                </select>
+                            </div>
+                            <div class="common-filter-group">
+                                <input type="date" id="dailyStartDate" class="common-filter-input">
+                            </div>
+                            <button id="dailyReportDownloadExcel" class="daily-report-icon-button" title="Export to Excel"><i class="fas fa-file-excel"></i></button>
+                        </div>
+                    </header>
+
+                    <div class="loading-indicator">
+                        <i class="fas fa-spinner fa-spin"></i> Loading data...
+                    </div>
+
+                    <div class="daily-report-print-header" style="display:none;">
+                        <h2 id="printRepName"></h2>
+                        <p id="printDateRange"></p>
+                    </div>
+
+                    <div class="daily-report-content">
+                        <div class="tables-container">
+                            <div class="section-container">
+                                <div class="daily-report-section-header">
+                                    <i class="fas fa-sun"></i> AM Activities
+                                </div>
+                                <div class="common-table-container">
+                                    <table class="daily-report-table" id="amTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="count-column">Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="section-am">
+                                                <td class="count-column">0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="section-container">
+                                <div class="daily-report-section-header">
+                                    <i class="fas fa-info-circle"></i> AM Details
+                                </div>
+                                <div class="common-table-container">
+                                    <table class="daily-report-table" id="amDetailsTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="count-column">Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="section-am-details">
+                                                <td class="count-column">0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="section-container">
+                                <div class="daily-report-section-header pm-gradient">
+                                    <i class="fas fa-moon"></i> PM Activities
+                                </div>
+                                <div class="common-table-container">
+                                    <table class="daily-report-table" id="pmTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="count-column">Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="section-pm">
+                                                <td class="count-column">0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="section-container">
+                                <div class="daily-report-section-header pharmacy-gradient">
+                                    <i class="fas fa-prescription-bottle-medical"></i> Pharmacy Activities
+                                </div>
+                                <div class="common-table-container">
+                                    <table class="daily-report-table" id="pharmacyTable">
+                                        <thead>
+                                            <tr>
+                                                <th class="count-column">Count</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="section-pharmacy">
+                                                <td class="count-column">0</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="requests-main-content">
-                        <div class="requests-filters-section">
-                            <div class="requests-filters-grid">
-                                <div class="common-filter-group">
-                                    <select id="requests_districtManager" class="common-filter-input" onchange="requests_filterMedicalRepsForRequests()">
-                                        <option value="">Select District Manager</option>
-                                    </select>
-                                </div>
-                                <div class="common-filter-group">
-                                    <select id="requests_medRepFilter" class="common-filter-input" onchange="requests_populateareasForRequests(); requests_filterRequests()">
-                                        <option value="">Select Medical Rep</option>
-                                    </select>
-                                </div>
-                                <div class="common-filter-group">
-                                    <select id="requests_areaFilter" class="common-filter-input" onchange="requests_filterRequests()">
-                                        <option value="">Select area</option>
-                                    </select>
-                                </div>
-                                <div class="common-filter-group">
-                                    <select id="requests_statusFilter" class="common-filter-input" onchange="requests_filterRequests()">
-                                        <option value="">All Status</option>
-                                        <option value="Requested">Requested</option>
-                                        <option value="Scheduled">Scheduled</option>
-                                        <option value="Pending">Pending</option>
-                                        <option value="Postponed">Postponed</option>
-                                        <option value="Done">Done</option>
-                                        <option value="Rejected">Rejected</option>
-                                        <option value="Approved">Approved</option>
-                                    </select>
-                                </div>
-                                <div class="common-filter-group">
-                                    <select id="requests_requestTypeFilter" class="common-filter-input" onchange="requests_filterRequests()">
-                                        <option value="">All Request Types</option>
-                                        <option value="Personal">Personal</option>
-                                        <option value="Customer">Customer</option>
-                                    </select>
-                                </div>
-                                <div class="common-filter-group">
-                                    <input type="text" id="requests_searchBox" class="common-filter-input" placeholder="Search requests..." oninput="requests_filterRequests()">
-                                </div>
+                </div>
+
+                <div id="lists-dashboard" class="tab-content">
+                    <header class="common-header">
+                        <div class="requests-header-content">
+                            <h1><i class="fas fa-list-alt"></i> Medical Team Lists</h1>
+                        </div>
+                        <div class="filter-controls mt-4">
+                            <div class="common-filter-group">
+                                <select id="medicalReps" class="common-filter-input">
+                                    <option value="">Select Representative</option>
+                                </select>
+                            </div>
+
+                            <div class="common-filter-group">
+                                <select id="bricksSelect" class="common-filter-input">
+                                    <option value="">Select Brick</option>
+                                </select>
+                            </div>
+
+                            <div class="common-filter-group">
+                                <select id="visitOptions" class="common-filter-input">
+                                    <option value="">Select Display Option</option>
+                                    <option value="unvisited">Unvisited HCPs</option>
+                                    <option value="remaining">Remaining Visits</option>
+                                    <option value="full">Full List</option>
+                                </select>
+                            </div>
+
+                            <div class="common-filter-group">
+                                <select id="dayFilter" class="common-filter-input">
+                                    <option value="">All Days</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="requests-stats-bar">
-                            <div class="requests-stats-item">
-                                <span class="requests-stats-number" id="requests_requestCount">0</span>
-                                <span class="requests-stats-label">Total Requests</span>
-                            </div>
-                            <div class="requests-stats-item">
-                                <span class="requests-stats-number" id="requests_filteredCount">0</span>
-                                <span class="requests-stats-label">Filtered Results</span>
-                            </div>
+                    </header>
+                    
+                    <div class="common-card p-4 sm:p-6">
+                        <div id="listsLoading" class="flex items-center space-x-2" style="display:none;">
+                            <div class="loading-spinner"></div>
+                            <span class="text-sm text-gray-600">Loading data...</span>
                         </div>
-                        <div id="requests_retrievedRequests">
-                            <div id="requests_requestDetailsDisplay" class="requests-grid"></div>
+
+                        <div id="listsContent">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                                <div id="countDisplay" class="status-count hidden w-full sm:w-auto"></div>
+                                <div class="flex gap-2">
+                                    <button id="filterButton" class="common-button common-button-primary">
+                                        Apply Filters
+                                    </button>
+                                    <button id="resetButton" class="common-button common-button-secondary">
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="listsError" class="hidden text-red-600 mb-4 p-4 bg-red-50 rounded-lg"></div>
+
+                            <div id="searchContainer" class="mb-4 hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                                <input type="text" id="searchBox" class="search-box common-filter-input" placeholder="Search in table data...">
+                            </div>
+
+                            <div class="lists-table-container">
+                                <table id="hcpTable" class="hidden min-w-full lists-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="sticky-col">HCP Name</th>
+                                            <th>Specialty</th>
+                                            <th>Class</th>
+                                            <th>Total Visits</th>
+                                            <th>Remaining</th>
+                                            <th>Brick</th>
+                                            <th>Address</th>
+                                            <th>Contact</th>
+                                            <th>Sat</th>
+                                            <th>Sun</th>
+                                            <th>Mon</th>
+                                            <th>Tue</th>
+                                            <th>Wed</th>
+                                            <th>Thu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                    <div class="designer-credit">
-                        Designed by <strong>DrTahaDesigns</strong>
+                </div>
+
+                <div id="requests-dashboard" class="tab-content">
+                    <div class="common-card" style="padding: 0;">
+                        <div class="requests-header">
+                            <div class="requests-header-content">
+                                <h1>Requests</h1>
+                            </div>
+                        </div>
+                        <div class="requests-main-content">
+                            <div class="requests-filters-section">
+                                <div class="requests-filters-grid">
+                                    <div class="common-filter-group">
+                                        <select id="requests_districtManager" class="common-filter-input" onchange="requests_filterMedicalRepsForRequests()">
+                                            <option value="">Select District Manager</option>
+                                        </select>
+                                    </div>
+                                    <div class="common-filter-group">
+                                        <select id="requests_medRepFilter" class="common-filter-input" onchange="requests_populateareasForRequests(); requests_filterRequests()">
+                                            <option value="">Select Medical Rep</option>
+                                        </select>
+                                    </div>
+                                    <div class="common-filter-group">
+                                        <select id="requests_areaFilter" class="common-filter-input" onchange="requests_filterRequests()">
+                                            <option value="">Select area</option>
+                                        </select>
+                                    </div>
+                                    <div class="common-filter-group">
+                                        <select id="requests_statusFilter" class="common-filter-input" onchange="requests_filterRequests()">
+                                            <option value="">All Status</option>
+                                            <option value="Requested">Requested</option>
+                                            <option value="Scheduled">Scheduled</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Postponed">Postponed</option>
+                                            <option value="Done">Done</option>
+                                            <option value="Rejected">Rejected</option>
+                                            <option value="Approved">Approved</option>
+                                        </select>
+                                    </div>
+                                    <div class="common-filter-group">
+                                        <select id="requests_requestTypeFilter" class="common-filter-input" onchange="requests_filterRequests()">
+                                            <option value="">All Request Types</option>
+                                            <option value="Personal">Personal</option>
+                                            <option value="Customer">Customer</option>
+                                        </select>
+                                    </div>
+                                    <div class="common-filter-group">
+                                        <input type="text" id="requests_searchBox" class="common-filter-input" placeholder="Search requests..." oninput="requests_filterRequests()">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="requests-stats-bar">
+                                <div class="requests-stats-item">
+                                    <span class="requests-stats-number" id="requests_requestCount">0</span>
+                                    <span class="requests-stats-label">Total Requests</span>
+                                </div>
+                                <div class="requests-stats-item">
+                                    <span class="requests-stats-number" id="requests_filteredCount">0</span>
+                                    <span class="requests-stats-label">Filtered Results</span>
+                                </div>
+                            </div>
+                            <div id="requests_retrievedRequests">
+                                <div id="requests_requestDetailsDisplay" class="requests-grid"></div>
+                            </div>
+                        </div>
+                        <div class="designer-credit">
+                            Designed by <strong>DrTahaDesigns</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="weekly-plan-dashboard" class="tab-content">
+                    <header class="common-header">
+                        <div class="requests-header-content">
+                            <h1><i class="fas fa-calendar-alt"></i> Weekly Plan Dashboard</h1>
+                        </div>
+                        <div class="filter-controls mt-4 daily-report-header-buttons">
+                            <div class="common-filter-group">
+                                <select id="weeklyPlanMedicalReps" class="common-filter-input">
+                                    <option value="">Select a Medical Rep</option>
+                                </select>
+                            </div>
+                            <div class="common-filter-group">
+                                <input type="date" id="weeklyPlanStartDate" class="common-filter-input">
+                            </div>
+                            <div class="common-filter-group">
+                                <input type="date" id="weeklyPlanEndDate" class="common-filter-input" readonly>
+                            </div>
+                            <button id="weeklyPlanResetButton" class="common-button common-button-secondary"><i class="fas fa-redo"></i> Reset</button>
+                            <button id="weeklyPlanDownloadButton" class="daily-report-icon-button" title="Download Excel"><i class="fas fa-file-excel"></i></button>
+                            <button id="weeklyPlanDeleteVisitButton" class="common-button common-button-danger" style="display:none;"><i class="fas fa-trash-alt"></i> Delete Selected Visit</button>
+                        </div>
+                    </header>
+
+                    <div id="weeklyPlanLoading" class="loading-indicator" style="display:none;">
+                        <i class="fas fa-spinner"></i> Loading data...
+                    </div>
+                    <div id="weeklyPlanError" class="error-message"></div>
+
+                    <div id="weeklyPlanContent" class="weekly-plan-grid" style="display: none;">
+                        <div class="common-card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-sun"></i> AM Activities</h2>
+                            </div>
+                            <div class="weekly-plan-table-container">
+                                <table class="weekly-plan-table" id="amActivitiesTable">
+                                    <thead>
+                                        <tr>
+                                            <th id="saturdayAmHeader">Saturday</th>
+                                            <th id="sundayAmHeader">Sunday</th>
+                                            <th id="mondayAmHeader">Monday</th>
+                                            <th id="tuesdayAmHeader">Tuesday</th>
+                                            <th id="wednesdayAmHeader">Wednesday</th>
+                                            <th id="thursdayAmHeader">Thursday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td id="saturdayAm"><div class="empty-message">No activities</div></td>
+                                            <td id="sundayAm"><div class="empty-message">No activities</div></td>
+                                            <td id="mondayAm"><div class="empty-message">No activities</div></td>
+                                            <td id="tuesdayAm"><div class="empty-message">No activities</div></td>
+                                            <td id="wednesdayAm"><div class="empty-message">No activities</div></td>
+                                            <td id="thursdayAm"><div class="empty-message">No activities</div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="common-card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-moon"></i> PM Activities</h2>
+                            </div>
+                            <div class="weekly-plan-table-container">
+                                <table class="weekly-plan-table" id="pmActivitiesTable">
+                                    <thead>
+                                        <tr>
+                                            <th id="saturdayPmHeader">Saturday</th>
+                                            <th id="sundayPmHeader">Sunday</th>
+                                            <th id="mondayPmHeader">Monday</th>
+                                            <th id="tuesdayPmHeader">Tuesday</th>
+                                            <th id="wednesdayPmHeader">Wednesday</th>
+                                            <th id="thursdayPmHeader">Thursday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td id="saturdayPm"><div class="empty-message">No activities</div></td>
+                                            <td id="sundayPm"><div class="empty-message">No activities</div></td>
+                                            <td id="mondayPm"><div class="empty-message">No activities</div></td>
+                                            <td id="tuesdayPm"><div class="empty-message">No activities</div></td>
+                                            <td id="wednesdayPm"><div class="empty-message">No activities</div></td>
+                                            <td id="thursdayPm"><div class="empty-message">No activities</div></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div id="weekly-plan-dashboard" class="tab-content">
-                <header class="common-header">
-                    <div class="requests-header-content">
-                        <h1><i class="fas fa-calendar-alt"></i> Weekly Plan Dashboard</h1>
-                    </div>
-                    <div class="filter-controls mt-4 daily-report-header-buttons">
-                        <div class="common-filter-group">
-                            <select id="weeklyPlanMedicalReps" class="common-filter-input">
-                                <option value="">Select a Medical Rep</option>
-                            </select>
-                        </div>
-                        <div class="common-filter-group">
-                            <input type="date" id="weeklyPlanStartDate" class="common-filter-input">
-                        </div>
-                        <div class="common-filter-group">
-                            <input type="date" id="weeklyPlanEndDate" class="common-filter-input" readonly>
-                        </div>
-                        <!-- Removed weeklyPlanRetrieveButton as per request -->
-                        <button id="weeklyPlanResetButton" class="common-button common-button-secondary"><i class="fas fa-redo"></i> Reset</button>
-                        <button id="weeklyPlanDownloadButton" class="daily-report-icon-button" title="Download Excel"><i class="fas fa-file-excel"></i></button>
-                        <button id="weeklyPlanDeleteVisitButton" class="common-button common-button-danger" style="display:none;"><i class="fas fa-trash-alt"></i> Delete Selected Visit</button>
-                    </div>
-                </header>
-
-                <div id="weeklyPlanLoading" class="loading-indicator" style="display:none;">
-                    <i class="fas fa-spinner"></i> Loading data...
-                </div>
-                <div id="weeklyPlanError" class="error-message"></div>
-
-                <div id="weeklyPlanContent" class="weekly-plan-grid" style="display: none;">
-                    <div class="common-card">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-sun"></i> AM Activities</h2>
-                        </div>
-                        <div class="weekly-plan-table-container">
-                            <table class="weekly-plan-table" id="amActivitiesTable">
-                                <thead>
-                                    <tr>
-                                        <th id="saturdayAmHeader">Saturday</th>
-                                        <th id="sundayAmHeader">Sunday</th>
-                                        <th id="mondayAmHeader">Monday</th>
-                                        <th id="tuesdayAmHeader">Tuesday</th>
-                                        <th id="wednesdayAmHeader">Wednesday</th>
-                                        <th id="thursdayAmHeader">Thursday</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td id="saturdayAm"><div class="empty-message">No activities</div></td>
-                                        <td id="sundayAm"><div class="empty-message">No activities</div></td>
-                                        <td id="mondayAm"><div class="empty-message">No activities</div></td>
-                                        <td id="tuesdayAm"><div class="empty-message">No activities</div></td>
-                                        <td id="wednesdayAm"><div class="empty-message">No activities</div></td>
-                                        <td id="thursdayAm"><div class="empty-message">No activities</div></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="common-card">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2"><i class="fas fa-moon"></i> PM Activities</h2>
-                        </div>
-                        <div class="weekly-plan-table-container">
-                            <table class="weekly-plan-table" id="pmActivitiesTable">
-                                <thead>
-                                    <tr>
-                                        <th id="saturdayPmHeader">Saturday</th>
-                                        <th id="sundayPmHeader">Sunday</th>
-                                        <th id="mondayPmHeader">Monday</th>
-                                        <th id="tuesdayPmHeader">Tuesday</th>
-                                        <th id="wednesdayPmHeader">Wednesday</th>
-                                        <th id="thursdayPmHeader">Thursday</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td id="saturdayPm"><div class="empty-message">No activities</div></td>
-                                        <td id="sundayPm"><div class="empty-message">No activities</div></td>
-                                        <td id="mondayPm"><div class="empty-message">No activities</div></td>
-                                        <td id="tuesdayPm"><div class="empty-message">No activities</div></td>
-                                        <td id="wednesdayPm"><div class="empty-message">No activities</div></td>
-                                        <td id="thursdayPm"><div class="empty-message">No activities</div></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 
@@ -2324,6 +2197,7 @@
                 <button id="confirmNo" class="confirm-no">No</button>
             </div>
         </div>
+    </div>
 
     <script>
         // Supabase and Google Sheet URLs - Consolidated
@@ -2346,7 +2220,7 @@
         let listsBricks = new Set();
         let listsSelectedBricks = [];
         let listsFilteredHCPs = [];
-        let listsCurrentMonthVisits = []; // Added for Lists Dashboard
+        let listsCurrentMonthVisits = [];
 
         // Global variables for Requests Dashboard
         let requests_districtManagers = new Set();
@@ -2363,12 +2237,13 @@
             Wednesday: { am: [], pm: [] },
             Thursday: { am: [], pm: [] }
         };
-        let weeklyPlanSelectedVisitIds = []; // Renamed to avoid conflict
+        let weeklyPlanSelectedVisitIds = [];
 
         // Global user role and DM information
         let loggedInUserRole = null;
         let loggedInUserDM = null;
         let loggedInUserGovernorates = [];
+        let selectedKPI_DM = ''; // Store the DM selected in the KPI dropdown
 
         // State for visits table view (normal, leaves, archived)
         let currentVisitsTableView = 'normal';
@@ -2383,196 +2258,98 @@
         // Global variable for Daily Report raw visits data for Excel export
         let dailyReportRawVisitsData = [];
 
-        // --- LOGIN LOGIC ---
-        async function fetchDistrictManagersForLogin() {
-            try {
-                const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch district managers from Google Sheets. Please ensure the Google Sheet URL is correct and publicly accessible.');
-                }
-                const csvText = await response.text();
-                allGoogleSheetData = parseCSV(csvText);
-                const districtManagers = new Set();
-                allGoogleSheetData.forEach(row => {
-                    if (row['District Manager']) {
-                        districtManagers.add(row['District Manager'].trim());
-                    }
-                });
-                const usernameSelect = $('#username');
-                usernameSelect.empty();
-                usernameSelect.append($('<option>', { value: '', text: 'Select District Manager' }));
-                Array.from(districtManagers).sort().forEach(dm => {
-                    usernameSelect.append($('<option>', { value: dm, text: dm }));
-                });
-            } catch (error) {
-                console.error('Error fetching district managers for login:', error);
-                $('#login-error').text('Failed to load district managers. Please check the console for details, ensure the Google Sheet URL is correct, and that the sheet is published to the web as a CSV.');
+        // Global variable for sidebar state
+        let isSidebarCollapsed = false;
+        
+        // --- CORE INITIALIZATION: Triggered by postMessage from parent ---
+        let isInitialized = false;
+
+        window.addEventListener('message', async (event) => {
+            if (event.data && event.data.type === 'dashboardLogin' && event.data.user && !isInitialized) {
+                console.log('Received login data from parent iframe:', event.data.user);
+                loggedInUserRole = event.data.user.title;
+                loggedInUserDM = event.data.user.username;
+                allGoogleSheetData = event.data.allGoogleSheetData || [];
+                
+                initializeCommonDashboard();
+                isInitialized = true;
             }
-        }
-
-        async function handleLogin(e) {
-    e.preventDefault();
-    const isAdminLogin = $('#adminLoginToggle').is(':checked');
-    let username;
-    let password = $('#password').val();
-    const loginError = $('#login-error');
-    loginError.text('');
-
-    if (isAdminLogin) {
-        username = $('#adminUsername').val();
-        if (!username || !password) {
-            loginError.text('Please enter admin username and password.');
-            return;
-        }
-    } else {
-        username = $('#username').val();
-        if (!username || !password) {
-            loginError.text('Please select a username and enter a password.');
-            return;
-        }
-    }
-
-    try {
-        let query;
-        if (isAdminLogin) {
-            query = supabaseClient
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password)
-                .eq('title', 'admin')
-                .single();
-        } else {
-            query = supabaseClient
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password)
-                .single();
-        }
-
-        const { data, error } = await query;
-        if (error && error.code !== 'PGRST116') {
-            throw error;
-        }
-
-        if (data) {
-            loggedInUserRole = data.title;
-            loggedInUserDM = data.username;
-
-            // Store credentials in localStorage
-            localStorage.setItem('username', username);
-            localStorage.setItem('password', password);
-
-            localStorage.setItem('loggedInUsername', data.username);
-            localStorage.setItem('loggedInUserRole', data.title);
-
-            const dmGovernorates = new Set();
-            const dmAreas = new Set(); // Also get areas for the DM
-            allGoogleSheetData.forEach(row => {
-                if (row['District Manager'] === loggedInUserDM) {
-                    if (row['Governorate']) { // Assuming 'Governorate' column exists
-                        dmGovernorates.add(row['Governorate'].trim());
-                    }
-                    if (row['area']) { // Assuming 'area' column exists
-                        dmAreas.add(row['area'].trim());
-                    }
-                }
-            });
-
-            // For a DM, we store their governorates (or areas if that's more relevant for dashboard display)
-            loggedInUserGovernorates = Array.from(dmGovernorates);
-            localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
-            localStorage.setItem('loggedInUserAreas', JSON.stringify(Array.from(dmAreas))); // Store areas too
-
-            $('#login-page').hide();
-            $('#dashboard-content').show();
-            initializeCommonDashboard();
-        } else {
-            loginError.text('Invalid username or password.');
-        }
-    } catch (err) {
-        console.error('Login error:', err);
-        if (err.message.includes("Invalid API key")) {
-            loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
-        } else {
-            loginError.text('An error occurred during login. Please try again.');
-        }
-    }
-}
-
+        });
+        
+        // Timeout to check if message was received
+        setTimeout(() => {
+            if (!isInitialized) {
+                showAlertDialog('Dashboard is waiting for user data from the parent page. Please ensure the parent page sends the "dashboardLogin" message.', 'warning');
+            }
+        }, 3000); // 3-second timeout
 
         // --- Common Dashboard Initialization ---
-        function initializeCommonDashboard() {
-            loggedInUserRole = localStorage.getItem('loggedInUserRole');
-            loggedInUserDM = localStorage.getItem('loggedInUsername');
-            loggedInUserGovernorates = JSON.parse(localStorage.getItem('loggedInUserGovernorates') || '[]');
-            const loggedInUserAreas = JSON.parse(localStorage.getItem('loggedInUserAreas') || '[]'); // Retrieve areas
+        async function initializeCommonDashboard() {
+            // Set up sidebar toggle
+            document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
 
-            if (loggedInUserDM) {
-                $('#loggedInUsernameDisplay').text(loggedInUserDM);
-                // Display governorates for DM, or areas for MR (if applicable and stored)
-                if (loggedInUserRole === 'District Manager' && loggedInUserGovernorates.length > 0) {
-                    $('#loggedInUserGovernorates').html(`(${loggedInUserGovernorates.join(', ')})`);
-                } else if (loggedInUserRole === 'Medical Representative' && loggedInUserAreas.length > 0) {
-                     $('#loggedInUserGovernorates').html(`(Area: ${loggedInUserAreas.join(', ')})`); // Display areas for MR
+            // Populate initial dropdowns that don't depend on a specific DM selection
+            try {
+                // Ensure allGoogleSheetData is populated before proceeding
+                if (allGoogleSheetData.length === 0) {
+                    const response = await fetch(GOOGLE_SHEET_URL);
+                    if (!response.ok) throw new Error('Failed to fetch data from Google Sheets.');
+                    const csvText = await response.text();
+                    allGoogleSheetData = parseCSV(csvText);
                 }
-                else {
-                    $('#loggedInUserGovernorates').text('');
-                }
-            }
+                
+                await fetchMedicalRepsData();
 
-            $('#logoutButton').on('click', () => {
-                localStorage.removeItem('loggedInUsername');
-                localStorage.removeItem('loggedInUserRole');
-                localStorage.removeItem('loggedInUserGovernorates');
-                localStorage.removeItem('loggedInUserAreas'); // Clear areas on logout
-                sessionStorage.clear();
-                location.reload(); // Reloads the page, which will go back to index.html login
-            });
-            
-            // Initialize the default active tab
-            openTab(null, 'kpi-dashboard');
-
-            // Pre-load Google Sheet data once for all dashboards
-            fetchMedicalRepsData().then(() => {
                 // Initialize each dashboard when the common data is ready
                 initKpiDashboard();
                 initDailyReportDashboard();
                 initListsDashboard(); 
                 requests_initRequestsDashboard(); 
                 initWeeklyPlanDashboard(); 
-            }).catch(error => {
+                
+                // Initialize the default active tab
+                openTab(null, 'kpi-dashboard');
+                
+            } catch (error) {
                 console.error("Failed to load essential common data:", error);
                 showAlertDialog("Failed to load essential data. Please refresh the page and verify Google Sheet URL and publishing settings.");
+            }
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('side-nav');
+            const toggleButton = document.getElementById('sidebarToggle');
+            sidebar.classList.toggle('collapsed');
+            isSidebarCollapsed = sidebar.classList.contains('collapsed');
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (isSidebarCollapsed) {
+                    link.setAttribute('title', link.querySelector('span').textContent);
+                } else {
+                    link.removeAttribute('title');
+                }
             });
         }
 
-        // Tab switching logic
         function openTab(evt, tabName) {
-            // Reset any previously opened sub-tables or specific UI elements
-            $('#visitsTableContainer').hide(); // Hide KPI overview table
-            $('#selectedRepName').text(''); // Clear selected rep name in KPI
-            $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name in KPI table
-            currentVisitsTableView = 'normal'; // Reset KPI table view
-            $('#leavesFilterOptions').hide(); // Hide KPI leaves filter options
-            $('#searchInput').val(''); // Clear KPI search input
+            $('#visitsTableContainer').hide();
+            $('#selectedRepName').text('');
+            $('#kpi-dashboard .rep-name').removeClass('active');
+            currentVisitsTableView = 'normal';
+            $('#leavesFilterOptions').hide();
+            $('#searchInput').val('');
 
-            // Hide all tab content and remove active class from all buttons
             $('.tab-content').hide();
-            $('.tab-button').removeClass('active');
+            $('.nav-link').removeClass('active');
             
-            // Show the selected tab content and add active class to the clicked button
             $(`#${tabName}`).show();
             if (evt) {
                 $(evt.currentTarget).addClass('active');
             } else {
-                // If called without an event (e.g., on initial load), find the button and activate it
-                $(`.tab-button[onclick*="'${tabName}'"]`).addClass('active');
+                $(`.nav-link[data-tab="${tabName}"]`).addClass('active');
             }
 
-            // Call specific initialization functions when a tab is opened
-            // These functions will now handle their own data fetching and filtering based on user role
+            // Trigger re-initialization with the latest DM filter
             if (tabName === 'kpi-dashboard') initKpiDashboard();
             else if (tabName === 'daily-report') initDailyReportDashboard();
             else if (tabName === 'lists-dashboard') initListsDashboard();
@@ -2647,7 +2424,6 @@
             }, 2600);
         }
 
-        // Parses CSV text into an array of objects
         function parseCSV(csvText) {
             const rows = csvText.split('\n').filter(row => row.trim() !== '');
             if (rows.length === 0) return [];
@@ -2665,7 +2441,6 @@
             return data;
         }
 
-        // Populate select dropdowns (generic function)
         function populateSelect(selectElementId, items, defaultOptionText, defaultOptionValue = '') {
             const select = $(`#${selectElementId}`);
             select.empty();
@@ -2675,14 +2450,12 @@
             });
         }
 
-        // Utility function to format date and time
         function formatDateTime(dateString) {
             if (!dateString) return '-';
             const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
             return new Date(dateString).toLocaleString('en-US', options);
         }
 
-        // Utility function to format date only
         function formatDateOnly(dateString) {
             if (!dateString) return '-';
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -2696,43 +2469,43 @@
         // --- KPI Dashboard Functions ---
         async function initKpiDashboard() {
             setupMonthDropdown();
-            populateKpiDistrictManagers(); // This now handles DM/Admin logic
+            populateKpiDistrictManagers();
             
-            // KPI Dashboard listeners
             $('#monthSelect').off('change').on('change', function() {
-                const [month, year] = $(this).val().split('-').map(Number);
-                const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
-                fetchKPIData(month, year, selectedKpiDm);
-                $('#visitsTableContainer').hide(); // Hide on filter change
+                const [month, year] = $('#monthSelect').val().split('-').map(Number);
+                fetchKPIData(month, year, selectedKPI_DM);
+                $('#visitsTableContainer').hide();
                 $('#selectedRepName').text('');
                 currentVisitsTableView = 'normal';
                 $('#leavesFilterOptions').hide();
-                $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
+                $('#kpi-dashboard .rep-name').removeClass('active');
+                updateAllDropdownsBasedOnKpiDM();
             });
+
+            $('#kpiDistrictManagerSelect').off('change').on('change', function() {
+                selectedKPI_DM = $(this).val();
+                const [month, year] = $('#monthSelect').val().split('-').map(Number);
+                fetchKPIData(month, year, selectedKPI_DM);
+                $('#visitsTableContainer').hide();
+                $('#selectedRepName').text('');
+                currentVisitsTableView = 'normal';
+                $('#leavesFilterOptions').hide();
+                $('#kpi-dashboard .rep-name').removeClass('active');
+                updateAllDropdownsBasedOnKpiDM();
+            });
+
 
             $('#syncKpiData').off('click').on('click', function() {
                 const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
-                fetchKPIData(month, year, selectedKpiDm);
+                fetchKPIData(month, year, selectedKPI_DM);
                 showAlertDialog('Refreshing KPI data...');
-                $('#visitsTableContainer').hide(); // Hide on sync button click
+                $('#visitsTableContainer').hide();
                 $('#selectedRepName').text('');
                 currentVisitsTableView = 'normal';
                 $('#leavesFilterOptions').hide();
-                $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
+                $('#kpi-dashboard .rep-name').removeClass('active');
             });
             
-            $('#kpiDistrictManagerSelect').off('change').on('change', function() {
-                const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                const selectedKpiDm = $(this).val();
-                fetchKPIData(month, year, selectedKpiDm);
-                $('#visitsTableContainer').hide(); // Hide on filter change
-                $('#selectedRepName').text('');
-                currentVisitsTableView = 'normal';
-                $('#leavesFilterOptions').hide();
-                $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
-            });
-
             $('#leavesButton').off('click').on('click', function() {
                 currentVisitsTableView = 'leaves';
                 const selectedRep = sessionStorage.getItem('selectedMedicalRep');
@@ -2756,7 +2529,7 @@
                         new Date(visit.created_at).getMonth() + 1 === month &&
                         new Date(visit.created_at).getFullYear() === year
                     );
-                    currentDisplayedVisitsData = filteredVisits; // Store for HCP filtering
+                    currentDisplayedVisitsData = filteredVisits;
                     renderVisitsTable(filteredVisits, 'normal');
                     $('#visitsTableContainer').show();
                 } else {
@@ -2803,24 +2576,19 @@
                 exportToExcel(tableData, repName + '_visits_overview', currentVisitsTableView);
             });
 
-            $('#printVisits').off('click').on('click', function() {
-                printVisitsTable();
-            });
+            $('#printVisits').off('click').on('click', printVisitsTable);
             
-            // Single click to open/toggle visibility of the visits table
             $(document).off('click', '#kpi-dashboard .rep-name').on('click', '#kpi-dashboard .rep-name', function() {
                 const repName = $(this).data('rep');
                 const selectedDm = $(this).data('dm');
                 
-                // If this rep is already selected and the table is visible, clicking again will close it
                 if ($(this).hasClass('active') && $('#visitsTableContainer').is(':visible')) {
-                    $('#visitsTableContainer').hide(); // Hide the table
-                    $(this).removeClass('active'); // Deactivate the rep name
-                    sessionStorage.removeItem('selectedMedicalRep'); // Clear selected rep
-                    return; // Exit if already open and clicked to close
+                    $('#visitsTableContainer').hide();
+                    $(this).removeClass('active');
+                    sessionStorage.removeItem('selectedMedicalRep');
+                    return;
                 }
 
-                // Otherwise, open/refresh the table for this rep
                 $('#selectedRepName').html(`(${repName})`);
                 sessionStorage.setItem('selectedMedicalRep', repName);
                 sessionStorage.setItem('selectedDistrictManager', selectedDm);
@@ -2837,8 +2605,7 @@
                     new Date(visit.created_at).getMonth() + 1 === month &&
                     new Date(visit.created_at).getFullYear() === year
                 );
-                currentDisplayedVisitsData = filteredVisits; // Store for HCP filtering
-
+                currentDisplayedVisitsData = filteredVisits;
                 renderVisitsTable(filteredVisits, 'normal');
                 $('#visitsTableContainer').show();
 
@@ -2847,31 +2614,25 @@
                 }, 1000);
             });
 
-            // Double click to explicitly close the visits table and scroll up
             $(document).off('dblclick', '#kpi-dashboard .rep-name').on('dblclick', '#kpi-dashboard .rep-name', function() {
-                $('#visitsTableContainer').hide(); // Hide the table
-                $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name
-                sessionStorage.removeItem('selectedMedicalRep'); // Clear selected rep
-                // Scroll back up to the KPI dashboard table
+                $('#visitsTableContainer').hide();
+                $('#kpi-dashboard .rep-name').removeClass('active');
+                sessionStorage.removeItem('selectedMedicalRep');
                 $('html, body').animate({
                     scrollTop: $("#kpi-dashboard .common-table-container").offset().top
                 }, 1000);
             });
 
-            // Add click listener to the HCP Visits Overview header to hide the table
             $(document).off('click', '#selectedRepName').on('click', '#selectedRepName', function() {
-                // Check if the visits table is currently visible
                 if ($('#visitsTableContainer').is(':visible')) {
-                    $('#visitsTableContainer').hide(); // Hide the table
-                    $('#kpi-dashboard .rep-name').removeClass('active'); // Deactivate any active rep name in KPI table
-                    sessionStorage.removeItem('selectedMedicalRep'); // Clear selected rep
-                    // Optionally scroll back up to the KPI dashboard table
+                    $('#visitsTableContainer').hide();
+                    $('#kpi-dashboard .rep-name').removeClass('active');
+                    sessionStorage.removeItem('selectedMedicalRep');
                     $('html, body').animate({
                         scrollTop: $("#kpi-dashboard .common-table-container").offset().top
                     }, 1000);
                 }
             });
-
 
             $(document).off('mouseenter', '#kpi-dashboard .duplicate-visit').on('mouseenter', '#kpi-dashboard .duplicate-visit', function() {
                 const visitsData = $(this).data('visits');
@@ -2890,7 +2651,7 @@
             });
 
             $('#searchInput').off('input').on('input', function() {
-                const query = $(this).val().toLowerCase().trim(); // Trim whitespace
+                const query = $(this).val().toLowerCase().trim();
                 $('#visitsTable tbody tr').each(function() {
                     const row = $(this);
                     if (row.find('.loading').length > 0 || row.find('td').length <= 1) return;
@@ -2905,6 +2666,10 @@
             });
 
             $(document).off('click', '#kpi-dashboard .archive-button').on('click', '#kpi-dashboard .archive-button', async function() {
+                if (loggedInUserRole !== 'District Manager' && loggedInUserRole !== 'admin') {
+                     showAlertDialog('You do not have permission to archive visits.', 'warning');
+                     return;
+                }
                 const row = $(this).closest('tr');
                 const visitId = $(this).data('id');
                 const confirmed = await showConfirmModal('Are you sure you want to archive this visit? It will be moved to archived records.');
@@ -2912,7 +2677,7 @@
 
                 try {
                     const { data: visitToArchive, error: fetchError } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .select('*')
                         .eq('id', visitId)
                         .single();
@@ -2932,7 +2697,7 @@
                     if (archiveError) throw archiveError;
 
                     const { error: deleteError } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .delete()
                         .eq('id', visitId);
 
@@ -2941,11 +2706,38 @@
                     row.remove();
                     showAlertDialog('Visit archived successfully!', 'success');
                     const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                    const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
-                    fetchKPIData(month, year, selectedKpiDm);
+                    fetchKPIData(month, year, selectedKPI_DM);
                 } catch (error) {
                     console.error('Error archiving visit:', error);
                     showAlertDialog('An error occurred while archiving the visit: ' + error.message, 'error');
+                }
+            });
+            
+            $(document).off('click', '#kpi-dashboard .delete-button').on('click', '#kpi-dashboard .delete-button', async function() {
+                if (loggedInUserRole !== 'admin') {
+                    showAlertDialog('You do not have permission to permanently delete visits.', 'warning');
+                    return;
+                }
+                const row = $(this).closest('tr');
+                const visitId = $(this).data('id');
+                const confirmed = await showConfirmModal('Are you sure you want to PERMANENTLY delete this visit? This action cannot be undone.');
+                if (!confirmed) return;
+
+                try {
+                    const { error: deleteError } = await supabaseClient
+                        .from('healthcarepro_visits')
+                        .delete()
+                        .eq('id', visitId);
+
+                    if (deleteError) throw deleteError;
+                    
+                    row.remove();
+                    showAlertDialog('Visit deleted successfully!', 'success');
+                    const [month, year] = $('#monthSelect').val().split('-').map(Number);
+                    fetchKPIData(month, year, selectedKPI_DM);
+                } catch (error) {
+                    console.error('Error deleting visit:', error);
+                    showAlertDialog('An error occurred while deleting the visit: ' + error.message, 'error');
                 }
             });
 
@@ -2971,7 +2763,7 @@
                     }
 
                     const { error: restoreError } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .insert([visitToRestoreForActive]);
 
                     if (restoreError) throw restoreError;
@@ -2986,8 +2778,7 @@
                     row.remove();
                     showAlertDialog('Visit restored successfully!', 'success');
                     const [month, year] = $('#monthSelect').val().split('-').map(Number);
-                    const selectedKpiDm = $('#kpiDistrictManagerSelect').val();
-                    fetchKPIData(month, year, selectedKpiDm);
+                    fetchKPIData(month, year, selectedKPI_DM);
                     displayArchivedVisits();
                 } catch (error) {
                     console.error('Error restoring visit:', error);
@@ -2996,6 +2787,10 @@
             });
 
             $(document).off('click', '#kpi-dashboard .remove-archived-button').on('click', '#kpi-dashboard .remove-archived-button', async function() {
+                if (loggedInUserRole !== 'admin') {
+                    showAlertDialog('You do not have permission to permanently remove archived visits.', 'warning');
+                    return;
+                }
                 const row = $(this).closest('tr');
                 const visitId = $(this).data('id');
                 const confirmed = await showConfirmModal('Are you sure you want to PERMANENTLY remove this archived visit? This action cannot be undone.');
@@ -3024,16 +2819,22 @@
             const currentYear = today.getFullYear();
             $('#monthSelect').val(`${currentMonth}-${currentYear}`);
             
-            let initialKpiDm = null;
             if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
-                initialKpiDm = loggedInUserDM;
+                selectedKPI_DM = loggedInUserDM;
                 $('#kpiDistrictManagerSelect').val(loggedInUserDM).prop('disabled', true);
             } else if (loggedInUserRole === 'admin') {
-                initialKpiDm = $('#kpiDistrictManagerSelect').val(); // Get current value, which might be 'All DMs'
+                selectedKPI_DM = $('#kpiDistrictManagerSelect').val();
                 $('#kpiDistrictManagerSelect').prop('disabled', false);
             }
             
-            fetchKPIData(currentMonth, currentYear, initialKpiDm);
+            fetchKPIData(currentMonth, currentYear, selectedKPI_DM);
+        }
+        
+        function updateAllDropdownsBasedOnKpiDM() {
+            populateDailyReportMedReps();
+            processListsData(listsGoogleData, listsCurrentMonthVisits);
+            requests_populateDistrictManagers();
+            initWeeklyPlanDashboard();
         }
 
         function showKPILoading() {
@@ -3093,19 +2894,17 @@
             const allMedicalReps = new Set();
 
             googleSheetData.forEach(row => {
-                const repName = row['medical rep'];
+                const repName = row['medical rep']?.trim();
                 const area = row['area']?.trim() || 'N/A';
                 const targetVisitsPerHCP = parseInt(row['T.V'], 10) || 0;
-                const hcpName = row['HCPS'];
-                let hcpClass = row['Class'];
+                const hcpName = row['HCPS']?.trim();
+                let hcpClass = row['Class']?.trim();
 
-                const districtManager = row['District Manager'] || 'N/A';
+                const districtManager = row['District Manager']?.trim() || 'N/A';
 
-                hcpClass = hcpClass ? hcpClass.trim().toUpperCase() : '';
+                hcpClass = hcpClass ? hcpClass.toUpperCase() : '';
 
-                if (repName && repName.includes("الجيزة")) return;
-
-                if (repName) {
+                if (repName && !repName.includes("الجيزة")) {
                     if (!data[repName]) {
                         data[repName] = {
                             area: area,
@@ -3121,7 +2920,7 @@
                             districtManager: districtManager
                         };
                     }
-                    if (hcpName && hcpName.trim() !== '') {
+                    if (hcpName && hcpName !== '') {
                         data[repName].totalHCPs++;
                         data[repName].hcps.push({ name: hcpName, class: hcpClass, target_visits: targetVisitsPerHCP });
                         
@@ -3162,8 +2961,8 @@
                 kpiDmSelect.append($('<option>', { value: dm, text: dm }));
             });
 
-            // Set initial selection and disable if DM is logged in
             if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
+                selectedKPI_DM = loggedInUserDM;
                 kpiDmSelect.val(loggedInUserDM);
                 kpiDmSelect.prop('disabled', true);
             } else {
@@ -3171,12 +2970,6 @@
             }
         }
 
-        /**
-         * Fetches visits data from Supabase with pagination.
-         * @param {number} month - The month to fetch data for (1-12).
-         * @param {number} year - The year to fetch data for.
-         * @returns {Promise<Array>} A promise that resolves to an array of all fetched visits.
-         */
         async function fetchVisitsData(month, year) {
             const startDate = new Date(year, month - 1, 1);
             const endDate = new Date(year, month, 0);
@@ -3193,7 +2986,7 @@
                         .select('id,medical_rep,hcp_name,created_at,specialty,brick,target_visits,remaining_visits,comments,visit_place')
                         .gte('created_at', startDate.toISOString())
                         .lte('created_at', endDate.toISOString())
-                        .range(offset, offset + PAGE_SIZE - 1); // Supabase range is inclusive
+                        .range(offset, offset + PAGE_SIZE - 1);
 
                     if (error) {
                         throw error;
@@ -3201,12 +2994,12 @@
 
                     allData = allData.concat(data);
                     if (data.length < PAGE_SIZE) {
-                        hasMore = false; // No more data to fetch
+                        hasMore = false;
                     } else {
                         offset += PAGE_SIZE;
                     }
                 }
-                allVisitsData = allData; // Store the fetched data globally
+                allVisitsData = allData;
                 return allData;
             } catch (error) {
                 console.error('Error fetching visits data with pagination:', error);
@@ -3218,7 +3011,7 @@
             showKPILoading();
             try {
                 const { processedData: medicalRepsProcessedData, districtManagers } = await fetchMedicalRepsData();
-                const visitsData = await fetchVisitsData(month, year); // This now fetches all data via pagination
+                const visitsData = await fetchVisitsData(month, year);
 
                 const workingDaysMap = calculateUnifiedWorkingDays(visitsData, allGoogleSheetData, month, year);
                 const filteredVisitsData = filterRecentVisits(visitsData, medicalRepsProcessedData, month, year);
@@ -3226,16 +3019,14 @@
                 let pmVisitsMetrics = calculateMetrics(medicalRepsProcessedData, filteredVisitsData, ['A', 'B']);
                 let amVisitsMetrics = calculateMetrics(medicalRepsProcessedData, filteredVisitsData, ['UPA', 'PRIVATE']);
 
-                // Apply filtering based on logged-in user role
                 if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
                     pmVisitsMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === loggedInUserDM);
                     amVisitsMetrics = amVisitsMetrics.filter(metric => metric.districtManager === loggedInUserDM);
                 } else if (loggedInUserRole === 'admin' && selectedKpiDm) {
-                    if (selectedKpiDm !== '') { // If admin selects a specific DM
+                    if (selectedKpiDm !== '') {
                         pmVisitsMetrics = pmVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
                         amVisitsMetrics = amVisitsMetrics.filter(metric => metric.districtManager === selectedKpiDm);
                     }
-                    // If selectedKpiDm is empty ('All District Managers'), no further filtering is needed here
                 }
 
                 pmVisitsMetrics.forEach(metric => {
@@ -3254,7 +3045,7 @@
                 $('.kpi-table-content').removeClass('active').hide();
                 $(`#${activeKpiTab}`).addClass('active').show();
 
-                populateDailyReportMedReps(); 
+                populateDailyReportMedReps();
 
             } catch (error) {
                 console.error("Error in fetchKPIData:", error);
@@ -3272,7 +3063,7 @@
                 const repName = visit.medical_rep;
                 const isCurrentMonth = visitDate.getMonth() + 1 === selectedMonth && visitDate.getFullYear() === selectedYear;
                 const isHCPInMedicalReps = medicalRepsData[repName] && medicalRepsData[repName].hcps.some(hcp => hcp.name === hcpName);
-                return isCurrentMonth && isHCPInMedicalReps; // Corrected typo here
+                return isCurrentMonth && isHCPInMedicalReps;
             });
         }
 
@@ -3311,7 +3102,7 @@
             visitsData.forEach(visit => {
                 const { medical_rep, hcp_name, specialty } = visit;
                 const hcpInfo = allGoogleSheetData.find(row => row['medical rep'] === medical_rep && row['HCPS'] === hcp_name);
-                const hcpClass = hcpInfo ? hcpInfo['Class'].trim().toUpperCase() : null;
+                const hcpClass = hcpInfo ? hcpInfo['Class']?.trim().toUpperCase() : null;
 
                 if (hcpClass && hcpClasses.includes(hcpClass)) {
                     if (specialty.toLowerCase() === 'pharmacy' || specialty.toLowerCase().includes('event(') || specialty.toLowerCase().includes('am(')) {
@@ -3332,10 +3123,9 @@
 
             const result = [];
             for (const rep in metrics) {
-                const totalHCPCount = metrics[rep].totalHCPs; // Corrected to use totalHCPs from metrics[rep]
+                const totalHCPCount = metrics[rep].totalHCPs;
                 const uniqueHCPCount = metrics[rep].uniqueHCPs.size;
                 
-                // Fix for unvisitedHCPs: calculate directly
                 const unvisitedHCPs = totalHCPCount - uniqueHCPCount;
                 
                 const coverage = uniqueHCPCount;
@@ -3349,7 +3139,7 @@
                     repName: rep,
                     area: medicalRepsData[rep].area,
                     totalHCPCount,
-                    unvisitedHCPs, // Corrected
+                    unvisitedHCPs,
                     coverage,
                     coveragePercentage,
                     frequency,
@@ -3385,7 +3175,7 @@
                     <td class="rep-name ${coverageClass}" data-rep="${row.repName}" data-dm="${row.districtManager}">${row.repName}</td>
                     <td>${row.area || 'N/A'}</td>
                     <td>${row.totalHCPCount}</td>
-                    <td class="unvisited">${row.unvisitedHCPs}</td>
+                    <td class="unvisited-hcp">${row.unvisitedHCPs}</td>
                     <td>${row.coverage}/${row.totalHCPCount}</td>
                     <td>
                         <div class="progress-bar">
@@ -3406,7 +3196,6 @@
                 tableBody.appendChild(tr);
             });
 
-            // Add click event listeners to the "PM Call Rate" cells
             document.querySelectorAll('.pm-call-rate').forEach(cell => {
                 cell.addEventListener('click', function() {
                     const repName = this.getAttribute('data-rep');
@@ -3418,32 +3207,21 @@
         function showFloatingBox(repName) {
             const floatingBox = document.getElementById('floatingBox');
             
-            // Step 1: Filter all data for the specific representative
             const repData = allVisitsData.filter(visit => visit.medical_rep === repName);
-
-            // Step 2: Filter specifically for visits to clinics
-            // Ensure 'visit_place' exists and case-insensitively includes 'clinic'
             const clinicVisits = repData.filter(visit => 
                 visit.visit_place && typeof visit.visit_place === 'string' && visit.visit_place.toLowerCase().includes('clinic')
             );
-            
-            // Calculate the number of clinic visits
             const clinicVisitCount = clinicVisits.length;
 
-            // Step 3: Get the number of working days (excluding leaves and full-day events)
             const workingDays = getWorkingDays(repName); 
             
-            // Step 4: Calculate the call rate
             let callRate;
             if (workingDays > 0) {
-                // Perform the division and format to two decimal places
                 callRate = (clinicVisitCount / workingDays).toFixed(2);
             } else {
-                // Handle cases where workingDays is zero to avoid division by zero
                 callRate = '0.00'; 
             }
 
-            // Update the floating box content
             floatingBox.innerHTML = `
                 <div>
                     <p>Private Clinics: ${clinicVisitCount}</p>
@@ -3451,7 +3229,6 @@
                 </div>
             `;
 
-            // Position the floating box
             const cell = document.querySelector(`.pm-call-rate[data-rep="${repName}"]`);
             if (cell) {
                 const rect = cell.getBoundingClientRect();
@@ -3462,12 +3239,11 @@
             }
         }
 
-        // Function to get working days, excluding leave and full-day event entries
         function getWorkingDays(repName) {
             const repVisits = allVisitsData.filter(visit => visit.medical_rep === repName);
             const workingDaysSet = new Set();
             const leaveKeywords = ['annual leave', 'official vacation', 'casual leave', 'sick leave', 'leave', 'vacation'];
-            const eventSpecialties = ['event(full day activity)']; // Only full day events should be excluded from working days
+            const eventSpecialties = ['event(full day activity)'];
 
             repVisits.forEach(visit => {
                 const visitDate = new Date(visit.created_at);
@@ -3475,7 +3251,6 @@
                 const hcpNameLower = visit.hcp_name ? visit.hcp_name.toLowerCase() : '';
                 const specialtyLower = visit.specialty ? visit.specialty.toLowerCase() : '';
 
-                // Exclude days that are explicitly leaves or full-day events
                 const isLeave = leaveKeywords.some(keyword => hcpNameLower.includes(keyword));
                 const isFullDayEvent = eventSpecialties.includes(specialtyLower);
 
@@ -3487,8 +3262,6 @@
             return workingDaysSet.size;
         }
 
-
-        // Close the floating box when clicking outside
         document.addEventListener('click', function(event) {
             const floatingBox = document.getElementById('floatingBox');
             if (!event.target.closest('.pm-call-rate') && !event.target.closest('#floatingBox')) {
@@ -3592,6 +3365,20 @@
                 let hcpNameCellClass = '';
                 if (specialtyLower.startsWith('am(')) hcpNameCellClass = 'am-specialty-hcp';
 
+                let actionButtonsHtml = '';
+                if (tableType === 'normal') {
+                    if (loggedInUserRole === 'admin') {
+                        actionButtonsHtml = `<button class="delete-button" data-id="${item.id}" title="Permanently Delete Visit"><i class="fas fa-trash-alt"></i></button>`;
+                    } else if (loggedInUserRole === 'District Manager') {
+                        actionButtonsHtml = `<button class="archive-button" data-id="${item.id}" title="Archive Visit"><i class="fas fa-box-archive"></i></button>`;
+                    }
+                } else if (tableType === 'archived') {
+                    actionButtonsHtml = `<button class="restore-button" data-id="${item.id}" title="Restore Visit"><i class="fas fa-undo"></i></button>`;
+                    if (loggedInUserRole === 'admin') {
+                        actionButtonsHtml += `<button class="remove-archived-button" data-id="${item.id}" title="Remove Permanently"><i class="fas fa-trash-alt"></i></button>`;
+                    }
+                }
+
                 let rowHtml = '';
                 if (tableType === 'normal' || tableType === 'archived') { 
                     rowHtml = `
@@ -3604,13 +3391,7 @@
                             <td>${item.remaining_visits || '-'}</td>
                             <td>${item.comments || '-'}</td>
                             <td class="visit-time">${formatDateTime(item.created_at)}</td>
-                            <td>
-                                ${tableType === 'normal' ? `<button class="archive-button" data-id="${item.id}" title="Archive Visit"><i class="fas fa-archive"></i></button>` : ''}
-                                ${tableType === 'archived' ? `
-                                    <button class="restore-button" data-id="${item.id}" title="Restore Visit"><i class="fas fa-undo"></i></button>
-                                    ${loggedInUserRole === 'admin' ? `<button class="remove-archived-button" data-id="${item.id}" title="Remove Permanently"><i class="fas fa-trash-alt"></i></button>` : ''}
-                                ` : ''}
-                            </td>
+                            <td>${actionButtonsHtml}</td>
                         </tr>
                     `;
                 } else if (tableType === 'leaves') {
@@ -3627,24 +3408,20 @@
                 tableBody.append(rowHtml);
             });
 
-            // Add double-click event listener to HCP Name cells
             $('#visitsTable tbody .hcp-name-cell').off('dblclick').on('dblclick', function() {
                 const clickedHcpName = $(this).data('hcp-name');
                 filterVisitsTableByHCP(clickedHcpName);
             });
 
-            // Add a double-click listener to the HCP Name header to clear filter
             $('#visitsTable thead th:first-child').off('dblclick').on('dblclick', function() {
                 clearHCPFilter();
             });
         }
 
-        // Function to filter visits table by HCP name
         function filterVisitsTableByHCP(hcpName) {
             const tableBody = $('#visitsTable tbody');
             const rows = tableBody.find('tr');
 
-            // If already filtered by this HCP, clear the filter
             if ($('#visitsTable').data('filtered-hcp') === hcpName) {
                 clearHCPFilter();
                 return;
@@ -3658,22 +3435,20 @@
                     $(this).hide();
                 }
             });
-            $('#visitsTable').data('filtered-hcp', hcpName); // Store the current filter
-            $('#searchInput').val(hcpName).trigger('input'); // Update search input
+            $('#visitsTable').data('filtered-hcp', hcpName);
+            $('#searchInput').val(hcpName).trigger('input');
             showAlertDialog(`Showing visits for: ${hcpName}`, 'info');
         }
 
-        // Function to clear HCP filter
         function clearHCPFilter() {
             $('#visitsTable tbody tr').show();
-            $('#visitsTable').removeData('filtered-hcp'); // Clear stored filter
-            $('#searchInput').val(''); // Clear search input
+            $('#visitsTable').removeData('filtered-hcp');
+            $('#searchInput').val('');
             showAlertDialog('HCP filter cleared. Showing all visits.', 'info');
         }
 
         function calculateUnifiedWorkingDays(visitsData, googleSheetData, month, year) {
             const workingDaysMap = {};
-            // Ensure all variations of leave are covered, including "Official vacation"
             const leaveKeywords = ['annual leave', 'official vacation', 'casual leave', 'sick leave', 'leave', 'vacation'];
 
             visitsData.forEach(visit => {
@@ -3681,15 +3456,12 @@
                 const visitDate = new Date(visit.created_at);
                 const visitDateKey = visitDate.toISOString().split('T')[0];
 
-                // Filter visits for the specified month and year
                 if (visitDate.getMonth() + 1 !== month || visitDate.getFullYear() !== year) {
                     return;
                 }
 
                 const hcpNameLower = visit.hcp_name ? visit.hcp_name.toLowerCase() : '';
 
-                // Determine if the visit is a leave, using a single, comprehensive check
-                // We use .some() to check if any of the keywords are present in hcpNameLower
                 const isLeave = leaveKeywords.some(keyword => hcpNameLower.includes(keyword));
 
                 if (!isLeave) {
@@ -3707,8 +3479,6 @@
 
             return finalWorkingDays;
         }
-
-
 
         function calculateAverageVisits(metrics, visitsData, hcpClasses) {
             const selectedMonth = parseInt($('#monthSelect').val().split('-')[0]);
@@ -3731,7 +3501,7 @@
                     const hcpNameLower = visit.hcp_name ? visit.hcp_name.toLowerCase() : '';
                     const specialtyLower = visit.specialty ? visit.specialty.toLowerCase() : '';
                     const hcpInfo = allGoogleSheetData.find(row => row['medical rep'] === visit.medical_rep && row['HCPS'] === visit.hcp_name);
-                    const hcpClass = hcpInfo ? hcpInfo['Class'].trim().toUpperCase() : null;
+                    const hcpClass = hcpInfo ? hcpInfo['Class']?.trim().toUpperCase() : null;
 
                     const isRelevantHCP = hcpClass && hcpClasses.includes(hcpClass);
                     const isNotSpecialVisit = specialtyLower !== 'pharmacy' &&
@@ -3820,7 +3590,7 @@
                     const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString();
                     const endDate = new Date(currentYear, currentMonth, 0).toISOString();
                     const { data, error } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .select('id, hcp_name, specialty, comments, created_at')
                         .eq('medical_rep', repName)
                         .gte('created_at', startDate)
@@ -3831,7 +3601,7 @@
                     const startDate = new Date(currentYear, 0, 1).toISOString();
                     const endDate = new Date(currentYear, 11, 31, 23, 59, 59, 999).toISOString();
                      const { data, error } = await supabaseClient
-                        .from('healthcarepro_visits') // Changed from hcps_visits2
+                        .from('healthcarepro_visits')
                         .select('id, hcp_name, specialty, comments, created_at')
                         .eq('medical_rep', repName)
                         .gte('created_at', startDate)
@@ -3843,8 +3613,7 @@
                 filteredLeaves = allLeaves.filter(visit => 
                     leaveTypes.some(leave => visit.hcp_name?.toLowerCase().includes(leave))
                 );
-                currentDisplayedVisitsData = filteredLeaves; // Store for HCP filtering
-
+                currentDisplayedVisitsData = filteredLeaves;
                 renderVisitsTable(filteredLeaves, 'leaves');
                 $('#visitsTableContainer').show();
             } catch (error) {
@@ -3891,8 +3660,8 @@
                 if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
                     const dmMedicalReps = new Set();
                     allGoogleSheetData.forEach(row => {
-                        if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
-                            dmMedicalReps.add(row['medical rep']);
+                        if (row['District Manager']?.trim() === loggedInUserDM && row['medical rep']?.trim()) {
+                            dmMedicalReps.add(row['medical rep']?.trim());
                         }
                     });
                     filteredArchivedData = filteredArchivedData.filter(visit => dmMedicalReps.has(visit.medical_rep));
@@ -3903,7 +3672,7 @@
                 }
 
                 archivedVisitsData = filteredArchivedData;
-                currentDisplayedVisitsData = archivedVisitsData; // Store for HCP filtering
+                currentDisplayedVisitsData = archivedVisitsData;
                 renderVisitsTable(archivedVisitsData, 'archived');
                 $('#visitsTableContainer').show();
             } catch (error) {
@@ -4001,8 +3770,14 @@
             medRepSelect.empty().append($('<option>', { value: '', text: 'Select Medical Representative' }));
             
             let repsToPopulate = [];
+            const selectedDm = selectedKPI_DM;
+
             if (loggedInUserRole === 'admin') {
-                repsToPopulate = medicalRepsForDailyReport;
+                if (selectedDm) {
+                    repsToPopulate = medicalRepsForDailyReport.filter(rep => rep.dm === selectedDm);
+                } else {
+                    repsToPopulate = medicalRepsForDailyReport;
+                }
             } else if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
                 repsToPopulate = medicalRepsForDailyReport.filter(rep => rep.dm === loggedInUserDM);
             }
@@ -4013,7 +3788,6 @@
                 medRepSelect.append($('<option>', { value: repName, text: repName }));
             });
 
-            // Set default selection to "Select Medical Representative"
             medRepSelect.val('');
         }
 
@@ -4024,8 +3798,8 @@
             lastSaturday.setDate(today.getDate() - daysToLastSaturday);
             const startDate = formatDateForInput(lastSaturday);
             $('#dailyStartDate').val(startDate);
-            const endDate = getEndDate(startDate);
-            updateTableStructure(startDate, endDate);
+            const endDate = getEndDate(lastSaturday);
+            updateTableStructure(lastSaturday, endDate);
         }
 
         function getFirstSaturday(dateStr) {
@@ -4049,11 +3823,9 @@
             const end = new Date(endDate);
             const daysDiff = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
-            // Update headers for all daily report tables
             $('#daily-report .daily-report-table').each(function() {
-                const tableId = $(this).attr('id');
                 const headerRow = $(this).find('thead tr');
-                headerRow.empty().append('<th class="count-column">Count</th>'); // Restore Count header
+                headerRow.empty().append('<th class="count-column">Count</th>');
 
                 for (let i = 0; i < daysDiff; i++) {
                     const currentDate = new Date(start);
@@ -4063,7 +3835,6 @@
                     headerRow.append(`<th>${dayName} ${dateStr}</th>`);
                 }
 
-                // Clear existing cells and append new ones for tbody
                 $(this).find('tbody tr').each(function() {
                     $(this).find('td:not(.count-column)').remove();
                     for (let i = 0; i < daysDiff; i++) $(this).append('<td></td>');
@@ -4103,7 +3874,7 @@
                         offset += PAGE_SIZE;
                     }
                 }
-                dailyReportRawVisitsData = allDailyVisits; // Store raw data for Excel export
+                dailyReportRawVisitsData = allDailyVisits;
                 clearDailyReportTable();
                 if (Array.isArray(allDailyVisits)) populateDailyReportTable(allDailyVisits, start);
                 else console.error('Expected array but received:', allDailyVisits);
@@ -4158,7 +3929,7 @@
 
                 dailyVisits.forEach(visit => {
                     const visitDate = new Date(visit.created_at);
-                    const visitDayDate = visitDate.toLocaleDateString('en-US', { weekday: 'short', month: '2-digit', day: '2-digit' }); // Day and Date
+                    const visitDayDate = visitDate.toLocaleDateString('en-US', { weekday: 'short', month: '2-digit', day: '2-digit' });
                     const visitTime = visitDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
                     const specialty = visit.specialty?.toLowerCase() || '';
                     const brick = visit.brick || '';
@@ -4170,20 +3941,18 @@
                     const hcpTargetVisits = hcpGoogleData ? (parseInt(hcpGoogleData['T.V'], 10) || 0) : null;
 
                     const createCellContent = (name, dayDate, time, specialtyDisplay, brickDisplay, visitPlaceDisplay, comment = '', isEvent = false, isLeave = false, isAmSpecialty = false) => {
-    let visitPlaceClass = 'visit-place-cell'; // Apply the visit-place-cell class by default
-    if (visitPlaceDisplay.toLowerCase().includes('clinic')) {
-        visitPlaceClass += ' clinic-hcp'; // Add clinic-hcp class if it's a clinic
-    }
-    return `<div class="hcp-cell ${isEvent ? 'event' : ''} ${isLeave ? 'leave-entry' : ''} ${visitPlaceClass}" onclick="toggleComment(this)">
-                <span class="hcp-name ${isAmSpecialty ? 'am-specialty-hcp' : ''}">${name}</span>
-                <span class="hcp-detail">${dayDate} ${time}</span>
-                <span class="hcp-detail">${specialtyDisplay}</span>
-                <span class="hcp-detail">${brickDisplay} - <span class="${visitPlaceClass}">${visitPlaceDisplay}</span></span>
-                <div class="comment-box" data-comment-text="${escapeHtml(comment)}">${comment || 'No comment available'}</div>
-            </div>`;
-};
-
-
+                        let visitPlaceClass = 'visit-place-cell';
+                        if (visitPlaceDisplay.toLowerCase().includes('clinic')) {
+                            visitPlaceClass += ' clinic-hcp';
+                        }
+                        return `<div class="hcp-cell ${isEvent ? 'event' : ''} ${isLeave ? 'leave-entry' : ''} ${visitPlaceClass}" onclick="toggleComment(this)">
+                                    <span class="hcp-name ${isAmSpecialty ? 'am-specialty-hcp' : ''}">${name}</span>
+                                    <span class="hcp-detail">${dayDate} ${time}</span>
+                                    <span class="hcp-detail">${specialtyDisplay}</span>
+                                    <span class="hcp-detail">${brickDisplay} - <span class="${visitPlaceClass}">${visitPlaceDisplay}</span></span>
+                                    <div class="comment-box" data-comment-text="${escapeHtml(comment)}">${comment || 'No comment available'}</div>
+                                </div>`;
+                    };
 
                     const isAmActivitySpecialty = amActivitiesSpecialties.includes(specialty);
                     const isAmActivityEvent = specialty === 'event(am activity)';
@@ -4197,7 +3966,6 @@
                     const originalSpecialty = visit.specialty || 'N/A';
 
                     if (isFullDayEvent) {
-                        // Handle full-day events
                         if (!dailyAmActivitiesHCPs.has(hcpName)) {
                             dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
                             dailyAmActivitiesHCPs.add(hcpName);
@@ -4215,13 +3983,11 @@
                             dailyPharmacyActivitiesHCPs.add(hcpName);
                         }
                     } else if (isLeaveHCP && !isAmActivitySpecialty && !isAmActivityEvent) {
-                        // Handle leaves only if it's not an AM activity or event
                         if (!dailyPmActivitiesHCPs.has(hcpName)) {
                             dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, false, true, isAmDetailsSpecialty));
                             dailyPmActivitiesHCPs.add(hcpName);
                         }
                     } else {
-                        // Handle AM and PM activities based on specialty
                         let addedToAmActivities = false;
                         if ((isAmActivitySpecialty || isAmActivityEvent) && !dailyAmActivitiesHCPs.has(hcpName)) {
                             dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
@@ -4298,7 +4064,7 @@
                         dailyDetails.forEach(detail => {
                             cell.append(`<div class="hcp-cell ${detail.isEvent ? 'event' : ''}" onclick="toggleComment(this)">
                                 <span class="hcp-name ${detail.isAmSpecialty ? 'am-specialty-hcp' : ''}">${detail.name}</span>
-                                <span class="hcp-detail">${detail.dayDate} ${detail.time}</span> <!-- Combined Day and Date with Time -->
+                                <span class="hcp-detail">${detail.dayDate} ${detail.time}</span>
                                 <span class="hcp-detail">${detail.specialty}</span>
                                 <span class="hcp-detail">${detail.brick} - ${detail.visit_place}</span>
                                 <div class="comment-box" data-comment-text="${escapeHtml(detail.comment || '')}">${detail.comment || 'No comment available'}</div>
@@ -4329,61 +4095,54 @@
                 const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
                 const scrollLeft = document.querySelector('.daily-report-table').parentElement.scrollLeft;
 
-                // Calculate space below and above
                 const spaceBelow = viewportHeight - rect.bottom;
                 const spaceAbove = rect.top;
 
-                // Position the comment box
                 commentBox.style.display = 'block';
                 commentBox.style.left = '50%';
                 commentBox.style.transform = 'translateX(-50%)';
-                commentBox.style.zIndex = '9999'; // Add this line to ensure it's on top!
+                commentBox.style.zIndex = '9999';
 
-                // Temporarily show to get its dimensions
                 commentBox.style.visibility = 'hidden';
                 commentBox.style.display = 'block';
                 const commentBoxHeight = commentBox.offsetHeight;
                 const commentBoxWidth = commentBox.offsetWidth;
                 commentBox.style.visibility = 'visible';
 
-                // Check if there's enough space below
-                if (spaceBelow >= commentBoxHeight + 10) { // +10 for a little margin
+                if (spaceBelow >= commentBoxHeight + 10) {
                     commentBox.style.top = '100%';
                     commentBox.style.bottom = 'auto';
                     commentBox.style.marginTop = '5px';
                     commentBox.style.marginBottom = 'auto';
                     commentBox.classList.add('bottom');
-                } else if (spaceAbove >= commentBoxHeight + 10) { // Check if there's enough space above
+                } else if (spaceAbove >= commentBoxHeight + 10) {
                     commentBox.style.top = 'auto';
                     commentBox.style.bottom = '100%';
                     commentBox.style.marginTop = 'auto';
                     commentBox.style.marginBottom = '5px';
                     commentBox.classList.add('top');
                 } else {
-                    // Fallback: position below but adjust if it goes off screen horizontally
                     commentBox.style.top = '100%';
                     commentBox.style.bottom = 'auto';
                     commentBox.style.marginTop = '5px';
                     commentBox.style.marginBottom = 'auto';
                     commentBox.classList.add('bottom');
 
-                    // Adjust horizontal position if it goes off screen
                     let newLeft = rect.left + rect.width / 2 - commentBoxWidth / 2;
                     if (newLeft < 0) {
-                        newLeft = 5; // Small padding from left edge
+                        newLeft = 5;
                     } else if (newLeft + commentBoxWidth > viewportWidth) {
-                        newLeft = viewportWidth - commentBoxWidth - 5; // Small padding from right edge
+                        newLeft = viewportWidth - commentBoxWidth - 5;
                     }
-                    commentBox.style.left = `${newLeft - rect.left + (element.offsetWidth/2)}px`; // Adjust relative to parent
+                    commentBox.style.left = `${newLeft - rect.left + (element.offsetWidth/2)}px`;
                     commentBox.style.transform = 'translateX(-50%)';
                 }
             } else {
                 commentBox.style.display = 'none';
                 commentBox.classList.remove('top', 'bottom');
-                commentBox.style.zIndex = ''; // Reset z-index when hidden
+                commentBox.style.zIndex = '';
             }
         }
-
 
         function downloadDailyReportExcel() {
             const selectedRep = $('#dailyMedRepSelect').val();
@@ -4414,13 +4173,13 @@
                 const specialty = visit.specialty?.toLowerCase() || '';
                 const hcpNameLower = visit.hcp_name ? visit.hcp_name.toLowerCase() : '';
 
-                let section = 'PM Activity'; // Default
+                let section = 'PM Activity';
 
                 const isFullDayEvent = specialty === 'event(full day)';
                 const isLeaveHCP = leaveTypes.some(leave => hcpNameLower.includes(leave));
                 const isPharmacySpecialty = specialty === 'pharmacy';
                 const isAmActivity = amActivitiesSpecialties.includes(specialty) || specialty === 'event(am activity)';
-                const isAmDetails = specialty.includes('am('); // This covers 'am(activity)'
+                const isAmDetails = specialty.includes('am(');
                 const isPmActivityEvent = specialty === 'event(pm activity)';
 
                 if (isFullDayEvent) {
@@ -4436,7 +4195,6 @@
                 } else if (isPmActivityEvent) {
                     section = 'PM Activity (Event)';
                 }
-                // If none of the above, it remains 'PM Activity'
 
                 excelData.push([
                     visit.medical_rep || 'N/A',
@@ -4474,7 +4232,6 @@
             }
             listsGoogleData = allGoogleSheetData;
 
-            // Hide content and show loading initially
             $('#listsContent').hide();
             $('#listsLoading').show();
 
@@ -4509,8 +4266,7 @@
                 $('#lists-dashboard #medicalReps').off('change').on('change', populateListsBricks);
                 $('#lists-dashboard #visitOptions, #lists-dashboard #dayFilter').off('change').on('change', updateListsCountDisplay);
                 $('#lists-dashboard #searchBox').off('input').on('input', searchListsTable);
-                // Removed initListsCustomSelect as we're using standard select
-                $('#bricksSelect').off('change').on('change', updateListsCountDisplay); // Listener for standard select
+                $('#bricksSelect').off('change').on('change', updateListsCountDisplay);
             }
             catch (error) {
                 $('#listsLoading').hide();
@@ -4520,13 +4276,22 @@
         }
 
         function processListsData(googleData, supabaseData) {
-            let medicalReps = [...new Set(googleData.map(row => row['medical rep']).filter(rep => rep && !/[\u0600-\u06FF]/.test(rep)))];
-            
+            let medicalReps = [...new Set(googleData.map(row => row['medical rep']?.trim()).filter(rep => rep && !/[\u0600-\u06FF]/.test(rep)))];
+            const selectedDm = selectedKPI_DM;
+
             if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
                 const dmReps = new Set();
                 googleData.forEach(row => {
-                    if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
-                        dmReps.add(row['medical rep']);
+                    if (row['District Manager']?.trim() === loggedInUserDM && row['medical rep']?.trim()) {
+                        dmReps.add(row['medical rep']?.trim());
+                    }
+                });
+                medicalReps = medicalReps.filter(rep => dmReps.has(rep));
+            } else if (loggedInUserRole === 'admin' && selectedDm) {
+                const dmReps = new Set();
+                 googleData.forEach(row => {
+                    if (row['District Manager']?.trim() === selectedDm && row['medical rep']?.trim()) {
+                        dmReps.add(row['medical rep']?.trim());
                     }
                 });
                 medicalReps = medicalReps.filter(rep => dmReps.has(rep));
@@ -4546,10 +4311,10 @@
 
         function populateListsBricks() {
             const selectedRep = $('#lists-dashboard #medicalReps').val();
-            const filteredData = listsGoogleData.filter(row => row['medical rep'] === selectedRep);
+            const filteredData = listsGoogleData.filter(row => row['medical rep']?.trim() === selectedRep);
             listsBricks = new Set(filteredData.map(row => row['Brick']).filter(Boolean));
             const bricksSelect = $('#lists-dashboard #bricksSelect').empty();
-            bricksSelect.append($('<option>', { value: '', text: 'Select Brick' })); // Add default option
+            bricksSelect.append($('<option>', { value: '', text: 'Select Brick' }));
             if (listsBricks.size === 0) {
                 return;
             }
@@ -4559,14 +4324,11 @@
             updateListsCountDisplay();
         }
 
-        // Removed initListsCustomSelect as we're using standard select
-        // Removed toggleListsBrickSelection as we're using standard select
-
         function updateListsCountDisplay() {
             const selectedRep = $('#lists-dashboard #medicalReps').val();
             const selectedOption = $('#lists-dashboard #visitOptions').val();
             const selectedDay = $('#lists-dashboard #dayFilter').val();
-            const selectedBrick = $('#lists-dashboard #bricksSelect').val(); // Get selected brick from standard select
+            const selectedBrick = $('#lists-dashboard #bricksSelect').val();
             const countDisplay = $('#lists-dashboard #countDisplay');
 
             if (!selectedRep || !selectedOption) {
@@ -4577,8 +4339,8 @@
             let count = 0;
             let displayText = '';
             const filteredByDay = listsGoogleData.filter(row => 
-                row['medical rep'] === selectedRep &&
-                (selectedBrick === '' || row['Brick'] === selectedBrick) && // Filter by selected brick
+                row['medical rep']?.trim() === selectedRep &&
+                (selectedBrick === '' || row['Brick']?.trim() === selectedBrick) &&
                 (selectedDay === '' || row[selectedDay]?.trim() !== '')
             );
 
@@ -4599,7 +4361,7 @@
             const selectedRep = $('#lists-dashboard #medicalReps').val();
             const selectedOption = $('#lists-dashboard #visitOptions').val();
             const selectedDay = $('#lists-dashboard #dayFilter').val();
-            const selectedBrick = $('#lists-dashboard #bricksSelect').val(); // Get selected brick from standard select
+            const selectedBrick = $('#lists-dashboard #bricksSelect').val();
             const listsErrorDiv = $('#lists-dashboard #listsError');
 
             if (!selectedRep || !selectedOption) {
@@ -4609,8 +4371,8 @@
             listsErrorDiv.hide();
             
             listsFilteredHCPs = listsGoogleData.filter(row => {
-                if (row['medical rep'] !== selectedRep) return false;
-                if (selectedBrick !== '' && row['Brick'] !== selectedBrick) return false; // Filter by selected brick
+                if (row['medical rep']?.trim() !== selectedRep) return false;
+                if (selectedBrick !== '' && row['Brick']?.trim() !== selectedBrick) return false;
                 if (selectedDay !== '' && !row[selectedDay]?.trim()) return false;
                 
                 if (selectedOption === 'unvisited') return !listsVisitCounts[row['HCPS']] || listsVisitCounts[row['HCPS']] === 0;
@@ -4671,10 +4433,12 @@
 
         function resetListsData() {
             $('#lists-dashboard #medicalReps, #lists-dashboard #visitOptions, #lists-dashboard #dayFilter, #lists-dashboard #bricksSelect').prop('selectedIndex', 0);
-            listsSelectedBricks = []; // Still keep this if needed for other logic, but not for direct select value
+            listsSelectedBricks = [];
             $('#lists-dashboard #searchBox').val('');
             $('#lists-dashboard #hcpTable tbody').empty();
             $('#lists-dashboard #hcpTable, #lists-dashboard #listsError, #lists-dashboard #countDisplay, #lists-dashboard #searchContainer').hide();
+            // Re-populate the medical reps dropdown based on the current user/DM
+            processListsData(allGoogleSheetData, []);
         }
         
         // --- Requests Management Dashboard Functions ---
@@ -4716,7 +4480,6 @@
             requests_populateDistrictManagers();
             await requests_fetchAllRequests();
 
-            // Attach event listeners for delete and email buttons
             $(document).off('click', '.delete-request-button').on('click', '.delete-request-button', async function() {
                 const requestId = $(this).data('id');
                 await requests_deleteRequest(requestId);
@@ -4733,10 +4496,14 @@
             districtManagerSelect.innerHTML = '';
             
             let dmsToDisplay = Array.from(requests_districtManagers).sort();
+            const selectedDmOnKpiTab = selectedKPI_DM;
 
             if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
                 dmsToDisplay = dmsToDisplay.filter(dm => dm === loggedInUserDM);
                 districtManagerSelect.disabled = true;
+            } else if (loggedInUserRole === 'admin' && selectedDmOnKpiTab) {
+                dmsToDisplay = dmsToDisplay.filter(dm => dm === selectedDmOnKpiTab);
+                districtManagerSelect.disabled = false;
             } else {
                 districtManagerSelect.disabled = false;
                 districtManagerSelect.innerHTML = '<option value="">Select District Manager</option>';
@@ -4751,13 +4518,14 @@
 
             if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
                 districtManagerSelect.value = loggedInUserDM;
+            } else if (loggedInUserRole === 'admin' && selectedDmOnKpiTab) {
+                 districtManagerSelect.value = selectedDmOnKpiTab;
             }
             requests_filterMedicalRepsForRequests();
         }
 
         async function requests_fetchAllRequests() {
             try {
-                // Fetch all requests data using pagination
                 let allRequests = [];
                 const limit = 1000;
                 let offset = 0;
@@ -4782,8 +4550,12 @@
                 }
                 requests_allRequests = allRequests;
                 
+                const selectedDm = $('#requests_districtManager').val();
                 if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
                     const dmReps = requests_medicalReps.get(loggedInUserDM) || new Set();
+                    requests_allRequests = requests_allRequests.filter(req => dmReps.has(req.medRep));
+                } else if (loggedInUserRole === 'admin' && selectedDm) {
+                    const dmReps = requests_medicalReps.get(selectedDm) || new Set();
                     requests_allRequests = requests_allRequests.filter(req => dmReps.has(req.medRep));
                 }
 
@@ -4848,7 +4620,6 @@
                     }
                 });
             } else {
-                // If no DM or Med Rep selected, populate all areas from all reps
                 requests_areasByMedRep.forEach(areas => {
                     areas.forEach(area => areasToPopulate.add(area));
                 });
@@ -5004,7 +4775,7 @@
                             </select>
                         </div>
                         <div class="request-card-actions">
-                            ${loggedInUserRole === 'admin' ? `<button class="delete-request-button" data-id="${req.id}" title="Delete Request"><i class="fas fa-trash"></i></button>` : ''}
+                            ${(loggedInUserRole === 'admin' || loggedInUserRole === 'District Manager') ? `<button class="delete-request-button" data-id="${req.id}" title="Delete Request"><i class="fas fa-trash"></i></button>` : ''}
                             <button class="email-request-button" data-id="${req.id}" title="Email Request"><i class="fas fa-envelope"></i></button>
                         </div>
                     `;
@@ -5074,7 +4845,7 @@
                 }
 
                 showAlertDialog('Request deleted successfully!', 'success');
-                await requests_fetchAllRequests(); // Refresh the list
+                await requests_fetchAllRequests();
             } catch (error) {
                 console.error('Error deleting request:', error);
                 showAlertDialog('Error deleting request: ' + error.message, 'danger');
@@ -5088,7 +4859,6 @@
                 return;
             }
 
-            // Generate the email content directly
             const emailBody = `Dear Doctor,
 
 Kindly review the following request at your convenience.
@@ -5102,20 +4872,16 @@ Status: ${request.status}
 
 Thank you.`;
 
-            // Include the request title in the mail subject
             const subject = `Request Review: ${request.requestTitle}`;
 
-            // Create the mailto link with the subject and body
             const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
 
-            // Open the default email client with the pre-filled subject and body
             window.location.href = mailtoLink;
         }
 
 
         // --- Weekly Plan Dashboard Functions ---
         async function initWeeklyPlanDashboard() {
-            // Fetch medical reps for weekly plan dropdown
             try {
                 if (allGoogleSheetData.length === 0) {
                     const response = await fetch(GOOGLE_SHEET_URL);
@@ -5126,14 +4892,22 @@ Thank you.`;
                     allGoogleSheetData = parseCSV(csvText);
                 }
 
-                let medicalReps = [...new Set(allGoogleSheetData.map(row => row['medical rep']).filter(Boolean))];
+                let medicalReps = [...new Set(allGoogleSheetData.map(row => row['medical rep']?.trim()).filter(Boolean))];
+                const selectedDm = selectedKPI_DM;
                 
-                // Filter medical reps based on logged-in DM
                 if (loggedInUserRole === 'District Manager' && loggedInUserDM) {
                     const dmReps = new Set();
                     allGoogleSheetData.forEach(row => {
-                        if (row['District Manager'] === loggedInUserDM && row['medical rep']) {
-                            dmReps.add(row['medical rep']);
+                        if (row['District Manager']?.trim() === loggedInUserDM && row['medical rep']?.trim()) {
+                            dmReps.add(row['medical rep']?.trim());
+                        }
+                    });
+                    medicalReps = medicalReps.filter(rep => dmReps.has(rep));
+                } else if (loggedInUserRole === 'admin' && selectedDm) {
+                     const dmReps = new Set();
+                     allGoogleSheetData.forEach(row => {
+                        if (row['District Manager']?.trim() === selectedDm && row['medical rep']?.trim()) {
+                            dmReps.add(row['medical rep']?.trim());
                         }
                     });
                     medicalReps = medicalReps.filter(rep => dmReps.has(rep));
@@ -5148,17 +4922,15 @@ Thank you.`;
                 console.error('Error loading medical representatives for weekly plan:', error);
             }
 
-            // Attach event listeners for weekly plan
             $('#weeklyPlanMedicalReps').off('change').on('change', function() {
                 const selectedRep = $(this).val();
                 const startDate = $('#weeklyPlanStartDate').val();
                 if (selectedRep && startDate) {
                     retrieveWeeklyPlan();
                 } else if (!selectedRep) {
-                    // If no rep is selected, clear the plan content
                     document.getElementById('weeklyPlanContent').style.display = 'none';
                     clearWeeklyPlanSelection();
-                    renderWeeklyPlan(); // Render empty tables
+                    renderWeeklyPlan();
                 }
             });
             $('#weeklyPlanStartDate').off('change').on('change', function() {
@@ -5168,7 +4940,7 @@ Thank you.`;
                 endDateInput.value = new Date(startDate.setDate(startDate.getDate() + 6)).toISOString().split('T')[0];
                 
                 const selectedRep = $('#weeklyPlanMedicalReps').val();
-                if (selectedRep && startDateInput.value) { // Trigger retrieve if both rep and date are selected
+                if (selectedRep && startDateInput.value) {
                     retrieveWeeklyPlan();
                 }
             });
@@ -5188,7 +4960,6 @@ Thank you.`;
             });
         }
 
-        // Retrieve weekly plan from Supabase
         async function retrieveWeeklyPlan() {
             const selectedRep = document.getElementById('weeklyPlanMedicalReps').value;
             const startDate = document.getElementById('weeklyPlanStartDate').value;
@@ -5218,9 +4989,9 @@ Thank you.`;
                         .select('*')
                         .eq('medical_rep_name', selectedRep)
                         .gte('start_date', startDate)
-                        .lte('end_date', endDate) // Note: This assumes end_date in DB matches the calculated end_date
-                        .order('visit_day', { ascending: true }) // Order by day for consistency
-                        .order('visit_time', { ascending: true }) // Order by time for consistency
+                        .lte('end_date', endDate)
+                        .order('visit_day', { ascending: true })
+                        .order('visit_time', { ascending: true })
                         .range(offset, offset + limit - 1);
 
                     if (error) throw error;
@@ -5290,7 +5061,6 @@ Thank you.`;
             }
         }
 
-        // Render weekly plan to tables
         function renderWeeklyPlan() {
             const daysOfWeek = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday'];
             daysOfWeek.forEach(day => {
@@ -5340,7 +5110,6 @@ Thank you.`;
             });
         }
 
-        // Update table headers with dates
         function updateWeeklyPlanTableHeaders() {
             const startDate = new Date(document.getElementById('weeklyPlanStartDate').value);
             const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
@@ -5354,8 +5123,7 @@ Thank you.`;
             });
         }
 
-        // Reset table and filters
-                function resetWeeklyPlanTable() {
+        function resetWeeklyPlanTable() {
             weeklyPlan = {
                 Saturday: { am: [], pm: [] },
                 Sunday: { am: [], pm: [] },
@@ -5373,43 +5141,33 @@ Thank you.`;
         }
 
         function setDefaultWeeklyPlanDateRange() {
-            // Create a date object for the current time in Cairo (UTC+2)
             const today = new Date();
-            const cairoOffset = 2; // Cairo is UTC+2
+            const cairoOffset = 2;
             const cairoTime = new Date(today.getTime() + cairoOffset * 60 * 60 * 1000);
 
-            // Calculate the day of the week in Cairo time (0 is Sunday, 6 is Saturday)
             const dayOfWeek = cairoTime.getDay();
 
-            // Calculate the start date based on the current day of the week
             const startDate = new Date(cairoTime);
 
-            // If today is Thursday (4), set start date to next Saturday
             if (dayOfWeek === 4) {
-                const diffToNextSaturday = (12 - dayOfWeek) % 7; // Days until next Saturday
+                const diffToNextSaturday = (12 - dayOfWeek) % 7;
                 startDate.setDate(cairoTime.getDate() + diffToNextSaturday);
             } else {
-                // Otherwise, set start date to the most recent past Saturday
-                const diffToPastSaturday = -(dayOfWeek + 2) % 7; // Days since past Saturday
+                const diffToPastSaturday = -(dayOfWeek + 2) % 7;
                 startDate.setDate(cairoTime.getDate() + diffToPastSaturday);
             }
 
-            // Ensure the date is set to Saturday
             if (startDate.getDay() !== 6) {
                 startDate.setDate(startDate.getDate() + 1);
             }
 
-            // Calculate the end date, which is 5 days after the start date
             const endDate = new Date(startDate);
             endDate.setDate(startDate.getDate() + 5);
 
-            // Set the start and end date input fields to the calculated dates
             document.getElementById('weeklyPlanStartDate').value = startDate.toISOString().split('T')[0];
             document.getElementById('weeklyPlanEndDate').value = endDate.toISOString().split('T')[0];
         }
 
-        
-        // Download tables as Excel
         function downloadWeeklyPlanExcel() {
             const selectedRep = document.getElementById('weeklyPlanMedicalReps').value;
             if (!selectedRep) {
@@ -5527,129 +5285,16 @@ Thank you.`;
             }
         }
         
-
-        // --- Document Ready / Initial Load ---
-        $(document).ready(function() {
-            $('#adminLoginToggle').on('change', function() {
-                if ($(this).is(':checked')) {
-                    $('#dmSelectGroup').hide();
-                    $('#adminUsernameGroup').show();
-                    $('#username').prop('required', false);
-                    $('#adminUsername').prop('required', true);
-                    $('#loginTitle').html('<i class=""></i> Admin Dashboard 🔐');
-                } else {
-                    $('#dmSelectGroup').show();
-                    $('#adminUsernameGroup').hide();
-                    $('#username').prop('required', true);
-                    $('#adminUsername').prop('required', false);
-                    $('#loginTitle').html('<i class=""></i> Dashboard 🔐');
-                }
-            });
-
-            fetchDistrictManagersForLogin().then(() => {
-                const loggedInUser = localStorage.getItem('loggedInUsername');
-                if (loggedInUser) {
-                    $('#login-page').hide();
-                    $('#dashboard-content').show();
-                    initializeCommonDashboard();
-                } else {
-                    $('#login-page').show();
-                    $('#dashboard-content').hide();
-                    $('#loginForm').on('submit', handleLogin);
-                }
-                
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide sidebar toggle on small screens to avoid conflicts with parent menu
+            if (window.innerWidth <= 1024) {
+                 const sidebarToggleButton = document.getElementById('sidebarToggle');
+                 if (sidebarToggleButton) {
+                     sidebarToggleButton.style.display = 'none';
+                 }
+            }
         });
-        async function handleLogin(e) {
-    e.preventDefault();
-    const isAdminLogin = $('#adminLoginToggle').is(':checked');
-    let username;
-    let password = $('#password').val();
-    const loginError = $('#login-error');
-    loginError.text('');
 
-    if (isAdminLogin) {
-        username = $('#adminUsername').val();
-        if (!username || !password) {
-            loginError.text('Please enter admin username and password.');
-            return;
-        }
-    } else {
-        username = $('#username').val();
-        if (!username || !password) {
-            loginError.text('Please select a username and enter a password.');
-            return;
-        }
-    }
-
-    try {
-        let query;
-        if (isAdminLogin) {
-            query = supabaseClient
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password)
-                .eq('title', 'admin')
-                .single();
-        } else {
-            query = supabaseClient
-                .from('users')
-                .select('*')
-                .eq('username', username)
-                .eq('password', password)
-                .single();
-        }
-
-        const { data, error } = await query;
-        if (error && error.code !== 'PGRST116') {
-            throw error;
-        }
-
-        if (data) {
-            loggedInUserRole = data.title;
-            loggedInUserDM = data.username;
-
-            // Store credentials in localStorage
-            localStorage.setItem('username', username);
-            localStorage.setItem('password', password);
-
-            localStorage.setItem('loggedInUsername', data.username);
-            localStorage.setItem('loggedInUserRole', data.title);
-
-            const dmGovernorates = new Set();
-            const dmAreas = new Set(); // Also get areas for the DM
-            allGoogleSheetData.forEach(row => {
-                if (row['District Manager'] === loggedInUserDM) {
-                    if (row['Governorate']) { // Assuming 'Governorate' column exists
-                        dmGovernorates.add(row['Governorate'].trim());
-                    }
-                    if (row['area']) { // Assuming 'area' column exists
-                        dmAreas.add(row['area'].trim());
-                    }
-                }
-            });
-
-            // For a DM, we store their governorates (or areas if that's more relevant for dashboard display)
-            loggedInUserGovernorates = Array.from(dmGovernorates);
-            localStorage.setItem('loggedInUserGovernorates', JSON.stringify(loggedInUserGovernorates));
-            localStorage.setItem('loggedInUserAreas', JSON.stringify(Array.from(dmAreas))); // Store areas too
-
-            $('#login-page').hide();
-            $('#dashboard-content').show();
-            initializeCommonDashboard();
-        } else {
-            loginError.text('Invalid username or password.');
-        }
-    } catch (err) {
-        console.error('Login error:', err);
-        if (err.message.includes("Invalid API key")) {
-            loginError.text('Authentication failed: Invalid Supabase API key. Please ensure the API key in the code is correct.');
-        } else {
-            loginError.text('An error occurred during login. Please try again.');
-        }
-    }
-}
     </script>
 </body>
 </html>
