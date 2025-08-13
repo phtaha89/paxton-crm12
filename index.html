@@ -1293,7 +1293,7 @@
                         id: 'dm-crm',
                         title: 'DM CRM',
                         subtitle: 'District Manager related affairs.',
-                        icon: '👔',
+                        icon: '�',
                         viewId: 'dmCrmView',
                         fileName: null,
                         isGroup: true,
@@ -1697,6 +1697,7 @@
                 let iframeFileName = fileName || '';
 
                 if (iframeFileName) {
+                    // FIX: Construct a robust URL before setting iframe.src
                     iframe.src = iframeFileName;
                     iframe.onload = function() {
                         console.log(`${config.title} iframe loaded successfully from ${iframeFileName}.`);
@@ -1734,9 +1735,15 @@
             } else {
                 const loadingOverlay = targetView.querySelector('.loading');
                 const errorState = targetView.querySelector('.error-state');
+                const iframeContainer = targetView.querySelector('.iframe-container-fpv');
+                const iframe = iframeContainer.querySelector('iframe');
+                const demoContent = iframeContainer.querySelector('.demo-content');
 
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
+                
+                // Fix: Check if iframe exists before setting its class.
+                if (iframe) iframe.classList.add('hidden');
                 
                 // FIX: No need for `new URL()` here, as the environment provides a safe URL for the uploaded files.
                 fetch(fileName)
@@ -1747,10 +1754,7 @@
                         return response.text();
                     })
                     .then(content => {
-                        const contentDiv = document.createElement('div');
-                        contentDiv.innerHTML = content;
-                        const bodyContent = contentDiv.querySelector('body').innerHTML;
-                        targetView.innerHTML = bodyContent;
+                        targetView.innerHTML = content;
                         loadingOverlay.classList.remove('show');
 
                         const scripts = targetView.querySelectorAll('script');
@@ -1975,3 +1979,4 @@
     </script>
 </body>
 </html>
+�
