@@ -21,6 +21,9 @@
         body {
             font-family: 'Inter', sans-serif;
             font-size: 0.875rem; /* Base font size for smaller view */
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         label, input, select, textarea, button {
             font-size: 0.875rem; /* Smaller font for form elements */
@@ -48,7 +51,10 @@
         .form-border-leaves {
             border-left: 4px solid #FFE6E1;
         }
-        /* Tab navigation styling */
+
+        /* --- New Styling for Navigation Tabs --- */
+
+        /* Mobile View (default) */
         .tab-button {
             border-radius: 0.5rem 0.5rem 0 0;
             transition: background-color 0.2s, color 0.2s;
@@ -62,6 +68,40 @@
             background-color: #e5e7eb;
             color: #6b7280;
         }
+        /* Hide side nav and show top tabs by default for mobile */
+        #side-nav {
+            display: none;
+        }
+        #top-nav {
+            display: flex;
+        }
+
+        /* Desktop View (md breakpoint) */
+        @media (min-width: 768px) {
+            #top-nav {
+                display: none;
+            }
+            #side-nav {
+                display: flex;
+                flex-direction: column;
+                width: 15rem; /* Adjust width as needed */
+                min-height: 100vh;
+                background-color: #f3f4f6;
+                padding: 1rem;
+            }
+            #side-nav .tab-button {
+                border-radius: 0.5rem;
+                margin-bottom: 0.5rem;
+                width: 100%;
+                text-align: left;
+            }
+            #main-app {
+                width: calc(100vw - 15rem); /* Fill remaining space */
+                min-height: 100vh;
+                border-radius: 0;
+            }
+        }
+
         /* Full-screen analysis page styling (now part of the tab content) */
         #monthly-details-tab-content {
             background-color: #f3f4f6;
@@ -77,10 +117,8 @@
             #main-app {
                 box-shadow: none;
                 padding: 0;
-            }
-            .container {
-                max-width: none;
                 width: 100%;
+                max-width: none;
             }
             .print-hidden, .flex.justify-between.items-center.mb-4.print-hidden {
                 display: none !important;
@@ -124,19 +162,28 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-100 flex min-h-screen">
+
+    <!-- Sidebar Navigation for PC -->
+    <nav id="side-nav" class="bg-white shadow-lg p-4 print-hidden">
+        <h2 class="text-xl font-bold mb-4 text-center text-gray-800">DM System</h2>
+        <button id="dm-report-tab" class="tab-button active px-4 py-2 text-sm md:text-base font-medium">DM Report</button>
+        <button id="monthly-details-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">Monthly Details</button>
+    </nav>
+    
 
     <!-- Main Content Container with Tabs -->
-    <div id="main-app" class="container mx-auto bg-white rounded-2xl shadow-2xl space-y-4 p-4 md:p-8">
+    <div id="main-app" class="flex flex-col flex-grow bg-white md:rounded-2xl md:shadow-2xl md:space-y-4">
 
-        <!-- Tab Navigation -->
-        <div class="flex border-b border-gray-200 print-hidden">
-            <button id="dm-report-tab" class="tab-button active px-4 py-2 text-sm md:text-base font-medium">DM Report</button>
-            <button id="monthly-details-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">Monthly Details</button>
+        <!-- Top Navigation for Mobile -->
+        <div id="top-nav" class="flex border-b border-gray-200 print-hidden">
+            <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm md:text-base font-medium">DM Report</button>
+            <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm md:text-base font-medium">Monthly Details</button>
         </div>
 
+
         <!-- Tab Content Containers -->
-        <div id="dm-report-tab-content" class="space-y-4 md:space-y-6">
+        <div id="dm-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6">
             <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">District Manager Reporting</h1>
 
             <form id="report-form" class="space-y-4">
@@ -544,6 +591,8 @@
             const monthlyDetailsTabContent = document.getElementById('monthly-details-tab-content');
             const dmReportTabButton = document.getElementById('dm-report-tab');
             const monthlyDetailsTabButton = document.getElementById('monthly-details-tab');
+            const dmReportTabButtonMobile = document.getElementById('dm-report-tab-mobile');
+            const monthlyDetailsTabButtonMobile = document.getElementById('monthly-details-tab-mobile');
             const reportDetailsSection = document.getElementById('report-details-section');
 
             const form = document.getElementById('report-form');
@@ -1205,30 +1254,38 @@
 
             // --- TAB NAVIGATION AND MONTHLY ANALYSIS LOGIC ---
 
-            // Tab functionality
-            dmReportTabButton.addEventListener('click', () => {
-                dmReportTabButton.classList.add('active');
-                monthlyDetailsTabButton.classList.remove('active');
-                dmReportTabContent.classList.remove('hidden');
-                monthlyDetailsTabContent.classList.add('hidden');
-            });
+            // Tab functionality for desktop side navigation
+            const setupTabListeners = (reportTabId, detailsTabId) => {
+                const reportTab = document.getElementById(reportTabId);
+                const detailsTab = document.getElementById(detailsTabId);
 
-            monthlyDetailsTabButton.addEventListener('click', () => {
-                const selectedDm = dmNameSelect.value;
-                if (!selectedDm) {
-                    showMessage('Error', 'Please select a District Manager before viewing Monthly Details.');
-                    dmReportTabButton.click(); // Revert to the DM Report tab
-                    return;
-                }
+                reportTab.addEventListener('click', () => {
+                    reportTab.classList.add('active');
+                    detailsTab.classList.remove('active');
+                    dmReportTabContent.classList.remove('hidden');
+                    monthlyDetailsTabContent.classList.add('hidden');
+                });
 
-                dmReportTabButton.classList.remove('active');
-                monthlyDetailsTabButton.classList.add('active');
-                dmReportTabContent.classList.add('hidden');
-                monthlyDetailsTabContent.classList.remove('hidden');
-                
-                // Immediately fetch and render the analysis data
-                renderAnalysisPage();
-            });
+                detailsTab.addEventListener('click', () => {
+                    const selectedDm = dmNameSelect.value;
+                    if (!selectedDm) {
+                        showMessage('Error', 'Please select a District Manager before viewing Monthly Details.');
+                        reportTab.click();
+                        return;
+                    }
+
+                    reportTab.classList.remove('active');
+                    detailsTab.classList.add('active');
+                    dmReportTabContent.classList.add('hidden');
+                    monthlyDetailsTabContent.classList.remove('hidden');
+                    
+                    renderAnalysisPage();
+                });
+            };
+
+            // Setup listeners for both mobile and desktop tabs
+            setupTabListeners('dm-report-tab', 'monthly-details-tab');
+            setupTabListeners('dm-report-tab-mobile', 'monthly-details-tab-mobile');
             
             filedVisitsBox.addEventListener('click', () => {
                 // Hide other sections
@@ -1565,11 +1622,12 @@
                     option.selected = true; // Select the user's name
                     dmNameSelect.appendChild(option);
 
-                    // Immediately load the reports for the logged-in DM
+                    // Do not automatically load the reports for the logged-in DM
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns();
-                    reportDetailsSection.classList.remove('hidden');
-                    await fetchReportsFromSupabase(user.username);
+                    // Do not display the report section until retrieve is clicked
+                    // reportDetailsSection.classList.remove('hidden'); 
+                    // await fetchReportsFromSupabase(user.username);
                 }
             }
 
