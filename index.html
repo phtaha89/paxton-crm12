@@ -876,7 +876,7 @@
                         id: 'dm-crm', 
                         title: 'DM CRM', 
                         subtitle: 'District Manager related affairs.', 
-                        icon: '👔', 
+                        icon: '�', 
                         viewId: 'dmCrmView', 
                         fileName: null, 
                         isGroup: true,
@@ -1078,29 +1078,36 @@
                 const errorState = targetView.querySelector('.error-state');
                 const iframe = targetView.querySelector('iframe');
                 
-                // Clear previous state and show loading
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
-                iframe.src = 'about:blank'; // Clear iframe before loading new content
+                iframe.src = 'about:blank'; 
 
-                // Set the new source for the iframe
                 iframe.src = fileName;
 
                 iframe.onload = () => {
                     loadingOverlay.classList.remove('show');
-                    // *** IMPORTANT: This sends a message to the loaded iframe. ***
-                    // The child page (e.g., final dashboard.html) MUST have a script with:
-                    // window.addEventListener('message', (event) => { /* handle event.data here */ });
-                    // to receive this login information.
-                    if (loggedInUser && (page === 'dashboard' || page === 'crm')) {
-                        iframe.contentWindow.postMessage({ 
-                            type: 'dashboardLogin', 
-                            username: sessionStorage.getItem('dashboardUsername'), 
-                            password: sessionStorage.getItem('dashboardPassword'),
-                            user: loggedInUser
-                        }, '*');
-                    } else if (loggedInUser) {
-                        iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*');
+                    
+                    if (loggedInUser) {
+                        if (page === 'dashboard') {
+                            iframe.contentWindow.postMessage({ 
+                                type: 'dashboardLogin', 
+                                username: sessionStorage.getItem('dashboardUsername'), 
+                                password: sessionStorage.getItem('dashboardPassword'),
+                                user: loggedInUser
+                            }, '*');
+                        } else if (page === 'dm-planning') {
+                             iframe.contentWindow.postMessage({
+                                type: 'dmPlanningUserPermissions',
+                                user: loggedInUser
+                            }, '*');
+                        } else if (page === 'dm-report') {
+                             iframe.contentWindow.postMessage({
+                                type: 'dmReportUserPermissions',
+                                user: loggedInUser
+                            }, '*');
+                        } else { 
+                            iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*');
+                        }
                     }
                 };
                 iframe.onerror = () => {
@@ -1253,3 +1260,4 @@
     </script>
 </body>
 </html>
+�
