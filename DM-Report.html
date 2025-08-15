@@ -22,17 +22,17 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            font-size: 0.875rem; /* Base font size for smaller view */
+            font-size: 0.875rem;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         label, input, select, textarea, button {
-            font-size: 0.875rem; /* Smaller font for form elements */
+            font-size: 0.875rem;
         }
         th, td {
-            font-size: 0.75rem; /* Even smaller font for table */
-            padding: 0.25rem 0.5rem; /* Reduced padding for table cells */
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
         }
         .container {
             max-width: 900px;
@@ -44,19 +44,11 @@
             opacity: 0;
             pointer-events: none;
         }
-        .form-border-visits {
-            border-left: 4px solid #ECFAE5;
-        }
-        .form-border-events {
-            border-left: 4px solid #E8F9FF;
-        }
-        .form-border-leaves {
-            border-left: 4px solid #FFE6E1;
-        }
+        .form-border-visits { border-left: 4px solid #ECFAE5; }
+        .form-border-events { border-left: 4px solid #E8F9FF; }
+        .form-border-leaves { border-left: 4px solid #FFE6E1; }
 
-        /* --- New Styling for Navigation Tabs --- */
-
-        /* Mobile View (default) */
+        /* --- Navigation Tabs Styling --- */
         .tab-button {
             border-radius: 0.5rem 0.5rem 0 0;
             transition: background-color 0.2s, color 0.2s;
@@ -70,126 +62,90 @@
             background-color: #e5e7eb;
             color: #6b7280;
         }
-        /* Hide side nav and show top tabs by default for mobile */
-        #side-nav {
-            display: none;
-        }
-        #top-nav {
-            display: flex;
-        }
+        #side-nav { display: none; }
+        #top-nav { display: flex; }
 
-        /* Desktop View (md breakpoint) */
+        /* --- Desktop Navigation --- */
         @media (min-width: 768px) {
-            #top-nav {
-                display: none;
-            }
+            #top-nav { display: none; }
             #side-nav {
                 display: flex;
                 flex-direction: column;
-                width: 15rem; /* Adjust width as needed */
+                width: 15rem;
                 min-height: 100vh;
                 background-color: #f3f4f6;
                 padding: 1rem;
+                transition: width 0.3s ease-in-out;
             }
             #side-nav .tab-button {
                 border-radius: 0.5rem;
                 margin-bottom: 0.5rem;
                 width: 100%;
                 text-align: left;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
             }
             #main-app {
-                width: calc(100vw - 15rem); /* Fill remaining space */
+                width: calc(100vw - 15rem);
                 min-height: 100vh;
                 border-radius: 0;
+                transition: width 0.3s ease-in-out;
+            }
+            /* Collapsed Sidebar Styles */
+            #side-nav.collapsed {
+                width: 5rem;
+            }
+            #side-nav.collapsed .tab-button-text, #side-nav.collapsed #nav-header-text {
+                display: none;
+            }
+            #side-nav.collapsed .tab-button {
+                justify-content: center;
+            }
+            #main-app.sidebar-collapsed {
+                width: calc(100vw - 5rem);
             }
         }
-
-        /* Full-screen analysis page styling (now part of the tab content) */
+        
         #monthly-details-tab-content {
             background-color: #f3f4f6;
             overflow-y: auto;
         }
-        
-        /* CSS to improve the rendering of the select dropdown */
         #dm-name {
-            min-height: 2.5rem; /* Ensures a minimum height for the dropdown */
+            min-height: 2.5rem;
             border-width: 1px;
             border-color: #d1d5db;
         }
         
-        /* New CSS for smaller monthly details tab */
-        #monthly-details-tab-content h2, #monthly-details-tab-content h3 {
-            font-size: 1.25rem; /* Reduced main titles */
-        }
-        #analysis-summary-boxes > div {
-            padding: 0.75rem; /* Smaller padding for the boxes */
-        }
-        #analysis-summary-boxes > div h3 {
-            font-size: 1rem; /* Smaller heading inside boxes */
-        }
-        #analysis-summary-boxes > div div {
-            font-size: 1.5rem; /* Smaller count size */
-        }
-        #analysis-summary-boxes > div .text-sm {
-            font-size: 0.75rem; /* Smaller descriptions */
-        }
-        #filed-visits-details-section h3 {
-            font-size: 1rem; /* Smaller heading for details section */
-        }
-        #double-visits-details div, #single-visits-details div {
-            font-size: 0.75rem; /* Smaller text inside detail divs */
-            padding: 0.5rem;
-        }
-        /* New chart styling */
-        #activity-chart-container {
-            max-width: 28rem; /* Set a max width for the container */
-            margin-left: auto;
-            margin-right: auto;
-        }
         /* Star rating styles */
         .star-rating .fa-star {
             color: #e4e5e9;
             cursor: pointer;
             transition: color 0.2s;
         }
-        .star-rating.read-only .fa-star {
-            cursor: default;
-        }
-        .star-rating .fa-star.selected {
-            color: #ffc107;
-        }
-        .star-rating:not(.read-only):hover .fa-star {
-            color: #ffc107;
-        }
-        .star-rating:not(.read-only) .fa-star:hover ~ .fa-star {
-            color: #e4e5e9;
-        }
+        .star-rating.read-only .fa-star { cursor: default; }
+        .star-rating .fa-star.selected { color: #ffc107; }
+        .star-rating:not(.read-only):hover .fa-star { color: #ffc107; }
+        .star-rating:not(.read-only) .fa-star:hover ~ .fa-star { color: #e4e5e9; }
         
-        /* Error message styling */
-        .error-message {
+        /* Error message & star styling */
+        .error-message, .error-star {
             color: #EF4444; /* red-500 */
             font-size: 0.75rem;
             margin-top: 0.25rem;
             display: none; /* Hidden by default */
         }
+        .error-star {
+            margin-left: 0.25rem;
+            font-weight: bold;
+        }
 
         /* Print Styles */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            .print-area, .print-area * {
-                visibility: visible;
-            }
-            .print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-            .print-hidden {
-                display: none !important;
-            }
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            .print-hidden { display: none !important; }
         }
     </style>
 </head>
@@ -197,10 +153,21 @@
 
     <!-- Sidebar Navigation for PC -->
     <nav id="side-nav" class="bg-white shadow-lg p-4 print-hidden">
-        <h2 class="text-xl font-bold mb-4 text-center text-gray-800">DM System</h2>
-        <button id="dm-report-tab" class="tab-button active px-4 py-2 text-sm md:text-base font-medium">DM Report</button>
-        <button id="monthly-details-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">Monthly Details</button>
-        <button id="coaching-report-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">Coaching Report</button>
+        <div class="flex justify-between items-center mb-4">
+            <h2 id="nav-header-text" class="text-xl font-bold text-gray-800">DM System</h2>
+            <button id="nav-toggle-btn" class="p-2 rounded-md hover:bg-gray-200">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <button id="dm-report-tab" class="tab-button active px-4 py-2 text-sm md:text-base font-medium">
+            <i class="fas fa-file-alt fa-fw"></i> <span class="tab-button-text">DM Report</span>
+        </button>
+        <button id="monthly-details-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">
+            <i class="fas fa-chart-pie fa-fw"></i> <span class="tab-button-text">Monthly Details</span>
+        </button>
+        <button id="coaching-report-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">
+            <i class="fas fa-chalkboard-teacher fa-fw"></i> <span class="tab-button-text">Coaching Report</span>
+        </button>
     </nav>
     
 
@@ -443,7 +410,6 @@
             </form>
 
             <!-- Submitted Data Table -->
-            <!-- The overflow-x-auto class will add a horizontal scrollbar when needed -->
             <div id="report-details-section" class="mt-8 hidden">
                 <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4 print-hidden">
                     <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
@@ -644,25 +610,25 @@
                             <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Feedback</label>
+                                    <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
                                     <div class="star-rating mt-1" data-field="feedback_score">
                                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Opening</label>
+                                    <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
                                     <div class="star-rating mt-1" data-field="opening_score">
                                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Asking for commitment</label>
+                                    <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
                                     <div class="star-rating mt-1" data-field="asking_for_commitment_score">
                                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Handling objection</label>
+                                    <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
                                     <div class="star-rating mt-1" data-field="handling_objection_score">
                                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     </div>
@@ -672,19 +638,19 @@
                         <!-- Other Skills Columns -->
                         <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div>
-                                <label class="block text-sm font-medium text-gray-700">Planning</label>
+                                <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="planning_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
                              <div>
-                                <label class="block text-sm font-medium text-gray-700">Time Management</label>
+                                <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="time_management_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
                              <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge</label>
+                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="medical_product_knowledge_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
@@ -693,7 +659,7 @@
                     </div>
                     <!-- Conclusions Box -->
                     <div class="mt-6">
-                        <label for="coaching-conclusions" class="block text-sm font-medium text-gray-700">Conclusions</label>
+                        <label for="coaching-conclusions" class="block text-sm font-medium text-gray-700">Conclusions<span class="error-star" data-for="coaching-conclusions">*</span></label>
                         <textarea id="coaching-conclusions" name="coaching-conclusions" rows="3" class="mt-1 block w-full shadow-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 p-2"></textarea>
                     </div>
                 </form>
@@ -828,6 +794,8 @@
             
             // Get form and modal elements
             const mainAppDiv = document.getElementById('main-app');
+            const sideNav = document.getElementById('side-nav');
+            const navToggleBtn = document.getElementById('nav-toggle-btn');
             const dmReportTabContent = document.getElementById('dm-report-tab-content');
             const monthlyDetailsTabContent = document.getElementById('monthly-details-tab-content');
             const coachingReportTabContent = document.getElementById('coaching-report-tab-content');
@@ -933,6 +901,12 @@
             const coachingViewModal = document.getElementById('coaching-view-modal');
             const closeCoachingViewModalBtn = document.getElementById('close-coaching-view-modal');
             const coachingViewPrintArea = document.getElementById('coaching-view-print-area');
+
+            // --- Sidebar Toggle Logic ---
+            navToggleBtn.addEventListener('click', () => {
+                sideNav.classList.toggle('collapsed');
+                mainAppDiv.classList.toggle('sidebar-collapsed');
+            });
 
             // Function to show custom message modal
             const showMessage = (title, message) => {
@@ -2064,9 +2038,11 @@
             });
             
             submitCoachingReportBtn.addEventListener('click', async () => {
-                const reportId = coachingReportIdInput.value;
+                let isValid = true;
+                document.querySelectorAll('.error-star').forEach(star => star.style.display = 'none');
+
                 const evaluationData = {
-                    dm_report_id: reportId,
+                    dm_report_id: coachingReportIdInput.value,
                     dm_name: dmNameSelect.value,
                     med_rep_name: coachingMedRepNameSelect.value,
                     feedback_score: document.querySelector('.star-rating[data-field="feedback_score"]').dataset.score || 0,
@@ -2081,25 +2057,19 @@
                 };
 
                 // Validation
-                const scores = [
-                    evaluationData.feedback_score,
-                    evaluationData.opening_score,
-                    evaluationData.asking_for_commitment_score,
-                    evaluationData.handling_objection_score,
-                    evaluationData.planning_score,
-                    evaluationData.time_management_score,
-                    evaluationData.medical_product_knowledge_score
-                ];
-
-                if (scores.some(score => score == 0)) {
-                    showMessage('Error', 'Please provide a star rating for all evaluation fields.');
-                    return;
+                for(const key in evaluationData) {
+                    if (key.endsWith('_score') && evaluationData[key] == 0) {
+                        document.querySelector(`.error-star[data-for="${key}"]`).style.display = 'inline';
+                        isValid = false;
+                    }
                 }
 
                 if (!evaluationData.conclusions.trim()) {
-                    showMessage('Error', 'Please fill out the Conclusions section.');
-                    return;
+                    document.querySelector('.error-star[data-for="coaching-conclusions"]').style.display = 'inline';
+                    isValid = false;
                 }
+
+                if(!isValid) return;
                 
                 const { error } = await supabase.from(COACHING_REPORTS_TABLE).insert([evaluationData]);
                 
@@ -2148,10 +2118,6 @@
                     updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
                 }
             }
-
-            // Fallback initialization for testing without message event
-            // This part will be replaced by the message listener in production
-            // initializeReportSystem({ username: 'Admin User', title: 'Admin' }); // Example for testing
             
             dmNameSelect.disabled = true;
             activityRadios.forEach(radio => radio.disabled = true);
