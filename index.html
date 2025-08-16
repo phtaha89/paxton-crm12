@@ -337,8 +337,9 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(8px);
+            /* SMOOTHER TRANSITION: Increased duration and distance */
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(15px);
             opacity: 0;
             height: 100%; /* Increased height */
         }
@@ -710,10 +711,20 @@
             align-items: center;
             justify-content: center;
         }
+        .notification-count.updated {
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.4); }
+            60% { transform: scale(0.9); }
+        }
+
         .notification-dropdown {
             position: absolute;
             top: 100%;
-            left: 0; /* Changed from right: 0 */
+            left: 0;
             background-color: white;
             border-radius: 8px;
             box-shadow: var(--shadow-lg);
@@ -725,6 +736,11 @@
         .notification-item {
             padding: 10px 15px;
             border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .notification-item:hover {
+            background-color: #f1f5f9;
         }
         .notification-item:last-child {
             border-bottom: none;
@@ -736,6 +752,107 @@
         .notification-rep {
             font-size: 0.8rem;
             color: var(--text-color-light);
+        }
+        .notification-date {
+            font-size: 0.7rem;
+            color: var(--text-color-light);
+            margin-top: 4px;
+        }
+
+        /* NEW: Request Modal Styles */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .custom-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .custom-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .custom-modal-overlay.show .custom-modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color-dark);
+        }
+        .close-modal-button {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-color-light);
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-body {
+            font-size: 0.9rem;
+            color: var(--text-color-dark);
+            line-height: 1.6;
+        }
+        .modal-body .detail-pair {
+            margin-bottom: 12px;
+        }
+        .modal-body .detail-pair strong {
+            color: var(--text-color-dark);
+            display: block;
+            font-weight: 600;
+            margin-bottom: 3px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .modal-body .detail-pair span {
+            color: var(--text-color-light);
+        }
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-footer label {
+            font-weight: 600;
+            color: var(--text-color-dark);
+        }
+        .modal-footer select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            flex-grow: 1;
+            font-size: 0.9rem;
+            cursor: pointer;
         }
 
         /* Responsive adjustments */
@@ -928,6 +1045,26 @@
             <button id="sideMenuLogoutButton" class="side-menu-logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </div>
+    
+    <!-- NEW: Request Details Modal -->
+    <div id="requestModal" class="custom-modal-overlay">
+        <div class="custom-modal-content">
+            <div class="modal-header">
+                <h2 id="modalRequestTitle">Request Details</h2>
+                <button id="modalCloseButton" class="close-modal-button">&times;</button>
+            </div>
+            <div id="modalRequestDetails" class="modal-body">
+                <!-- Request details will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <label for="modalStatusSelect">Status:</label>
+                <select id="modalStatusSelect">
+                    <!-- Status options will be populated here -->
+                </select>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
@@ -938,6 +1075,7 @@
         let loggedInUser = null;
         let googleSheetData = [];
         let lastPageHistory = [];
+        let notificationChannel = null;
 
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
@@ -1003,7 +1141,7 @@
                 document.getElementById('userCardName').textContent = loggedInUser.username;
                 document.getElementById('userCardTitle').textContent = loggedInUser.title;
                 userCard.classList.remove('hidden');
-                fetchNotifications();
+                fetchNotifications(); // Initial fetch
             } else {
                 userCard.classList.add('hidden');
                 document.getElementById('notificationBell').classList.add('hidden');
@@ -1027,7 +1165,6 @@
                 if (dmReps.length > 0) {
                     query = query.in('medRep', dmReps);
                 } else {
-                    // If a DM has no reps, they should see no requests.
                     notificationBell.classList.add('hidden');
                     return;
                 }
@@ -1041,23 +1178,140 @@
             }
 
             if (data.length > 0) {
+                const currentCount = parseInt(notificationCount.textContent, 10);
                 notificationCount.textContent = data.length;
                 notificationBell.classList.remove('hidden');
+
+                if (data.length > currentCount) {
+                    notificationCount.classList.add('updated');
+                    setTimeout(() => {
+                        notificationCount.classList.remove('updated');
+                    }, 600);
+                }
 
                 notificationDropdown.innerHTML = '';
                 data.forEach(req => {
                     const item = document.createElement('div');
                     item.className = 'notification-item';
+                    item.dataset.requestId = req.id; // Use dataset for cleaner code
+                    const requestDate = new Date(req.date).toLocaleDateString('en-GB', {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                    });
+
                     item.innerHTML = `
                         <div class="notification-title">${req.requestTitle}</div>
                         <div class="notification-rep">By: ${req.medRep}</div>
+                        <div class="notification-date">${requestDate}</div>
                     `;
+                    item.addEventListener('click', () => showRequestModal(req.id)); // Add click listener
                     notificationDropdown.appendChild(item);
                 });
 
             } else {
                 notificationBell.classList.add('hidden');
             }
+        }
+
+        function subscribeToNotifications() {
+            if (notificationChannel) {
+                supabase.removeChannel(notificationChannel);
+                notificationChannel = null;
+            }
+
+            notificationChannel = supabase.channel('public:requests')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
+                    console.log('Change received!', payload);
+                    setTimeout(fetchNotifications, 500);
+                })
+                .subscribe((status, err) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Successfully subscribed to real-time notifications!');
+                    }
+                    if (status === 'CHANNEL_ERROR') {
+                        console.error('Subscription error:', err);
+                    }
+                });
+        }
+        
+        // NEW: Show request details in a modal
+        async function showRequestModal(requestId) {
+            const { data, error } = await supabase.from('requests').select('*').eq('id', requestId).single();
+
+            if (error) {
+                console.error('Error fetching request details:', error);
+                showBlurredMessage('Could not load request details.', 1500);
+                return;
+            }
+
+            const modal = document.getElementById('requestModal');
+            const modalTitle = document.getElementById('modalRequestTitle');
+            const modalDetails = document.getElementById('modalRequestDetails');
+            const modalStatusSelect = document.getElementById('modalStatusSelect');
+
+            modalTitle.textContent = data.requestTitle;
+
+            let detailsHtml = `
+                <div class="detail-pair"><strong>Medical Rep:</strong> <span>${data.medRep || 'N/A'}</span></div>
+                <div class="detail-pair"><strong>Area:</strong> <span>${data.area || 'N/A'}</span></div>
+                <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.date).toLocaleDateString()}</span></div>
+            `;
+
+            if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
+                 detailsHtml += `
+                    <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
+                    <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
+                 `;
+            }
+
+            detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
+            modalDetails.innerHTML = detailsHtml;
+
+            // Populate status dropdown based on request type
+            let statusOptions = '';
+            if (data.customerType && data.customerType.toLowerCase() === 'personal') {
+                statusOptions = `
+                    <option value="Requested">Requested</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                `;
+            } else {
+                statusOptions = `
+                    <option value="Requested">Requested</option>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Postponed">Postponed</option>
+                    <option value="Done">Done</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Approved">Approved</option>
+                `;
+            }
+            modalStatusSelect.innerHTML = statusOptions;
+            modalStatusSelect.value = data.status;
+
+            // Remove previous event listener and add a new one
+            modalStatusSelect.onchange = null; // Clear old listener
+            modalStatusSelect.onchange = () => updateRequestStatus(requestId, modalStatusSelect.value);
+
+            modal.classList.add('show');
+        }
+
+        // NEW: Update request status in Supabase
+        async function updateRequestStatus(requestId, newStatus) {
+            const { error } = await supabase.from('requests').update({ status: newStatus }).eq('id', requestId);
+
+            if (error) {
+                console.error('Error updating status:', error);
+                showBlurredMessage('Failed to update status.', 1500);
+            } else {
+                showBlurredMessage('Status updated successfully!', 1500);
+                closeRequestModal();
+                fetchNotifications(); // Refresh notifications
+            }
+        }
+
+        // NEW: Close the request modal
+        function closeRequestModal() {
+            document.getElementById('requestModal').classList.remove('show');
         }
 
 
@@ -1078,6 +1332,13 @@
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
+            
+            if (notificationChannel) {
+                supabase.removeChannel(notificationChannel);
+                notificationChannel = null;
+                console.log('Unsubscribed from notifications.');
+            }
+
             localStorage.clear();
             sessionStorage.clear();
             loggedInUser = null;
@@ -1093,6 +1354,7 @@
             applyUserPermissions();
             updateAndShowUserCard();
             populateSideMenu();
+            subscribeToNotifications();
         }
 
         function applyUserPermissions() {
@@ -1175,7 +1437,7 @@
                         activeView.classList.add('hidden');
                         const iframe = activeView.querySelector('iframe');
                         if (iframe) iframe.src = 'about:blank';
-                    }, 300);
+                    }, 400);
                 }
                 currentActiveViewId = null;
             }
@@ -1208,7 +1470,7 @@
                         prevActiveView.classList.add('hidden');
                         const prevIframe = prevActiveView.querySelector('iframe');
                         if (prevIframe) prevIframe.src = 'about:blank';
-                    }, 300);
+                    }, 400);
                 }
             }
             currentActiveViewId = viewId;
@@ -1228,10 +1490,8 @@
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
                 
-                // Set src and immediately send data
                 iframe.src = fileName;
                 
-                // Function to send data to iframe
                 const sendDataToIframe = () => {
                     if (loggedInUser && iframe.contentWindow) {
                          const message = { user: loggedInUser };
@@ -1250,12 +1510,10 @@
                     }
                 };
                 
-                // Send data immediately
                 sendDataToIframe();
 
                 iframe.onload = () => {
                     loadingOverlay.classList.remove('show');
-                    // Resend data on load as a fallback
                     sendDataToIframe();
                 };
                 iframe.onerror = () => {
@@ -1415,6 +1673,14 @@
             document.addEventListener('click', (event) => {
                 if (!notificationBell.contains(event.target)) {
                     notificationDropdown.classList.add('hidden');
+                }
+            });
+            
+            // NEW: Modal close listeners
+            document.getElementById('modalCloseButton').addEventListener('click', closeRequestModal);
+            document.getElementById('requestModal').addEventListener('click', (event) => {
+                if (event.target.id === 'requestModal') {
+                    closeRequestModal();
                 }
             });
         });
