@@ -3,622 +3,397 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Management</title>
+  <title>User Management Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Tailwind CSS CDN for modern styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* Custom styles to override or extend Tailwind for specific elements */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
     body {
       font-family: 'Inter', sans-serif;
-      background: #91C8E4; /* Original background color */
+      background-color: #f1f5f9; /* Lighter, neutral background */
       color: #334155;
       line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
     }
 
-    /* Header Banner - Retained and slightly enhanced with Tailwind classes */
+    /* Header Banner */
     .header-banner {
       background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
       color: white;
-      padding: 10px 16px; /* Decreased padding */
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Slightly smaller shadow */
+      padding: 1rem 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       position: sticky;
       top: 0;
-      z-index: 100;
-      display: flex;
-      flex-shrink: 0;
+      z-index: 1000;
     }
-
     .header-content {
-      max-width: 1200px;
+      max-width: 1600px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
     }
-
-    .header-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
     .header-title {
-      font-size: clamp(1.3rem, 3.5vw, 1.8rem); /* Decreased font size */
+      font-size: clamp(1.5rem, 3vw, 2rem);
       font-weight: 700;
-      margin: 0;
     }
-
-    .header-subtitle {
-      font-size: clamp(0.8rem, 1.8vw, 0.9rem); /* Decreased font size */
-      opacity: 0.8;
-      margin: 0;
-    }
-
-    .header-stats {
-      display: flex;
-      align-items: center;
-      gap: 12px; /* Decreased gap */
-      font-size: clamp(0.7rem, 1.4vw, 0.8rem); /* Decreased font size */
-      opacity: 0.9;
-    }
-
     .stat-badge {
       background: rgba(255, 255, 255, 0.1);
-      padding: 3px 10px; /* Decreased padding */
-      border-radius: 18px; /* Slightly smaller border-radius */
-      backdrop-filter: blur(8px); /* Slightly less blur */
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      backdrop-filter: blur(10px);
+      font-size: clamp(0.8rem, 1.5vw, 0.9rem);
     }
 
-    /* Main Container - Adjusted for full width */
-    .container {
-      width: 100%; /* Take full available width */
-      max-width: none; /* Remove max-width constraint */
+    /* Main Content Layout */
+    .main-container {
+      display: flex;
+      flex-direction: column; /* Mobile-first: top tabs */
+      gap: 1.5rem;
+      padding: 1.5rem;
+      max-width: 1600px;
       margin: 0 auto;
-      padding: 0; /* Removed padding to let main-content control spacing */
-      flex-grow: 1;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
       display: flex;
-      flex-direction: column;
+      flex-direction: row; /* Mobile: horizontal tabs */
+      gap: 0.5rem;
     }
-
-    /* Adjusted main-content to use flexbox for full width and vertical stacking */
-    .main-content {
-      display: flex;
-      flex-direction: column; /* Stack cards vertically */
-      gap: 20px; /* Increased gap between cards for better separation */
-      margin-top: 20px;
-      flex-grow: 1;
-      padding: 0 20px; /* Add horizontal padding to main content */
-    }
-
-    /* Card Styles - Enhanced for a professional, slimmer look */
-    .card {
-      background: rgba(255, 255, 255, 0.98); /* Slightly more opaque */
-      border-radius: 12px; /* Slightly smaller border-radius for a sleeker look */
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); /* Softer shadow */
-      border: 1px solid rgba(255, 255, 255, 0.1); /* Thinner, more subtle border */
-      backdrop-filter: blur(8px); /* Slightly less blur */
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      width: 100%; /* Ensure cards take full width */
-    }
-
-    .card-header {
-      padding: 12px 20px; /* Adjusted padding */
-      background: linear-gradient(135deg, #f0f4f8 0%, #e8edf2 100%); /* Lighter gradient */
-      border-bottom: 1px solid rgba(226, 232, 240, 0.2); /* Thinner border */
-    }
-
-    .card-header h2 {
-      font-size: clamp(1.1rem, 2.2vw, 1.3rem); /* Adjusted font size */
+    .tab-button {
+      flex-grow: 1; /* Mobile: tabs take equal width */
+      padding: 0.6rem 0.9rem; /* Decreased padding */
+      border-radius: 0.75rem;
       font-weight: 600;
-      color: #1e293b;
-      margin: 0;
-    }
-
-    .card-body {
-      padding: 20px; /* Adjusted padding */
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Form Styles */
-    .form-group {
-      margin-bottom: 15px; /* Adjusted margin */
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 5px; /* Adjusted margin */
-      font-weight: 500;
-      color: #374151;
-      font-size: clamp(0.75rem, 1.7vw, 0.875rem); /* Adjusted font size */
-      text-align: left;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 8px 12px; /* Adjusted padding for slimmer input */
-      border: 1px solid #cbd5e1; /* Softer border color */
-      border-radius: 8px; /* Adjusted border-radius */
-      font-size: clamp(0.75rem, 1.7vw, 0.875rem); /* Adjusted font size */
-      transition: all 0.2s ease-in-out; /* Faster transition */
-      background: rgba(255, 255, 255, 0.9); /* Slightly more opaque background */
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* Slightly stronger focus shadow */
-      background: white;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px; /* Adjusted gap */
-    }
-
-    /* Button Styles - Slimmer and more professional */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 9px 16px; /* Adjusted padding for slimmer button */
-      border-radius: 8px; /* Adjusted border-radius */
-      font-size: clamp(0.75rem, 1.7vw, 0.875rem); /* Adjusted font size */
-      font-weight: 500;
-      border: none;
+      font-size: 0.9rem;
+      text-align: center;
       cursor: pointer;
-      transition: all 0.2s ease-in-out; /* Faster transition */
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent); /* Softer hover effect */
-      transition: left 0.4s; /* Faster transition */
-    }
-
-    .btn:hover::before {
-      left: 100%;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); /* Slightly darker blue gradient */
-      color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 5px 15px rgba(59, 130, 246, 0.25); /* Softer shadow */
-    }
-
-    .btn-secondary {
-      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-      color: white;
-    }
-
-    .btn-secondary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 5px 15px rgba(107, 114, 128, 0.25);
-    }
-
-    .btn-danger {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      color: white;
-    }
-
-    .btn-danger:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 5px 15px rgba(239, 68, 68, 0.25);
-    }
-
-    .btn-sm {
-      padding: 7px 14px; /* Adjusted padding for smaller buttons */
-      font-size: clamp(0.7rem, 1.5vw, 0.8rem); /* Adjusted font size */
-    }
-
-    /* Cascading Users Menu (for the list of users) */
-    .users-cascade {
-      max-height: 600px; /* Max height for scrollable area */
-      overflow-y: auto; /* Enable vertical scrolling */
-      overflow-x: hidden; /* Hide horizontal scrollbar */
-      flex-grow: 1;
-      padding-right: 5px; /* Padding for scrollbar */
-    }
-
-    .users-cascade::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .users-cascade::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 10px;
-    }
-
-    .users-cascade::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 10px;
-    }
-
-    .users-cascade::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-
-    /* Individual User Item (Card) in the list */
-    .user-item {
-      background: white;
-      border-radius: 10px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       transition: all 0.3s ease;
-      border: 1px solid #e2e8f0;
-    }
-
-    .user-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-
-    .user-header {
-      padding: 14px 18px; /* Adjusted padding */
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: background 0.3s ease;
-      text-align: left;
-    }
-
-    .user-header:hover {
-      background: #f8fafc;
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .user-avatar {
-      width: 40px; /* Maintained size for clarity */
-      height: 40px; /* Maintained size for clarity */
-      border-radius: 50%;
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 600;
-      font-size: clamp(0.85rem, 1.9vw, 0.95rem); /* Adjusted font size */
-      flex-shrink: 0; /* Prevent avatar from shrinking */
-    }
-
-    .user-details {
-      flex-grow: 1; /* Allow user details to take available space */
-    }
-
-    .user-details h4 {
-      margin: 0;
-      font-size: clamp(0.95rem, 2.2vw, 1.05rem); /* Adjusted font size */
-      color: #1e293b;
-      text-align: left;
-    }
-
-    .user-details p {
-      margin: 0;
-      font-size: clamp(0.7rem, 1.4vw, 0.8rem); /* Adjusted font size */
-      text-align: left;
-    }
-
-    /* Title Colors */
-    .title-medical { color: #059669; }
-    .title-district { color: #dc2626; }
-    .title-admin { color: #ea580c; }
-    .title-default { color: #64748b; }
-
-    .user-id {
-      background: #e2e8f0;
+      background-color: #ffffff;
       color: #475569;
-      padding: 4px 8px; /* Adjusted padding */
-      border-radius: 6px; /* Adjusted border-radius */
-      font-size: clamp(0.65rem, 1.2vw, 0.75rem); /* Adjusted font size */
-      font-weight: 500;
-      flex-shrink: 0; /* Prevent ID from shrinking */
-    }
-
-    .user-actions {
-      padding: 15px 20px; /* Adjusted padding */
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      display: none;
-    }
-
-    .user-actions.active {
-      display: block;
-      animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px; /* Adjusted gap */
-      flex-wrap: wrap;
-    }
-
-    .edit-form {
-      background: white;
-      padding: 18px; /* Adjusted padding */
-      border-radius: 10px;
-      margin-top: 15px; /* Adjusted margin */
       border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .tab-button:hover {
+      background-color: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    .tab-button.active {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
+      transform: translateY(-2px);
     }
 
-    .edit-form h4 {
-      margin-bottom: 14px; /* Adjusted margin */
-      color: #1e293b;
-    }
-
-    /* Password display in edit form */
-    .password-display-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 15px;
-    }
-
-    .password-display-group .form-input {
+    /* Tab Content */
+    .tab-content {
       flex-grow: 1;
-      background-color: #f0f4f8; /* Slightly different background for read-only */
-      cursor: text;
     }
-
-    .password-display-group .btn-copy {
-      padding: 6px 10px;
-      font-size: 0.75rem;
-      background: #4a5568;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-
-    .password-display-group .btn-copy:hover {
-      background: #2d3748;
-    }
-
-
-    /* Alert Styles */
-    .alert {
-      padding: 12px 16px; /* Adjusted padding */
-      border-radius: 10px;
-      margin-bottom: 18px; /* Adjusted margin */
-      font-size: clamp(0.8rem, 1.8vw, 0.9rem);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .alert::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: currentColor;
-    }
-
-    .alert-success {
-      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-      color: #166534;
-      border: 1px solid #a7f3d0;
-    }
-
-    .alert-error {
-      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-      color: #991b1b;
-      border: 1px solid #fca5a5;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 35px; /* Adjusted padding */
-      color: #6b7280;
-      font-size: clamp(0.95rem, 2.2vw, 1.05rem);
-    }
-
-    .no-users {
-      text-align: center;
-      padding: 35px; /* Adjusted padding */
-      color: #6b7280;
-      font-size: clamp(0.95rem, 2.2vw, 1.05rem);
-      background: white;
-      border-radius: 12px;
-      border: 2px dashed #e2e8f0;
-    }
-
-    /* Modal Styles */
-    .modal {
+    .tab-pane {
       display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.4);
-      justify-content: center;
-      align-items: center;
+      animation: fadeIn 0.5s ease;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .modal-content {
-      background-color: #fefefe;
-      margin: auto;
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid #888;
-      width: 85%; /* Adjusted width */
-      max-width: 380px; /* Adjusted max-width */
-      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-      animation-name: animatetop;
-      animation-duration: 0.4s
-    }
-
-    @keyframes animatetop {
-      from {top: -300px; opacity: 0}
-      to {top: 0; opacity: 1}
-    }
-
-    .modal-header {
-      padding: 10px 16px;
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      color: white;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .modal-header h3 {
-      margin: 0;
-      font-size: clamp(1.05rem, 2.6vw, 1.2rem); /* Adjusted font size */
-    }
-
-    .close-button {
-      color: white;
-      float: right;
-      font-size: 26px; /* Adjusted font size */
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .close-button:hover,
-    .close-button:focus {
-      color: #000;
-      text-decoration: none;
-    }
-
-    .modal-body {
-      padding: 20px 16px;
-      text-align: center;
-    }
-
-    .modal-footer {
-      padding: 10px 16px;
-      background-color: #f1f1f1;
-      border-bottom-left-radius: 12px;
-      border-bottom-right-radius: 12px;
-      text-align: right;
-    }
-
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        gap: 8px;
-        text-align: center;
+    /* Desktop Layout: Left-sided tabs */
+    @media (min-width: 768px) {
+      .main-container {
+        flex-direction: row; /* Desktop: side-by-side */
       }
-      .header-info {
-        align-items: center;
+      .tab-nav {
+        flex-direction: column; /* Desktop: vertical tabs */
+        flex-shrink: 0;
+        width: 240px;
       }
-      .header-stats {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      /* Main content will naturally stack due to flex-direction: column */
-      .main-content {
-        padding: 0 15px; /* Adjusted horizontal padding for mobile */
-        gap: 15px; /* Adjusted gap for mobile */
-      }
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-      .actions {
-        flex-direction: column;
-      }
-      .btn {
-        width: 100%;
-      }
-      .user-header {
-        flex-direction: row;
-        gap: 12px;
+      .tab-button {
+        flex-grow: 0; /* Let content determine height */
         text-align: left;
       }
-      .user-info {
-        flex-direction: row;
-        text-align: left;
+    }
+    
+    /* Mobile full-width and size adjustments */
+    @media (max-width: 767px) {
+      .main-container {
+        padding: 1rem 0.5rem; /* Reduce padding for a fuller width feel */
       }
-      .card-body {
-        padding: 16px;
+      .header-title {
+        font-size: 1.4rem;
       }
     }
 
     @media (max-width: 480px) {
-      .container {
-        padding: 8px;
-      }
-      .user-actions {
-        padding: 12px 16px;
-      }
-      .edit-form {
-        padding: 16px;
-      }
+        .header-title {
+            font-size: 1.25rem; /* Smaller font for very small screens */
+        }
+        .header-banner {
+            padding: 0.75rem 1rem; /* Tighter padding */
+        }
+        .main-container {
+            padding: 0.75rem 0.25rem; /* Even less padding */
+            gap: 1rem;
+        }
+        .tab-button {
+            padding: 0.5rem 0.7rem;
+            font-size: 0.8rem;
+        }
+        .card-header, .card-body {
+            padding: 1rem;
+        }
+        .user-header {
+            padding: 0.6rem 0.8rem;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+        }
+        .user-details h4 {
+            font-size: 0.9rem;
+        }
+        .btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+    }
+
+
+    /* Re-using and enhancing existing styles */
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 1rem 1.5rem;
+      background-color: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .card-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0;
+    }
+    .card-body {
+      padding: 1.5rem;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.5rem 0.7rem; /* Decreased padding */
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      transition: all 0.2s ease-in-out;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+      color: #374151;
+      font-size: 0.875rem;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 640px) {
+        .form-row { grid-template-columns: 1fr 1fr; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem; /* Decreased padding */
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(29, 78, 216, 0.3);
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+    }
+    .btn-danger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(239, 68, 68, 0.25);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      color: white;
+    }
+    .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(107, 114, 128, 0.25);
+    }
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+
+    /* User List Styles */
+    .users-cascade {
+      /* max-height and overflow removed to eliminate scrollbar */
+      padding-right: 5px;
+    }
+    .user-item {
+      background: white;
+      border-radius: 0.75rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+      border: 1px solid #e2e8f0;
+    }
+    .user-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    .user-header {
+      padding: 0.8rem 1rem; /* Decreased padding */
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .user-info { display: flex; align-items: center; gap: 0.75rem; }
+    .user-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 600; font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .user-details h4 { margin: 0; font-size: 1rem; color: #1e293b; text-align: left; }
+    .user-details p { margin: 0; font-size: 0.8rem; text-align: left; }
+    .title-medical { color: #059669; }
+    .title-district { color: #dc2626; }
+    .title-admin { color: #ea580c; }
+    .title-default { color: #64748b; }
+    .user-id {
+      background: #e2e8f0; color: #475569;
+      padding: 0.25rem 0.5rem; border-radius: 0.375rem;
+      font-size: 0.75rem; font-weight: 500;
+      flex-shrink: 0;
+    }
+    .user-actions {
+      padding: 1rem 1.25rem;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: none;
+    }
+    .user-actions.active {
+      display: block;
+      animation: slideDown 0.4s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .edit-form {
+      background: white; padding: 1.25rem;
+      border-radius: 0.75rem; margin-top: 1rem;
+      border: 1px solid #e2e8f0;
+    }
+    .password-display-group {
+        display: flex; align-items: center; gap: 8px; margin-bottom: 1rem;
+    }
+    .password-display-group .form-input { flex-grow: 1; background-color: #f1f5f9; }
+    .password-display-group .btn-copy {
+        padding: 6px 10px; font-size: 0.75rem; background: #4b5563;
+        color: white; border-radius: 6px; cursor: pointer;
+    }
+
+    /* Alert & Modal Styles */
+    .alert {
+      padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;
+      font-size: 0.9rem; position: relative;
+    }
+    .alert-success { background-color: #dcfce7; color: #166534; border: 1px solid #a7f3d0; }
+    .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .loading, .no-users { text-align: center; padding: 2rem; color: #6b7280; font-size: 1rem; }
+    .no-users { background: white; border-radius: 1rem; border: 2px dashed #e2e8f0; }
+
+    .modal {
+        display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+        width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
+        justify-content: center; align-items: center;
+    }
+    .modal-content {
+        background-color: #fefefe; margin: auto; padding: 0;
+        border-radius: 1rem; border: 1px solid #e2e8f0; width: 90%;
+        max-width: 420px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        animation: animatetop 0.4s;
+    }
+    @keyframes animatetop { from { top: -300px; opacity: 0 } to { top: 0; opacity: 1 } }
+    .modal-header {
+        padding: 1rem 1.5rem; background: #1d4ed8; color: white;
+        border-top-left-radius: 1rem; border-top-right-radius: 1rem;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-header h3 { margin: 0; font-size: 1.2rem; }
+    .close-button { color: white; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .modal-body { padding: 1.5rem; text-align: center; }
+    .modal-footer {
+        padding: 1rem; background-color: #f1f5f9;
+        border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem;
+        text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;
     }
   </style>
 </head>
 <body>
-  <!-- Slim Banner Header -->
+  <!-- Header -->
   <div class="header-banner">
     <div class="header-content">
-      <div class="header-info">
-        <h1 class="header-title">User Management</h1>
-        <p class="header-subtitle">Manage your system users efficiently</p>
-      </div>
-      <div class="header-stats">
-        <div class="stat-badge">
-          <span id="totalUsers">0</span> Users
-        </div>
+      <h1 class="header-title">User Dashboard</h1>
+      <div class="stat-badge">
+        <span id="totalUsers">0</span> Total Users
       </div>
     </div>
   </div>
 
-  <!-- Main Application Content -->
-  <div id="appContent" class="flex-grow flex flex-col">
-    <div class="container">
+  <!-- Main Application Content with Tabs -->
+  <div id="appContent" class="main-container">
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-button active" data-tab="addUser">Add New User</button>
+      <button class="tab-button" data-tab="currentUsers">Current Users</button>
+    </nav>
+
+    <!-- Tab Content Area -->
+    <div class="tab-content">
       <div id="message"></div>
-      <div class="main-content">
-        <!-- Add User Form -->
+      
+      <!-- Add User Pane -->
+      <div id="addUser" class="tab-pane active">
         <div class="card">
           <div class="card-header">
-            <h2>Add New User</h2>
+            <h2>Add a New User</h2>
           </div>
           <div class="card-body">
             <form id="addUserForm">
@@ -641,15 +416,17 @@
                 <label for="newPassword">Password *</label>
                 <input type="password" id="newPassword" class="form-input" required />
               </div>
-              <button type="submit" class="btn btn-primary">Add User</button>
+              <button type="submit" class="btn btn-primary">Create User</button>
             </form>
           </div>
         </div>
+      </div>
 
-        <!-- Users Cascade Menu -->
+      <!-- Current Users Pane -->
+      <div id="currentUsers" class="tab-pane">
         <div class="card">
           <div class="card-header">
-            <h2>Current Users</h2>
+            <h2>Manage Current Users</h2>
           </div>
           <div class="card-body">
             <div id="usersList" class="loading">Loading users...</div>
@@ -659,7 +436,7 @@
     </div>
   </div>
 
-  <!-- Custom Confirmation Modal -->
+  <!-- Confirmation Modal -->
   <div id="confirmationModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -670,8 +447,8 @@
         <p id="modalMessage"></p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-danger" id="modalConfirmBtn">Confirm</button>
         <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger" id="modalConfirmBtn">Confirm</button>
       </div>
     </div>
   </div>
@@ -683,61 +460,59 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-    let users = []; // Array to hold user data
-    let activeEditId = null; // Stores the ID of the user currently being edited
-    let confirmCallback = null; // Callback function for the confirmation modal
+    let users = [];
+    let activeEditId = null;
+    let confirmCallback = null;
 
-    // DOM Elements references
     const messageDiv = document.getElementById('message');
     const confirmationModal = document.getElementById('confirmationModal');
     const modalMessage = document.getElementById('modalMessage');
     const modalConfirmBtn = document.getElementById('modalConfirmBtn');
 
     /**
-     * Displays a temporary message to the user.
-     * @param {string} text - The message text.
-     * @param {string} type - The type of message ('success' or 'error').
+     * Tab switching logic
      */
-    function showMessage(text, type = 'success') {
-      const messageContainer = messageDiv;
-      messageContainer.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
-      setTimeout(() => {
-        messageContainer.innerHTML = ''; // Clear message after 5 seconds
-      }, 5000);
+    function setupTabs() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Deactivate all
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanes.forEach(pane => pane.classList.remove('active'));
+
+                // Activate clicked
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
     }
 
-    /**
-     * Shows a custom confirmation modal.
-     * @param {string} message - The message to display in the modal.
-     * @param {function} callback - A function to call when the user confirms or cancels.
-     */
+    function showMessage(text, type = 'success') {
+      messageDiv.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+      setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
+    }
+
     function showConfirmationModal(message, callback) {
       modalMessage.textContent = message;
-      confirmCallback = callback; // Store the callback
-      confirmationModal.style.display = 'flex'; // Show the modal
+      confirmCallback = callback;
+      confirmationModal.style.display = 'flex';
     }
 
-    /**
-     * Closes the custom confirmation modal.
-     */
     function closeModal() {
-      confirmationModal.style.display = 'none'; // Hide the modal
-      confirmCallback = null; // Clear the callback
+      confirmationModal.style.display = 'none';
+      confirmCallback = null;
     }
 
-    // Event listener for the modal's confirm button
     modalConfirmBtn.onclick = () => {
       if (confirmCallback) {
-        confirmCallback(true); // Call the stored callback with true (confirmed)
+        confirmCallback(true);
       }
-      closeModal(); // Close the modal
+      closeModal();
     };
 
-    /**
-     * Returns a CSS class based on the user's title for styling.
-     * @param {string} title - The user's title.
-     * @returns {string} The CSS class name.
-     */
     function getTitleClass(title) {
       if (!title) return 'title-default';
       const titleLower = title.toLowerCase();
@@ -747,82 +522,67 @@
       return 'title-default';
     }
 
-    /**
-     * Updates the total user count displayed in the header.
-     */
     function updateUserCount() {
       document.getElementById('totalUsers').textContent = users.length;
     }
 
-    /**
-     * Copies text to the clipboard.
-     * @param {string} text - The text to copy.
-     */
     function copyToClipboard(text) {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      try {
-        document.execCommand('copy');
-        showMessage('Password copied to clipboard!', 'success');
-      } catch (err) {
-        showMessage('Failed to copy password.', 'error');
-      }
-      document.body.removeChild(textarea);
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showMessage('Password copied to clipboard!', 'success');
+        } catch (err) {
+            showMessage('Failed to copy password.', 'error');
+        }
+        document.body.removeChild(textarea);
     }
 
-    /**
-     * Loads users from the Supabase 'users' table and updates the display.
-     */
     async function loadUsers() {
       try {
-        // Fetch users, ordered by ID
-        const { data, error } = await supabaseClient.from('users').select('*').order('id');
-        if (error) throw error; // Throw error if fetch fails
+        // Fetch users from the database
+        const { data, error } = await supabaseClient.from('users').select('*');
+        if (error) throw error;
+        
+        // Sort users by ID in descending order on the client side
+        data.sort((a, b) => b.id - a.id);
+        users = data;
 
-        users = data; // Update local users array
-        updateUserCount(); // Update the displayed user count
-        displayUsers(); // Render users in the UI
+        updateUserCount();
+        displayUsers();
       } catch (err) {
         showMessage('Failed to load users: ' + err.message, 'error');
         document.getElementById('usersList').innerHTML = '<div class="alert alert-error">Failed to load users.</div>';
       }
     }
 
-    /**
-     * Renders the list of users in the UI.
-     */
     function displayUsers() {
       const usersList = document.getElementById('usersList');
       if (!users.length) {
-        usersList.innerHTML = '<div class="no-users">No users found.<br>Add your first user above.</div>';
+        usersList.innerHTML = '<div class="no-users">No users found.<br>Add your first user in the "Add New User" tab.</div>';
         return;
       }
 
-      // Generate HTML for each user item
       usersList.innerHTML = `
         <div class="users-cascade">
           ${users.map(user => `
             <div class="user-item">
               <div class="user-header" onclick="toggleUserActions(${user.id})">
                 <div class="user-info">
-                  <div class="user-avatar">
-                    ${user.username.charAt(0).toUpperCase()}
-                  </div>
-                  <div class="user-details flex-grow">
-                    <h4 class="text-sm font-semibold text-gray-800 mb-0.5">
-                        ${user.username}
-                    </h4>
-                    <p class="${getTitleClass(user.title)} text-xs">${user.title || 'No title'}</p>
+                  <div class="user-avatar">${user.username.charAt(0).toUpperCase()}</div>
+                  <div class="user-details">
+                    <h4>${user.username}</h4>
+                    <p class="${getTitleClass(user.title)}">${user.title || 'No title'}</p>
                   </div>
                 </div>
                 <div class="user-id">ID: ${user.id}</div>
               </div>
               <div class="user-actions" id="userActions${user.id}">
                 <div class="actions">
-                  <button class="btn btn-sm btn-secondary" onclick="editUser(${user.id})">Edit User</button>
-                  <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Delete User</button>
+                  <button class="btn btn-sm btn-secondary" onclick="editUser(${user.id})">Edit</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Delete</button>
                 </div>
                 <div id="editForm${user.id}" class="edit-form" style="display: none;">
                   <h4>Edit User Information</h4>
@@ -832,9 +592,8 @@
                       <input type="text" id="editUsername${user.id}" class="form-input" value="${user.username}" required />
                     </div>
                     <div class="form-group">
-                      <label>Title *</label>
+                      <label>Title</label>
                       <select id="editTitle${user.id}" class="form-input" required>
-                        <option value="">Select Title</option>
                         <option value="Medical Representative" ${user.title === 'Medical Representative' ? 'selected' : ''}>Medical Representative</option>
                         <option value="District Manager" ${user.title === 'District Manager' ? 'selected' : ''}>District Manager</option>
                         <option value="admin" ${user.title === 'admin' ? 'selected' : ''}>admin</option>
@@ -845,15 +604,15 @@
                     <label>Current Password</label>
                     <div class="password-display-group">
                       <input type="text" id="displayPassword${user.id}" class="form-input" value="${user.password || 'N/A'}" readonly />
-                      <button type="button" class="btn btn-copy" onclick="copyToClipboard(document.getElementById('displayPassword${user.id}').value)">Copy</button>
+                      <button type="button" class="btn-copy" onclick="copyToClipboard(document.getElementById('displayPassword${user.id}').value)">Copy</button>
                     </div>
                   </div>
                   <div class="form-group">
                     <label>New Password (optional)</label>
-                    <input type="password" id="editPassword${user.id}" class="form-input" placeholder="Leave blank to keep current password" />
+                    <input type="password" id="editPassword${user.id}" class="form-input" placeholder="Leave blank to keep current" />
                   </div>
                   <div class="actions">
-                    <button class="btn btn-primary" onclick="saveUser(${user.id})">Save Changes</button>
+                    <button class="btn btn-primary" onclick="saveUser(${user.id})">Save</button>
                     <button class="btn btn-secondary" onclick="cancelEdit(${user.id})">Cancel</button>
                   </div>
                 </div>
@@ -863,89 +622,65 @@
         </div>`;
     }
 
-    /**
-     * Toggles the visibility of the action panel for a specific user.
-     * @param {number} userId - The ID of the user.
-     */
     function toggleUserActions(userId) {
       const actionsDiv = document.getElementById(`userActions${userId}`);
       const isActive = actionsDiv.classList.contains('active');
 
-      // Close any other open action panels
       document.querySelectorAll('.user-actions.active').forEach(el => {
-        el.classList.remove('active');
-        // Also hide any active edit forms within them
-        const editForm = el.querySelector('.edit-form');
-        if (editForm) editForm.style.display = 'none';
+        if (el.id !== `userActions${userId}`) {
+            el.classList.remove('active');
+            const editForm = el.querySelector('.edit-form');
+            if (editForm) editForm.style.display = 'none';
+        }
       });
 
-      // If the clicked panel was not active, open it
       if (!isActive) {
         actionsDiv.classList.add('active');
+      } else {
+        actionsDiv.classList.remove('active');
+        const editForm = actionsDiv.querySelector('.edit-form');
+        if (editForm) editForm.style.display = 'none';
       }
     }
 
-    // Event listener for adding a new user
     document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-      e.preventDefault(); // Prevent default form submission
-
+      e.preventDefault();
       const username = document.getElementById('newUsername').value.trim();
       const password = document.getElementById('newPassword').value.trim();
       const title = document.getElementById('newTitle').value.trim();
 
-      // Basic validation
       if (!username || !password || !title) {
         return showMessage('Username, password, and title are required', 'error');
       }
 
       try {
-        // Insert new user into Supabase
-        const { error } = await supabaseClient
-          .from('users')
-          .insert([{ username, password, title }]);
-
-        if (error) throw error; // Throw error if insert fails
-
+        const { error } = await supabaseClient.from('users').insert([{ username, password, title }]);
+        if (error) throw error;
         showMessage('User added successfully!');
-        e.target.reset(); // Clear the form fields
-        loadUsers(); // Reload users to update the list
+        e.target.reset();
+        await loadUsers();
+        // Switch back to the users list tab
+        document.querySelector('.tab-button[data-tab="currentUsers"]').click();
       } catch (err) {
         showMessage('Error adding user: ' + err.message, 'error');
       }
     });
 
-    /**
-     * Displays the edit form for a specific user.
-     * @param {number} userId - The ID of the user to edit.
-     */
     function editUser(userId) {
-      // Hide all other edit forms
-      document.querySelectorAll('.edit-form').forEach(form => {
-        form.style.display = 'none';
-      });
-
-      // Show the edit form for the selected user
+      document.querySelectorAll('.edit-form').forEach(form => { form.style.display = 'none'; });
       document.getElementById(`editForm${userId}`).style.display = 'block';
-      activeEditId = userId; // Set the active edit ID
+      activeEditId = userId;
     }
 
-    /**
-     * Hides the edit form for a specific user and clears the active edit ID.
-     * @param {number} userId - The ID of the user whose form to cancel.
-     */
     function cancelEdit(userId) {
       document.getElementById(`editForm${userId}`).style.display = 'none';
-      activeEditId = null; // Clear the active edit ID
+      activeEditId = null;
     }
 
-    /**
-     * Saves changes to a user's information.
-     * @param {number} userId - The ID of the user to save.
-     */
     async function saveUser(userId) {
       const username = document.getElementById(`editUsername${userId}`).value.trim();
       const title = document.getElementById(`editTitle${userId}`).value.trim();
-      const password = document.getElementById(`editPassword${userId}`).value.trim(); // New password input
+      const password = document.getElementById(`editPassword${userId}`).value.trim();
 
       if (!username || !title) {
         return showMessage('Username and title are required', 'error');
@@ -954,67 +689,51 @@
       try {
         const updateData = { username, title };
         if (password) {
-          // Only update password if a new one is provided
           updateData.password = password;
         }
-
-        // Update user in Supabase
         const { error } = await supabaseClient.from('users').update(updateData).eq('id', userId);
         if (error) throw error;
-
         showMessage('User updated successfully!');
-        cancelEdit(userId); // Hide the edit form
-        loadUsers(); // Reload users to reflect changes
+        cancelEdit(userId);
+        loadUsers();
       } catch (err) {
         showMessage('Update failed: ' + err.message, 'error');
       }
     }
 
-    /**
-     * Deletes a user after confirmation.
-     * Admin users cannot be deleted from the frontend.
-     * @param {number} userId - The ID of the user to delete.
-     */
     async function deleteUser(userId) {
-      const user = users.find(user => user.id === userId);
+      const user = users.find(u => u.id === userId);
       if (user && user.title === 'admin') {
         showMessage('Admin users cannot be deleted from the front end.', 'error');
         return;
       }
 
-      // Show confirmation modal before deleting
       showConfirmationModal('Are you sure you want to delete this user? This action cannot be undone.', async (confirmed) => {
-        if (!confirmed) return; // If not confirmed, do nothing
-
+        if (!confirmed) return;
         try {
-          // Delete user from Supabase
           const { error } = await supabaseClient.from('users').delete().eq('id', userId);
           if (error) throw error;
-
           showMessage('User deleted successfully!');
-          loadUsers(); // Reload users to update the list
+          loadUsers();
         } catch (err) {
           showMessage('Delete failed: ' + err.message, 'error');
         }
       });
     }
 
-    // Close user actions panel when clicking outside of a user item or modal
     document.addEventListener('click', (e) => {
-      // Check if the click target is NOT inside a user-item and NOT inside the modal-content
       if (!e.target.closest('.user-item') && !e.target.closest('.modal-content')) {
-        // Find all currently active user action panels and close them
         document.querySelectorAll('.user-actions.active').forEach(el => {
           el.classList.remove('active');
-          // Also hide any active edit forms within them
           const editForm = el.querySelector('.edit-form');
           if (editForm) editForm.style.display = 'none';
         });
       }
     });
 
-    // Initialize the application by loading users when the DOM is fully loaded
+    // Initialize the application
     document.addEventListener('DOMContentLoaded', () => {
+      setupTabs();
       loadUsers();
     });
   </script>
