@@ -54,9 +54,9 @@
 
         /* Main container for the application, taking full available width and height */
         .container {
-            max-width: 1600px;
+            max-width: 1500px; /* Slightly reduced max-width */
             margin: 0 auto;
-            padding: 15px;
+            padding: 12px; /* Slightly reduced padding */
             width: 100%;
             flex-grow: 1;
             display: flex;
@@ -69,10 +69,10 @@
             justify-content: space-between;
             align-items: center;
             background: var(--card-bg);
-            padding: 8px 20px;
+            padding: 6px 18px; /* Adjusted padding */
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
-            margin-bottom: 15px;
+            margin-bottom: 0.2rem; /* Reduced margin */
             position: relative;
             z-index: 100;
             gap: 10px;
@@ -83,20 +83,19 @@
         .user-card {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 15px;
+            gap: 10px; /* Reduced gap */
+            padding: 6px 12px; /* Adjusted padding */
             background: #f1f5f9;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
             flex-shrink: 0;
             order: 2; /* User card on right */
             width: fit-content; /* Make width fit content */
-            max-width: 200px; /* Smaller max-width for user card */
+            max-width: 180px; /* Smaller max-width for user card */
         }
 
         .user-card-icon {
-            font-size: 1.5rem;
-            color: var(--background-gradient-end);
+            font-size: 1.4rem; /* Slightly smaller */
         }
 
         .user-info {
@@ -106,8 +105,8 @@
         }
 
         .user-name {
-            font-weight: 700;
-            font-size: 1rem;
+            font-weight: 600; /* Slightly less bold */
+            font-size: 0.9rem; /* Slightly smaller */
             color: var(--text-color-dark);
             white-space: nowrap; /* Prevent name wrapping */
             overflow: hidden;
@@ -115,7 +114,7 @@
         }
 
         .user-title {
-            font-size: 0.85rem;
+            font-size: 0.8rem; /* Slightly smaller */
             color: var(--text-color-light);
             font-weight: 400;
             white-space: nowrap; /* Prevent title wrapping */
@@ -126,17 +125,18 @@
         /* Button group in header */
         .header-buttons {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
             order: 1; /* Buttons on left (including logout) */
         }
 
         /* Button base styling */
         .header-button {
-            padding: 8px 15px;
+            padding: 7px 14px; /* Adjusted padding */
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* Slightly smaller */
             border: none;
             transition: all 0.25s ease;
             text-decoration: none;
@@ -164,7 +164,7 @@
         .logout-button {
             background: #ef4444; /* Red color for logout */
             color: var(--white);
-            width: 100px; /* Fixed smaller width for logout button */
+            width: 90px; /* Fixed smaller width for logout button */
             justify-content: center; /* Center content within the button */
         }
 
@@ -181,9 +181,9 @@
         .banner {
             background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
             color: white;
-            padding: 12px 25px; /* Decreased height for slimmer banner */
-            margin-bottom: 20px;
-            border-radius: 18px; /* Matched from dashboard */
+            padding: 10px 22px; /* Decreased height for slimmer banner */
+            margin-bottom: 15px;
+            border-radius: 16px; /* Matched from dashboard */
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
@@ -191,7 +191,7 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
         }
 
         /* Grain texture from dashboard */
@@ -210,7 +210,7 @@
 
         /* Company Logo styling within the banner */
         .company-logo {
-            max-width: 70px;
+            max-width: 65px;
             height: auto;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -225,33 +225,42 @@
         }
 
         .banner h1 {
-            font-size: 2rem;
+            font-size: 1.8rem; /* Slightly smaller */
             font-weight: 700;
             margin-bottom: 2px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .banner .subtitle {
-            font-size: 0.9rem;
+            font-size: 0.85rem; /* Slightly smaller */
             opacity: 0.98;
             font-weight: 400;
+        }
+        
+        /* Home view container */
+        .home-view {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden; /* For mobile scroll */
         }
 
         /* Home view grid for navigation cards */
         .home-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            padding: 15px 0;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); /* Adjusted minmax */
+            gap: 18px; /* Adjusted gap */
+            padding: 12px 0;
             flex-grow: 1;
             align-content: start;
+            overflow-y: auto; /* Enable scrolling for tabs only */
         }
 
         /* Styling for each navigation card */
         .main-card {
             background: var(--card-bg);
-            padding: 18px;
-            border-radius: 18px; /* Matched from dashboard */
+            padding: 16px; /* Adjusted padding */
+            border-radius: 16px; /* Matched from dashboard */
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
@@ -260,7 +269,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 130px;
+            min-height: 120px; /* Adjusted height */
             position: relative;
             overflow: hidden;
             border: 1px solid var(--border-color);
@@ -289,7 +298,7 @@
 
         /* Icon styling for cards */
         .main-card-icon {
-            font-size: 2.2rem;
+            font-size: 2rem; /* Slightly smaller */
             margin-bottom: 8px;
             color: var(--background-gradient-end);
             line-height: 1;
@@ -301,7 +310,7 @@
 
         /* Title styling for cards */
         .main-card-title {
-            font-size: 1.2rem;
+            font-size: 1.1rem; /* Slightly smaller */
             font-weight: 600;
             color: var(--text-color-dark);
             margin-bottom: 3px;
@@ -313,7 +322,7 @@
 
         /* Subtitle styling for cards */
         .main-card-subtitle {
-            font-size: 0.8rem;
+            font-size: 0.75rem; /* Slightly smaller */
             color: var(--text-color-light);
             line-height: 1.4;
         }
@@ -328,10 +337,10 @@
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            transform: translateY(10px);
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(8px);
             opacity: 0;
-            height: calc(100vh - 100px);
+            height: 100%; /* Increased height */
         }
 
         .full-page-view.active {
@@ -457,7 +466,7 @@
             text-align: center;
             width: 100%;
             max-width: 360px;
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeInFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* New animation */
             position: relative;
         }
 
@@ -468,9 +477,9 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInFromCenter {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .login-box h2 {
@@ -566,6 +575,7 @@
 
         /* Footer Styling */
         .footer {
+            display: none; /* Hidden by default */
             margin-top: auto;
             padding: 8px 15px; /* Reduced padding for a slimmer footer */
             text-align: center;
@@ -573,7 +583,12 @@
             background: #f1f5f9;
             border-top: 1px solid var(--border-color);
             font-weight: bold;
-            color: var(--primary-dark);
+            color: var(--background-gradient-end);
+            flex-shrink: 0;
+        }
+
+        .footer.show {
+            display: block; /* Show only on home screen */
         }
 
         /* New Professional Intro Animation Styles */
@@ -671,6 +686,57 @@
         .side-menu-sub-items.show { display: flex; }
         .side-menu-sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 15px; background: var(--white); border-radius: var(--border-radius); cursor: pointer; transition: background 0.2s ease; box-shadow: var(--shadow-sm); }
         .side-menu-sub-item:hover { background: #f1f5f9; }
+        
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-bell .fa-bell {
+            font-size: 1.4rem;
+            color: var(--text-color-dark);
+        }
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0; /* Changed from right: 0 */
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 101;
+        }
+        .notification-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+        .notification-title {
+            font-weight: 600;
+            color: var(--text-color-dark);
+        }
+        .notification-rep {
+            font-size: 0.8rem;
+            color: var(--text-color-light);
+        }
 
         /* Responsive adjustments */
         @media (max-width: 1024px) {
@@ -695,24 +761,25 @@
         }
 
         @media (max-width: 768px) {
-            .container { padding: 8px; }
-            .header { flex-wrap: nowrap; justify-content: space-between; padding: 8px 10px; }
+            body { overflow: hidden; } /* Prevent body scroll on mobile */
+            .container { padding: 8px; height: 100vh; }
+            .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; position: sticky; top: 0; z-index: 100; }
             .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
             .user-name { font-size: 0.7rem; }
             .user-title { font-size: 0.6rem; }
             .header-buttons { width: auto; justify-content: flex-start; order: 1; flex-grow: 1; }
-            .header-button { flex-grow: 0; padding: 6px 8px; font-size: 0.75rem; }
+            .header-button { flex-grow: 0; padding: 5px 7px; font-size: 0.7rem; }
             .logout-button { width: 70px; display: none; }
-            .banner { padding: 8px 15px; gap: 10px; }
-            .company-logo { max-width: 45px; }
-            .banner h1 { font-size: 1.4rem; }
-            .banner .subtitle { font-size: 0.75rem; }
+            .banner { padding: 6px 12px; gap: 8px; } /* Removed sticky positioning */
+            .company-logo { max-width: 40px; }
+            .banner h1 { font-size: 1.2rem; }
+            .banner .subtitle { font-size: 0.65rem; }
             .home-grid { grid-template-columns: 1fr; gap: 12px; }
             .main-card { min-height: 80px; padding: 12px; flex-direction: row; justify-content: flex-start; text-align: left; gap: 15px; }
             .main-card-icon { font-size: 1.8rem; margin-bottom: 0; flex-shrink: 0; }
             .main-card-title { font-size: 1rem; margin-bottom: 0; }
             .main-card-subtitle { font-size: 0.7rem; display: none; }
-            .full-page-view { height: calc(100vh - 80px); }
+            .full-page-view { height: 100%; }
             .login-box { padding: 20px; margin: 0 10px; max-width: 280px; }
             .login-box .login-logo { max-width: 50px; }
             .login-box h2 { font-size: 1.2rem; margin-bottom: 15px; }
@@ -721,6 +788,7 @@
             .full-page-message-overlay p { font-size: 1.2rem; padding: 10px; }
             .main-card-text-content { display: flex; flex-direction: column; flex-grow: 1; }
             .mobile-menu-button { display: block; }
+            .footer.show { display: block; }
         }
     </style>
 </head>
@@ -766,6 +834,13 @@
             <div class="header-buttons">
                 <button id="logoutButton" class="header-button logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 <button id="backButton" class="header-button back-button hidden"><i class="fas fa-arrow-left"></i> Back to Home</button>
+                <div class="notification-bell hidden" id="notificationBell">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-count" id="notificationCount">0</span>
+                    <div class="notification-dropdown hidden" id="notificationDropdown">
+                        <!-- Notification items will be inserted here -->
+                    </div>
+                </div>
             </div>
             <div id="userCard" class="user-card hidden">
                 <i class="fas fa-user-circle user-card-icon"></i>
@@ -866,7 +941,6 @@
 
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
-        // *** FIX: Corrected file names to match the user's file structure from the screenshot ***
         const navConfig = {
             'home': {
                 pages: [
@@ -884,14 +958,13 @@
                         subPages: [
                             { id: 'dm-planning', title: 'DM Planning', subtitle: 'Plan and schedule district manager activities.', icon: '📅', viewId: 'nestedIframeView', fileName: 'DM-Plan.html', isNested: true, roles: ['admin', 'District Manager'] },
                             { id: 'dm-report', title: 'DM Report', subtitle: 'View and generate reports for the district.', icon: '📄', viewId: 'nestedIframeView', fileName: 'DM-Report.html', isNested: true, roles: ['admin', 'District Manager'] },
-                                                    ]
+                        ]
                     },
                     { id: 'master-list', title: 'Master List', subtitle: 'View and manage the master data list.', icon: '📋', viewId: 'masterListView', fileName: 'master list.html', roles: ['admin', 'District Manager'] },
                     { id: 'upa-codes', title: 'UPA Codes', subtitle: 'Access UPA Codes and affairs.', icon: '🏥', viewId: 'upaCodesView', fileName: 'upa-codes.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'price-list', title: 'Price List', subtitle: 'products pricing information.', icon: '💲', viewId: 'priceListView', fileName: 'price-list.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'products-knowledge', title: 'Products Knowledge', subtitle: 'Detailed information about our products.', icon: '📚', viewId: 'productsKnowledgeView', fileName: 'Products knowledge.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'admin', title: 'Admin Panel', subtitle: 'Manage users and system settings.', icon: '⚙️', viewId: 'adminView', fileName: 'admin users.html', roles: ['admin'] },
-                    { id: 'coming-soon', title: 'Coming Soon', subtitle: 'Exciting new features are on their way!', icon: '⏳', isPlaceholder: true, roles: ['admin', 'District Manager', 'Medical Representative'] }
                 ]
             }
         };
@@ -901,10 +974,27 @@
                 const response = await fetch(GOOGLE_SHEET_URL);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const csvText = await response.text();
-                // Parsing logic remains the same
+                googleSheetData = parseCSV(csvText); // Store in global variable
             } catch (error) {
                 console.error('Error fetching or parsing Google Sheet data:', error);
             }
+        }
+        
+        function parseCSV(csvText) {
+            const rows = csvText.split('\n').filter(row => row.trim() !== '');
+            if (rows.length === 0) return [];
+            const headers = rows[0].split(',').map(header => header.trim());
+            const data = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i].split(',');
+                const rowObject = {};
+                headers.forEach((header, index) => {
+                    rowObject[header] = row[index] ? row[index].trim() : '';
+                });
+                data.push(rowObject);
+            }
+            return data;
         }
 
         function updateAndShowUserCard() {
@@ -913,10 +1003,63 @@
                 document.getElementById('userCardName').textContent = loggedInUser.username;
                 document.getElementById('userCardTitle').textContent = loggedInUser.title;
                 userCard.classList.remove('hidden');
+                fetchNotifications();
             } else {
                 userCard.classList.add('hidden');
+                document.getElementById('notificationBell').classList.add('hidden');
             }
         }
+        
+        async function fetchNotifications() {
+            const notificationBell = document.getElementById('notificationBell');
+            const notificationCount = document.getElementById('notificationCount');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+
+            if (!loggedInUser) return;
+
+            let query = supabase.from('requests').select('*').eq('status', 'Requested');
+            
+            if (loggedInUser.title === 'District Manager') {
+                const dmReps = googleSheetData
+                    .filter(row => row['District Manager'] === loggedInUser.username)
+                    .map(row => row['medical rep']);
+                
+                if (dmReps.length > 0) {
+                    query = query.in('medRep', dmReps);
+                } else {
+                    // If a DM has no reps, they should see no requests.
+                    notificationBell.classList.add('hidden');
+                    return;
+                }
+            }
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('Error fetching notifications:', error);
+                return;
+            }
+
+            if (data.length > 0) {
+                notificationCount.textContent = data.length;
+                notificationBell.classList.remove('hidden');
+
+                notificationDropdown.innerHTML = '';
+                data.forEach(req => {
+                    const item = document.createElement('div');
+                    item.className = 'notification-item';
+                    item.innerHTML = `
+                        <div class="notification-title">${req.requestTitle}</div>
+                        <div class="notification-rep">By: ${req.medRep}</div>
+                    `;
+                    notificationDropdown.appendChild(item);
+                });
+
+            } else {
+                notificationBell.classList.add('hidden');
+            }
+        }
+
 
         function showBlurredMessage(message, duration, callback = null) {
             const overlay = document.getElementById('fullPageMessageOverlay');
@@ -931,6 +1074,7 @@
         function showLoginPage() {
             document.getElementById('loginPage').classList.remove('hidden');
             document.getElementById('appContent').classList.add('hidden');
+            document.querySelector('.footer').classList.remove('show');
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
@@ -1015,6 +1159,7 @@
 
         function showHome() {
             document.getElementById('homeView').classList.remove('hidden');
+            document.querySelector('.footer').classList.add('show');
             document.getElementById('backButton').classList.add('hidden');
             if (loggedInUser) {
                 applyUserPermissions();
@@ -1049,9 +1194,12 @@
             }
             const { viewId, fileName, isNested } = config;
             if (currentActiveViewId !== 'homeView' && !isNested) lastPageHistory.push(currentActiveViewId);
+            
             document.getElementById('homeView').classList.add('hidden');
+            document.querySelector('.footer').classList.remove('show');
             document.getElementById('backButton').classList.remove('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
+
             if (currentActiveViewId && currentActiveViewId !== viewId) {
                 const prevActiveView = document.getElementById(currentActiveViewId);
                 if (prevActiveView) {
@@ -1079,35 +1227,36 @@
                 
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
-                iframe.src = 'about:blank'; 
-
+                
+                // Set src and immediately send data
                 iframe.src = fileName;
+                
+                // Function to send data to iframe
+                const sendDataToIframe = () => {
+                    if (loggedInUser && iframe.contentWindow) {
+                         const message = { user: loggedInUser };
+                        if (page === 'dashboard') {
+                            message.type = 'dashboardLogin';
+                            message.username = sessionStorage.getItem('dashboardUsername');
+                            message.password = sessionStorage.getItem('dashboardPassword');
+                        } else if (page === 'dm-planning') {
+                            message.type = 'dmPlanningUserPermissions';
+                        } else if (page === 'dm-report') {
+                            message.type = 'dmReportUserPermissions';
+                        } else { 
+                            message.type = 'loggedInUser';
+                        }
+                        iframe.contentWindow.postMessage(message, '*');
+                    }
+                };
+                
+                // Send data immediately
+                sendDataToIframe();
 
                 iframe.onload = () => {
                     loadingOverlay.classList.remove('show');
-                    
-                    if (loggedInUser) {
-                        if (page === 'dashboard') {
-                            iframe.contentWindow.postMessage({ 
-                                type: 'dashboardLogin', 
-                                username: sessionStorage.getItem('dashboardUsername'), 
-                                password: sessionStorage.getItem('dashboardPassword'),
-                                user: loggedInUser
-                            }, '*');
-                        } else if (page === 'dm-planning') {
-                             iframe.contentWindow.postMessage({
-                                type: 'dmPlanningUserPermissions',
-                                user: loggedInUser
-                            }, '*');
-                        } else if (page === 'dm-report') {
-                             iframe.contentWindow.postMessage({
-                                type: 'dmReportUserPermissions',
-                                user: loggedInUser
-                            }, '*');
-                        } else { 
-                            iframe.contentWindow.postMessage({ type: 'loggedInUser', user: loggedInUser }, '*');
-                        }
-                    }
+                    // Resend data on load as a fallback
+                    sendDataToIframe();
                 };
                 iframe.onerror = () => {
                     loadingOverlay.classList.remove('show');
@@ -1255,6 +1404,19 @@
             document.getElementById('mobileMenuButton').addEventListener('click', openSideMenu);
             document.getElementById('closeMenuButton').addEventListener('click', closeSideMenu);
             document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
+            
+            const notificationBell = document.getElementById('notificationBell');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            notificationBell.addEventListener('click', (event) => {
+                event.stopPropagation();
+                notificationDropdown.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!notificationBell.contains(event.target)) {
+                    notificationDropdown.classList.add('hidden');
+                }
+            });
         });
     </script>
 </body>
