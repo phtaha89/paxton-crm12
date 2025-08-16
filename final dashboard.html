@@ -1748,6 +1748,15 @@
                 max-width: 150px; /* Adjust as needed */
             }
         }
+                /* Add these new styles to your existing CSS */
+        .am-hospital-visit {
+            background-color: #e0f2fe !important; /* A nice light blue */
+        }
+        .visit-place-highlight {
+            color: #ef4444; /* Red color from your theme */
+            font-weight: 700; /* Bold */
+        }
+
        
     </style>
 </head>
@@ -4140,6 +4149,7 @@
             }
 
             const amActivitiesSpecialties = ['hospital', 'account', 'dialysis center', 'oncology center'];
+            const excludedAmDetailsSpecialties = ['account', 'hospital']; // Added back this line
             const leaveTypes = ['annual leave', 'Official vacation', 'casual leave', 'sick leave'];
             const eventSpecialties = ['event(am activity)', 'event(pm activity)', 'event(full day activity)'];
 
@@ -4169,21 +4179,33 @@
                     const hcpGoogleData = allGoogleSheetData.find(row => row['medical rep'] === visit.medical_rep && row['HCPS'] === hcpName);
                     const hcpTargetVisits = hcpGoogleData ? (parseInt(hcpGoogleData['T.V'], 10) || 0) : null;
 
-                    const createCellContent = (name, dayDate, time, specialtyDisplay, brickDisplay, visitPlaceDisplay, comment = '', isEvent = false, isLeave = false, isAmSpecialty = false) => {
-    let visitPlaceClass = 'visit-place-cell'; // Apply the visit-place-cell class by default
-    if (visitPlaceDisplay.toLowerCase().includes('clinic')) {
-        visitPlaceClass += ' clinic-hcp'; // Add clinic-hcp class if it's a clinic
-    }
-    return `<div class="hcp-cell ${isEvent ? 'event' : ''} ${isLeave ? 'leave-entry' : ''} ${visitPlaceClass}" onclick="toggleComment(this)">
-                <span class="hcp-name ${isAmSpecialty ? 'am-specialty-hcp' : ''}">${name}</span>
-                <span class="hcp-detail">${dayDate} ${time}</span>
-                <span class="hcp-detail">${specialtyDisplay}</span>
-                <span class="hcp-detail">${brickDisplay} - <span class="${visitPlaceClass}">${visitPlaceDisplay}</span></span>
-                <div class="comment-box" data-comment-text="${escapeHtml(comment)}">${comment || 'No comment available'}</div>
-            </div>`;
-};
+                    const createCellContent = (name, dayDate, time, specialtyDisplay, brickDisplay, visitPlaceDisplay, comment = '', isEvent = false, isLeave = false, isAmSpecialty = false, isPmVisit = false) => {
+                        let visitPlaceHtml = visitPlaceDisplay;
+                        let cardClass = `${isEvent ? 'event' : ''} ${isLeave ? 'leave-entry' : ''}`;
+                        
+                        // Logic for AM Hospital styling
+                        if (visitPlaceDisplay.toLowerCase() === 'am hospital' && !excludedAmDetailsSpecialties.includes(specialtyDisplay.toLowerCase())) {
+                            cardClass += ' am-hospital-visit';
+                            visitPlaceHtml = `<span class="visit-place-highlight">${visitPlaceDisplay}</span>`;
+                        } 
+                        // New logic for PM visit place styling
+                        else if (isPmVisit) {
+                            visitPlaceHtml = `<span class="visit-place-highlight">${visitPlaceDisplay}</span>`;
+                        }
+                        
+                        // This is your existing clinic logic, preserved.
+                        if (visitPlaceDisplay.toLowerCase().includes('clinic')) {
+                            cardClass += ' clinic-hcp';
+                        }
 
-
+                        return `<div class="hcp-cell ${cardClass}" onclick="toggleComment(this)">
+                                    <span class="hcp-name ${isAmSpecialty ? 'am-specialty-hcp' : ''}">${name}</span>
+                                    <span class="hcp-detail">${dayDate} ${time}</span>
+                                    <span class="hcp-detail">${specialtyDisplay}</span>
+                                    <span class="hcp-detail">${brickDisplay} - ${visitPlaceHtml}</span>
+                                    <div class="comment-box" data-comment-text="${escapeHtml(comment)}">${comment || 'No comment available'}</div>
+                                </div>`;
+                    };
 
                     const isAmActivitySpecialty = amActivitiesSpecialties.includes(specialty);
                     const isAmActivityEvent = specialty === 'event(am activity)';
@@ -4195,11 +4217,36 @@
                     const isLeaveHCP = leaveTypes.some(leave => hcpName.toLowerCase().includes(leave));
                     const isAnyEvent = eventSpecialties.includes(specialty);
                     const originalSpecialty = visit.specialty || 'N/A';
+                    
+                    // New condition for "AM Hospital"
+                    const isAmHospitalVisit = visitPlace.toLowerCase() === 'am hospital' && !excludedAmDetailsSpecialties.includes(specialty);
+
+                    if (isAmHospitalVisit) {
+                         if (!dailyAmDetailsHCPs.has(hcpName)) {
+                            amDetailsData.push({ 
+                                name: hcpName, 
+                                specialty: originalSpecialty, 
+                                brick: brick, 
+                                time: visitTime, 
+                                date: dateStr, 
+                                isEvent: false, 
+                                comment: comments, 
+                                visit_place: visitPlace, 
+                                target_visits: hcpTargetVisits, 
+                                isAmSpecialty: false, 
+                                dayDate: visitDayDate,
+                                isAmHospital: true // Flag for styling
+                            });
+                            dailyAmDetailsHCPs.add(hcpName);
+                        }
+                        return; // Skip further processing for this visit
+                    }
+
 
                     if (isFullDayEvent) {
                         // Handle full-day events
                         if (!dailyAmActivitiesHCPs.has(hcpName)) {
-                            dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty, false));
                             dailyAmActivitiesHCPs.add(hcpName);
                         }
                         if (!dailyAmDetailsHCPs.has(hcpName)) {
@@ -4207,24 +4254,24 @@
                             dailyAmDetailsHCPs.add(hcpName);
                         }
                         if (!dailyPmActivitiesHCPs.has(hcpName)) {
-                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty, true));
                             dailyPmActivitiesHCPs.add(hcpName);
                         }
                         if (!dailyPharmacyActivitiesHCPs.has(hcpName)) {
-                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty));
+                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, true, false, isAmDetailsSpecialty, false));
                             dailyPharmacyActivitiesHCPs.add(hcpName);
                         }
                     } else if (isLeaveHCP && !isAmActivitySpecialty && !isAmActivityEvent) {
                         // Handle leaves only if it's not an AM activity or event
                         if (!dailyPmActivitiesHCPs.has(hcpName)) {
-                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, false, true, isAmDetailsSpecialty));
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, false, true, isAmDetailsSpecialty, true));
                             dailyPmActivitiesHCPs.add(hcpName);
                         }
                     } else {
                         // Handle AM and PM activities based on specialty
                         let addedToAmActivities = false;
                         if ((isAmActivitySpecialty || isAmActivityEvent) && !dailyAmActivitiesHCPs.has(hcpName)) {
-                            dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                            dailyAmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty, false));
                             dailyAmActivitiesHCPs.add(hcpName);
                             addedToAmActivities = true;
                         }
@@ -4238,17 +4285,17 @@
 
                         let addedToPharmacy = false;
                         if (isPharmacySpecialty && !dailyPharmacyActivitiesHCPs.has(hcpName)) {
-                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                            dailyPharmacyCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty, false));
                             dailyPharmacyActivitiesHCPs.add(hcpName);
                             addedToPharmacy = true;
                         }
 
                         if (isPmActivityEvent && !dailyPmActivitiesHCPs.has(hcpName)) {
-                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                            dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty, true));
                             dailyPmActivitiesHCPs.add(hcpName);
                         } else if (!addedToAmActivities && !addedToAmDetails && !addedToPharmacy) {
                             if (hcpTargetVisits !== null && hcpTargetVisits !== 0 && !dailyPmActivitiesHCPs.has(hcpName)) {
-                                dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty));
+                                dailyPmCells.push(createCellContent(hcpName, visitDayDate, visitTime, originalSpecialty, brick, visitPlace, comments, isAnyEvent, false, isAmDetailsSpecialty, true));
                                 dailyPmActivitiesHCPs.add(hcpName);
                             }
                         }
@@ -4296,11 +4343,17 @@
                     if (cell) {
                         cell.empty();
                         dailyDetails.forEach(detail => {
-                            cell.append(`<div class="hcp-cell ${detail.isEvent ? 'event' : ''}" onclick="toggleComment(this)">
+                            const isAmHospital = detail.isAmHospital;
+                            const cardClass = isAmHospital ? 'am-hospital-visit' : (detail.isEvent ? 'event' : '');
+                            const visitPlaceHtml = isAmHospital 
+                                ? `<span class="visit-place-highlight">${detail.visit_place}</span>` 
+                                : detail.visit_place;
+
+                            cell.append(`<div class="hcp-cell ${cardClass}" onclick="toggleComment(this)">
                                 <span class="hcp-name ${detail.isAmSpecialty ? 'am-specialty-hcp' : ''}">${detail.name}</span>
-                                <span class="hcp-detail">${detail.dayDate} ${detail.time}</span> <!-- Combined Day and Date with Time -->
+                                <span class="hcp-detail">${detail.dayDate} ${detail.time}</span>
                                 <span class="hcp-detail">${detail.specialty}</span>
-                                <span class="hcp-detail">${detail.brick} - ${detail.visit_place}</span>
+                                <span class="hcp-detail">${detail.brick} - ${visitPlaceHtml}</span>
                                 <div class="comment-box" data-comment-text="${escapeHtml(detail.comment || '')}">${detail.comment || 'No comment available'}</div>
                             </div>`);
                         });
@@ -4308,6 +4361,7 @@
                 }
             });
         }
+
 
         function findDailyReportTableCell(section, columnIndex) {
             const rows = $(`#daily-report .section-${section}`);
