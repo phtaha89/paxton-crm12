@@ -5,238 +5,184 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>User Management Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f1f5f9; /* Lighter, neutral background */
+      background-color: #f8fafc;
       color: #334155;
-      line-height: 1.6;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
     }
 
     /* Header Banner */
     .header-banner {
       background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
       color: white;
-      padding: 1rem 1.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       position: sticky;
       top: 0;
       z-index: 1000;
     }
     .header-content {
-      max-width: 1600px;
-      margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
     }
     .header-title {
-      font-size: clamp(1.5rem, 3vw, 2rem);
-      font-weight: 700;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
     }
     .stat-badge {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 0.5rem 1rem;
-      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 0.375rem 0.75rem;
+      border-radius: 1rem;
       backdrop-filter: blur(10px);
-      font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+      font-size: 0.8rem;
+      font-weight: 500;
     }
 
-    /* Main Content Layout */
+    /* Main Content Layout - Mobile First */
     .main-container {
-      display: flex;
-      flex-direction: column; /* Mobile-first: top tabs */
-      gap: 1.5rem;
-      padding: 1.5rem;
-      max-width: 1600px;
+      padding: 1rem;
+      width: 100%;
       margin: 0 auto;
     }
 
-    /* Tab Navigation */
+    /* Tab Navigation - Horizontal on mobile */
     .tab-nav {
       display: flex;
-      flex-direction: row; /* Mobile: horizontal tabs */
       gap: 0.5rem;
+      margin-bottom: 1rem;
     }
     .tab-button {
-      flex-grow: 1; /* Mobile: tabs take equal width */
-      padding: 0.6rem 0.9rem; /* Decreased padding */
-      border-radius: 0.75rem;
-      font-weight: 600;
-      font-size: 0.9rem;
+      flex: 1;
+      padding: 0.625rem 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
       text-align: center;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
       background-color: #ffffff;
-      color: #475569;
+      color: #64748b;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .tab-button:hover {
       background-color: #f8fafc;
       border-color: #cbd5e1;
     }
     .tab-button.active {
-      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: white;
       border-color: transparent;
-      box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
-      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
     }
 
     /* Tab Content */
     .tab-content {
-      flex-grow: 1;
+      width: 100%;
     }
     .tab-pane {
       display: none;
-      animation: fadeIn 0.5s ease;
+      animation: fadeIn 0.3s ease;
     }
     .tab-pane.active {
       display: block;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Desktop Layout: Left-sided tabs */
-    @media (min-width: 768px) {
-      .main-container {
-        flex-direction: row; /* Desktop: side-by-side */
-      }
-      .tab-nav {
-        flex-direction: column; /* Desktop: vertical tabs */
-        flex-shrink: 0;
-        width: 240px;
-      }
-      .tab-button {
-        flex-grow: 0; /* Let content determine height */
-        text-align: left;
-      }
-    }
-    
-    /* Mobile full-width and size adjustments */
-    @media (max-width: 767px) {
-      .main-container {
-        padding: 1rem 0.5rem; /* Reduce padding for a fuller width feel */
-      }
-      .header-title {
-        font-size: 1.4rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-        .header-title {
-            font-size: 1.25rem; /* Smaller font for very small screens */
-        }
-        .header-banner {
-            padding: 0.75rem 1rem; /* Tighter padding */
-        }
-        .main-container {
-            padding: 0.75rem 0.25rem; /* Even less padding */
-            gap: 1rem;
-        }
-        .tab-button {
-            padding: 0.5rem 0.7rem;
-            font-size: 0.8rem;
-        }
-        .card-header, .card-body {
-            padding: 1rem;
-        }
-        .user-header {
-            padding: 0.6rem 0.8rem;
-        }
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-        }
-        .user-details h4 {
-            font-size: 0.9rem;
-        }
-        .btn {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-        }
-    }
-
-
-    /* Re-using and enhancing existing styles */
+    /* Card Styles */
     .card {
       background: white;
-      border-radius: 1rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       border: 1px solid #e2e8f0;
       overflow: hidden;
+      margin-bottom: 1rem;
     }
     .card-header {
-      padding: 1rem 1.5rem;
+      padding: 1rem 1.25rem;
       background-color: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
     }
     .card-header h2 {
-      font-size: 1.25rem;
+      font-size: 1.125rem;
       font-weight: 600;
       color: #1e293b;
       margin: 0;
     }
     .card-body {
-      padding: 1.5rem;
+      padding: 1.25rem;
     }
+
+    /* Form Styles */
     .form-input {
       width: 100%;
-      padding: 0.5rem 0.7rem; /* Decreased padding */
-      border: 1px solid #cbd5e1;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid #d1d5db;
       border-radius: 0.5rem;
-      font-size: 0.9rem;
-      transition: all 0.2s ease-in-out;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      background-color: white;
     }
     .form-input:focus {
       outline: none;
       border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    .form-group { margin-bottom: 1rem; }
+    .form-group { 
+      margin-bottom: 1rem; 
+    }
     .form-group label {
       display: block;
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.375rem;
       font-weight: 500;
       color: #374151;
-      font-size: 0.875rem;
+      font-size: 0.8125rem;
     }
     .form-row {
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
     }
-    @media (min-width: 640px) {
-        .form-row { grid-template-columns: 1fr 1fr; }
-    }
 
+    /* Button Styles */
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.5rem 1rem; /* Decreased padding */
+      padding: 0.625rem 1rem;
       border-radius: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.875rem;
       font-weight: 500;
       border: none;
       cursor: pointer;
-      transition: all 0.2s ease-in-out;
+      transition: all 0.2s ease;
       text-decoration: none;
+      line-height: 1;
     }
     .btn-primary {
-      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       color: white;
     }
     .btn-primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 5px 15px rgba(29, 78, 216, 0.3);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
     }
     .btn-danger {
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -244,199 +190,309 @@
     }
     .btn-danger:hover {
       transform: translateY(-1px);
-      box-shadow: 0 5px 15px rgba(239, 68, 68, 0.25);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
     }
     .btn-secondary {
       background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
       color: white;
     }
     .btn-secondary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 5px 15px rgba(107, 114, 128, 0.25);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(107, 114, 128, 0.25);
     }
-    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+    .btn-sm { 
+      padding: 0.425rem 0.75rem; 
+      font-size: 0.8125rem; 
+    }
 
     /* User List Styles */
-    .users-cascade {
-      /* max-height and overflow removed to eliminate scrollbar */
-      padding-right: 5px;
-    }
     .user-item {
+      margin-bottom: 0.75rem;
+    }
+    .user-card {
       background: white;
       border-radius: 0.75rem;
-      margin-bottom: 0.75rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
       border: 1px solid #e2e8f0;
-    }
-    .user-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-    .user-header {
-      padding: 0.8rem 1rem; /* Decreased padding */
-      cursor: pointer;
+      padding: 0.875rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      width: 100%;
     }
-    .user-info { display: flex; align-items: center; gap: 0.75rem; }
+    .user-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .user-info { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem; 
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+    }
     .user-avatar {
-      width: 40px; height: 40px; border-radius: 50%;
-      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: 600; font-size: 1rem;
+      width: 36px; 
+      height: 36px; 
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      color: white; 
+      font-weight: 600; 
+      font-size: 0.875rem;
       flex-shrink: 0;
     }
-    .user-details h4 { margin: 0; font-size: 1rem; color: #1e293b; text-align: left; }
-    .user-details p { margin: 0; font-size: 0.8rem; text-align: left; }
+    .user-details {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+    }
+    .user-details h4 { 
+      margin: 0; 
+      font-size: 0.9375rem; 
+      color: #1e293b; 
+      font-weight: 600;
+      text-align: left;
+      white-space: normal;
+      word-break: break-word;
+    }
+    .user-details p { 
+      margin: 0; 
+      font-size: 0.8125rem;
+      text-align: left;
+      white-space: normal;
+      word-break: break-word;
+    }
     .title-medical { color: #059669; }
     .title-district { color: #dc2626; }
     .title-admin { color: #ea580c; }
     .title-default { color: #64748b; }
     .user-id {
-      background: #e2e8f0; color: #475569;
-      padding: 0.25rem 0.5rem; border-radius: 0.375rem;
-      font-size: 0.75rem; font-weight: 500;
+      background: #e2e8f0; 
+      color: #475569;
+      padding: 0.25rem 0.5rem; 
+      border-radius: 0.375rem;
+      font-size: 0.75rem; 
+      font-weight: 500;
       flex-shrink: 0;
+      margin-left: 0.5rem;
     }
-    .user-actions {
-      padding: 1rem 1.25rem;
+    .user-actions { 
+      display: flex; 
+      gap: 0.375rem; 
+      flex-shrink: 0;
+      margin-left: 0.5rem;
+    }
+
+    /* Edit form styles */
+    .edit-form {
       background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      display: none;
-    }
-    .user-actions.active {
-      display: block;
-      animation: slideDown 0.4s ease;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      margin-top: 0.75rem;
+      border: 1px solid #e2e8f0;
+      animation: slideDown 0.3s ease;
     }
     @keyframes slideDown {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .edit-form {
-      background: white; padding: 1.25rem;
-      border-radius: 0.75rem; margin-top: 1rem;
-      border: 1px solid #e2e8f0;
+    .edit-form h4 {
+      margin: 0 0 1rem 0;
+      font-size: 1rem;
+      color: #1e293b;
     }
     .password-display-group {
-        display: flex; align-items: center; gap: 8px; margin-bottom: 1rem;
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+      margin-bottom: 0.875rem;
     }
-    .password-display-group .form-input { flex-grow: 1; background-color: #f1f5f9; }
+    .password-display-group .form-input { 
+      flex: 1; 
+      background-color: #f1f5f9; 
+    }
     .password-display-group .btn-copy {
-        padding: 6px 10px; font-size: 0.75rem; background: #4b5563;
-        color: white; border-radius: 6px; cursor: pointer;
+      padding: 0.625rem 0.75rem; 
+      font-size: 0.75rem; 
+      background: #4b5563;
+      color: white; 
+      border-radius: 0.375rem; 
+      cursor: pointer;
+      border: none;
+      flex-shrink: 0;
     }
 
     /* Alert & Modal Styles */
     .alert {
-      padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem;
-      font-size: 0.9rem; position: relative;
+      padding: 0.875rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.875rem; 
     }
-    .alert-success { background-color: #dcfce7; color: #166534; border: 1px solid #a7f3d0; }
-    .alert-error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-    .loading, .no-users { text-align: center; padding: 2rem; color: #6b7280; font-size: 1rem; }
-    .no-users { background: white; border-radius: 1rem; border: 2px dashed #e2e8f0; }
+    .alert-success { 
+      background-color: #dcfce7; color: #166534; border: 1px solid #a7f3d0; 
+    }
+    .alert-error { 
+      background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; 
+    }
+    .loading, .no-users { 
+      text-align: center; padding: 2rem 1rem; color: #6b7280; font-size: 0.875rem; 
+    }
+    .no-users { 
+      background: white; border-radius: 0.75rem; border: 2px dashed #e2e8f0; 
+    }
 
     .modal {
-        display: none; position: fixed; z-index: 2000; left: 0; top: 0;
-        width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
-        justify-content: center; align-items: center;
+      display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+      width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
+      justify-content: center; align-items: center; padding: 1rem;
     }
     .modal-content {
-        background-color: #fefefe; margin: auto; padding: 0;
-        border-radius: 1rem; border: 1px solid #e2e8f0; width: 90%;
-        max-width: 420px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-        animation: animatetop 0.4s;
+      background-color: white; padding: 0; border-radius: 0.75rem; border: 1px solid #e2e8f0; 
+      width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      animation: animatetop 0.3s ease;
     }
-    @keyframes animatetop { from { top: -300px; opacity: 0 } to { top: 0; opacity: 1 } }
+    @keyframes animatetop { 
+      from { transform: translateY(-20px); opacity: 0 } 
+      to { transform: translateY(0); opacity: 1 } 
+    }
     .modal-header {
-        padding: 1rem 1.5rem; background: #1d4ed8; color: white;
-        border-top-left-radius: 1rem; border-top-right-radius: 1rem;
-        display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem; background: #3b82f6; color: white;
+      border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .modal-header h3 { margin: 0; font-size: 1.2rem; }
-    .close-button { color: white; font-size: 28px; font-weight: bold; cursor: pointer; }
-    .modal-body { padding: 1.5rem; text-align: center; }
+    .modal-header h3 { 
+      margin: 0; font-size: 1.125rem; font-weight: 600;
+    }
+    .close-button { 
+      color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; line-height: 1; padding: 0.25rem;
+    }
+    .modal-body { 
+      padding: 1.25rem; text-align: center; font-size: 0.9375rem;
+    }
     .modal-footer {
-        padding: 1rem; background-color: #f1f5f9;
-        border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem;
-        text-align: right; display: flex; gap: 0.5rem; justify-content: flex-end;
+      padding: 1rem; background-color: #f8fafc;
+      border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem;
+      display: flex; gap: 0.75rem; justify-content: flex-end;
+    }
+    
+    /* Mobile-specific layout for user card */
+    @media (max-width: 480px) {
+      .user-card {
+        flex-wrap: wrap;
+        row-gap: 0.75rem;
+      }
+      .user-info {
+        flex-basis: 100%; /* Makes user info (avatar, name, title) take the full first row */
+      }
+      .user-id {
+        margin-left: 0; /* Reset margin for the second row */
+      }
+      .user-actions {
+        margin-left: auto; /* Pushes Edit/Delete buttons to the far right on the second row */
+      }
+    }
+
+    /* PC / Desktop improvements */
+    @media (min-width: 768px) {
+      .main-container {
+        padding: 1.5rem;
+      }
+      .dashboard-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 1.5rem;
+      }
+      .tab-nav {
+        flex-direction: column;
+        margin-bottom: 0;
+      }
+      .tab-button {
+        flex: unset;
+        text-align: left;
+        padding-left: 1rem;
+      }
+      .form-row {
+        flex-direction: row;
+        align-items: flex-end;
+      }
+      .form-row .form-group {
+        flex: 1;
+      }
+      .header-title {
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
   <div class="header-banner">
     <div class="header-content">
       <h1 class="header-title">User Dashboard</h1>
       <div class="stat-badge">
-        <span id="totalUsers">0</span> Total Users
+        <span id="totalUsers">0</span> Users
       </div>
     </div>
   </div>
 
-  <!-- Main Application Content with Tabs -->
   <div id="appContent" class="main-container">
-    <!-- Tab Navigation -->
-    <nav class="tab-nav">
-      <button class="tab-button active" data-tab="addUser">Add New User</button>
-      <button class="tab-button" data-tab="currentUsers">Current Users</button>
-    </nav>
+    <div class="dashboard-layout">
+      <nav class="tab-nav">
+        <button class="tab-button active" data-tab="addUser">Add User</button>
+        <button class="tab-button" data-tab="currentUsers">Manage Users</button>
+      </nav>
 
-    <!-- Tab Content Area -->
-    <div class="tab-content">
-      <div id="message"></div>
-      
-      <!-- Add User Pane -->
-      <div id="addUser" class="tab-pane active">
-        <div class="card">
-          <div class="card-header">
-            <h2>Add a New User</h2>
-          </div>
-          <div class="card-body">
-            <form id="addUserForm">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="newUsername">Username *</label>
-                  <input type="text" id="newUsername" class="form-input" required />
+      <div class="tab-content">
+        <div id="message"></div>
+        
+        <div id="addUser" class="tab-pane active">
+          <div class="card">
+            <div class="card-header">
+              <h2>Add New User</h2>
+            </div>
+            <div class="card-body">
+              <form id="addUserForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="newUsername">Username *</label>
+                    <input type="text" id="newUsername" class="form-input" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="newTitle">Title *</label>
+                    <select id="newTitle" class="form-input" required>
+                      <option value="">Select Title</option>
+                      <option value="Medical Representative">Medical Representative</option>
+                      <option value="District Manager">District Manager</option>
+                      <option value="admin">admin</option>
+                    </select>
+                  </div>
                 </div>
                 <div class="form-group">
-                  <label for="newTitle">Title *</label>
-                  <select id="newTitle" class="form-input" required>
-                    <option value="">Select Title</option>
-                    <option value="Medical Representative">Medical Representative</option>
-                    <option value="District Manager">District Manager</option>
-                    <option value="admin">admin</option>
-                  </select>
+                  <label for="newPassword">Password *</label>
+                  <input type="password" id="newPassword" class="form-input" required />
                 </div>
-              </div>
-              <div class="form-group">
-                <label for="newPassword">Password *</label>
-                <input type="password" id="newPassword" class="form-input" required />
-              </div>
-              <button type="submit" class="btn btn-primary">Create User</button>
-            </form>
+                <button type="submit" class="btn btn-primary">Create User</button>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Current Users Pane -->
-      <div id="currentUsers" class="tab-pane">
-        <div class="card">
-          <div class="card-header">
-            <h2>Manage Current Users</h2>
-          </div>
-          <div class="card-body">
-            <div id="usersList" class="loading">Loading users...</div>
+        <div id="currentUsers" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <h2>Current Users</h2>
+            </div>
+            <div class="card-body">
+              <div id="usersList" class="loading">Loading users...</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Confirmation Modal -->
   <div id="confirmationModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -469,20 +525,14 @@
     const modalMessage = document.getElementById('modalMessage');
     const modalConfirmBtn = document.getElementById('modalConfirmBtn');
 
-    /**
-     * Tab switching logic
-     */
     function setupTabs() {
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabPanes = document.querySelectorAll('.tab-pane');
 
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
-                // Deactivate all
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 tabPanes.forEach(pane => pane.classList.remove('active'));
-
-                // Activate clicked
                 button.classList.add('active');
                 const tabId = button.getAttribute('data-tab');
                 document.getElementById(tabId).classList.add('active');
@@ -542,11 +592,9 @@
 
     async function loadUsers() {
       try {
-        // Fetch users from the database
         const { data, error } = await supabaseClient.from('users').select('*');
         if (error) throw error;
         
-        // Sort users by ID in descending order on the client side
         data.sort((a, b) => b.id - a.id);
         users = data;
 
@@ -561,15 +609,15 @@
     function displayUsers() {
       const usersList = document.getElementById('usersList');
       if (!users.length) {
-        usersList.innerHTML = '<div class="no-users">No users found.<br>Add your first user in the "Add New User" tab.</div>';
+        usersList.innerHTML = '<div class="no-users">No users found.<br>Add your first user to get started.</div>';
         return;
       }
 
       usersList.innerHTML = `
-        <div class="users-cascade">
+        <div class="users-list">
           ${users.map(user => `
             <div class="user-item">
-              <div class="user-header" onclick="toggleUserActions(${user.id})">
+              <div class="user-card">
                 <div class="user-info">
                   <div class="user-avatar">${user.username.charAt(0).toUpperCase()}</div>
                   <div class="user-details">
@@ -578,43 +626,41 @@
                   </div>
                 </div>
                 <div class="user-id">ID: ${user.id}</div>
-              </div>
-              <div class="user-actions" id="userActions${user.id}">
-                <div class="actions">
+                <div class="user-actions">
                   <button class="btn btn-sm btn-secondary" onclick="editUser(${user.id})">Edit</button>
                   <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Delete</button>
                 </div>
-                <div id="editForm${user.id}" class="edit-form" style="display: none;">
-                  <h4>Edit User Information</h4>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label>Username</label>
-                      <input type="text" id="editUsername${user.id}" class="form-input" value="${user.username}" required />
-                    </div>
-                    <div class="form-group">
-                      <label>Title</label>
-                      <select id="editTitle${user.id}" class="form-input" required>
-                        <option value="Medical Representative" ${user.title === 'Medical Representative' ? 'selected' : ''}>Medical Representative</option>
-                        <option value="District Manager" ${user.title === 'District Manager' ? 'selected' : ''}>District Manager</option>
-                        <option value="admin" ${user.title === 'admin' ? 'selected' : ''}>admin</option>
-                      </select>
-                    </div>
+              </div>
+              <div id="editForm${user.id}" class="edit-form" style="display: none;">
+                <h4>Edit User</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="editUsername${user.id}" class="form-input" value="${user.username}" required />
                   </div>
                   <div class="form-group">
-                    <label>Current Password</label>
-                    <div class="password-display-group">
-                      <input type="text" id="displayPassword${user.id}" class="form-input" value="${user.password || 'N/A'}" readonly />
-                      <button type="button" class="btn-copy" onclick="copyToClipboard(document.getElementById('displayPassword${user.id}').value)">Copy</button>
-                    </div>
+                    <label>Title</label>
+                    <select id="editTitle${user.id}" class="form-input" required>
+                      <option value="Medical Representative" ${user.title === 'Medical Representative' ? 'selected' : ''}>Medical Representative</option>
+                      <option value="District Manager" ${user.title === 'District Manager' ? 'selected' : ''}>District Manager</option>
+                      <option value="admin" ${user.title === 'admin' ? 'selected' : ''}>admin</option>
+                    </select>
                   </div>
-                  <div class="form-group">
-                    <label>New Password (optional)</label>
-                    <input type="password" id="editPassword${user.id}" class="form-input" placeholder="Leave blank to keep current" />
+                </div>
+                <div class="form-group">
+                  <label>Current Password</label>
+                  <div class="password-display-group">
+                    <input type="text" id="displayPassword${user.id}" class="form-input" value="${user.password || 'N/A'}" readonly />
+                    <button type="button" class="btn-copy" onclick="copyToClipboard(document.getElementById('displayPassword${user.id}').value)">Copy</button>
                   </div>
-                  <div class="actions">
-                    <button class="btn btn-primary" onclick="saveUser(${user.id})">Save</button>
-                    <button class="btn btn-secondary" onclick="cancelEdit(${user.id})">Cancel</button>
-                  </div>
+                </div>
+                <div class="form-group">
+                  <label>New Password (optional)</label>
+                  <input type="password" id="editPassword${user.id}" class="form-input" placeholder="Leave blank to keep current" />
+                </div>
+                <div class="user-actions">
+                  <button class="btn btn-primary" onclick="saveUser(${user.id})">Save Changes</button>
+                  <button class="btn btn-secondary" onclick="cancelEdit(${user.id})">Cancel</button>
                 </div>
               </div>
             </div>
@@ -622,25 +668,20 @@
         </div>`;
     }
 
-    function toggleUserActions(userId) {
-      const actionsDiv = document.getElementById(`userActions${userId}`);
-      const isActive = actionsDiv.classList.contains('active');
+    function editUser(userId) {
+        const editForm = document.getElementById(`editForm${userId}`);
+        const isVisible = editForm.style.display === 'block';
 
-      document.querySelectorAll('.user-actions.active').forEach(el => {
-        if (el.id !== `userActions${userId}`) {
-            el.classList.remove('active');
-            const editForm = el.querySelector('.edit-form');
-            if (editForm) editForm.style.display = 'none';
+        document.querySelectorAll('.edit-form').forEach(form => {
+            form.style.display = 'none';
+        });
+
+        if (!isVisible) {
+            editForm.style.display = 'block';
+            activeEditId = userId;
+        } else {
+            activeEditId = null;
         }
-      });
-
-      if (!isActive) {
-        actionsDiv.classList.add('active');
-      } else {
-        actionsDiv.classList.remove('active');
-        const editForm = actionsDiv.querySelector('.edit-form');
-        if (editForm) editForm.style.display = 'none';
-      }
     }
 
     document.getElementById('addUserForm').addEventListener('submit', async (e) => {
@@ -659,18 +700,11 @@
         showMessage('User added successfully!');
         e.target.reset();
         await loadUsers();
-        // Switch back to the users list tab
         document.querySelector('.tab-button[data-tab="currentUsers"]').click();
       } catch (err) {
         showMessage('Error adding user: ' + err.message, 'error');
       }
     });
-
-    function editUser(userId) {
-      document.querySelectorAll('.edit-form').forEach(form => { form.style.display = 'none'; });
-      document.getElementById(`editForm${userId}`).style.display = 'block';
-      activeEditId = userId;
-    }
 
     function cancelEdit(userId) {
       document.getElementById(`editForm${userId}`).style.display = 'none';
@@ -703,9 +737,8 @@
 
     async function deleteUser(userId) {
       const user = users.find(u => u.id === userId);
-      if (user && user.title === 'admin') {
-        showMessage('Admin users cannot be deleted from the front end.', 'error');
-        return;
+      if (user && user.title.toLowerCase() === 'admin') {
+        return showMessage('Admin users cannot be deleted.', 'error');
       }
 
       showConfirmationModal('Are you sure you want to delete this user? This action cannot be undone.', async (confirmed) => {
@@ -720,21 +753,19 @@
         }
       });
     }
-
+    
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.user-item') && !e.target.closest('.modal-content')) {
-        document.querySelectorAll('.user-actions.active').forEach(el => {
-          el.classList.remove('active');
-          const editForm = el.querySelector('.edit-form');
-          if (editForm) editForm.style.display = 'none';
+        document.querySelectorAll('.edit-form').forEach(form => {
+          form.style.display = 'none';
         });
+        activeEditId = null;
       }
     });
-
-    // Initialize the application
+    
     document.addEventListener('DOMContentLoaded', () => {
-      setupTabs();
-      loadUsers();
+        setupTabs();
+        loadUsers();
     });
   </script>
 </body>
