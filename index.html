@@ -160,6 +160,17 @@
         .back-button:hover {
             background: #a0cffc;
         }
+        
+        /* NEW: Refresh button styling */
+        .refresh-button {
+            background: #60a5fa; /* A nice blue */
+            color: var(--white);
+            padding: 7px 10px; /* Make it more circular */
+        }
+
+        .refresh-button:hover {
+            background: var(--primary-dark);
+        }
 
         .logout-button {
             background: #ef4444; /* Red color for logout */
@@ -951,6 +962,8 @@
             <div class="header-buttons">
                 <button id="logoutButton" class="header-button logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
                 <button id="backButton" class="header-button back-button hidden"><i class="fas fa-arrow-left"></i> Back</button>
+                <!-- NEW: Refresh Button -->
+                <button id="refreshButton" class="header-button refresh-button hidden"><i class="fas fa-sync-alt"></i></button>
                 <div class="notification-bell hidden" id="notificationBell">
                     <i class="fas fa-bell"></i>
                     <span class="notification-count" id="notificationCount">0</span>
@@ -1423,6 +1436,7 @@
             document.getElementById('homeView').classList.remove('hidden');
             document.querySelector('.footer').classList.add('show');
             document.getElementById('backButton').classList.add('hidden');
+            document.getElementById('refreshButton').classList.add('hidden'); // Hide refresh button on home
             if (loggedInUser) {
                 applyUserPermissions();
                 document.getElementById('logoutButton').classList.remove('hidden');
@@ -1460,6 +1474,7 @@
             document.getElementById('homeView').classList.add('hidden');
             document.querySelector('.footer').classList.remove('show');
             document.getElementById('backButton').classList.remove('hidden');
+            document.getElementById('refreshButton').classList.remove('hidden'); // Show refresh button
             document.getElementById('logoutButton').classList.add('hidden');
 
             if (currentActiveViewId && currentActiveViewId !== viewId) {
@@ -1492,6 +1507,7 @@
                 
                 iframe.src = fileName;
                 
+                // OPTIMIZED: This function sends data to the iframe.
                 const sendDataToIframe = () => {
                     if (loggedInUser && iframe.contentWindow) {
                          const message = { user: loggedInUser };
@@ -1506,15 +1522,15 @@
                         } else { 
                             message.type = 'loggedInUser';
                         }
+                        // The '*' means the message can be sent to any origin.
                         iframe.contentWindow.postMessage(message, '*');
                     }
                 };
                 
-                sendDataToIframe();
-
+                // The 'onload' event is the most reliable way to know the iframe is ready.
                 iframe.onload = () => {
                     loadingOverlay.classList.remove('show');
-                    sendDataToIframe();
+                    sendDataToIframe(); // Send data once the iframe has fully loaded.
                 };
                 iframe.onerror = () => {
                     loadingOverlay.classList.remove('show');
@@ -1663,6 +1679,22 @@
             document.getElementById('closeMenuButton').addEventListener('click', closeSideMenu);
             document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
             
+            // NEW: Refresh button event listener
+            document.getElementById('refreshButton').addEventListener('click', () => {
+                if (currentActiveViewId) {
+                    const activeView = document.getElementById(currentActiveViewId);
+                    if (activeView) {
+                        const iframe = activeView.querySelector('iframe');
+                        if (iframe && iframe.contentWindow) {
+                            const loadingOverlay = activeView.querySelector('.loading');
+                            if (loadingOverlay) loadingOverlay.classList.add('show');
+                            // The iframe's own 'onload' event will hide the loader again
+                            iframe.contentWindow.location.reload();
+                        }
+                    }
+                }
+            });
+
             const notificationBell = document.getElementById('notificationBell');
             const notificationDropdown = document.getElementById('notificationDropdown');
             notificationBell.addEventListener('click', (event) => {
