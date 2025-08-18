@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -17,133 +17,25 @@
             font-family: 'Inter', sans-serif;
         }
         body {
-            background-color: #f5f7fa;
+            background-color: #f5f7fa; /* Light background */
+            /* Enhanced background */
             background-image: linear-gradient(to top, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%);
+            padding: 12px;
             color: #333;
+            min-height: 100vh; /* Changed to 100vh for better full page display */
         }
-
-        /* Loading Overlay */
-        #loadingOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            backdrop-filter: blur(5px);
-        }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border-left-color: #4361ee;
-            animation: spin 1s ease infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        #loadingOverlay p {
-            margin-top: 1rem;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #4361ee;
-        }
-
         .container {
             width: 100%;
-            max-width: 100%;
-            background-color: transparent;
-            display: flex;
+            max-width: 1400px; /* Wider for combined layout */
+            margin: 0 auto;
+            background-color: white;
+            padding: 14px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            display: flex; /* Use flex for potential side-by-side or stacked content */
             flex-direction: column;
-            gap: 20px;
+            gap: 20px; /* Space between form and dashboard */
         }
-
-        /* PC Layout: Left Navigation */
-        @media (min-width: 1024px) {
-            body {
-                padding: 0;
-            }
-            .container {
-                flex-direction: row;
-                height: 100vh;
-            }
-            #leftNav {
-                flex-shrink: 0;
-                width: 240px;
-                height: 100vh;
-                position: sticky;
-                top: 0;
-                background-color: #ffffff;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-                padding: 1rem;
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-                overflow-y: auto;
-            }
-            .main-tab-group {
-                flex-direction: column;
-                gap: 0.5rem;
-                margin: 0;
-            }
-            .main-tab-group .tab-button {
-                justify-content: flex-start;
-                width: 100%;
-            }
-            #mainContentArea {
-                flex-grow: 1;
-                overflow-y: auto;
-                padding: 12px;
-            }
-            .main-content-wrapper {
-                 max-width: 1400px;
-                 margin: 0 auto;
-            }
-            /* Hide mobile nav header on PC */
-            #mobileNavHeader {
-                display: none;
-            }
-            #weeklyPlanSection .dashboard {
-                max-width: 100%; /* Allow weekly plan to use full width */
-            }
-        }
-
-        /* Mobile Layout: Top Navigation */
-        @media (max-width: 1023px) {
-            body {
-                padding: 12px;
-            }
-            #leftNav {
-                display: none;
-            }
-            #mobileNavHeader {
-                width: 100%;
-                max-width: 1400px;
-                margin: 0 auto;
-                background-color: white;
-                padding: 14px;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            }
-             .main-content-wrapper {
-                 width: 100%;
-                 max-width: 1400px;
-                 margin: 0 auto;
-                 background-color: white;
-                 padding: 14px;
-                 border-radius: 8px;
-                 box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            }
-        }
-
-
         .form-header {
             display: flex;
             align-items: center;
@@ -271,7 +163,7 @@
             flex: 1;
             padding: 10px 12px;
             border: none;
-            border-radius: 14px; /* Consistent rounded corners */
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
             font-size: 13px;
@@ -279,11 +171,13 @@
             color: #495057;
             transition: all 0.2s ease;
             display: flex;
+            /* Changed flex-direction to row for side-by-side count */
             flex-direction: row;
             align-items: center;
             justify-content: center;
         }
         .tab-button i {
+             /* Adjusted margin for row layout */
             margin-right: 8px;
             margin-bottom: 0;
             font-size: 14px;
@@ -391,7 +285,7 @@
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             border: 1px solid #e9ecef;
-            width: 100%;
+            width: 100%; /* FIX: Ensure container takes full width */
         }
         table {
             border-collapse: separate;
@@ -399,7 +293,6 @@
             max-height: 600px;
             border-radius: 8px;
             overflow: hidden;
-            width: 100%;
         }
         th, td {
             padding: 12px 16px;
@@ -418,6 +311,7 @@
         tbody tr:hover {
             background-color: rgba(67, 97, 238, 0.05);
         }
+        /* Fix the first column */
         th:first-child, td:first-child {
             position: sticky;
             left: 0;
@@ -437,7 +331,6 @@
             font-size: 12px;
             color: #6c757d;
             margin-top: 24px;
-            padding-bottom: 12px;
         }
         .form-row {
             display: flex;
@@ -475,6 +368,30 @@
             content: " *";
             color: #dc3545;
         }
+        .form-helper-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .badge-success {
+            background-color: #e6f7ed;
+            color: #2e8540;
+        }
+        .badge-warning {
+            background-color: #fff3e0;
+            color: #e67700;
+        }
+        .badge-danger {
+            background-color: #fee2e2;
+            color: #dc3545;
+        }
         #brickHcp, #specialtyHcp {
             background-color: #f3e5f5;
             color: #4a148c;
@@ -483,11 +400,30 @@
             border-radius: 18px;
         }
         @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
             .form-row {
                 flex-direction: column;
                 gap: 16px;
             }
+            .action-button {
+                padding: 10px;
+                font-size: 13px;
+            }
+            .tab-button {
+                padding: 8px;
+                font-size: 12px;
+            }
+            .tab-button i {
+                margin-right: 4px;
+            }
+            th, td {
+                padding: 10px 12px;
+                font-size: 12px;
+            }
         }
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -503,18 +439,85 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #a8bbcf;
         }
-
+        /* ENHANCEMENT: Glassmorphism effect for login */
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 5% auto; /* Center vertically */
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            padding: 20px;
+            border-radius: 12px; /* More rounded */
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        /* FIX: Center logo above title */
+        .login-header {
+            display: flex;
+            flex-direction: column; /* Stack logo and title vertically */
+            align-items: center; /* Center horizontally */
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .login-header .form-logo {
+            margin-right: 0; /* Remove side margin */
+            margin-bottom: 12px; /* Add space between logo and title */
+        }
+        .login-title {
+            color: #212b36;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .login-form-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .login-button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background-color: #4361ee;
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        }
+        .login-button:hover {
+            background-color: #3a56d4;
+            transform: translateY(-1px);
+        }
+        .logout-button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            background-color: #dc3545;
+            color: white;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+            margin-left: auto;
+            display: block;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
         .med-rep-card {
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 12px;
-            margin-bottom: 8px;
+            margin-bottom: 8px; /* Reduced margin */
             border: 1px solid #e9ecef;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
         }
         .med-rep-info {
             display: flex;
@@ -525,7 +528,7 @@
             color: #3a3a3a;
             font-size: 14px;
         }
-        .med-rep-area, .med-rep-dm, .med-rep-gov {
+        .med-rep-area, .med-rep-dm, .med-rep-gov { /* Added new classes */
             font-size: 12px;
             color: #6c757d;
         }
@@ -533,14 +536,15 @@
         /* Dashboard specific styles */
         .dashboard-container {
             width: 100%;
-            padding: 0.5rem;
-            margin: 0;
+            padding: 0.5rem; /* Reduced padding for compact layout */
+            margin: 0; /* Remove auto margin as it's inside another container */
         }
+
         .dashboard-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 1rem;
+            margin-bottom: 1rem; /* Adjusted margin */
         }
         .dashboard-header h1 {
             font-size: 18px;
@@ -552,6 +556,7 @@
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+
         .select-wrapper {
             position: relative;
         }
@@ -565,32 +570,41 @@
             color: #6b7280;
             pointer-events: none;
         }
+
+        /* Adjusted select, input, button styles to blend with form's more rounded aesthetic */
         .dashboard-container select, .dashboard-container input {
             padding: 0.45rem 1rem;
-            border: 1px solid #dce0e5;
-            border-radius: 18px;
+            border: 1px solid #dce0e5; /* Consistent border */
+            border-radius: 18px; /* More rounded */
             font-size: 12px;
             background-color: white;
             color: #374151;
             transition: all 0.2s;
         }
+
         .dashboard-container select:focus, .dashboard-container input:focus {
             outline: none;
             border-color: #4361ee;
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
+
+        .dashboard-container select:disabled {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
+
         .btn {
-            padding: 10px;
-            border-radius: 18px;
-            font-weight: 600;
-            font-size: 12px;
+            padding: 10px; /* Consistent with form buttons */
+            border-radius: 18px; /* Consistent with form buttons */
+            font-weight: 600; /* Consistent with form buttons */
+            font-size: 12px; /* Consistent with form buttons */
             transition: all 0.2s;
             width: 100%;
             margin-bottom: 0.5rem;
-            display: flex;
+            display: flex; /* For icons if added */
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 8px; /* Space between icon and text */
         }
         .btn-primary {
             background-color: #4361ee;
@@ -610,6 +624,8 @@
         .btn-secondary:hover {
             background-color: #f8f9fa;
         }
+
+        /* Custom multi-select dropdown - re-styling for consistency */
         .custom-select {
             position: relative;
             width: 100%;
@@ -618,12 +634,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 12px;
+            padding: 10px 12px; /* Consistent with form inputs */
             border: 1px solid #dce0e5;
-            border-radius: 18px;
+            border-radius: 18px; /* Consistent with form inputs */
             background-color: white;
             color: #374151;
-            font-size: 12px;
+            font-size: 12px; /* Consistent with form inputs */
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -654,15 +670,69 @@
             padding: 0.5rem 1rem;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 12px;
+            font-size: 12px; /* Consistent with form inputs */
         }
         .custom-select-option:hover {
             background-color: #f3f4f6;
         }
         .custom-select-option.selected {
-            background-color: #4361ee;
+            background-color: #4361ee; /* Use primary color */
             color: white;
         }
+        .custom-select-option.highlighted {
+            background-color: #dbeafe;
+        }
+
+        /* Search box */
+        .dashboard-container .search-box {
+            padding: 10px 12px; /* Consistent with form inputs */
+            border: 1px solid #dce0e5;
+            border-radius: 18px; /* Consistent with form inputs */
+            font-size: 12px; /* Consistent with form inputs */
+        }
+        .dashboard-container .search-box:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        /* Table Styles - Adjusted for visual consistency */
+        .dashboard-container .table-container {
+            border-radius: 8px; /* Consistent */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Consistent */
+            border: 1px solid #e9ecef; /* Consistent */
+        }
+        .dashboard-container table {
+            font-size: 13px; /* Consistent */
+        }
+        .dashboard-container th, .dashboard-container td {
+            padding: 12px 16px; /* Consistent */
+            font-size: 13px; /* Consistent */
+            border-bottom: 1px solid #e9ecef; /* Consistent */
+        }
+        .dashboard-container th {
+            background-color: #f8f9fa; /* Consistent */
+            color: #495057; /* Consistent */
+            font-weight: 600; /* Consistent */
+        }
+        .dashboard-container tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05); /* Consistent */
+        }
+        #hcpTableDashboard th:first-child,
+        #hcpTableDashboard td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: white; /* Match the background color of your table */
+            z-index: 100;
+        }
+
+        #hcpTableDashboard {
+            overflow-x: auto;
+            border-collapse: separate; /* This can help with sticky positioning */
+            border-spacing: 0; /* Remove any spacing between cells */
+        }
+
+        /* Updated sticky column styles */
         .sticky-col, td.sticky {
             position: sticky;
             left: 0;
@@ -671,15 +741,30 @@
             border-right: 2px solid #e5e7eb;
             background-color: #fff;
         }
+
         th.sticky-col {
             z-index: 30;
             background-color: #f8f9fa;
         }
-        .light-red { background-color: #fee2e2; }
-        .light-yellow { background-color: #fef3c7; }
-        .light-green { background-color: #dcfce7; }
-        .highlight { background-color: #dbeafe !important; }
-        .first-visit-of-day { background-color: #d4edda !important; }
+
+        .light-red {
+            background-color: #fee2e2;
+        }
+        .light-yellow {
+            background-color: #fef3c7;
+        }
+        .light-green {
+            background-color: #dcfce7;
+        }
+        .highlight {
+            background-color: #dbeafe !important;
+        }
+
+        /* New style for first visit of the day */
+        .first-visit-of-day {
+            background-color: #d4edda !important; /* Light green */
+        }
+
         .status-count {
             display: inline-flex;
             align-items: center;
@@ -691,6 +776,7 @@
             color: #1e40af;
             margin-bottom: 1rem;
         }
+
         .loading-spinner {
             border: 3px solid #f3f4f6;
             border-radius: 50%;
@@ -700,6 +786,12 @@
             animation: spin 1s linear infinite;
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Combined layout for desktop */
         @media (min-width: 992px) {
             .main-content-wrapper {
                 display: flex;
@@ -708,14 +800,30 @@
             }
             #formSection, #dashboardSection, #requestSection, #weeklyPlanSection {
                 flex: 1;
-                min-width: 0;
+                min-width: 0; /* Important for flex items to prevent overflow */
             }
         }
+
+        /* Mobile-specific styles for combined layout */
         @media (max-width: 991px) {
+            .container {
+                flex-direction: column;
+            }
             .dashboard-header {
                 flex-direction: column;
                 gap: 1rem;
                 align-items: flex-start !important;
+            }
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            .filters-section {
+                gap: 1rem !important;
+            }
+             th, td {
+                padding: 0.375rem;
+                font-size: 0.75rem;
             }
         }
         .visit-stats-card {
@@ -742,77 +850,97 @@
             font-weight: 600;
             color: #4361ee;
         }
+        .visit-stats-red {
+            color: #dc3545;
+            font-weight: 600;
+        }
         .unvisited-count-square {
-            display: inline-block;
+            display: inline-block; /* Changed from absolute to inline-block */
             background-color: #ff0000;
             color: #ffffff;
-            padding: 1px 5px;
-            margin-left: 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 500;
+            padding: 1px 5px; /* Increased padding slightly for better appearance */
+            margin-left: 8px; /* Adjusted margin to move it away from text */
+            border-radius: 4px; /* Slightly more rounded corners */
+            font-size: 11px; /* Adjusted font size */
+            font-weight: 500; /* Made slightly bolder */
             line-height: 1;
             vertical-align: middle;
         }
 
-        /* Request Form Specific Styles */
+        /* Request Form Specific Styles (from new requests form.txt) */
+        /* Overrides for consistency with main CRM app */
         #requestSection h1 {
-            color: #212b36;
+            color: #212b36; /* Match form-title */
             text-align: center;
-            margin-bottom: 14px;
-            font-size: 18px;
-            font-weight: 600;
+            margin-bottom: 14px; /* Match form-header margin */
+            font-size: 18px; /* Match form-title font size */
+            font-weight: 600; /* Match form-title font weight */
             position: relative;
+        }
+        #requestSection h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background-color: #4361ee; /* Match primary color */
         }
         #requestSection label {
             display: block;
             margin-top: 10px;
-            font-weight: 500;
-            font-size: 12px;
-            color: #495057;
+            font-weight: 500; /* Match main form */
+            font-size: 12px; /* Match main form */
+            color: #495057; /* Match main form */
+        }
+        #requestSection .required {
+            font-size: small;
+            color: #dc3545; /* Match main form required field color */
         }
         #requestSection .required::after {
             content: " *";
-            color: #dc3545;
+            color: #dc3545; /* Match main form required field color */
         }
         #requestSection select,
         #requestSection input[type="text"],
         #requestSection textarea,
         #requestSection input[type="date"] {
             width: 100%;
-            padding: 10px 12px;
+            padding: 10px 12px; /* Match main form */
             margin-top: 6px;
             box-sizing: border-box;
-            border-radius: 18px;
-            border: 1px solid #dce0e5;
+            border-radius: 18px; /* Match main form */
+            border: 1px solid #dce0e5; /* Match main form */
             margin-bottom: 5px;
-            font-size: 12px;
+            transition: border-color 0.3s ease;
+            font-size: 12px; /* Match main form */
         }
         #requestSection select:focus, #requestSection input:focus, #requestSection textarea:focus {
             outline: none;
-            border-color: #4361ee;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            border-color: #4361ee; /* Match main form */
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1); /* Match main form */
         }
         #requestSection .button-container {
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
-            gap: 10px;
+            gap: 10px; /* Match action-button-group gap */
         }
         #requestSection .button-container button {
             flex: 1;
-            margin: 0;
+            margin: 0; /* Remove individual margins */
             color: white;
             border: none;
             cursor: pointer;
-            border-radius: 18px;
+            border-radius: 18px; /* Match main form buttons */
             height: 35px;
-            font-weight: 600;
-            font-size: 12px;
+            font-weight: 600; /* Match main form buttons */
+            font-size: 12px; /* Match main form buttons */
             transition: all 0.2s ease;
         }
         #requestSection .submit-button {
-            background-color: #4361ee;
+            background-color: #4361ee; /* Match main form submit-btn */
             box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
         }
         #requestSection .submit-button:hover {
@@ -824,10 +952,23 @@
             color: red !important;
             border: 1px solid #dce0e5;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #requestSection .reset-button:hover {
+            background-color: grey !important;
+            color: lightgrey !important;
         }
         #requestSection .retrieve-button {
-            background-color: #2e8540;
+            background-color: #2e8540; /* Match main form retrieve-btn */
             box-shadow: 0 4px 12px rgba(46, 133, 64, 0.2);
+        }
+        #requestSection .retrieve-button:hover {
+            background-color: #267438;
+            transform: translateY(-1px);
+        }
+        #requestSection .hidden {
+            display: none;
         }
         .note-box {
             border-radius: 10px;
@@ -837,117 +978,240 @@
             margin-top: 10px;
             font-size: 12px;
         }
-        .note-box-done { background-color: #e8f5e9; border: 1px solid #a5d6a7; }
-        .note-box-canceled { background-color: #ffebee; border: 1px solid #ef9a9a; }
-        .note-header { font-weight: bold; font-size: 12px; color: #4361ee; }
+        .note-box-done {
+            background-color: #e8f5e9; /* Light green for done */
+            border: 1px solid #a5d6a7;
+        }
+        .note-box-taha {
+            background-color: #d0f0c0;
+        }
+        .note-box-canceled {
+            background-color: #ffebee; /* Light red for canceled */
+            border: 1px solid #ef9a9a;
+        }
+        .note-header {
+            font-weight: bold;
+            font-size: 12px;
+            color: #4361ee; /* Match primary color */
+        }
         #requestSection h2 {
-            font-size: 14px;
+            color: #3a3a3a; /* Match main form h2 */
+            font-weight: 600; /* Match main form h2 */
+            font-size: 14px; /* Match main form h2 */
             margin-top: 15px;
             padding: 6px;
             border-radius: 9px;
+            display: block;
             background-color: #ffffff;
-            border: 1px solid #e9ecef;
+            border: 1px solid #e9ecef; /* Match section-card border */
             width: fit-content;
             margin: 15px auto 0;
+            cursor: pointer;
+        }
+        #requestSection .designer-info {
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d; /* Match main form designer-info */
+            margin-top: 10px;
+        }
+        #requestSection h3 {
+            text-align: center;
+            color: #3a3a3a; /* Match main form h2 */
+            margin-bottom: 10px;
+            font-size: 14px; /* Match main form h2 */
+            font-weight: 600;
+        }
+        #requestSection .status-dropdown {
+            width: auto;
+            display: inline-block;
+            font-size: 11px;
         }
         #requestSection .error {
-            color: #dc3545;
+            color: #dc3545; /* Match main form error color */
             font-size: 12px;
             margin-top: -5px;
             margin-bottom: 10px;
             display: none;
         }
+        /* New Request Form specific styles from new requests form.txt */
         #requestSection .tab-container {
             display: flex;
             justify-content: center;
             margin-bottom: 1rem;
-            background: #f7fafc;
-            border-bottom: 1px solid #e2e8f0;
-            border-radius: 8px 8px 0 0;
+            background: #f7fafc; /* Use CRM's background-color */
+            border-bottom: 1px solid #e2e8f0; /* Use CRM's border-color */
+            border-radius: 8px 8px 0 0; /* Rounded top corners */
+        }
+        #requestSection .tab-button {
+            background-color: transparent;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #718096; /* Use CRM's text-secondary */
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
         }
         #requestSection .tab-button.active {
-            font-weight: bold;
+            color: #1a365d; /* Use CRM's primary-color */
+            border-bottom: 2px solid #1a365d; /* Use CRM's primary-color */
+            background-color: #ffffff; /* Use CRM's surface-color */
         }
+        /* Custom styles for request form tabs */
         #requestSection #personalTabBtn.active {
-            background-color: #e0f2f7;
-            color: #007bff;
+            background-color: #e0f2f7; /* Light blue */
+            color: #007bff; /* Darker blue */
+            font-weight: bold;
             border-bottom: 2px solid #007bff;
         }
         #requestSection #customerTabBtn.active {
-            background-color: #fff3e0;
-            color: #e67700;
+            background-color: #fff3e0; /* Light orange */
+            color: #e67700; /* Darker orange */
+            font-weight: bold;
             border-bottom: 2px solid #e67700;
         }
+
         #requestSection .requests-display-grid {
             display: grid;
             gap: 1rem;
         }
+        /* Adjustments for note-box colors to match CRM alerts */
+        #requestSection .note-box {
+            background-color: #f8fafc; /* Lighter background */
+            border: 1px solid #e9ecef; /* Lighter border */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04); /* Subtle shadow */
+        }
+        #requestSection .note-box::before {
+            background: #4361ee; /* CRM primary color */
+        }
+        #requestSection .note-box-done {
+            background-color: #e8f5e9; /* Light green for success */
+            border: 1px solid #a5d6a7;
+            color: #2e7d32; /* Dark green text */
+        }
+        #requestSection .note-box-done::before {
+            background: #2e7d32; /* Dark green for border */
+        }
+        #requestSection .note-box-canceled {
+            background-color: #ffebee; /* Light red for error/canceled */
+            border: 1px solid #ef9a9a;
+            color: #c62828; /* Dark red text */
+        }
+        #requestSection .note-box-canceled::before {
+            background: #c62828; /* Dark red for border */
+        }
+        #requestSection .note-box-done .note-header,
+        #requestSection .note-box-canceled .note-header {
+            color: inherit; /* Inherit color from parent note-box */
+        }
+        #requestSection .note-box-done div strong,
+        #requestSection .note-box-canceled div strong {
+            color: inherit; /* Inherit color from parent note-box */
+        }
+        /* Specific override for the new form's header h1 after pseudo-element to match CRM */
+        #requestSection .header h1::after {
+            background-color: #4361ee; /* Use CRM's primary color */
+        }
 
         /* --- Weekly Plan Styles --- */
         #weeklyPlanSection {
-            --primary: #6366f1;
-            --secondary: #4b5563;
-            --success: #10b981;
-            --danger: #ef4444;
-            --background: #f1f5f9;
-            --card: #ffffff;
-            --border: #cbd5e1;
+            --primary: #6366f1;          /* Vibrant Indigo */
+            --primary-light: #a5b4fc;    /* Soft Indigo */
+            --secondary: #4b5563;        /* Deep Gray */
+            --success: #10b981;          /* Emerald Green */
+            --warning: #f59e0b;          /* Amber */
+            --danger: #ef4444;           /* Red */
+            --background: #f1f5f9;       /* Light Slate Background */
+            --card: #ffffff;             /* Pure White Card */
+            --text: #1e293b;             /* Dark Slate Text */
+            --border: #cbd5e1;           /* Soft Slate Border */
+            --speciality-bg: #d1fae5;    /* Light Mint Green */
+            --v-t-color: #dc2626;        /* Intense Red */
+            --accent-purple: #8b5cf6;    /* Vibrant Purple */
+            --accent-blue: #3b82f6;      /* Bright Blue */
         }
+
         #weeklyPlanSection .dashboard {
+            max-width: 101%;
+            margin: 0 auto;
             padding: 0.3rem;
         }
+
         #weeklyPlanSection .header {
             background: var(--card);
             border-radius: 0.75rem;
             padding: 0.25rem;
             margin-bottom: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
+
         #weeklyPlanSection .header h1 {
             color: var(--primary);
             font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 1rem;
         }
+
         #weeklyPlanSection .filters-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 0.5rem;
             margin-bottom: 0.5rem;
         }
+
         #weeklyPlanSection .filter-group {
             display: flex;
             flex-direction: column;
             gap: 0.15rem;
         }
+
         #weeklyPlanSection label {
             font-weight: 500;
             color: var(--secondary);
             font-size: 0.775rem;
         }
+
         #weeklyPlanSection select, #weeklyPlanSection input[type="date"], #weeklyPlanSection input[type="text"] {
             padding: 0.5rem;
-            border-radius: 18px;
-            border: 1px solid #dce0e5;
+            border-radius: 18px; /* Match main app style */
+            border: 1px solid #dce0e5; /* Match main app style */
             background: var(--card);
             font-size: 0.775rem;
+            transition: all 0.2s;
             width: 100%;
         }
+
         #weeklyPlanSection select:focus, #weeklyPlanSection input[type="date"]:focus, #weeklyPlanSection input[type="text"]:focus {
             outline: none;
-            border-color: #4361ee;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+            border-color: #4361ee; /* Match main app style */
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1); /* Match main app style */
         }
+
         #weeklyPlanSection .button-group {
             display: flex;
             gap: 0.5rem;
             margin-top: 0.5rem;
         }
+
+        #weeklyPlanSection button {
+            padding: 0.5rem 1rem;
+            border-radius: 18px; /* Match main app style */
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.775rem;
+        }
+        
+        /* Removed conflicting button styles, will use global .action-button, .btn etc. */
+
         #weeklyPlanSection .content-grid {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
+
         #weeklyPlanSection .card {
             background: var(--card);
             border-radius: 0.5rem;
@@ -956,6 +1220,7 @@
             overflow: hidden;
             position: relative;
         }
+
         #weeklyPlanSection .card-header {
             display: flex;
             justify-content: space-between;
@@ -964,23 +1229,28 @@
             padding-bottom: 0.5rem;
             border-bottom: 1px solid var(--border);
         }
+
         #weeklyPlanSection .card-title {
             font-size: 1rem;
             font-weight: 600;
             color: var(--primary);
         }
+
         #weeklyPlanSection .table-container {
             overflow-x: auto;
             position: relative;
             border-radius: 0.5rem;
             border: 1px solid var(--border);
         }
+
         #weeklyPlanSection table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-size: 0.75rem;
+            font-size: 0.75rem; /* Reduced table font size */
         }
+
+        /* Sticky headers */
         #weeklyPlanSection th {
             position: sticky;
             top: 0;
@@ -990,12 +1260,20 @@
             z-index: 5;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
         #weeklyPlanSection th, #weeklyPlanSection td {
             padding: 0.5rem;
             text-align: center;
             border: 1px solid var(--border);
             white-space: nowrap;
         }
+
+        #weeklyPlanSection th {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+        }
+
         #weeklyPlanSection .hcp-box {
             border: 1px solid var(--border);
             border-radius: 0.375rem;
@@ -1005,8 +1283,9 @@
             background: var(--background);
             position: relative;
         }
+
         #weeklyPlanSection .Speciality-box {
-            background: #d1fae5;
+            background: var(--speciality-bg); /* Light green color */
             border: 1px solid var(--border);
             width: 100px;
             border-radius: 0.3rem;
@@ -1014,7 +1293,12 @@
             margin-bottom: 0.2rem;
             position: relative;
         }
-        #weeklyPlanSection .v-t { color: #dc2626; font-weight: bold; }
+
+        #weeklyPlanSection .v-t {
+            color: var(--v-t-color);
+            font-weight: bold;
+        }
+
         #weeklyPlanSection .stats-badge {
             display: inline-flex;
             align-items: center;
@@ -1025,9 +1309,28 @@
             font-weight: 500;
             font-size: 0.75rem;
         }
-        #weeklyPlanSection .remaining-visit { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
-        #weeklyPlanSection .not-remaining { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-        #weeklyPlanSection .rep-info { display: flex; gap: 0.7rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
+
+        #weeklyPlanSection .highlight {
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        #weeklyPlanSection .remaining-visit {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        #weeklyPlanSection .not-remaining {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        #weeklyPlanSection .rep-info {
+            display: flex;
+            gap: 0.7rem;
+            margin-bottom: 0.4rem;
+            flex-wrap: wrap;
+        }
+
         #weeklyPlanSection .rep-badge {
             padding: 0.25rem 0.3rem;
             background: rgba(79, 70, 229, 0.1);
@@ -1036,6 +1339,61 @@
             font-weight: 500;
             font-size: 0.65rem;
         }
+
+        @media (max-width: 768px) {
+            #weeklyPlanSection .dashboard {
+                max-width: 100%;
+                padding: 0.5rem;
+            }
+
+            #weeklyPlanSection .header {
+                padding: 0.75rem;
+            }
+
+            #weeklyPlanSection .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #weeklyPlanSection .button-group {
+                flex-direction: row;
+                width: 100%;
+            }
+
+            #weeklyPlanSection button {
+                flex: 1;
+            }
+
+            #weeklyPlanSection th, #weeklyPlanSection td {
+                padding: 0.25rem;
+                font-size: 0.7rem;
+            }
+
+            #weeklyPlanSection .card {
+                padding: 0.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            #weeklyPlanSection .table-container {
+                max-height: 300px;
+                overflow-y: auto;
+            }
+        }
+
+        #weeklyPlanSection .table-container::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+
+        #weeklyPlanSection .table-container::-webkit-scrollbar-track {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        #weeklyPlanSection .table-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
         #weeklyPlanSection .remove-button {
             color: var(--danger);
             cursor: pointer;
@@ -1044,358 +1402,803 @@
             top: 0;
             left: 0;
         }
-        #weeklyPlanSection .date-boxes { display: flex; gap: 0.7rem; }
+        #weeklyPlanSection .remove-button.hidden {
+            display: none;
+        }
+
+        #weeklyPlanSection .bold {
+            font-weight: bold;
+        }
+
+        #weeklyPlanSection .date-boxes {
+            display: flex;
+            gap: 0.7rem;
+        }
+
         #weeklyPlanSection .rep-info-container {
             display: flex;
             justify-content: space-between;
             margin-bottom: 1rem;
             font-size: 0.875rem;
-            color: purple;
+            color: purple; /* Change the text color to purple */
         }
+
+        #weeklyPlanSection .editable-brick {
+            background: #f0f0f0; /* Light gray to indicate editability */
+            border: 1px solid var(--border);
+        }
+
+        #weeklyPlanSection .priority-hcp {
+            background-color: #e9d8fd; /* Light purple background */
+            font-weight: bold;
+        }
+
         #weeklyPlanSection .message {
             padding: 0.5rem;
             border-radius: 0.5rem;
             margin-top: 0.7rem;
             display: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+            font-family: 'Arial', sans-serif; /* Refine typography */
+            transition: all 0.3s ease; /* Smooth transitions */
+            background-color: white; /* Solid background color */
         }
-        #weeklyPlanSection .message.success { background-color: var(--success); color: white; }
-        #weeklyPlanSection .message.error { background-color: var(--danger); color: white; }
+
+        #weeklyPlanSection .message.success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        #weeklyPlanSection .message.error {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        /* Floating HCPS Column */
         #weeklyPlanSection #weeklyPlanHcpTable th:first-child, #weeklyPlanSection #weeklyPlanHcpTable td:first-child {
             position: sticky;
             left: 0;
-            background: var(--card);
-            color: #1e293b;
-            z-index: 4;
+            background: var(--card); /* Match the background color of other cells */
+            color: var(--text);
+            z-index: 4; /* Ensure it stays below the header */
         }
+
         #weeklyPlanSection #weeklyPlanHcpTable th:first-child {
             background: var(--primary);
             color: white;
-            z-index: 6;
+            z-index: 6; /* Ensure it stays above the other sticky elements */
         }
+
+        #weeklyPlanSection .table-container .card-title {
+            font-size: 0.75rem;
+        }
+
         #weeklyPlanSection #weeklyPlanAmActivitiesTable td, #weeklyPlanSection #weeklyPlanPmActivitiesTable td {
             word-break: break-word;
             white-space: normal;
             padding: 0.5rem;
         }
         #weeklyPlanSection .event-box {
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
+            background: #fef3c7; /* Light amber background */
+            border: 1px solid #f59e0b; /* Amber border */
             border-radius: 0.3rem;
             padding: 0.3rem;
             margin: 0.2rem 0;
             position: relative;
             width: 100px;
         }
+
+        #weeklyPlanSection .filter-group.event-selector,
+        #weeklyPlanSection .filter-group.event-time-selector {
+            margin-bottom: 1rem;
+        }
+        /* Specific style for weekly plan reset button */
+        #weeklyPlanSection #weeklyPlanResetButton {
+            background-color: #e0e0e0; /* Light gray */
+            color: #424242; /* Darker gray text */
+            border: 1px solid #bdbdbd; /* Gray border */
+        }
+        #weeklyPlanSection #weeklyPlanResetButton:hover {
+            background-color: #c0c0c0; /* Slightly darker gray on hover */
+            color: #212121; /* Even darker gray on hover */
+        }
+
     </style>
 </head>
 <body>
-    <div id="loadingOverlay">
-        <div class="spinner"></div>
-        <p>Loading CRM...</p>
-    </div>
+    <!-- Removed loginPage div -->
 
     <div id="mainAppContainer" class="container">
-        <!-- Left Navigation (PC) -->
-        <nav id="leftNav">
-             <div class="med-rep-card">
-                <div class="med-rep-info">
-                    <div class="med-rep-name" id="medRepName">Medical Rep Name</div>
-                    <div class="med-rep-area" id="medRepArea">Area</div>
-                    <div class="med-rep-dm" id="medRepDM">District Manager: N/A</div>
-                    <div class="med-rep-gov" id="medRepGov">Governorate: N/A</div>
-                </div>
+        <div class="med-rep-card">
+            <div class="med-rep-info">
+                <div class="med-rep-name" id="medRepName">Medical Rep Name</div>
+                <div class="med-rep-area" id="medRepArea">Area</div>
+                <div class="med-rep-dm" id="medRepDM">District Manager: N/A</div>
+                <div class="med-rep-gov" id="medRepGov">Governorate: N/A</div>
             </div>
+            <!-- New Medical Rep Dropdown -->
             <div class="relative">
-                <select id="medicalRepSelector" class="w-full">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                    <i class="fas fa-user-tie text-gray-400"></i>
+                </span>
+                <select id="medicalRepSelector" class="pl-10">
                     <option value="">Select Medical Rep</option>
                 </select>
             </div>
-            <div class="main-tab-group">
-                <button id="crmMainTabBtn" class="tab-button" disabled>
-                    <i class="fas fa-edit"></i> CRM
-                </button>
-                <button id="dashboardMainTabBtn" class="tab-button" disabled>
-                    <i class="fas fa-chart-bar"></i> Customers Lists
-                </button>
-                <button id="requestMainTabBtn" class="tab-button" disabled>
-                    <i class="fas fa-file-alt"></i> Requests
-                </button>
-                <button id="weeklyPlanMainTabBtn" class="tab-button" disabled>
-                    <i class="fas fa-calendar-week"></i> Weekly Plan
-                </button>
-            </div>
-            <div class="designed-by mt-auto">Designed By: DrTahaDesigns</div>
-        </nav>
-
-        <!-- Main Content Area -->
-        <div id="mainContentArea">
-            <!-- Mobile Navigation Header -->
-            <div id="mobileNavHeader">
-                 <div class="med-rep-card">
-                    <div class="med-rep-info">
-                        <div class="med-rep-name" id="medRepNameMobile">Medical Rep Name</div>
-                        <div class="med-rep-area" id="medRepAreaMobile">Area</div>
-                        <div class="med-rep-dm" id="medRepDMMobile">District Manager: N/A</div>
-                        <div class="med-rep-gov" id="medRepGovMobile">Governorate: N/A</div>
-                    </div>
-                </div>
-                <div class="relative">
-                    <select id="medicalRepSelectorMobile" class="w-full">
-                        <option value="">Select Medical Rep</option>
-                    </select>
-                </div>
-                <div class="main-tab-group mt-2">
-                    <button id="crmMainTabBtnMobile" class="tab-button" disabled>
-                        <i class="fas fa-edit"></i> CRM
-                    </button>
-                    <button id="dashboardMainTabBtnMobile" class="tab-button" disabled>
-                        <i class="fas fa-chart-bar"></i> Customers
-                    </button>
-                    <button id="requestMainTabBtnMobile" class="tab-button" disabled>
-                        <i class="fas fa-file-alt"></i> Requests
-                    </button>
-                    <button id="weeklyPlanMainTabBtnMobile" class="tab-button" disabled>
-                        <i class="fas fa-calendar-week"></i> Weekly Plan
-                    </button>
-                </div>
-            </div>
-
-            <div class="main-content-wrapper">
-                <!-- Form Section -->
-                <div id="formSection" class="hidden">
-                    <div class="form-header">
-                        <div class="form-logo"><i class="fas fa-handshake"></i></div>
-                        <h1 class="form-title">Visits Submission Form</h1>
-                    </div>
-                    <div id="alertContainer"></div>
-                    <div class="tab-group">
-                        <button id="hcpBtn" class="tab-button" disabled><i class="fas fa-user-md"></i> HCPs</button>
-                        <button id="amBtn" class="tab-button" disabled><i class="fas fa-clipboard-check"></i> AM Details</button>
-                        <button id="pharmacyBtn" class="tab-button" disabled><i class="fas fa-pills"></i> Pharmacy</button>
-                        <button id="eventBtn" class="tab-button" disabled><i class="fas fa-calendar-alt"></i> Event</button>
-                    </div>
-                    <div id="hcpForm" class="hidden">
-                        <h2><i class="fas fa-user-md"></i> HCP Submission Form <span id="hcpFormUnvisitedCount" class="unvisited-count-square hidden"></span></h2>
-                        <div class="form-group">
-                            <label for="hcp" class="required-field">Healthcare Professional</label>
-                            <select id="hcp" required><option value="">Select Healthcare Professional</option></select>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group"><label for="brickHcp">Brick</label><input type="text" id="brickHcp" class="readonly-input" readonly /></div>
-                            <div class="form-group"><label for="specialtyHcp">Specialty</label><input type="text" id="specialtyHcp" class="readonly-input" readonly /></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="visitLocationHcp" class="required-field">Visit Location</label>
-                            <select id="visitLocationHcp" required>
-                                <option value="">Select Visit Location</option>
-                                <option value="Clinic">Clinic</option>
-                                <option value="AM Hospital">AM Hospital</option>
-                            </select>
-                        </div>
-                        <div class="form-group"><label for="visitTimeHcp">Visit Time</label><input type="datetime-local" id="visitTimeHcp" required readonly /></div>
-                        <div class="form-group">
-                            <label for="commentsHcp" class="required-field">Comments (min 10 characters)</label>
-                            <textarea id="commentsHcp" placeholder="Enter detailed visit notes here..." required></textarea>
-                        </div>
-                        <div id="remainingVisitsSection" class="visit-stats-card hidden">
-                            <div class="visit-stats-item"><div class="visit-stats-label">Remaining Visits:</div><div class="visit-stats-value"><span id="remainingVisits">0</span></div></div>
-                            <div id="lastVisitDate" class="visit-stats-item"><div class="visit-stats-label">Last Visit:</div><div class="visit-stats-value"><span id="lastVisitDateValue">N/A</span></div></div>
-                        </div>
-                        <div id="savedCommentSection" class="info-section hidden">
-                            <div class="saved-comment-title">Saved Comment:</div>
-                            <div id="savedComment" class="saved-comment-content">No previous comments available</div>
-                        </div>
-                    </div>
-                    <div id="pharmacyForm" class="hidden">
-                        <h2><i class="fas fa-pills"></i> Pharmacy Submission</h2>
-                        <div class="form-group"><label for="pharmacyName" class="required-field">Pharmacy Name</label><input type="text" id="pharmacyName" placeholder="Enter pharmacy name" required /></div>
-                        <div class="form-group"><label for="brick" class="required-field">Brick</label><select id="brick" required><option value="">Select Brick</option></select></div>
-                        <div class="form-group"><label for="visitTimePharmacy">Visit Time</label><input type="datetime-local" id="visitTimePharmacy" required readonly /></div>
-                        <div class="form-group"><label for="commentsPharmacy">Comments</label><textarea id="commentsPharmacy" placeholder="Enter pharmacy visit notes here..."></textarea></div>
-                    </div>
-                    <div id="eventForm" class="hidden">
-                        <h2><i class="fas fa-calendar-alt"></i> Event Submission</h2>
-                        <div class="form-group">
-                            <label for="eventType" class="required-field">Event Type</label>
-                            <select id="eventType" required>
-                                <option value="">Select Event Type</option>
-                                <option value="Meeting">Meeting</option>
-                                <option value="Training">Training</option>
-                                <option value="Event">Event</option>
-                                <option value="Official vacation">Official vacation</option>
-                                <option value="Annual leave">Annual leave</option>
-                                <option value="Sick leave">Sick leave</option>
-                                <option value="Casual leave">Casual leave</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="eventActivity" class="required-field">Event Time</label>
-                            <select id="eventActivity" required>
-                                <option value="">Select Event Time</option>
-                                <option value="AM activity">AM activity</option>
-                                <option value="PM activity">PM activity</option>
-                                <option value="Full day">Full day</option>
-                            </select>
-                        </div>
-                        <div class="form-group"><label for="commentsEvent" class="required-field">Comments</label><textarea id="commentsEvent" placeholder="Enter event details here..." required></textarea></div>
-                        <div class="form-group"><label for="dateEvent" class="required-field">Date</label><input type="date" id="dateEvent" required /></div>
-                    </div>
-                    <div id="amForm" class="hidden">
-                        <h2><i class="fas fa-clipboard-check"></i> AM Details Submission <span id="amFormUnvisitedCount" class="unvisited-count-square hidden"></span></h2>
-                        <div class="form-group"><label for="associatedAccount" class="required-field">Associated Account</label><select id="associatedAccount" required><option value="">Select Associated Account</option></select></div>
-                        <div class="form-group"><label for="amDoctorName" class="required-field">AM Doctor Name</label><input type="text" id="amDoctorName" placeholder="Enter AM doctor name" required /></div>
-                        <div class="form-group"><label for="amBrick" class="required-field">Brick</label><select id="amBrick" required><option value="">Select Brick</option></select></div>
-                        <div class="form-group"><label for="visitTimeAm">Visit Time</label><input type="datetime-local" id="visitTimeAm" required readonly /></div>
-                        <div class="form-group"><label for="commentsAm" class="required-field">Comments</label><textarea id="commentsAm" placeholder="Enter detailed AM notes here..." required></textarea></div>
-                    </div>
-                    <div class="action-button-group">
-                        <button id="submitBtn" class="action-button submit-btn" disabled><i class="fas fa-save"></i> Submit</button>
-                        <button id="resetBtn" class="action-button reset-btn"><i class="fas fa-undo"></i> Reset</button>
-                        <button id="retrieveBtn" class="action-button retrieve-btn"><i class="fas fa-sync-alt"></i> Retrieve</button>
-                    </div>
-                    <div id="dataTable" class="hidden">
-                        <h2><i class="fas fa-table"></i> Submitted Visits</h2>
-                        <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search for data..." /></div>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>HCP Name</th><th>Specialty</th><th>Brick</th><th>Target Visits</th>
-                                        <th>Last Visit</th><th>Remaining Visits</th><th>Comments</th><th>Visit Place</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dashboard Section -->
-                <div id="dashboardSection" class="section-card hidden">
-                     <!-- Content will be managed by JS -->
-                </div>
-
-                <!-- Request Section -->
-                <div id="requestSection" class="section-card hidden">
-                     <!-- Content will be managed by JS -->
-                </div>
-
-                <!-- Weekly Plan Section -->
-                <div id="weeklyPlanSection" class="section-card hidden">
-                     <!-- Content will be managed by JS -->
-                </div>
-            </div>
+            <!-- Removed logoutBtn -->
         </div>
+
+        <div class="main-tab-group tab-group -mt-2">
+            <button id="crmMainTabBtn" class="tab-button" disabled>
+                <i class="fas fa-edit"></i> CRM
+            </button>
+            <button id="dashboardMainTabBtn" class="tab-button" disabled>
+                <i class="fas fa-chart-bar"></i> Customers Lists
+            </button>
+            <button id="requestMainTabBtn" class="tab-button" disabled>
+                <i class="fas fa-file-alt"></i> Requests
+            </button>
+            <button id="weeklyPlanMainTabBtn" class="tab-button" disabled>
+                <i class="fas fa-calendar-week"></i> Weekly Plan
+            </button>
+        </div>
+
+        <div class="main-content-wrapper">
+            <!-- Form Section -->
+            <div id="formSection" class="section-card hidden">
+                <div class="form-header">
+                    <div class="form-logo">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h1 class="form-title">Visits Submission Form</h1>
+                </div>
+                <div id="alertContainer"></div>
+                <!-- Existing internal tab group for forms -->
+                <div class="tab-group">
+                     <!-- Removed span for unvisited count from tab button -->
+                    <button id="hcpBtn" class="tab-button" disabled>
+                        <i class="fas fa-user-md"></i> HCPs
+                    </button>
+                    <!-- Removed span for unvisited count from AM tab button -->
+                    <button id="amBtn" class="tab-button" disabled>
+                        <i class="fas fa-clipboard-check"></i> AM Details
+                    </button>
+                    <button id="pharmacyBtn" class="tab-button" disabled>
+                        <i class="fas fa-pills"></i> Pharmacy
+                    </button>
+                    <button id="eventBtn" class="tab-button" disabled>
+                        <i class="fas fa-calendar-alt"></i> Event
+                    </button>
+                </div>
+                <div id="hcpForm" class="hidden">
+                     <!-- Moved unvisited count span beside the title -->
+                     <h2>
+                         <i class="fas fa-user-md"></i> HCP Submission Form
+                         <span id="hcpFormUnvisitedCount" class="unvisited-count-square hidden"></span>
+                     </h2>
+                    <div class="form-group">
+                        <label for="hcp" class="required-field">Healthcare Professional</label>
+                        <select id="hcp" required>
+                            <option value="">Select Healthcare Professional</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="brickHcp">Brick</label>
+                            <input type="text" id="brickHcp" class="readonly-input" readonly />
+                        </div>
+                        <div class="form-group">
+                            <label for="specialtyHcp">Specialty</label>
+                            <input type="text" id="specialtyHcp" class="readonly-input" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitLocationHcp" class="required-field">Visit Location</label>
+                        <select id="visitLocationHcp" required>
+                            <option value="">Select Visit Location</option>
+                            <option value="Clinic">Clinic</option>
+                            <option value="AM Hospital">AM Hospital</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitTimeHcp">Visit Time</label>
+                        <input type="datetime-local" id="visitTimeHcp" required readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="commentsHcp" class="required-field">Comments</label>
+                        <textarea id="commentsHcp" placeholder="Enter detailed visit notes here..." required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="samples">Samples</label>
+                            <select id="samples" required>
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group hidden" id="sampleCountGroup">
+                            <label for="sampleCount">Sample Count</label>
+                            <input type="number" id="sampleCount" value="1" min="1" required />
+                        </div>
+                    </div>
+                    <div id="remainingVisitsSection" class="visit-stats-card hidden">
+                        <div class="visit-stats-item">
+                            <div class="visit-stats-label">Remaining Visits for Selected HCP:</div>
+                            <div class="visit-stats-value"><span id="remainingVisits">0</span></div>
+                        </div>
+                        <div id="lastVisitDate" class="visit-stats-item">
+                            <div class="visit-stats-label">Last Visit:</div>
+                            <div class="visit-stats-value"><span id="lastVisitDateValue">N/A</span></div>
+                        </div>
+                    </div>
+                    <div id="savedCommentSection" class="info-section hidden">
+                        <div class="saved-comment-title">Saved Comment:</div>
+                        <div id="savedComment" class="saved-comment-content">No previous comments available</div>
+                    </div>
+                </div>
+                <div id="pharmacyForm" class="hidden">
+                    <h2><i class="fas fa-pills"></i> Pharmacy Submission</h2>
+                    <div class="form-group">
+                        <label for="pharmacyName" class="required-field">Pharmacy Name</label>
+                        <input type="text" id="pharmacyName" placeholder="Enter pharmacy name" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="brick" class="required-field">Brick</label>
+                        <select id="brick" required>
+                            <option value="">Select Brick</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitTimePharmacy">Visit Time</label>
+                        <input type="datetime-local" id="visitTimePharmacy" required readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="commentsPharmacy">Comments</label>
+                        <textarea id="commentsPharmacy" placeholder="Enter pharmacy visit notes here..."></textarea>
+                    </div>
+                </div>
+                <div id="eventForm" class="hidden">
+                    <h2><i class="fas fa-calendar-alt"></i> Event Submission</h2>
+                    <div class="form-group">
+                        <label for="eventType" class="required-field">Event Type</label>
+                        <select id="eventType" required>
+                            <option value="">Select Event Type</option>
+                            <option value="Meeting">Meeting</option>
+                            <option value="Training">Training</option>
+                            <option value="Event">Event</option>
+                            <option value="Official vacation">Official vacation</option>
+                            <option value="Annual leave">Annual leave</option>
+                            <option value="Sick leave">Sick leave</option> <!-- Added Sick Leave -->
+                            <option value="Casual leave">Casual leave</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventActivity" class="required-field">Event Time</label>
+                        <select id="eventActivity" required>
+                            <option value="">Select Event Time</option>
+                            <option value="AM activity">AM activity</option>
+                            <option value="PM activity">PM activity</option>
+                            <option value="Full day">Full day</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="commentsEvent" class="required-field">Comments</label>
+                        <textarea id="commentsEvent" placeholder="Enter event details here..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="dateEvent" class="required-field">Date</label>
+                        <input type="date" id="dateEvent" required />
+                    </div>
+                </div>
+                <div id="amForm" class="hidden">
+                     <h2>
+                        <i class="fas fa-clipboard-check"></i> AM Details Submission
+                        <span id="amFormUnvisitedCount" class="unvisited-count-square hidden"></span> <!-- Moved AM unvisited count here -->
+                     </h2>
+                    <div class="form-group">
+                        <label for="associatedAccount" class="required-field">Associated Account</label>
+                        <select id="associatedAccount" required>
+                            <option value="">Select Associated Account</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amDoctorName" class="required-field">AM Doctor Name</label>
+                        <input type="text" id="amDoctorName" placeholder="Enter AM doctor name" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="amBrick" class="required-field">Brick</label>
+                        <select id="amBrick" required>
+                            <option value="">Select Brick</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="visitTimeAm">Visit Time</label>
+                        <input type="datetime-local" id="visitTimeAm" required readonly />
+                    </div>
+                    <div class="form-group">
+                        <label for="commentsAm" class="required-field">Comments</label>
+                        <textarea id="commentsAm" placeholder="Enter detailed AM notes here..." required></textarea>
+                    </div>
+                </div>
+                <div class="action-button-group">
+                    <button id="submitBtn" class="action-button submit-btn" disabled><i class="fas fa-save"></i> Submit</button>
+                    <button id="resetBtn" class="action-button reset-btn"><i class="fas fa-undo"></i> Reset</button>
+                    <button id="retrieveBtn" class="action-button retrieve-btn"><i class="fas fa-sync-alt"></i> Retrieve</button>
+                </div>
+                <!-- Data table for submitted visits -->
+                <div id="dataTable" class="hidden">
+                    <h2><i class="fas fa-table"></i> Submitted Visits</h2>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Search for data..." />
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>HCP Name</th> <!-- Column 0 -->
+                                    <th>Specialty</th> <!-- Column 1 -->
+                                    <th>Brick</th> <!-- Column 2 -->
+                                    <th>Target Visits</th> <!-- Column 3 -->
+                                    <th>Last Visit</th> <!-- Column 4 -->
+                                    <th>Remaining Visits</th> <!-- Column 5 -->
+                                    <th>Comments</th> <!-- Column 6 -->
+                                    <th>Visit Place</th> <!-- Added Visit Place column -->
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboardSection" class="section-card hidden">
+                <div class="dashboard-header">
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Customers Lists</h1>
+                    <div id="loadingDashboard" class="flex items-center space-x-2 hidden">
+                        <div class="loading-spinner"></div>
+                        <span class="text-sm text-gray-600">Loading dashboard data...</span>
+                    </div>
+                </div>
+
+                <div id="dashboardContent">
+                    <div class="filters-section grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <div class="select-wrapper">
+                                <select id="dashboardMedicalReps" class="w-full" disabled>
+                                    <option value="">Select Representative</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="custom-select">
+                                <div class="custom-select-trigger" id="bricksTrigger">
+                                    Select Brick
+                                </div>
+                                <div class="custom-select-options" id="bricksOptions">
+                                    <!-- Options will be added here dynamically -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="select-wrapper">
+                                <select id="visitOptions">
+                                    <option value="">Select Display Option</option>
+                                    <option value="unvisited">Unvisited HCPs</option>
+                                    <option value="remaining">Remaining Visits</option>
+                                    <option value="full">Full List</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="select-wrapper">
+                                <select id="dayFilter">
+                                    <option value="">All Days</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                        <div id="countDisplay" class="status-count hidden w-full sm:w-auto"></div>
+                        <div class="button-group flex gap-2">
+                            <button id="filterDashboardButton" class="btn btn-primary">
+                                <i class="fas fa-filter"></i> Apply Filters
+                            </button>
+                            <button id="resetDashboardButton" class="btn btn-secondary">
+                                <i class="fas fa-undo"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="errorDashboard" class="hidden text-red-600 mb-4 p-4 bg-red-50 rounded-lg"></div>
+
+                    <!-- Search box above the table -->
+                    <div id="searchContainerDashboard" class="mb-4 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                        <input type="text" id="searchBoxDashboard" class="search-box" placeholder="Search in table data...">
+                    </div>
+
+                    <div class="table-container rounded-lg border border-gray-200">
+                        <!-- FIX: Removed min-w-full class to allow table to shrink and container to scroll -->
+                        <table id="hcpTableDashboard" class="hidden">
+                            <thead>
+                                <tr>
+                                    <th class="sticky-col">HCP Name</th> <!-- Column 0 -->
+                                    <th>Specialty</th> <!-- Column 1 -->
+                                    <th>Class</th> <!-- Column 2 -->
+                                    <th>Total Visits</th> <!-- Column 3 -->
+                                    <th>Remaining</th> <!-- Column 4 -->
+                                    <th>Brick</th> <!-- Column 5 -->
+                                    <th>Address</th> <!-- Column 6 -->
+                                    <th>Contact</th> <!-- Column 7 -->
+                                    <th>Sat</th> <!-- Column 8 -->
+                                    <th>Sun</th> <!-- Column 9 -->
+                                    <th>Mon</th> <!-- Column 10 -->
+                                    <th>Tue</th> <!-- Column 11 -->
+                                    <th>Wed</th> <!-- Column 12 -->
+                                    <th>Thu</th> <!-- Column 13 -->
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Request Section (New Content) -->
+            <div id="requestSection" class="section-card hidden">
+                <div class="form-header">
+                    <div class="form-logo">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h1 class="form-title">Request Form</h1>
+                </div>
+                <div id="requestAlertContainer"></div>
+
+                <div class="tab-container">
+                    <button class="tab-button active" id="personalTabBtn">Personal Request</button>
+                    <button class="tab-button" id="customerTabBtn">Customer Request</button>
+                </div>
+
+                <div id="personalRequestTab" class="tab-content">
+                    <label for="personalName">Name:</label>
+                    <select id="personalName" required>
+                        <option value="">Select Your Name</option>
+                    </select>
+                    <div id="personalNameError" class="error">This field is required.</div>
+
+                    <div id="personalAreaContainer" class="hidden">
+                        <label for="personalArea">Area:</label>
+                        <select id="personalArea" required>
+                            <option value="">Select Your Area</option>
+                        </select>
+                        <div id="personalAreaError" class="error">This field is required.</div>
+                    </div>
+
+                    <label for="personalDate">Date:</label>
+                    <input type="date" id="personalDate" required readonly> <!-- Added readonly -->
+                    <div id="personalDateError" class="error">This field is required.</div>
+
+                    <label for="personalRequestTitle">Request Title:</label>
+                    <select id="personalRequestTitle" required>
+                        <option value="">Select Request Title</option>
+                        <option value="Annual Leave">Annual Leave</option>
+                        <option value="Sick Leave">Sick Leave</option>
+                        <option value="Unpaid Leave">Unpaid Leave</option>
+                    </select>
+                    <div id="personalRequestTitleError" class="error">This field is required.</div>
+
+                    <label for="personalRequestDetails">Request Details:</label>
+                    <textarea id="personalRequestDetails" rows="4" placeholder="Enter Your Request" required></textarea>
+                    <div id="personalRequestDetailsError" class="error">This field is required.</div>
+
+                    <div class="button-container">
+                        <button type="button" class="submit-button" id="submitPersonalRequestBtn">Submit</button>
+                        <button type="button" class="reset-button" id="resetPersonalFormBtn">Reset</button>
+                        <button type="button" class="retrieve-button" id="retrievePersonalRequestsBtn">Retrieve </button>
+                    </div>
+                    <h2>Total Personal Requests: <span id="personalRequestCount">0</span></h2>
+                    <div id="retrievedPersonalRequests" class="hidden">
+                        <h3>Personal Requests:</h3>
+                        <div id="personalRequestDetailsDisplay" class="requests-display-grid"></div>
+                    </div>
+                </div>
+
+                <div id="customerRequestTab" class="tab-content hidden">
+                    <!-- Medical Rep field removed from here as it's handled by currentMedRep -->
+                    <div id="areaContainer" class="hidden">
+                        <label for="area">Area:</label>
+                        <select id="area" name="area" required>
+                            <option value="">Select an Area</option>
+                        </select>
+                        <div id="areaError" class="error">This field is required.</div>
+                    </div>
+
+                    <label for="customerType">Customer Type:</label>
+                    <select id="customerType" required>
+                        <option value="">Select Customer Type</option>
+                        <option value="AM Accounts">AM Accounts</option>
+                        <option value="PM Doctors">PM Doctors</option>
+                    </select>
+                    <div id="customerTypeError" class="error">This field is required.</div>
+
+                    <div id="accountDropdown" class="hidden">
+                        <label for="amAccounts">AM Accounts:</label>
+                        <select id="amAccounts" required>
+                            <option value="">Select AM Account</option>
+                            <option value="UPA Hospital">UPA Hospital</option>
+                            <option value="Military Hospital">Military Hospital</option>
+                            <option value="Private Hospital">Private Hospital</option>
+                            <option value="Dialysis Center">Dialysis Center</option>
+                            <option value="Oncology Center">Oncology Center</option>
+                        </select>
+                        <div id="amAccountsError" class="error">This field is required.</div>
+                    </div>
+
+                    <div id="doctorDropdown" class="hidden">
+                        <label for="pmDoctors">PM Doctors:</label>
+                        <select id="pmDoctors" required>
+                            <option value="">Select PM Doctor</option>
+                            <option value="Intervention">Intervention</option>
+                            <option value="Hematology">Hematology</option>
+                            <option value="Vascular">Vascular</option>
+                            <option value="GP">GP</option>
+                            <option value="ICU">ICU</option>
+                            <option value="Oncology">Oncology</option>
+                            <option value="Nephrology">Nephrology</option>
+                        </select>
+                        <div id="pmDoctorsError" class="error">This field is required.</div>
+                    </div>
+
+                    <div id="customerNames" class="hidden">
+                        <label for="customerName">Customer Name:</label>
+                        <input type="text" id="customerName" placeholder="Enter Customer Name" required>
+                        <div id="customerNameError" class="error">This field is required.</div>
+                    </div>
+
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" required readonly> <!-- Added readonly -->
+                    <div id="dateError" class="error">This field is required.</div>
+
+                    <label for="requestTitle">Request Title:</label>
+                    <input type="text" id="requestTitle" placeholder="Enter Request Title" required>
+                    <div id="requestTitleError" class="error">This field is required.</div>
+
+                    <label for="requestDetails">Request Details:</label>
+                    <textarea id="requestDetails" rows="4" placeholder="Enter Request Details" required></textarea>
+                    <div id="requestDetailsError" class="error">This field is required.</div>
+
+                    <div class="button-container">
+                        <button type="button" class="submit-button" id="submitCustomerRequestBtn">Submit</button>
+                        <button type="button" class="reset-button" id="resetCustomerFormBtn">Reset</button>
+                        <button type="button" class="retrieve-button" id="retrieveCustomerRequestsBtn">Retrieve</button>
+                    </div>
+                    <h2>Total Customer Requests: <span id="customerRequestCount">0</span></h2>
+                    <div id="retrievedCustomerRequests" class="hidden">
+                        <h3>Customer Requests:</h3>
+                        <div id="customerRequestDetailsDisplay" class="requests-display-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Plan Section -->
+            <div id="weeklyPlanSection" class="section-card hidden">
+                 <div class="dashboard">
+                    <div class="header">
+                        <h1>Weekly Plan Dashboard</h1>
+                        <div id="weeklyPlanLoading">Loading data...</div>
+                        <div id="weeklyPlanError" class="message error" style="display: none;"></div>
+                        <div id="weeklyPlanSuccess" class="message success" style="display: none;"></div>
+
+                        <div id="weeklyPlanContent" style="display: none;">
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <select id="weeklyPlanMedicalReps" disabled>
+                                        <option value="">Select a Medical Rep</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <select id="weeklyPlanBricks" disabled>
+                                        <option value="">Select a Brick</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <select id="weeklyPlanDayFilter">
+                                        <option value="">Select a Days</option>
+                                        <option value="Saturday">Saturday</option>
+                                        <option value="Sunday">Sunday</option>
+                                        <option value="Monday">Monday</option>
+                                        <option value="Tuesday">Tuesday</option>
+                                        <option value="Wednesday">Wednesday</option>
+                                        <option value="Thursday">Thursday</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="button-group">
+                                <button id="weeklyPlanFilterButton" class="action-button submit-btn"><i class="fas fa-filter"></i> Apply Filter</button>
+                                <button id="weeklyPlanRetrieveButton" class="action-button retrieve-btn"><i class="fas fa-sync-alt"></i> Retrieve</button>
+                            </div>
+
+                            <!-- New Event Filters -->
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="weeklyPlanEventType">Event Type</label>
+                                    <select id="weeklyPlanEventType">
+                                        <option value="">Select Event Type</option>
+                                        <option value="Meeting">Meeting</option>
+                                        <option value="Training">Training</option>
+                                        <option value="Event">Event</option>
+                                        <option value="Annual Leave">Annual Leave</option>
+                                        <option value="Sick Leave">Sick Leave</option>
+                                        <option value="Official Leave">Official Leave</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group" id="weeklyPlanEventNameGroup" style="display: none;">
+                                    <label for="weeklyPlanEventName">Event Name</label>
+                                    <input type="text" id="weeklyPlanEventName" placeholder="Enter event name">
+                                </div>
+                                <div class="filter-group" id="weeklyPlanEventTimeGroup" style="display: none;">
+                                    <label for="weeklyPlanEventTime">Event Time</label>
+                                    <select id="weeklyPlanEventTime">
+                                        <option value="">Select Time</option>
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                        <option value="Full Day">Full Day</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!-- End New Event Filters -->
+                        </div>
+                    </div>
+                    <div class="content-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">HCP List</h2>
+                                <div id="weeklyPlanStatsDisplay" class="stats-badge" style="display: none;"></div>
+                            </div>
+                            <div class="table-container">
+                                <table id="weeklyPlanHcpTable" style="display: none;">
+                                    <thead>
+                                        <tr>
+                                            <th>HCPS</th>
+                                            <th>Speciality</th>
+                                            <th>Class</th>
+                                            <th>T.V</th>
+                                            <th>Remaining</th>
+                                            <th>Brick</th>
+                                            <th>Address</th>
+                                            <th>Mobile</th>
+                                            <th>Sat</th>
+                                            <th>Sun</th>
+                                            <th>Mon</th>
+                                            <th>Tue</th>
+                                            <th>Wed</th>
+                                            <th>Thu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Weekly Schedule</h2>
+                            </div>
+                            <div class="rep-info-container">
+                                <div id="weeklyPlanRepArea" class="rep-badge"></div>
+                                <div id="weeklyPlanRepNameArea" class="rep-badge"></div>
+                            </div>
+                            <div class="date-boxes">
+                                <div class="filter-group">
+                                    <label for="weeklyPlanStartDate">Start Date</label>
+                                    <input type="date" id="weeklyPlanStartDate">
+                                </div>
+                                <div class="filter-group">
+                                    <label for="weeklyPlanEndDate">End Date</label>
+                                    <input type="date" id="weeklyPlanEndDate" readonly>
+                                </div>
+                            </div>
+                            <div id="weeklyPlanAmActivitiesTable" class="table-container">
+                                <div class="card-title">AM Activities</div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th id="saturdayAmHeader">Saturday</th>
+                                            <th id="sundayAmHeader">Sunday</th>
+                                            <th id="mondayAmHeader">Monday</th>
+                                            <th id="tuesdayAmHeader">Tuesday</th>
+                                            <th id="wednesdayAmHeader">Wednesday</th>
+                                            <th id="thursdayAmHeader">Thursday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td id="saturdayAm"></td>
+                                            <td id="sundayAm"></td>
+                                            <td id="mondayAm"></td>
+                                            <td id="tuesdayAm"></td>
+                                            <td id="wednesdayAm"></td>
+                                            <td id="thursdayAm"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="weeklyPlanPmActivitiesTable" class="table-container">
+                                <div class="card-title">PM Activities</div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th id="saturdayPmHeader">Saturday</th>
+                                            <th id="sundayPmHeader">Sunday</th>
+                                            <th id="mondayPmHeader">Monday</th>
+                                            <th id="tuesdayPmHeader">Tuesday</th>
+                                            <th id="wednesdayPmHeader">Wednesday</th>
+                                            <th id="thursdayPmHeader">Thursday</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td id="saturdayPm"></td>
+                                            <td id="sundayPm"></td>
+                                            <td id="mondayPm"></td>
+                                            <td id="tuesdayPm"></td>
+                                            <td id="wednesdayPm"></td>
+                                            <td id="thursdayPm"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="button-group">
+                                <button id="weeklyPlanSubmitButton" class="action-button submit-btn"><i class="fas fa-save"></i> Submit</button>
+                                <button id="weeklyPlanResetButton" class="action-button reset-btn"><i class="fas fa-undo"></i> Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="designed-by">Designed By: DrTahaDesigns</div>
     </div>
 
     <script>
-    // NOTE: The full JavaScript logic is extensive. Key changes are highlighted below.
-    // The complete script from the prompt is included but condensed for brevity in this comment.
-    // Key changes:
-    // 1. New loading overlay logic.
-    // 2. New left-nav layout and mobile/PC view handling.
-    // 3. Removed all "samples" related code.
-    // 4. Added new validation for HCP comments.
-    document.addEventListener('DOMContentLoaded', async () => {
-        // ... (Full script from prompt with modifications)
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/healthcarepro_visits'; // Changed from hcps_visits2 to healthcarepro_visits
+        const SAVED_COMMENTS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/saved_comments';
+        const SAMPLES_MANAGEMENT_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/samples_management';
+        const REQUESTS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/requests';
+        const SUPABASE_WEEKLY_PLANS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/weekly_plans';
+        // New Supabase URL for vacations
+        const SUPABASE_VACATIONS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/vacations';
+        const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
 
-        // --- MODIFICATION: Loading Overlay ---
-        const loadingOverlay = document.getElementById('loadingOverlay');
+        // Global variables for both form and dashboard
+        let currentMedRep = null; // This will now be set by the postMessage from parent
+        let loggedInUser = null; // Stores the user object { username, title } from parent
+        let globalGoogleData = []; // Data from Google Sheet (full set if admin, otherwise fetched by CRM)
+        let globalGoogleSheetDataFromParent = []; // Used to store the full data passed from parent if admin
+        let globalSupabaseVisits = []; // Visit data from Supabase (all users)
+        let visitCountsForCurrentRep = {}; // Specific to the logged-in rep
+        let medicalRepsAreas = new Map(); // Map to store medical rep and their associated areas
+        let districtManagersGovernorates = new Map(); // Map to store district managers and their associated governorates
 
-        // --- MODIFICATION: PC/Mobile Nav Elements ---
-        const leftNav = document.getElementById('leftNav');
-        const mobileNavHeader = document.getElementById('mobileNavHeader');
-        const mainContentArea = document.getElementById('mainContentArea');
-
-        const medicalRepSelector = document.getElementById('medicalRepSelector');
-        const medicalRepSelectorMobile = document.getElementById('medicalRepSelectorMobile');
-
-        const medRepNameElement = document.getElementById('medRepName');
-        const medRepAreaElement = document.getElementById('medRepArea');
-        const medRepDMElement = document.getElementById('medRepDM');
-        const medRepGovElement = document.getElementById('medRepGov');
-        
-        const medRepNameMobile = document.getElementById('medRepNameMobile');
-        const medRepAreaMobile = document.getElementById('medRepAreaMobile');
-        const medRepDMMobile = document.getElementById('medRepDMMobile');
-        const medRepGovMobile = document.getElementById('medRepGovMobile');
-
-        // ... (rest of variable declarations)
-
-        // --- MODIFICATION: Handle both PC and Mobile selectors ---
-        function updateAllRepSelectors(repsToDisplay, defaultSelectedRep) {
-            populateSelect(medicalRepSelector, repsToDisplay);
-            populateSelect(medicalRepSelectorMobile, repsToDisplay);
-            if (defaultSelectedRep) {
-                medicalRepSelector.value = defaultSelectedRep;
-                medicalRepSelectorMobile.value = defaultSelectedRep;
-            }
-        }
-        
-        function handleRepSelectionChange(selectedRepName) {
-             // This function contains the logic from the original 'change' event listener
-             // It's called by both desktop and mobile dropdowns
-             // ...
-        }
-
-        medicalRepSelector.addEventListener('change', (e) => {
-            medicalRepSelectorMobile.value = e.target.value;
-            handleRepSelectionChange(e.target.value);
-        });
-        medicalRepSelectorMobile.addEventListener('change', (e) => {
-            medicalRepSelector.value = e.target.value;
-            handleRepSelectionChange(e.target.value);
-        });
-
-        // --- MODIFICATION: In FormManager.handleSubmit ---
-        // ...
-        // if (formActive === 'hcp') {
-        //    if (!formData.comments || formData.comments.trim().length < 10) {
-        //        throw new Error('Please add a visit comment with at least 10 characters.');
-        //    }
-        //    if (!/^[a-zA-Z0-9]/.test(formData.comments)) {
-        //         throw new Error('Comment must start with a letter or a number.');
-        //    }
-        //    // ...
-        // }
-        // ...
-
-        // --- MODIFICATION: In message event listener ---
-        window.addEventListener('message', async (event) => {
-            if (event.data && event.data.type === 'loggedInUser') {
-                // ... (existing logic)
-                await fetchAllData();
-                handleUserRoleBasedRepSelection();
-                loadingOverlay.style.display = 'none'; // Hide loader
-            }
-        });
-    });
-    // The full, functional script would be placed here.
-    // For this response, I'm including the full script as provided and modified.
-    
-    // Supabase Configuration
-    const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/healthcarepro_visits';
-    const SAVED_COMMENTS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/saved_comments';
-    const REQUESTS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/requests';
-    const SUPABASE_WEEKLY_PLANS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/weekly_plans';
-    const SUPABASE_VACATIONS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/vacations';
-    const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
-    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
-
-    // Global variables
-    let currentMedRep = null;
-    let loggedInUser = null;
-    let globalGoogleData = [];
-    let globalGoogleSheetDataFromParent = [];
-    let globalSupabaseVisits = [];
-    let visitCountsForCurrentRep = {};
-    let medicalRepsAreas = new Map();
-    let districtManagersGovernorates = new Map();
-    let selectedBricks = [];
-    let filteredHCPsForDashboard = []; // HCPs currently displayed in dashboard table
+        // Dashboard specific variables
+        let selectedBricks = [];
+        let filteredHCPsForDashboard = []; // HCPs currently displayed in dashboard table
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Helper functions for localStorage - REMOVED as data is passed via postMessage
