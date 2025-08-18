@@ -397,7 +397,7 @@
         .med-rep-card {
             background-color: #f8f9fa;
             border-radius: 8px;
-            padding: 12px;
+            padding: 8px 12px; /* Reduced padding */
             margin-bottom: 8px;
             border: 1px solid #e9ecef;
             display: flex;
@@ -864,6 +864,7 @@
                 overflow: hidden; /* Prevent body scroll on desktop */
             }
             .container {
+                max-width: 1600px; /* Increased width */
                 height: calc(100vh - 24px);
                 display: flex;
                 flex-direction: column;
@@ -872,7 +873,7 @@
             .med-rep-card {
                 border-radius: 0;
                 margin-bottom: 0;
-                padding: 12px 20px;
+                padding: 8px 20px; /* Reduced vertical padding */
             }
             .desktop-layout-wrapper {
                 flex-direction: row;
@@ -915,6 +916,9 @@
             .designed-by {
                 padding: 10px;
                 border-top: 1px solid #e9ecef;
+            }
+            .pc-hidden {
+                display: none;
             }
         }
         
@@ -1000,8 +1004,8 @@
                     <i class="fas fa-spinner fa-spin"></i> Loading User...
                 </div>
                 <div class="med-rep-area" id="medRepArea">Area</div>
-                <div class="med-rep-dm" id="medRepDM">District Manager: N/A</div>
-                <div class="med-rep-gov" id="medRepGov">Governorate: N/A</div>
+                <div class="med-rep-dm pc-hidden" id="medRepDM">District Manager: N/A</div>
+                <div class="med-rep-gov pc-hidden" id="medRepGov">Governorate: N/A</div>
             </div>
             <div class="relative">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -2692,10 +2696,20 @@
                 }
                 addHCPToTable(hcpData) { if (globalGoogleData.find(row => row['HCPS'] === hcpData.name)) this.applyFilter(); }
                 setDefaultDates() {
-                    const nowInCairo = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' })); const day = nowInCairo.getDay();
-                    let daysUntilSaturday = (6 - day + 7) % 7; if (daysUntilSaturday === 0 && day !== 6) daysUntilSaturday = 7;
-                    const nearestSaturday = new Date(nowInCairo); nearestSaturday.setDate(nowInCairo.getDate() + daysUntilSaturday);
-                    this.elements.startDate.value = formManager.getCairoDate(nearestSaturday); this.updateEndDate();
+                    const nowInCairo = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
+                    const day = nowInCairo.getDay(); // 0=Sun, 6=Sat
+                    let startDate = new Date(nowInCairo);
+
+                    if (day < 3) { // Sunday (0), Monday (1), Tuesday (2)
+                        // Go back to the previous Saturday
+                        startDate.setDate(nowInCairo.getDate() - (day + 1));
+                    } else { // Wednesday (3), Thursday (4), Friday (5), Saturday (6)
+                        // Go forward to the upcoming Saturday
+                        startDate.setDate(nowInCairo.getDate() + (6 - day));
+                    }
+
+                    this.elements.startDate.value = formManager.getCairoDate(startDate);
+                    this.updateEndDate();
                 }
                 updateEndDate() {
                     const startDate = new Date(this.elements.startDate.value); const endDate = new Date(startDate);
