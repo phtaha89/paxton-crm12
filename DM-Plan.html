@@ -32,7 +32,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         h1 {
@@ -76,6 +76,13 @@
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Adjusted minmax */
             gap: 12px; /* Reduced gap */
             margin-bottom: 12px;
+        }
+
+        .top-controls-row {
+             display: grid;
+             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+             gap: 15px;
+             margin-bottom: 20px;
         }
         
         .full-width-form-row {
@@ -326,7 +333,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 15px 0;
+            margin: 0 0 15px 0;
         }
 
         /* Popover */
@@ -408,7 +415,7 @@
                 padding: 10px;
             }
 
-            .form-row {
+            .form-row, .top-controls-row {
                 grid-template-columns: 1fr;
                 gap: 10px;
             }
@@ -432,8 +439,6 @@
             }
             .form-panel {
                 flex: 0 0 360px; /* Reduced fixed width for the form panel */
-                position: sticky;
-                top: 15px; /* Stick to top on scroll */
             }
             .table-panel {
                 flex: 1; /* Table takes remaining space */
@@ -443,8 +448,6 @@
             }
             .scrollable-table-container {
                 margin-top: 0; /* Adjust margin as nav controls are inside now */
-                max-height: calc(100vh - 280px); /* Make table scrollable within its container */
-                overflow-y: auto;
             }
             .nav-controls {
                 margin-top: 0;
@@ -463,7 +466,7 @@
         <div class="header-controls">
             <h1>Weekly Plan</h1>
         </div>
-        <div class="form-row">
+        <div class="top-controls-row">
             <div class="flex-col">
                 <label for="districtManager">District Manager:</label>
                 <select id="districtManager">
@@ -487,7 +490,7 @@
             <div class="form-panel">
                 <div class="form-panel-header">
                     <h2>Add/Edit Entry</h2>
-                    <button type="button" class="btn btn-primary" id="editPlanBtn">Show Form</button>
+                    <button type="button" class="btn btn-primary" id="editPlanBtn">Edit Plan</button>
                 </div>
                 <div id="form-section-container" class="form-section hidden">
                     <div class="form-row">
@@ -952,7 +955,7 @@
                 
                 // Hide form and reset button after successful submission
                 document.getElementById('form-section-container').classList.add('hidden');
-                document.getElementById('editPlanBtn').textContent = 'Show Form';
+                document.getElementById('editPlanBtn').textContent = 'Edit Plan';
 
                 await fetchExistingPlanData(planData.startDate); // Refresh to get new IDs
             } catch (error) {
@@ -1542,7 +1545,7 @@
         document.getElementById('editPlanBtn').addEventListener('click', (e) => {
             const form = document.getElementById('form-section-container');
             const isHidden = form.classList.toggle('hidden');
-            e.target.textContent = isHidden ? 'Show Form' : 'Hide Form';
+            e.target.textContent = isHidden ? 'Edit Plan' : 'Hide Form';
         });
 
         document.getElementById('prevWeekBtn').addEventListener('click', () => {
