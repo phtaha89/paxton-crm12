@@ -44,10 +44,10 @@
         /* Simplified form controls */
         input, select, textarea {
             width: 100%;
-            padding: 6px 10px;
+            padding: 5px 8px; /* Reduced padding */
             border: 1px solid #ced4da;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px; /* Slightly smaller font */
             background: #fff;
             transition: border-color 0.15s;
         }
@@ -73,16 +73,16 @@
         /* Grid layout for form rows */
         .form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Adjusted minmax */
+            gap: 12px; /* Reduced gap */
+            margin-bottom: 12px;
         }
         
         .full-width-form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         /* Button styles */
@@ -161,20 +161,20 @@
             overflow-x: auto;
             border: 1px solid #dee2e6;
             border-radius: 6px;
-            margin: 20px 0;
+            margin: 15px 0; /* Adjusted margin */
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 700px; /* Adjusted min-width */
         }
 
         th, td {
-            padding: 8px 10px;
+            padding: 6px 8px; /* Reduced padding */
             border-bottom: 1px solid #dee2e6;
             text-align: left;
-            font-size: 13px;
+            font-size: 12px; /* Reduced font size */
         }
         
         /* Time column styling */
@@ -184,8 +184,8 @@
             position: sticky;
             left: 0;
             z-index: 30;
-            min-width: 60px;
-            width: auto;
+            min-width: 50px; /* Reduced width */
+            width: 50px; /* Fixed width */
             white-space: nowrap;
         }
 
@@ -203,7 +203,7 @@
         }
 
         .table-cell-hour {
-            height: 35px;
+            height: 30px; /* Reduced height */
             position: relative;
             vertical-align: top;
         }
@@ -211,14 +211,14 @@
         /* Plan entry boxes */
         .plan-box {
             position: absolute;
-            top: 2px;
-            left: 2px;
-            right: 2px;
+            top: 1px;
+            left: 1px;
+            right: 1px;
             background: #fff;
             border: 1px solid #dee2e6;
             border-radius: 4px;
-            padding: 4px 6px;
-            font-size: 11px;
+            padding: 3px 5px; /* Reduced padding */
+            font-size: 10px; /* Reduced font size */
             cursor: pointer;
             transition: all 0.15s;
             overflow: hidden;
@@ -245,7 +245,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 8px;
+            height: 6px; /* Reduced height */
             cursor: ns-resize;
             background-color: rgba(0, 0, 0, 0.1);
             border-bottom-left-radius: 4px;
@@ -258,8 +258,8 @@
         }
 
         .plan-time {
-            margin-top: 4px;
-            font-size: 10px;
+            margin-top: 2px;
+            font-size: 9px;
         }
 
         /* Loading overlay */
@@ -431,16 +431,20 @@
                 align-items: flex-start;
             }
             .form-panel {
-                flex: 0 0 420px; /* Fixed width for the form panel */
+                flex: 0 0 360px; /* Reduced fixed width for the form panel */
                 position: sticky;
                 top: 15px; /* Stick to top on scroll */
             }
             .table-panel {
                 flex: 1; /* Table takes remaining space */
                 min-width: 0; /* Prevents flexbox overflow issues */
+                display: flex;
+                flex-direction: column;
             }
             .scrollable-table-container {
                 margin-top: 0; /* Adjust margin as nav controls are inside now */
+                max-height: calc(100vh - 280px); /* Make table scrollable within its container */
+                overflow-y: auto;
             }
             .nav-controls {
                 margin-top: 0;
@@ -542,8 +546,8 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="flex-col col-span-full">
+                        <div class="full-width-form-row">
+                            <div class="flex-col">
                                 <label for="visitDetails">Visit Details:</label>
                                 <textarea id="visitDetails" rows="2" placeholder="Add specific details about the visit..."></textarea>
                             </div>
@@ -584,8 +588,8 @@
                                 <input type="time" id="eventTimeInput">
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="flex-col col-span-full">
+                        <div class="full-width-form-row">
+                            <div class="flex-col">
                                 <label for="eventDetails">Event Details:</label>
                                 <textarea id="eventDetails" rows="2" placeholder="Add specific details about the event..."></textarea>
                             </div>
@@ -617,8 +621,8 @@
                                 <input type="time" id="leaveTimeInput">
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="flex-col col-span-full">
+                        <div class="full-width-form-row">
+                            <div class="flex-col">
                                 <label for="leaveDetails">Leave Details:</label>
                                 <textarea id="leaveDetails" rows="2" placeholder="Add specific details about the leave..."></textarea>
                             </div>
@@ -678,7 +682,7 @@
         let currentResizingBox = null;
         let initialY = 0;
         let initialHeight = 0;
-        let cellHeight = 35; // Default cell height
+        let cellHeight = 30; // Default cell height - UPDATED
         let isAppInitialized = false;
 
         // --- CONSTANTS ---
