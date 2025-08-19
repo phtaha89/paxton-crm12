@@ -1358,8 +1358,7 @@
                 console.log('Unsubscribed from notifications.');
             }
 
-            localStorage.clear();
-            sessionStorage.clear();
+            // State reset
             loggedInUser = null;
             currentActiveViewId = null;
             updateAndShowUserCard();
@@ -1435,6 +1434,10 @@
         }
 
         function handleLogout() {
+            // **MODIFIED**: Immediately clear all storage data on logout action.
+            localStorage.clear();
+            sessionStorage.clear();
+            // Then proceed with the UI transition and full state reset.
             showBlurredMessage('See you soon!', 1500, showLoginPage);
         }
 
@@ -1685,8 +1688,11 @@
             document.getElementById('closeMenuButton').addEventListener('click', closeSideMenu);
             document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
             
-            // Refresh button event listener
+            // **MODIFIED**: Refresh button event listener
             document.getElementById('refreshButton').addEventListener('click', () => {
+                // Fetch new notifications on every refresh click
+                fetchNotifications();
+
                 if (!currentActiveViewId) return;
 
                 const activeView = document.getElementById(currentActiveViewId);
