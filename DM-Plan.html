@@ -17,10 +17,11 @@
             background: #f8f9fa;
             color: #212529;
             line-height: 1.4;
+            overflow: hidden; /* Prevent body scroll on desktop */
         }
 
         .container {
-            max-width: 1600px; /* Increased max-width for wider layout */
+            max-width: 1600px;
             margin: 10px auto;
             padding: 15px;
             background: #fff;
@@ -44,10 +45,10 @@
         /* Simplified form controls */
         input, select, textarea {
             width: 100%;
-            padding: 5px 8px; /* Reduced padding */
+            padding: 5px 8px;
             border: 1px solid #ced4da;
             border-radius: 4px;
-            font-size: 13px; /* Slightly smaller font */
+            font-size: 13px;
             background: #fff;
             transition: border-color 0.15s;
         }
@@ -73,16 +74,9 @@
         /* Grid layout for form rows */
         .form-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Adjusted minmax */
-            gap: 12px; /* Reduced gap */
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
             margin-bottom: 12px;
-        }
-
-        .top-controls-row {
-             display: grid;
-             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-             gap: 15px;
-             margin-bottom: 20px;
         }
         
         .full-width-form-row {
@@ -106,47 +100,20 @@
             gap: 4px;
         }
 
-        .btn-primary {
-            background: #007bff;
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background: #0056b3;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: #fff;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: #fff;
-        }
-
-        .btn-secondary:hover {
-            background: #545b62;
-        }
+        .btn-primary { background: #007bff; color: #fff; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; color: #fff; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-secondary { background: #6c757d; color: #fff; }
+        .btn-secondary:hover { background: #545b62; }
 
         /* Form sections */
         .form-section {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 6px;
-            margin-bottom: 20px;
-            border: 1px solid #e9ecef;
-        }
-
-        .form-section h2 {
-            font-size: 1.1rem;
-            color: #495057;
             margin-bottom: 15px;
-            font-weight: 600;
+            border: 1px solid #e9ecef;
         }
 
         /* Entry type containers */
@@ -168,31 +135,29 @@
             overflow-x: auto;
             border: 1px solid #dee2e6;
             border-radius: 6px;
-            margin: 15px 0; /* Adjusted margin */
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px; /* Adjusted min-width */
+            min-width: 700px;
         }
 
         th, td {
-            padding: 6px 8px; /* Reduced padding */
+            padding: 5px 8px; /* Further reduced padding */
             border-bottom: 1px solid #dee2e6;
             text-align: left;
-            font-size: 12px; /* Reduced font size */
+            font-size: 12px;
         }
         
-        /* Time column styling */
         .time-cell {
             background: #f8f9fa;
             font-weight: 500;
             position: sticky;
             left: 0;
             z-index: 30;
-            min-width: 50px; /* Reduced width */
-            width: 50px; /* Fixed width */
+            min-width: 50px;
+            width: 50px;
             white-space: nowrap;
         }
 
@@ -205,27 +170,22 @@
             z-index: 31;
         }
         
-        th:first-child {
-            z-index: 32; /* Ensure top-left corner is on top */
-        }
+        th:first-child { z-index: 32; }
 
         .table-cell-hour {
-            height: 30px; /* Reduced height */
+            height: 28px; /* Reduced height */
             position: relative;
             vertical-align: top;
         }
         
-        /* Plan entry boxes */
         .plan-box {
             position: absolute;
-            top: 1px;
-            left: 1px;
-            right: 1px;
+            top: 1px; left: 1px; right: 1px;
             background: #fff;
             border: 1px solid #dee2e6;
             border-radius: 4px;
-            padding: 3px 5px; /* Reduced padding */
-            font-size: 10px; /* Reduced font size */
+            padding: 3px 5px;
+            font-size: 10px;
             cursor: pointer;
             transition: all 0.15s;
             overflow: hidden;
@@ -246,86 +206,71 @@
         .event-box { background: #d1ecf1; border-color: #007bff; }
         .leave-box { background: #f8d7da; border-color: #dc3545; }
 
-        /* Resizing handle */
         .resize-handle {
             position: absolute;
-            bottom: 0;
-            left: 0;
+            bottom: 0; left: 0;
             width: 100%;
-            height: 6px; /* Reduced height */
+            height: 6px;
             cursor: ns-resize;
             background-color: rgba(0, 0, 0, 0.1);
-            border-bottom-left-radius: 4px;
-            border-bottom-right-radius: 4px;
             z-index: 25;
-            transition: background-color 0.2s;
         }
-        .plan-box:hover .resize-handle {
-            background-color: rgba(0, 0, 0, 0.2);
-        }
+        .plan-box:hover .resize-handle { background-color: rgba(0, 0, 0, 0.2); }
 
-        .plan-time {
-            margin-top: 2px;
-            font-size: 9px;
-        }
+        .plan-time { margin-top: 2px; font-size: 9px; }
 
-        /* Loading overlay */
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Loading & Modal styles */
+        .loading, .modal-box {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
             z-index: 1000;
-            flex-direction: column;
         }
+        .loading { background: rgba(255,255,255,0.9); flex-direction: column; }
+        .modal-box { background: rgba(0,0,0,0.5); }
 
-        .spinner {
-            width: 30px;
-            height: 30px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #007bff;
+        .spinner, .box-loading-spinner {
             border-radius: 50%;
             animation: spin 1s linear infinite;
+        }
+        .spinner {
+            width: 30px; height: 30px;
+            border: 3px solid #f3f3f3; border-top: 3px solid #007bff;
             margin-bottom: 10px;
         }
-        
         .box-loading-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            position: absolute;
-            right: 5px;
-            top: 5px;
+            position: absolute; right: 5px; top: 5px;
+            width: 16px; height: 16px;
+            border: 2px solid #f3f3f3; border-top: 2px solid #007bff;
         }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .modal-content {
+            background: #fff; padding: 20px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 400px; width: 90%; text-align: center;
         }
+        .modal-content h3 { font-size: 1.2rem; margin-bottom: 10px; color: #007bff; }
+        .modal-content p { font-size: 14px; margin-bottom: 20px; }
+
+        /* Popover */
+        .popover {
+            position: fixed; background: #fff; border: 1px solid #dee2e6;
+            border-radius: 6px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100; font-size: 13px; max-width: 250px;
+        }
+        .popover p { margin-bottom: 6px; }
+        .popover p:last-child { margin-bottom: 0; }
 
         /* Utility classes */
         .hidden { display: none !important; }
-        .text-center { text-align: center; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
         .items-center { align-items: center; }
         .justify-between { justify-content: space-between; }
         .justify-end { justify-content: flex-end; }
-        .gap-2 { gap: 8px; }
         .gap-3 { gap: 12px; }
-        .mb-1 { margin-bottom: 4px; }
-        .mb-2 { margin-bottom: 8px; }
-        .mb-3 { margin-bottom: 12px; }
         .mt-3 { margin-top: 12px; }
-        .p-2 { padding: 8px; }
         .font-semibold { font-weight: 600; }
 
         /* Navigation */
@@ -333,101 +278,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 0 0 15px 0;
+            margin-bottom: 15px;
         }
-
-        /* Popover */
-        .popover {
-            position: fixed;
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 100;
-            font-size: 13px;
-            max-width: 250px;
-        }
-        
-        .modal-box {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
+        .date-selectors {
             display: flex;
-            justify-content: center;
+            gap: 15px;
             align-items: center;
-            z-index: 1000;
+        }
+        .date-selectors .flex-col {
+            min-width: 200px;
         }
 
-        .modal-content {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-
-        .modal-content h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #007bff;
-        }
-
-        .modal-content p {
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        
-        .popover p {
-            margin-bottom: 6px;
-        }
-
-        .popover p:last-child {
-            margin-bottom: 0;
-        }
-
-        /* --- NEW STYLES FOR HORIZONTAL LAYOUT --- */
-        .main-content-area {
-            /* This will be a flex container on desktop */
-        }
+        /* Form Panel */
         .form-panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        .form-panel-header h2 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #495057;
-        }
+        .form-panel-header h2 { font-size: 1.2rem; font-weight: 600; color: #495057; }
 
         /* Responsive adjustments */
         @media (max-width: 1023px) {
-            .container {
-                margin: 5px;
-                padding: 10px;
-            }
-
-            .form-row, .top-controls-row {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-
-            h1 {
-                font-size: 1.3rem;
-            }
-
-            .btn {
-                font-size: 12px;
-                padding: 5px 10px;
-            }
+            body { overflow: auto; } /* Allow body scroll on mobile */
+            .container { margin: 5px; padding: 10px; }
+            .form-row { grid-template-columns: 1fr; gap: 10px; }
+            h1 { font-size: 1.3rem; }
+            .btn { font-size: 12px; padding: 5px 10px; }
         }
         
         /* Desktop Layout (side-by-side) */
@@ -438,22 +315,17 @@
                 align-items: flex-start;
             }
             .form-panel {
-                flex: 0 0 360px; /* Reduced fixed width for the form panel */
+                flex: 0 0 350px; /* Further reduced width */
+                max-height: calc(100vh - 120px); /* Adjust based on header/footer height */
+                overflow-y: auto;
             }
             .table-panel {
-                flex: 1; /* Table takes remaining space */
-                min-width: 0; /* Prevents flexbox overflow issues */
+                flex: 1;
+                min-width: 0;
                 display: flex;
                 flex-direction: column;
             }
-            .scrollable-table-container {
-                margin-top: 0; /* Adjust margin as nav controls are inside now */
-            }
-            .nav-controls {
-                margin-top: 0;
-            }
         }
-
     </style>
 </head>
 <body>
@@ -462,25 +334,8 @@
         <p>Loading data...</p>
     </div>
     <div class="container">
-        <!-- These controls remain at the top for global context -->
         <div class="header-controls">
             <h1>Weekly Plan</h1>
-        </div>
-        <div class="top-controls-row">
-            <div class="flex-col">
-                <label for="districtManager">District Manager:</label>
-                <select id="districtManager">
-                    <option value="">Select District Manager</option>
-                </select>
-            </div>
-            <div class="flex-col">
-                <label for="startDate">Week Start Date (Saturday):</label>
-                <input type="date" id="startDate">
-            </div>
-            <div class="flex-col">
-                <label for="endDate">Week End Date (Friday):</label>
-                <input type="date" id="endDate" readonly>
-            </div>
         </div>
 
         <!-- Main content area for the two-column layout -->
@@ -491,6 +346,12 @@
                 <div class="form-panel-header">
                     <h2>Add/Edit Entry</h2>
                     <button type="button" class="btn btn-primary" id="editPlanBtn">Edit Plan</button>
+                </div>
+                <div class="flex-col" style="margin-bottom: 15px;">
+                    <label for="districtManager">District Manager:</label>
+                    <select id="districtManager">
+                        <option value="">Select District Manager</option>
+                    </select>
                 </div>
                 <div id="form-section-container" class="form-section hidden">
                     <div class="form-row">
@@ -645,10 +506,18 @@
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
-                        <span class="hidden sm:inline">Previous Week</span>
                     </button>
+                    <div class="date-selectors">
+                        <div class="flex-col">
+                            <label for="startDate">Week Start Date (Saturday):</label>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div class="flex-col">
+                            <label for="endDate">Week End Date (Friday):</label>
+                            <input type="date" id="endDate" readonly>
+                        </div>
+                    </div>
                     <button id="nextWeekBtn" class="btn btn-secondary">
-                        <span class="hidden sm:inline">Next Week</span>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
@@ -685,7 +554,7 @@
         let currentResizingBox = null;
         let initialY = 0;
         let initialHeight = 0;
-        let cellHeight = 30; // Default cell height - UPDATED
+        let cellHeight = 28; // Default cell height - UPDATED
         let isAppInitialized = false;
 
         // --- CONSTANTS ---
