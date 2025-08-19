@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1600px; /* Increased max-width for wider layout */
             margin: 10px auto;
             padding: 15px;
             background: #fff;
@@ -385,8 +385,24 @@
             margin-bottom: 0;
         }
 
+        /* --- NEW STYLES FOR HORIZONTAL LAYOUT --- */
+        .main-content-area {
+            /* This will be a flex container on desktop */
+        }
+        .form-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .form-panel-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
         /* Responsive adjustments */
-        @media (max-width: 768px) {
+        @media (max-width: 1023px) {
             .container {
                 margin: 5px;
                 padding: 10px;
@@ -406,6 +422,31 @@
                 padding: 5px 10px;
             }
         }
+        
+        /* Desktop Layout (side-by-side) */
+        @media (min-width: 1024px) {
+            .main-content-area {
+                display: flex;
+                gap: 20px;
+                align-items: flex-start;
+            }
+            .form-panel {
+                flex: 0 0 420px; /* Fixed width for the form panel */
+                position: sticky;
+                top: 15px; /* Stick to top on scroll */
+            }
+            .table-panel {
+                flex: 1; /* Table takes remaining space */
+                min-width: 0; /* Prevents flexbox overflow issues */
+            }
+            .scrollable-table-container {
+                margin-top: 0; /* Adjust margin as nav controls are inside now */
+            }
+            .nav-controls {
+                margin-top: 0;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -414,9 +455,9 @@
         <p>Loading data...</p>
     </div>
     <div class="container">
+        <!-- These controls remain at the top for global context -->
         <div class="header-controls">
             <h1>Weekly Plan</h1>
-            <button type="button" class="btn btn-primary" id="editPlanBtn">Edit Plan</button>
         </div>
         <div class="form-row">
             <div class="flex-col">
@@ -435,181 +476,194 @@
             </div>
         </div>
 
-        <div id="form-section-container" class="form-section hidden">
-            <h2>Add Daily Plan Entry</h2>
-            <div class="form-row">
-                <div class="flex-col">
-                    <label for="selectedDay">Select Day:</label>
-                    <select id="selectedDay">
-                        <option value="">Select a Day</option>
-                    </select>
+        <!-- Main content area for the two-column layout -->
+        <div class="main-content-area">
+            
+            <!-- Left Panel: Form for adding entries -->
+            <div class="form-panel">
+                <div class="form-panel-header">
+                    <h2>Add/Edit Entry</h2>
+                    <button type="button" class="btn btn-primary" id="editPlanBtn">Show Form</button>
                 </div>
-                <div class="flex-col">
-                    <label for="entryTypeSelect">Entry Type:</label>
-                    <select id="entryTypeSelect" onchange="handleEntryTypeChange()">
-                        <option value="">Select Type</option>
-                        <option value="Visit">Visit</option>
-                        <option value="Event">Event</option>
-                        <option value="Leave">Leave</option>
-                    </select>
+                <div id="form-section-container" class="form-section hidden">
+                    <div class="form-row">
+                        <div class="flex-col">
+                            <label for="selectedDay">Select Day:</label>
+                            <select id="selectedDay">
+                                <option value="">Select a Day</option>
+                            </select>
+                        </div>
+                        <div class="flex-col">
+                            <label for="entryTypeSelect">Entry Type:</label>
+                            <select id="entryTypeSelect" onchange="handleEntryTypeChange()">
+                                <option value="">Select Type</option>
+                                <option value="Visit">Visit</option>
+                                <option value="Event">Event</option>
+                                <option value="Leave">Leave</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="visitInputsContainer" class="hidden entry-container visit-container">
+                        <div class="form-row">
+                            <div class="flex-col">
+                                <label for="visitTypeSelect">Visit Type:</label>
+                                <select id="visitTypeSelect" onchange="handleVisitTypeChange()">
+                                    <option value="">Select Visit Type</option>
+                                    <option value="Single Visit">Single Visit</option>
+                                    <option value="Double Visit">Double Visit</option>
+                                </select>
+                            </div>
+                            <div class="flex-col">
+                                <label for="visitTimeChoice">Time Option:</label>
+                                <select id="visitTimeChoice" onchange="handleVisitTimeChoiceChange()">
+                                    <option value="">Select Time Option</option>
+                                    <option value="Pick a Time">Pick a Time</option>
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                    <option value="Full Day">Full Day</option>
+                                </select>
+                            </div>
+                            <div id="visitTimeInputContainer" class="flex-col hidden">
+                                <label for="visitTimeInput">Specific Time:</label>
+                                <input type="time" id="visitTimeInput">
+                            </div>
+                        </div>
+                        <div id="mrBrickContainer" class="form-row hidden">
+                            <div class="flex-col">
+                                <label for="medicalRepSelect">Medical Rep:</label>
+                                <select id="medicalRepSelect" onchange="handleMedicalRepChange()">
+                                    <option value="">Select MR</option>
+                                </select>
+                            </div>
+                            <div class="flex-col">
+                                <label for="brickSelect">Brick:</label>
+                                <select id="brickSelect">
+                                    <option value="">Select Brick</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="flex-col col-span-full">
+                                <label for="visitDetails">Visit Details:</label>
+                                <textarea id="visitDetails" rows="2" placeholder="Add specific details about the visit..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="eventInputsContainer" class="hidden entry-container event-container">
+                        <div class="form-row">
+                            <div class="flex-col">
+                                <label for="eventSelect">Event Type:</label>
+                                <select id="eventSelect" onchange="handleEventChange()">
+                                    <option value="">Select Event</option>
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Training">Training</option>
+                                    <option value="Event">Event</option>
+                                    <option value="Admin Work">Admin Work</option>
+                                </select>
+                            </div>
+                            <div id="adminWorkTypeContainer" class="flex-col hidden">
+                                <label for="adminWorkTypeSelect">Admin Work Type:</label>
+                                <select id="adminWorkTypeSelect">
+                                    <option value="">Select Type</option>
+                                    <option value="Office">Office</option>
+                                    <option value="Online">Online</option>
+                                </select>
+                            </div>
+                            <div class="flex-col">
+                                <label for="eventTimeChoice">Time Option:</label>
+                                <select id="eventTimeChoice" onchange="handleEventTimeChoiceChange()">
+                                    <option value="">Select Time Option</option>
+                                    <option value="Pick a Time">Pick a Time</option>
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                    <option value="Full Day">Full Day</option>
+                                </select>
+                            </div>
+                            <div id="eventTimeInputContainer" class="flex-col hidden">
+                                <label for="eventTimeInput">Specific Time:</label>
+                                <input type="time" id="eventTimeInput">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="flex-col col-span-full">
+                                <label for="eventDetails">Event Details:</label>
+                                <textarea id="eventDetails" rows="2" placeholder="Add specific details about the event..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="leavesInputsContainer" class="hidden entry-container leave-container">
+                        <div class="form-row">
+                            <div class="flex-col">
+                                <label for="leaveSelect">Leave Type:</label>
+                                <select id="leaveSelect" onchange="handleLeaveChange()">
+                                    <option value="">Select Leave Type</option>
+                                    <option value="Annual Leave">Annual Leave</option>
+                                    <option value="Official Leave">Official Leave</option>
+                                    <option value="Sick Leave">Sick Leave</option>
+                                </select>
+                            </div>
+                            <div class="flex-col">
+                                <label for="leaveTimeChoice">Time Option:</label>
+                                <select id="leaveTimeChoice" onchange="handleLeaveTimeChoiceChange()">
+                                    <option value="">Select Time Option</option>
+                                    <option value="Pick a Time">Pick a Time</option>
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                    <option value="Full Day">Full Day</option>
+                                </select>
+                            </div>
+                            <div id="leaveTimeInputContainer" class="flex-col hidden">
+                                <label for="leaveTimeInput">Specific Time:</label>
+                                <input type="time" id="leaveTimeInput">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="flex-col col-span-full">
+                                <label for="leaveDetails">Leave Details:</label>
+                                <textarea id="leaveDetails" rows="2" placeholder="Add specific details about the leave..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-3">
+                        <button type="button" class="btn btn-primary" onclick="addPlanEntry()">Add Entry to Plan</button>
+                        <button type="button" class="btn btn-danger" id="deleteEntryButton" style="display:none;">Delete Selected Entries</button>
+                    </div>
                 </div>
             </div>
-            <div id="visitInputsContainer" class="hidden entry-container visit-container">
-                <div class="form-row">
-                    <div class="flex-col">
-                        <label for="visitTypeSelect">Visit Type:</label>
-                        <select id="visitTypeSelect" onchange="handleVisitTypeChange()">
-                            <option value="">Select Visit Type</option>
-                            <option value="Single Visit">Single Visit</option>
-                            <option value="Double Visit">Double Visit</option>
-                        </select>
-                    </div>
-                    <div class="flex-col">
-                        <label for="visitTimeChoice">Time Option:</label>
-                        <select id="visitTimeChoice" onchange="handleVisitTimeChoiceChange()">
-                            <option value="">Select Time Option</option>
-                            <option value="Pick a Time">Pick a Time</option>
-                            <option value="AM">AM</option>
-                            <option value="PM">PM</option>
-                            <option value="Full Day">Full Day</option>
-                        </select>
-                    </div>
-                    <div id="visitTimeInputContainer" class="flex-col hidden">
-                        <label for="visitTimeInput">Specific Time:</label>
-                        <input type="time" id="visitTimeInput">
-                    </div>
-                </div>
-                <div id="mrBrickContainer" class="form-row hidden">
-                    <div class="flex-col">
-                        <label for="medicalRepSelect">Medical Rep:</label>
-                        <select id="medicalRepSelect" onchange="handleMedicalRepChange()">
-                            <option value="">Select MR</option>
-                        </select>
-                    </div>
-                    <div class="flex-col">
-                        <label for="brickSelect">Brick:</label>
-                        <select id="brickSelect">
-                            <option value="">Select Brick</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="flex-col col-span-full">
-                        <label for="visitDetails">Visit Details:</label>
-                        <textarea id="visitDetails" rows="2" placeholder="Add specific details about the visit..."></textarea>
-                    </div>
-                </div>
-            </div>
-            <div id="eventInputsContainer" class="hidden entry-container event-container">
-                <div class="form-row">
-                    <div class="flex-col">
-                        <label for="eventSelect">Event Type:</label>
-                        <select id="eventSelect" onchange="handleEventChange()">
-                            <option value="">Select Event</option>
-                            <option value="Meeting">Meeting</option>
-                            <option value="Training">Training</option>
-                            <option value="Event">Event</option>
-                            <option value="Admin Work">Admin Work</option>
-                        </select>
-                    </div>
-                    <div id="adminWorkTypeContainer" class="flex-col hidden">
-                        <label for="adminWorkTypeSelect">Admin Work Type:</label>
-                        <select id="adminWorkTypeSelect">
-                            <option value="">Select Type</option>
-                            <option value="Office">Office</option>
-                            <option value="Online">Online</option>
-                        </select>
-                    </div>
-                    <div class="flex-col">
-                        <label for="eventTimeChoice">Time Option:</label>
-                        <select id="eventTimeChoice" onchange="handleEventTimeChoiceChange()">
-                            <option value="">Select Time Option</option>
-                            <option value="Pick a Time">Pick a Time</option>
-                            <option value="AM">AM</option>
-                            <option value="PM">PM</option>
-                            <option value="Full Day">Full Day</option>
-                        </select>
-                    </div>
-                    <div id="eventTimeInputContainer" class="flex-col hidden">
-                        <label for="eventTimeInput">Specific Time:</label>
-                        <input type="time" id="eventTimeInput">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="flex-col col-span-full">
-                        <label for="eventDetails">Event Details:</label>
-                        <textarea id="eventDetails" rows="2" placeholder="Add specific details about the event..."></textarea>
-                    </div>
-                </div>
-            </div>
-            <div id="leavesInputsContainer" class="hidden entry-container leave-container">
-                <div class="form-row">
-                    <div class="flex-col">
-                        <label for="leaveSelect">Leave Type:</label>
-                        <select id="leaveSelect" onchange="handleLeaveChange()">
-                            <option value="">Select Leave Type</option>
-                            <option value="Annual Leave">Annual Leave</option>
-                            <option value="Official Leave">Official Leave</option>
-                            <option value="Sick Leave">Sick Leave</option>
-                        </select>
-                    </div>
-                    <div class="flex-col">
-                        <label for="leaveTimeChoice">Time Option:</label>
-                        <select id="leaveTimeChoice" onchange="handleLeaveTimeChoiceChange()">
-                            <option value="">Select Time Option</option>
-                            <option value="Pick a Time">Pick a Time</option>
-                            <option value="AM">AM</option>
-                            <option value="PM">PM</option>
-                            <option value="Full Day">Full Day</option>
-                        </select>
-                    </div>
-                    <div id="leaveTimeInputContainer" class="flex-col hidden">
-                        <label for="leaveTimeInput">Specific Time:</label>
-                        <input type="time" id="leaveTimeInput">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="flex-col col-span-full">
-                        <label for="leaveDetails">Leave Details:</label>
-                        <textarea id="leaveDetails" rows="2" placeholder="Add specific details about the leave..."></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 mt-3">
-                <button type="button" class="btn btn-primary" onclick="addPlanEntry()">Add Entry to Plan</button>
-                <button type="button" class="btn btn-danger" id="deleteEntryButton" style="display:none;">Delete Selected Entries</button>
-            </div>
-        </div>
 
-        <div class="nav-controls">
-            <button id="prevWeekBtn" class="btn btn-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                <span class="hidden sm:inline">Previous Week</span>
-            </button>
-            <button id="nextWeekBtn" class="btn btn-secondary">
-                <span class="hidden sm:inline">Next Week</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
-        </div>
+            <!-- Right Panel: Table and navigation -->
+            <div class="table-panel">
+                <div class="nav-controls">
+                    <button id="prevWeekBtn" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span class="hidden sm:inline">Previous Week</span>
+                    </button>
+                    <button id="nextWeekBtn" class="btn btn-secondary">
+                        <span class="hidden sm:inline">Next Week</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
 
-        <div class="scrollable-table-container">
-            <table>
-                <thead>
-                    <tr id="table-header-row">
-                        <th class="time-cell">Time</th>
-                    </tr>
-                </thead>
-                <tbody id="plan-table-body">
-                </tbody>
-            </table>
-        </div>
-        <div class="flex justify-end gap-3 mt-3">
-            <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
-            <button type="submit" class="btn btn-primary" onclick="submitPlan()">Submit Plan</button>
+                <div class="scrollable-table-container">
+                    <table>
+                        <thead>
+                            <tr id="table-header-row">
+                                <th class="time-cell">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plan-table-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-end gap-3 mt-3">
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+                    <button type="submit" class="btn btn-primary" onclick="submitPlan()">Submit Plan</button>
+                </div>
+            </div>
         </div>
     </div>
     <div id="global-popover-container" class="popover-container"></div>
@@ -702,7 +756,7 @@
                         console.error(`Error fetching or parsing data (attempt ${retries + 1}):`, error);
                         retries++;
                         if (retries >= maxRetries) {
-                             showMessageBox(`Failed to load data after multiple attempts. Please check your connection and refresh.`, 'Error');
+                            showMessageBox(`Failed to load data after multiple attempts. Please check your connection and refresh.`, 'Error');
                         } else {
                             await new Promise(res => setTimeout(res, delay));
                             delay *= 2;
@@ -894,7 +948,7 @@
                 
                 // Hide form and reset button after successful submission
                 document.getElementById('form-section-container').classList.add('hidden');
-                document.getElementById('editPlanBtn').textContent = 'Edit Plan';
+                document.getElementById('editPlanBtn').textContent = 'Show Form';
 
                 await fetchExistingPlanData(planData.startDate); // Refresh to get new IDs
             } catch (error) {
@@ -1484,7 +1538,7 @@
         document.getElementById('editPlanBtn').addEventListener('click', (e) => {
             const form = document.getElementById('form-section-container');
             const isHidden = form.classList.toggle('hidden');
-            e.target.textContent = isHidden ? 'Edit Plan' : 'Hide Form';
+            e.target.textContent = isHidden ? 'Show Form' : 'Hide Form';
         });
 
         document.getElementById('prevWeekBtn').addEventListener('click', () => {
@@ -1540,4 +1594,4 @@
 
     </script>
 </body>
-</html>     
+</html>
