@@ -409,7 +409,7 @@
     </style>
 </head>
 <body>
-    <div id="loading-overlay" class="loading hidden">
+    <div id="loading-overlay" class="loading">
         <div class="spinner"></div>
         <p>Loading data...</p>
     </div>
@@ -625,6 +625,7 @@
         let initialY = 0;
         let initialHeight = 0;
         let cellHeight = 35; // Default cell height
+        let isAppInitialized = false;
 
         // --- CONSTANTS ---
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
@@ -677,37 +678,40 @@
 
         async function fetchData() {
             toggleLoading(true);
-            const maxRetries = 5;
-            let retries = 0;
-            let delay = 1000;
-            while (retries < maxRetries) {
-                try {
-                    const response = await fetch(CSV_URL, { mode: 'cors' });
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const csvText = await response.text();
-                    allData = parseCSV(csvText);
-                    const managerSet = new Set();
-                    allData.forEach(row => {
-                        if (row['District Manager']) {
-                            managerSet.add(row['District Manager']);
+            try {
+                const maxRetries = 5;
+                let retries = 0;
+                let delay = 1000;
+                while (retries < maxRetries) {
+                    try {
+                        const response = await fetch(CSV_URL, { mode: 'cors' });
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                    });
-                    districtManagers = Array.from(managerSet).sort();
-                    return; // Success
-                } catch (error) {
-                    console.error(`Error fetching or parsing data (attempt ${retries + 1}):`, error);
-                    retries++;
-                    if (retries < maxRetries) {
-                        await new Promise(res => setTimeout(res, delay));
-                        delay *= 2;
-                    } else {
-                        showMessageBox(`Failed to load data after multiple attempts. Error: ${error.message}`, 'Error');
+                        const csvText = await response.text();
+                        allData = parseCSV(csvText);
+                        const managerSet = new Set();
+                        allData.forEach(row => {
+                            if (row['District Manager']) {
+                                managerSet.add(row['District Manager']);
+                            }
+                        });
+                        districtManagers = Array.from(managerSet).sort();
+                        return; // Success, exit the function
+                    } catch (error) {
+                        console.error(`Error fetching or parsing data (attempt ${retries + 1}):`, error);
+                        retries++;
+                        if (retries >= maxRetries) {
+                             showMessageBox(`Failed to load data after multiple attempts. Please check your connection and refresh.`, 'Error');
+                        } else {
+                            await new Promise(res => setTimeout(res, delay));
+                            delay *= 2;
+                        }
                     }
                 }
+            } finally {
+                toggleLoading(false); // This will always run
             }
-            toggleLoading(false); // Ensure loading is hidden on failure
         }
 
         // --- INITIALIZATION ---
@@ -718,6 +722,12 @@
             setDefaultStartDate();
             updateDatesAndDaySelector();
             handleEntryTypeChange();
+        }
+        
+        function handleInitialization(user) {
+            if (isAppInitialized) return;
+            isAppInitialized = true;
+            initializeApp(user);
         }
 
         function filterAndPopulateDMs(user) {
@@ -881,6 +891,11 @@
                 if (error) throw error;
 
                 showMessageBox('Plan submitted successfully!', 'Success');
+                
+                // Hide form and reset button after successful submission
+                document.getElementById('form-section-container').classList.add('hidden');
+                document.getElementById('editPlanBtn').textContent = 'Edit Plan';
+
                 await fetchExistingPlanData(planData.startDate); // Refresh to get new IDs
             } catch (error) {
                 console.error('Error submitting plan:', error);
@@ -1451,14 +1466,15 @@
         
         // --- GLOBAL EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', () => {
-            // This is a fallback if the message event doesn't fire
-            initializeApp({ username: 'Default User', title: 'admin' });
+            // The app will wait for user data from the parent window via the 'message' event.
+            // If it's stuck on "Loading...", it means the user data was not received.
+            console.log("Weekly plan waiting for user data...");
         });
 
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'dmPlanningUserPermissions') {
                 console.log('DM-Plan received user data:', event.data.user);
-                initializeApp(event.data.user);
+                handleInitialization(event.data.user);
             }
         });
         
@@ -1474,7 +1490,7 @@
         document.getElementById('prevWeekBtn').addEventListener('click', () => {
             const startDateInput = document.getElementById('startDate');
             const currentDate = new Date(startDateInput.value);
-            currentDate.setDate(currentDate.getDate() - 6); // Go back 7 days from current start
+            currentDate.setDate(currentDate.getDate() - 7);
             startDateInput.value = currentDate.toISOString().split('T')[0];
             updateDatesAndDaySelector();
         });
@@ -1482,7 +1498,7 @@
         document.getElementById('nextWeekBtn').addEventListener('click', () => {
             const startDateInput = document.getElementById('startDate');
             const currentDate = new Date(startDateInput.value);
-            currentDate.setDate(currentDate.getDate() + 8); // Go forward 7 days from current start
+            currentDate.setDate(currentDate.getDate() + 7);
             startDateInput.value = currentDate.toISOString().split('T')[0];
             updateDatesAndDaySelector();
         });
