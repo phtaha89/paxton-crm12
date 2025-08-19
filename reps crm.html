@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -162,7 +162,7 @@
             flex: 1;
             padding: 10px 12px;
             border: none;
-            border-radius: 6px;
+            border-radius: 14px;
             cursor: pointer;
             font-weight: 500;
             font-size: 13px;
@@ -286,7 +286,7 @@
         table {
             border-collapse: separate;
             border-spacing: 0;
-            max-height: 600px;
+            width: 100%;
             border-radius: 8px;
             overflow: hidden;
         }
@@ -303,6 +303,7 @@
             color: #495057;
             position: sticky;
             top: 0;
+            z-index: 1;
         }
         tbody tr:hover {
             background-color: rgba(67, 97, 238, 0.05);
@@ -310,8 +311,15 @@
         th:first-child, td:first-child {
             position: sticky;
             left: 0;
-            background-color: white;
-            z-index: 10;
+            background-color: inherit;
+            z-index: 2;
+        }
+        tbody tr:hover td:first-child {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        th:first-child {
+            z-index: 3;
+            background-color: #f8f9fa;
         }
         .hidden {
             display: none;
@@ -336,7 +344,7 @@
             width: 100%;
             padding: 10px 12px 10px 36px;
             border: 1px solid #dce0e5;
-            border-radius: 8px;
+            border-radius: 18px;
             font-size: 14px;
         }
         .search-box i {
@@ -1029,8 +1037,8 @@
             .mobile-only-header .main-tab-group {
                 display: none;
             }
-            .mobile-only-header .med-rep-info,
-            .mobile-only-header .relative {
+            /* FIX: Removed '.mobile-only-header .relative' from this rule to prevent it from hiding the dropdown in the slide-out nav */
+            .mobile-only-header .med-rep-info {
                 display: none;
             }
         }
@@ -1846,6 +1854,21 @@
                 request: document.getElementById('requestSection'),
                 weeklyPlan: document.getElementById('weeklyPlanSection')
             };
+            
+            // --- Mobile Navigation Logic ---
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const mobileNav = document.getElementById('mobileSideNav');
+            const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+
+            function toggleMobileNav() {
+                mobileNav.classList.toggle('show');
+                mobileNavOverlay.classList.toggle('show');
+                document.body.classList.toggle('mobile-nav-open');
+            }
+
+            hamburgerBtn.addEventListener('click', toggleMobileNav);
+            mobileNavOverlay.addEventListener('click', toggleMobileNav);
+
 
             // --- Helper Functions to Update UI Elements ---
             function updateAllRepNameElements(htmlContent) {
@@ -2008,6 +2031,10 @@
                     requestFormManager.showTab('personal');
                 } else if (sectionType === 'weeklyPlan') {
                     weeklyPlanManager.initialize(currentMedRep.name);
+                }
+                 // Close mobile nav after selection
+                if (mobileNav.classList.contains('show')) {
+                    toggleMobileNav();
                 }
             }
             
@@ -2414,7 +2441,7 @@
                     this.elements.hcpSelect.value = ''; this.elements.brickHcpInput.value = ''; this.elements.specialtyHcpInput.value = '';
                     this.elements.visitLocationHcpSelect.value = ''; this.elements.commentsHcpInput.value = '';
                     this.elements.pharmacyNameInput.value = ''; this.elements.brickSelect.value = ''; this.elements.commentsPharmacyInput.value = '';
-                    this.elements.eventTypeSelect.value = ''; this.elements.eventActivitySelect.value = ''; this.elements.commentsEventInput.value = '';
+                    this.elements.eventTypeSelect.value = ''; this.elements.eventActivitySelect.value = ''; this.elements.commentsEvent.value = '';
                     this.elements.amDoctorNameInput.value = ''; this.elements.associatedAccountSelect.value = ''; this.elements.amBrickSelect.value = ''; this.elements.commentsAmInput.value = '';
                     [this.elements.hcpForm, this.elements.pharmacyForm, this.elements.eventForm, this.elements.amForm, this.elements.remainingVisitsSection, this.elements.savedCommentSection, this.elements.dataTable].forEach(el => el.classList.add('hidden'));
                     this.elements.internalTabButtons.forEach(button => button.classList.remove('selected'));
