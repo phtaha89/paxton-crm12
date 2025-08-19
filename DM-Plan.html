@@ -611,10 +611,6 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="flex justify-end gap-3 mt-3">
-                    <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
-                    <button type="submit" class="btn btn-primary" onclick="submitPlan()">Submit Plan</button>
-                </div>
             </div>
         </div>
     </div>
@@ -796,57 +792,6 @@
                 toggleLoading(false);
             }
         }
-
-        async function submitPlan() {
-            const planData = {
-                districtManager: document.getElementById('districtManager').value,
-                startDate: document.getElementById('startDate').value,
-                endDate: document.getElementById('endDate').value,
-            };
-            if (!planData.districtManager || !planData.startDate) {
-                showMessageBox('Please fill in the District Manager and Week Start Date.');
-                return;
-            }
-            const allPlanBoxes = document.querySelectorAll('.plan-box');
-            const weeklyEntries = Array.from(allPlanBoxes).map(box => JSON.parse(box.getAttribute('data-entry-details')));
-            toggleLoading(true);
-            try {
-                const { error: deleteError } = await _supabase.from('dms_weekly_plans')
-                    .delete()
-                    .eq('district_manager_name', planData.districtManager)
-                    .eq('start_date', planData.startDate);
-                if (deleteError) throw deleteError;
-                if (weeklyEntries.length > 0) {
-                    const entriesToInsert = weeklyEntries.map(entry => ({
-                        district_manager_name: planData.districtManager,
-                        start_date: planData.startDate,
-                        end_date: planData.endDate,
-                        entry_day: entry.day,
-                        entry_type: entry.type,
-                        start_hour: entry.startHour,
-                        end_hour: entry.endHour,
-                        start_time_option: entry.startTimeOption,
-                        visit_type: entry.visitType,
-                        medical_rep_name: entry.medicalRep,
-                        brick: entry.brick,
-                        event_type: entry.event,
-                        leave_type: entry.leaveType,
-                        details: entry.details
-                    }));
-                    const { error: insertError } = await _supabase.from('dms_weekly_plans').insert(entriesToInsert);
-                    if (insertError) throw insertError;
-                }
-                showMessageBox('Plan submitted successfully!', 'Success');
-                document.getElementById('form-section-container').classList.add('hidden');
-                document.getElementById('editPlanBtn').textContent = 'Edit Plan';
-                await fetchExistingPlanData(planData.startDate);
-            } catch (error) {
-                console.error('Error submitting plan:', error);
-                showMessageBox(`Failed to submit plan. Error: ${error.message}`, 'Error');
-            } finally {
-                toggleLoading(false);
-            }
-        }
         
         async function deleteSelectedEntries() {
             const selectedBoxes = document.querySelectorAll('.plan-box.selected');
@@ -854,19 +799,52 @@
                 showMessageBox('No entries selected for deletion.');
                 return;
             }
-            selectedBoxes.forEach(box => box.remove());
-            showMessageBox(`${selectedBoxes.length} entr${selectedBoxes.length > 1 ? 'ies' : 'y'} removed. Click 'Submit Plan' to save.`);
-            updateDeleteButtonVisibility();
-            hideAllPopovers();
+
+            const idsToDelete = Array.from(selectedBoxes)
+                .map(box => box.getAttribute('data-entry-id'))
+                .filter(id => id && !id.startsWith('entry-'));
+
+            toggleLoading(true);
+            try {
+                if (idsToDelete.length > 0) {
+                    const { error } = await _supabase.from('dms_weekly_plans').delete().in('id', idsToDelete);
+                    if (error) throw error;
+                }
+                selectedBoxes.forEach(box => box.remove());
+                showMessageBox('Selected entries deleted successfully!', 'Success');
+            } catch (error) {
+                console.error('Error deleting entries:', error);
+                showMessageBox(`Failed to delete entries. Error: ${error.message}`, 'Error');
+                await fetchExistingPlanData(document.getElementById('startDate').value);
+            } finally {
+                toggleLoading(false);
+                updateDeleteButtonVisibility();
+                hideAllPopovers();
+            }
         }
         
-        function deleteSingleEntry(e, entryId) {
+        async function deleteSingleEntry(e, entryId) {
             e.stopPropagation();
             hideAllPopovers();
             const planBoxElement = document.querySelector(`[data-entry-id="${entryId}"]`);
             if (!planBoxElement) return;
-            planBoxElement.remove();
-            showMessageBox(`Entry removed. Click 'Submit Plan' to save.`);
+
+            if (entryId && !entryId.startsWith('entry-')) {
+                toggleLoading(true);
+                try {
+                    const { error } = await _supabase.from('dms_weekly_plans').delete().eq('id', entryId);
+                    if (error) throw error;
+                    showMessageBox('Entry deleted successfully!', 'Success');
+                    planBoxElement.remove();
+                } catch (error) {
+                    console.error('Error deleting entry:', error);
+                    showMessageBox(`Failed to delete entry. Error: ${error.message}`, 'Error');
+                } finally {
+                    toggleLoading(false);
+                }
+            } else {
+                planBoxElement.remove();
+            }
             updateDeleteButtonVisibility();
         }
 
@@ -1049,7 +1027,7 @@
         }
 
         // --- DYNAMIC ENTRY ADDITION & OVERLAP LOGIC ---
-        function addPlanEntry() {
+        async function addPlanEntry() {
             const selectedDayValue = document.getElementById('selectedDay').value;
             const entryType = document.getElementById('entryTypeSelect').value;
             if (!document.getElementById('districtManager').value || !document.getElementById('startDate').value || !selectedDayValue || !entryType) {
@@ -1103,21 +1081,21 @@
             } else if (timeOption === 'AM') { entryData.startHour = 9; entryData.endHour = 13; }
             else if (timeOption === 'PM') { entryData.startHour = 14; entryData.endHour = 23; }
             else if (timeOption === 'Full Day') { entryData.startHour = startHour; entryData.endHour = endHour; }
-            if (timeOption === 'Full Day') {
-                for (let hour = startHour; hour <= endHour; hour++) {
-                    const cell = document.getElementById(`day-${dayIndex}-hour-${hour}`);
-                    if (cell) cell.innerHTML = '';
-                }
-                document.getElementById(`day-${dayIndex}-hour-${startHour}`).appendChild(createPlanBoxElement(entryData));
-                return;
-            }
+            
             const existingEntriesOnDay = Array.from(document.querySelectorAll(`#plan-table-body .plan-box`))
                 .map(box => JSON.parse(box.getAttribute('data-entry-details')))
                 .filter(entry => entry.day === dayName);
-            if (existingEntriesOnDay.some(e => e.startTimeOption === 'Full Day')) {
+
+            if (timeOption === 'Full Day') {
+                if (existingEntriesOnDay.length > 0) {
+                    showMessageBox('Clear existing entries before adding a Full Day event.');
+                    return;
+                }
+            } else if (existingEntriesOnDay.some(e => e.startTimeOption === 'Full Day')) {
                 showMessageBox('Cannot add an entry on a day that is already marked as Full Day.');
                 return;
             }
+
             let proposedStart = entryData.startHour;
             const duration = entryData.endHour - entryData.startHour + 1;
             let isOverlapping = true;
@@ -1139,9 +1117,36 @@
             }
             entryData.startHour = proposedStart;
             entryData.endHour = proposedStart + duration - 1;
-            const targetCell = document.getElementById(`day-${dayIndex}-hour-${entryData.startHour}`);
-            if (targetCell) {
-                targetCell.appendChild(createPlanBoxElement(entryData));
+
+            toggleLoading(true);
+            try {
+                const entryToInsert = {
+                    district_manager_name: document.getElementById('districtManager').value,
+                    start_date: document.getElementById('startDate').value,
+                    end_date: document.getElementById('endDate').value,
+                    entry_day: entryData.day,
+                    entry_type: entryData.type,
+                    start_hour: entryData.startHour,
+                    end_hour: entryData.endHour,
+                    start_time_option: entryData.startTimeOption,
+                    visit_type: entryData.visitType,
+                    medical_rep_name: entryData.medicalRep,
+                    brick: entryData.brick,
+                    event_type: entryData.event,
+                    leave_type: entryData.leaveType,
+                    details: entryData.details
+                };
+                const { data, error } = await _supabase.from('dms_weekly_plans').insert([entryToInsert]).select();
+                if (error) throw error;
+                
+                await fetchExistingPlanData(document.getElementById('startDate').value);
+                showMessageBox('Entry added successfully.');
+
+            } catch (error) {
+                console.error('Error adding entry:', error);
+                showMessageBox(`Failed to add entry. Error: ${error.message}`, 'Error');
+            } finally {
+                toggleLoading(false);
             }
         }
 
@@ -1177,7 +1182,7 @@
             }
         }
 
-        function stopResize() {
+        async function stopResize() {
             if (!isResizing) return;
             isResizing = false;
             document.removeEventListener('mousemove', doResize);
@@ -1190,6 +1195,20 @@
                 const newEndHour = Math.min(entryData.startHour + newDurationHours - 1, endHour);
                 entryData.endHour = newEndHour;
                 currentResizingBox.setAttribute('data-entry-details', JSON.stringify(entryData));
+
+                if (entryData.id) {
+                    toggleLoading(true);
+                    try {
+                        const { error } = await _supabase.from('dms_weekly_plans').update({ end_hour: newEndHour }).eq('id', entryData.id);
+                        if (error) throw error;
+                    } catch (error) {
+                        console.error('Error updating entry:', error);
+                        showMessageBox(`Failed to update entry. Error: ${error.message}`, 'Error');
+                        await fetchExistingPlanData(document.getElementById('startDate').value);
+                    } finally {
+                        toggleLoading(false);
+                    }
+                }
             }
             currentResizingBox = null;
         }
@@ -1224,7 +1243,7 @@
                     break;
             }
             contentHtml += `<p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption)}</p>`;
-            popover.innerHTML = `${contentHtml}<button type="button" class="btn btn-danger mt-2" onclick="deleteSingleEntry(event, '${planBoxElement.getAttribute('data-entry-id')}')">Delete</button>`;
+            popover.innerHTML = `${contentHtml}<button type="button" class="btn btn-danger mt-2" onclick="deleteSingleEntry(event, '${entryData.id}')">Delete</button>`;
             const planBoxRect = planBoxElement.getBoundingClientRect();
             document.body.appendChild(popover);
             const popoverRect = popover.getBoundingClientRect();
@@ -1313,6 +1332,13 @@
                             editBtn.classList.remove('btn-primary');
                             editBtn.classList.add('btn-danger');
                         }
+                    } else {
+                        const form = document.getElementById('form-section-container');
+                        form.classList.add('hidden');
+                        const editBtn = document.getElementById('editPlanBtn');
+                        editBtn.textContent = 'Edit Plan';
+                        editBtn.classList.remove('btn-danger');
+                        editBtn.classList.add('btn-primary');
                     }
                 }
             } else {
@@ -1340,6 +1366,21 @@
 
         const planTableBody = document.getElementById('plan-table-body');
         planTableBody.addEventListener('touchstart', (event) => {
+            if (event.target.tagName === 'TD') {
+                document.querySelectorAll('.plan-box.selected').forEach(box => box.classList.remove('selected'));
+                updateDeleteButtonVisibility();
+                multiSelectMode = false;
+                const form = document.getElementById('form-section-container');
+                if (!form.classList.contains('hidden')) {
+                    form.classList.add('hidden');
+                    const editBtn = document.getElementById('editPlanBtn');
+                    editBtn.textContent = 'Edit Plan';
+                    editBtn.classList.remove('btn-danger');
+                    editBtn.classList.add('btn-primary');
+                }
+                return;
+            }
+
             const targetBox = event.target.closest('.plan-box');
             if (!targetBox) return;
             longPressTimer = setTimeout(() => {
