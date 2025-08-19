@@ -28,10 +28,15 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        h1 {
-            text-align: center;
-            color: #495057;
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #495057;
             font-size: 1.5rem;
             font-weight: 600;
         }
@@ -151,22 +156,12 @@
         .leave-container { border-left: 4px solid #dc3545; }
 
         /* Table styles */
-        .table-container {
+        .scrollable-table-container {
+            position: relative;
             overflow-x: auto;
             border: 1px solid #dee2e6;
             border-radius: 6px;
             margin: 20px 0;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        
-        .scrollable-table-container {
-            position: relative;
-            overflow-x: auto;
-            overflow-y: auto;
-            max-height: 500px;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
         }
 
         table {
@@ -190,7 +185,7 @@
             left: 0;
             z-index: 30;
             min-width: 60px;
-            width: 1%; /* Auto-fit width to content */
+            width: auto;
             white-space: nowrap;
         }
 
@@ -203,30 +198,10 @@
             z-index: 31;
         }
         
-        th:first-child,
-        .time-cell {
-            min-width: 60px; 
-            width: 1%;
-        }
-        
-        /* Sticky headers and columns */
-        .scrollable-table-container thead th,
-        .scrollable-table-container tbody td:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 30;
-            background-color: #f8f9fa;
-        }
-        
-        .scrollable-table-container thead th {
-             z-index: 31; 
+        th:first-child {
+            z-index: 32; /* Ensure top-left corner is on top */
         }
 
-        .scrollable-table-container tbody td:first-child {
-            background-color: #fff;
-            z-index: 30;
-        }
-        
         .table-cell-hour {
             height: 35px;
             position: relative;
@@ -439,7 +414,10 @@
         <p>Loading data...</p>
     </div>
     <div class="container">
-        <h1>Weekly Plan Submission</h1>
+        <div class="header-controls">
+            <h1>Weekly Plan</h1>
+            <button type="button" class="btn btn-primary" id="editPlanBtn">Edit Plan</button>
+        </div>
         <div class="form-row">
             <div class="flex-col">
                 <label for="districtManager">District Manager:</label>
@@ -456,7 +434,8 @@
                 <input type="date" id="endDate" readonly>
             </div>
         </div>
-        <div class="form-section">
+
+        <div id="form-section-container" class="form-section hidden">
             <h2>Add Daily Plan Entry</h2>
             <div class="form-row">
                 <div class="flex-col">
@@ -635,31 +614,48 @@
     </div>
     <div id="global-popover-container" class="popover-container"></div>
     <script>
+        // --- STATE MANAGEMENT ---
         let allData = [];
         let districtManagers = [];
         let loggedInUser = null;
         let multiSelectMode = false;
         let longPressTimer;
-
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
-        const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-        const startHour = 9;
-        const endHour = 23;
-        const totalHours = endHour - startHour + 1;
         let isResizing = false;
         let currentResizingBox = null;
         let initialY = 0;
         let initialHeight = 0;
-        let cellHeight = 0;
+        let cellHeight = 35; // Default cell height
 
+        // --- CONSTANTS ---
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv';
+        const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        const startHour = 9;
+        const endHour = 23;
+
+        // --- SUPABASE CLIENT ---
         const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
         const _supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
+        // --- UI HELPER FUNCTIONS ---
         function toggleLoading(show) {
             document.getElementById('loading-overlay').classList.toggle('hidden', !show);
         }
 
+        function showMessageBox(message, title = 'Notification') {
+            const modalBox = document.createElement('div');
+            modalBox.className = 'modal-box';
+            modalBox.innerHTML = `
+                <div class="modal-content">
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-box').remove()">Close</button>
+                </div>
+            `;
+            document.body.appendChild(modalBox);
+        }
+
+        // --- DATA FETCHING & PARSING ---
         function parseCSV(csv) {
             const lines = csv.split('\n');
             const nonEmptyLines = lines.filter(line => line.trim() !== '');
@@ -699,7 +695,7 @@
                         }
                     });
                     districtManagers = Array.from(managerSet).sort();
-                    return;
+                    return; // Success
                 } catch (error) {
                     console.error(`Error fetching or parsing data (attempt ${retries + 1}):`, error);
                     retries++;
@@ -709,14 +705,12 @@
                     } else {
                         showMessageBox(`Failed to load data after multiple attempts. Error: ${error.message}`, 'Error');
                     }
-                } finally {
-                    if (retries >= maxRetries || allData.length > 0) {
-                        toggleLoading(false);
-                    }
                 }
             }
+            toggleLoading(false); // Ensure loading is hidden on failure
         }
-        
+
+        // --- INITIALIZATION ---
         async function initializeApp(user) {
             loggedInUser = user;
             await fetchData();
@@ -755,20 +749,7 @@
             }
         }
 
-        function showMessageBox(message, title = 'Notification') {
-            // New modal styling to match the new CSS
-            const modalBox = document.createElement('div');
-            modalBox.className = 'modal-box';
-            modalBox.innerHTML = `
-                <div class="modal-content">
-                    <h3>${title}</h3>
-                    <p>${message}</p>
-                    <button type="button" class="btn btn-secondary" onclick="this.closest('.modal-box').remove()">Close</button>
-                </div>
-            `;
-            document.body.appendChild(modalBox);
-        }
-
+        // --- DATE & TIME LOGIC ---
         function calculateEndDate(startDateStr) {
             if (!startDateStr) return '';
             const startDate = new Date(startDateStr);
@@ -780,7 +761,7 @@
         function setDefaultStartDate() {
             const today = new Date();
             const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-            let daysSinceSaturday = (dayOfWeek + 1) % 7; // 0=Sat, 1=Sun, ..., 6=Fri
+            let daysSinceSaturday = (dayOfWeek + 1) % 7;
             
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - daysSinceSaturday);
@@ -803,30 +784,43 @@
             fetchExistingPlanData(selectedStartDate);
         }
 
+        function formatHourForDisplay(hour) {
+            if (hour === 12) return '12 PM';
+            if (hour > 12) return `${hour - 12} PM`;
+            return `${hour} AM`;
+        }
+        
+        function getTimeDisplay(startHour, endHour, startTimeOption) {
+            if (startTimeOption === 'Full Day') return 'Full Day';
+            if (startTimeOption === 'AM') return `AM (9 AM - 2 PM)`;
+            if (startTimeOption === 'PM') return `PM (2 PM - 11 PM)`;
+            
+            // For specific times, show the range. End hour is inclusive.
+            return `${formatHourForDisplay(startHour)} - ${formatHourForDisplay(endHour + 1)}`;
+        }
+
+        // --- PLAN DATA MANAGEMENT (SUPABASE) ---
         async function fetchExistingPlanData(startDate) {
             const districtManager = document.getElementById('districtManager').value;
             const endDate = document.getElementById('endDate').value;
 
             if (!startDate || !endDate || !districtManager) {
-                console.log('Missing required filters.');
+                console.log('Missing required filters to fetch plan data.');
+                clearPlanTableBody(); // Clear table if filters are incomplete
                 return;
             }
 
-            clearPlanTableBody();
             toggleLoading(true);
-
             try {
-                const { data: entries, error: entriesError } = await _supabase
+                const { data: entries, error } = await _supabase
                     .from('dms_weekly_plans')
                     .select('*')
                     .eq('district_manager_name', districtManager)
                     .gte('start_date', startDate)
                     .lte('end_date', endDate);
 
-                if (entriesError) throw entriesError;
-
+                if (error) throw error;
                 populatePlanTable(entries || []);
-
             } catch (error) {
                 console.error('Error fetching plan data:', error);
                 showMessageBox(`Failed to load plan data. Error: ${error.message}`, 'Error');
@@ -835,257 +829,8 @@
             }
         }
 
-        document.getElementById('districtManager').addEventListener('change', updateDatesAndDaySelector);
-        document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
-        
-        document.getElementById('prevWeekBtn').addEventListener('click', () => {
-            const startDateInput = document.getElementById('startDate');
-            const currentDate = new Date(startDateInput.value);
-            currentDate.setDate(currentDate.getDate() - 7);
-            startDateInput.value = currentDate.toISOString().split('T')[0];
-            updateDatesAndDaySelector();
-        });
-
-        document.getElementById('nextWeekBtn').addEventListener('click', () => {
-            const startDateInput = document.getElementById('startDate');
-            const currentDate = new Date(startDateInput.value);
-            currentDate.setDate(currentDate.getDate() + 7);
-            startDateInput.value = currentDate.toISOString().split('T')[0];
-            updateDatesAndDaySelector();
-        });
-
-
-        function populatePlanTable(entries) {
-            clearPlanTableBody();
-
-            if (!entries || entries.length === 0) {
-                console.log('No entries to populate.');
-                return;
-            }
-
-            entries.forEach(entry => {
-                const dayIndex = daysOfWeek.indexOf(entry.entry_day);
-                if (dayIndex === -1) {
-                    console.log('Day not found for entry:', entry);
-                    return;
-                }
-
-                let planDetailsHtml = '';
-                let entryData = {
-                    id: entry.id,
-                    day: entry.entry_day,
-                    date: entry.entry_day,
-                    type: entry.entry_type,
-                    details: entry.details || '',
-                    startHour: entry.start_hour,
-                    endHour: entry.end_hour
-                };
-
-                let isFullDay = false;
-                let timeDisplay = getTimeDisplay(entry.start_hour, entry.end_hour, entry.start_time_option, entry.end_time_option);
-
-                if (entry.entry_type === 'Event') {
-                    entryData.event = entry.event_type;
-                    entryData.eventTime = timeDisplay;
-                    entryData.isLeave = false;
-                    entryData.startTimeOption = entry.start_time_option;
-                    if (entry.start_time_option === 'Full Day') isFullDay = true;
-
-                    let adminWorkSubType = '';
-                    if (entry.event_type === 'Admin Work' && entry.details) {
-                        const detailsParts = entry.details.split(' - ');
-                        if (detailsParts.length > 1 && (detailsParts[0] === 'Office' || detailsParts[0] === 'Online')) {
-                            adminWorkSubType = detailsParts[0];
-                            entryData.adminWorkType = adminWorkSubType;
-                        }
-                    }
-
-                    planDetailsHtml = `
-                        <div class="plan-box event-box"
-                             data-type="Event"
-                             data-event="${entry.event_type}"
-                             data-time="${timeDisplay}"
-                             data-details="${entry.details || ''}"
-                             data-start-hour="${entry.start_hour}"
-                             data-end-hour="${entry.end_hour}"
-                             data-is-leave="false"
-                             data-entry-id="${entry.id}"
-                             data-start-time-option="${entry.start_time_option}">
-                            <p>${entry.event_type}</p>
-                            ${entry.event_type === 'Admin Work' && adminWorkSubType ? `<p><span class="font-semibold">Type:</span> ${adminWorkSubType}</p>` : ''}
-                            ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
-                        </div>
-                    `;
-                } else if (entry.entry_type === 'Visit') {
-                    entryData.visitType = entry.visit_type;
-                    entryData.visitTime = timeDisplay;
-                    entryData.medicalRep = entry.medical_rep_name || '';
-                    entryData.brick = entry.brick || '';
-                    entryData.isLeave = false;
-                    entryData.startTimeOption = entry.start_time_option;
-                    if (entry.start_time_option === 'Full Day') isFullDay = true;
-
-
-                    planDetailsHtml = `
-                        <div class="plan-box visit-box"
-                             data-type="Visit"
-                             data-visit-type="${entry.visit_type}"
-                             data-time="${timeDisplay}"
-                             data-mr="${entry.medical_rep_name || ''}"
-                             data-brick="${entry.brick || ''}"
-                             data-details="${entry.details || ''}"
-                             data-start-hour="${entry.start_hour}"
-                             data-end-hour="${entry.end_hour}"
-                             data-is-leave="false"
-                             data-entry-id="${entry.id}"
-                             data-start-time-option="${entry.start_time_option}">
-                            <p>${entry.visit_type}</p>
-                            ${entry.visit_type === 'Double Visit' ? `<p><span class="font-semibold">Brick:</span> ${entry.brick || ''}</p>` : ''}
-                            ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
-                        </div>
-                    `;
-                } else if (entry.entry_type === 'Leave') {
-                    entryData.leaveType = entry.leave_type;
-                    entryData.leaveTime = timeDisplay;
-                    entryData.isLeave = true;
-                    entryData.startTimeOption = entry.start_time_option;
-                    if (entry.start_time_option === 'Full Day') isFullDay = true;
-
-
-                    planDetailsHtml = `
-                        <div class="plan-box leave-box"
-                             data-type="Leave"
-                             data-leave-type="${entry.leave_type}"
-                             data-time="${timeDisplay}"
-                             data-details="${entry.details || ''}"
-                             data-start-hour="${entry.start_hour}"
-                             data-end-hour="${entry.end_hour}"
-                             data-is-leave="true"
-                             data-entry-id="${entry.id}"
-                             data-start-time-option="${entry.start_time_option}">
-                            <p>${entry.leave_type}</p>
-                            ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
-                        </div>
-                    `;
-                }
-
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = planDetailsHtml.trim();
-                const planBoxElement = tempDiv.firstChild;
-
-                const targetCell = document.getElementById(`day-${dayIndex}-hour-${entry.start_hour}`);
-                if (!targetCell) {
-                    console.log('Target cell not found for entry:', entry);
-                    return;
-                }
-
-                const existingBoxesInCell = Array.from(targetCell.querySelectorAll('.plan-box'));
-                const hasFullDayEntry = existingBoxesInCell.some(box => box.dataset.startTimeOption === 'Full Day');
-
-                if (isFullDay) {
-                    // Remove any existing non-full-day entries before adding a full-day one
-                    if (!hasFullDayEntry) {
-                        existingBoxesInCell.forEach(box => box.remove());
-                    }
-                    
-                    const durationHours = endHour - startHour + 1;
-                    planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
-                    planBoxElement.style.top = '0px';
-                    planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
-                    targetCell.appendChild(planBoxElement);
-                } else {
-                    // Check for overlap with other entries on the same day and adjust position
-                    const existingBoxesOnDay = [];
-                    for(let h = startHour; h <= endHour; h++) {
-                        const dayCell = document.getElementById(`day-${dayIndex}-hour-${h}`);
-                        if(dayCell) {
-                           existingBoxesOnDay.push(...dayCell.querySelectorAll('.plan-box:not(.full-day-entry)'));
-                        }
-                    }
-                    
-                    const newEntryDurationHours = entry.end_hour - entry.start_hour + 1;
-                    
-                    let proposedStartHour = entry.start_hour;
-                    let isOverlapping = true;
-                    
-                    while(isOverlapping && proposedStartHour <= endHour) {
-                        isOverlapping = false;
-                        let proposedEndHour = proposedStartHour + newEntryDurationHours - 1;
-                        for(const existingBox of existingBoxesOnDay) {
-                            const existingStartHour = parseInt(existingBox.dataset.startHour);
-                            const existingEndHour = parseInt(existingBox.dataset.endHour);
-                            if( (proposedStartHour <= existingEndHour && proposedEndHour >= existingStartHour) && (existingBox.getAttribute('data-entry-id') !== entry.id) ) {
-                                isOverlapping = true;
-                                proposedStartHour = existingEndHour + 1;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (proposedStartHour + newEntryDurationHours - 1 <= endHour) {
-                        entryData.startHour = proposedStartHour;
-                        entryData.endHour = proposedStartHour + newEntryDurationHours - 1;
-                    }
-                    
-                    planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
-                    const newTargetCell = document.getElementById(`day-${dayIndex}-hour-${entryData.startHour}`);
-
-                    if(newTargetCell) {
-                       const durationHours = entryData.endHour - entryData.startHour + 1;
-                       planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
-                       planBoxElement.style.top = '0px';
-                       newTargetCell.appendChild(planBoxElement);
-                    } else {
-                        console.error('Could not find a non-overlapping cell for entry:', entry);
-                    }
-
-                    const resizeHandle = planBoxElement.querySelector('.resize-handle');
-                    if (resizeHandle) {
-                        resizeHandle.addEventListener('mousedown', startResize);
-                        resizeHandle.addEventListener('touchstart', startResize, { passive: false });
-                    }
-                }
-            });
-        }
-
-
-        function getTimeDisplay(startHour, endHour, startTimeOption, endTimeOption) {
-            if (startTimeOption === 'Full Day') {
-                return 'Full Day (9 AM - 11 PM)';
-            } else if (startTimeOption === 'AM') {
-                return `AM (9 AM - 2 PM)`;
-            } else if (startTimeOption === 'PM') {
-                return `PM (2 PM - 11 PM)`;
-            } else {
-                return `${formatHourForDisplay(startHour)} - ${formatHourForDisplay(endHour)}`;
-            }
-        }
-
-        function formatHourForDisplay(hour) {
-            if (hour === 0) return '12 AM';
-            if (hour === 12) return '12 PM';
-            if (hour < 12) return `${hour} AM`;
-            return `${hour - 12} PM`;
-        }
-
-        function clearPlanTableBody() {
-            const planTableBody = document.getElementById('plan-table-body');
-            const allCells = planTableBody.querySelectorAll('.table-cell-hour');
-            allCells.forEach(cell => {
-                cell.innerHTML = '';
-            });
-
-            const startDateInput = document.getElementById('startDate').value;
-            if (!startDateInput) {
-                planTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="${daysOfWeek.length + 1}" class="text-center py-4 text-gray-500" data-empty-message="true">No plan entries yet. Select a day and add an entry.</td>
-                    </tr>
-                `;
-            }
-        }
-
         async function submitPlan() {
+            // This function will handle submitting NEW entries. Updates are handled separately.
             const planData = {
                 districtManager: document.getElementById('districtManager').value,
                 startDate: document.getElementById('startDate').value,
@@ -1097,31 +842,23 @@
                 showMessageBox('Please fill in the District Manager and Week Start Date before submitting.');
                 return;
             }
-
-            for (let dayIndex = 0; dayIndex < daysOfWeek.length; dayIndex++) {
-                for (let hour = startHour; hour <= endHour; hour++) {
-                    const cell = document.getElementById(`day-${dayIndex}-hour-${hour}`);
-                    if (cell) {
-                        const planBoxes = cell.querySelectorAll('.plan-box');
-                        planBoxes.forEach(planBox => {
-                            if (planBox.hasAttribute('data-entry-details')) {
-                                const entry = JSON.parse(planBox.getAttribute('data-entry-details'));
-                                if (!entry.id || entry.id.startsWith('entry-')) {
-                                    planData.weeklyEntries.push(entry);
-                                }
-                            }
-                        });
-                    }
+            
+            // Collect only new, unsaved entries (those with temporary IDs)
+            const allPlanBoxes = document.querySelectorAll('.plan-box');
+            allPlanBoxes.forEach(planBox => {
+                const entryId = planBox.getAttribute('data-entry-id');
+                if (entryId && entryId.startsWith('entry-')) {
+                     const entry = JSON.parse(planBox.getAttribute('data-entry-details'));
+                     planData.weeklyEntries.push(entry);
                 }
-            }
+            });
 
             if (planData.weeklyEntries.length === 0) {
-                showMessageBox('No new entries to submit. Please add at least one entry to your weekly plan.');
+                showMessageBox('No new entries to submit. Use the form to add entries first.');
                 return;
             }
 
             toggleLoading(true);
-
             try {
                 const entriesToInsert = planData.weeklyEntries.map(entry => ({
                     district_manager_name: planData.districtManager,
@@ -1132,7 +869,6 @@
                     start_hour: entry.startHour,
                     end_hour: entry.endHour,
                     start_time_option: entry.startTimeOption,
-                    end_time_option: getTimeOption(entry.startHour, entry.endHour),
                     visit_type: entry.visitType,
                     medical_rep_name: entry.medicalRep,
                     brick: entry.brick,
@@ -1141,37 +877,94 @@
                     details: entry.details
                 }));
 
-                const { error: insertError } = await _supabase
-                    .from('dms_weekly_plans')
-                    .insert(entriesToInsert);
-
-                if (insertError) {
-                    throw insertError;
-                }
+                const { error } = await _supabase.from('dms_weekly_plans').insert(entriesToInsert);
+                if (error) throw error;
 
                 showMessageBox('Plan submitted successfully!', 'Success');
-                await fetchExistingPlanData(planData.startDate);
-            }
-            catch (error) {
+                await fetchExistingPlanData(planData.startDate); // Refresh to get new IDs
+            } catch (error) {
                 console.error('Error submitting plan:', error);
                 showMessageBox(`Failed to submit plan. Error: ${error.message}`, 'Error');
             } finally {
                 toggleLoading(false);
             }
         }
-
-        function getTimeOption(startHour, endHour) {
-            if (startHour === 9 && endHour === 23) {
-                return 'Full Day';
-            } else if (startHour === 9 && endHour === 13) {
-                return 'AM';
-            } else if (startHour === 14 && endHour === 23) {
-                return 'PM';
-            } else {
-                return 'Pick a Time';
+        
+        async function updateSupabaseEntry(id, updateData) {
+            try {
+                const { error } = await _supabase
+                    .from('dms_weekly_plans')
+                    .update(updateData)
+                    .eq('id', id);
+                if (error) throw error;
+                console.log('Entry updated successfully:', id);
+            } catch (error) {
+                console.error('Error updating entry in Supabase:', error);
+                showMessageBox(`Failed to update entry. Error: ${error.message}`, 'Error');
             }
         }
 
+        async function deleteSelectedEntries() {
+            const selectedBoxes = document.querySelectorAll('.plan-box.selected');
+            if (selectedBoxes.length === 0) {
+                showMessageBox('No entries selected for deletion.');
+                return;
+            }
+
+            const idsToDelete = [];
+            selectedBoxes.forEach(box => {
+                const entryId = box.getAttribute('data-entry-id');
+                if (entryId && !entryId.startsWith('entry-')) {
+                    idsToDelete.push(entryId);
+                }
+                box.remove(); // Remove from DOM immediately
+            });
+
+            if (idsToDelete.length > 0) {
+                toggleLoading(true);
+                try {
+                    const { error } = await _supabase.from('dms_weekly_plans').delete().in('id', idsToDelete);
+                    if (error) throw error;
+                    showMessageBox('Selected entries deleted successfully!', 'Success');
+                } catch (error) {
+                    console.error('Error deleting entries from Supabase:', error);
+                    showMessageBox(`Failed to delete entries. Error: ${error.message}`, 'Error');
+                    // If deletion fails, refresh data to restore the boxes
+                    await fetchExistingPlanData(document.getElementById('startDate').value);
+                } finally {
+                    toggleLoading(false);
+                }
+            }
+            updateDeleteButtonVisibility();
+            hideAllPopovers();
+        }
+        
+        async function deleteSingleEntry(e, entryId) {
+            e.stopPropagation();
+            hideAllPopovers();
+            const planBoxElement = document.querySelector(`[data-entry-id="${entryId}"]`);
+            if (!planBoxElement) return;
+
+            if (entryId && !entryId.startsWith('entry-')) {
+                toggleLoading(true);
+                try {
+                    const { error } = await _supabase.from('dms_weekly_plans').delete().eq('id', entryId);
+                    if (error) throw error;
+                    showMessageBox('Entry deleted successfully!', 'Success');
+                    planBoxElement.remove();
+                } catch (error) {
+                    console.error('Error deleting entry from Supabase:', error);
+                    showMessageBox(`Failed to delete entry. Error: ${error.message}`, 'Error');
+                } finally {
+                    toggleLoading(false);
+                }
+            } else {
+                planBoxElement.remove(); // It's a temporary entry, just remove from DOM
+            }
+            updateDeleteButtonVisibility();
+        }
+
+        // --- TABLE & UI RENDERING ---
         function populateDaySelector(startDateStr) {
             const daySelect = document.getElementById('selectedDay');
             daySelect.innerHTML = '<option value="">Select a Day</option>';
@@ -1199,13 +992,7 @@
                     currentDate.setDate(startDate.getDate() + index);
                     const dateString = currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     const th = document.createElement('th');
-                    th.innerHTML = `<div><span>${dayName}</span><span class="text-xs font-normal text-gray-500">(${dateString})</span></div>`;
-                    tableHeaderRow.appendChild(th);
-                });
-            } else {
-                daysOfWeek.forEach(dayName => {
-                    const th = document.createElement('th');
-                    th.innerHTML = `<div><span>${dayName}</span><span class="text-xs font-normal text-gray-500">Select Date</span></div>`;
+                    th.innerHTML = `<div><span>${dayName}</span><br><span class="text-xs font-normal text-gray-500" style="font-weight:400;">${dateString}</span></div>`;
                     tableHeaderRow.appendChild(th);
                 });
             }
@@ -1213,20 +1000,16 @@
 
         function populateTimeSlotTable(startDateStr) {
             const planTableBody = document.getElementById('plan-table-body');
-            planTableBody.innerHTML = '';
+            planTableBody.innerHTML = ''; // Clear existing rows
             if (!startDateStr) {
-                planTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="${daysOfWeek.length + 1}" class="text-center py-4 text-gray-500" data-empty-message="true">No plan entries yet. Select a day and add an entry.</td>
-                    </tr>
-                `;
+                planTableBody.innerHTML = `<tr><td colspan="${daysOfWeek.length + 1}" class="text-center p-4">Please select a start date to view the plan.</td></tr>`;
                 return;
             }
             for (let hour = startHour; hour <= endHour; hour++) {
                 const tr = document.createElement('tr');
                 const timeLabelTd = document.createElement('td');
                 timeLabelTd.classList.add('time-cell');
-                timeLabelTd.textContent = `${hour > 12 ? hour - 12 : hour}${hour >= 12 ? ' PM' : ' AM'}`;
+                timeLabelTd.textContent = formatHourForDisplay(hour);
                 tr.appendChild(timeLabelTd);
                 for (let dayIndex = 0; dayIndex < daysOfWeek.length; dayIndex++) {
                     const td = document.createElement('td');
@@ -1236,138 +1019,144 @@
                 }
                 planTableBody.appendChild(tr);
             }
-            if (planTableBody.querySelector('.table-cell-hour')) {
-                cellHeight = planTableBody.querySelector('.table-cell-hour').offsetHeight;
+            // Ensure cellHeight is updated after table is rendered
+            const firstCell = planTableBody.querySelector('.table-cell-hour');
+            if (firstCell) {
+                cellHeight = firstCell.offsetHeight;
             }
         }
+        
+        function clearPlanTableBody() {
+             populateTimeSlotTable(document.getElementById('startDate').value);
+        }
 
+        function populatePlanTable(entries) {
+            clearPlanTableBody(); // Start with a fresh grid
+            if (!entries || entries.length === 0) {
+                console.log('No entries to populate.');
+                return;
+            }
+
+            entries.forEach(entry => {
+                const dayIndex = daysOfWeek.indexOf(entry.entry_day);
+                if (dayIndex === -1) return;
+
+                const entryData = {
+                    id: entry.id,
+                    day: entry.entry_day,
+                    type: entry.entry_type,
+                    details: entry.details || '',
+                    startHour: entry.start_hour,
+                    endHour: entry.end_hour,
+                    startTimeOption: entry.start_time_option,
+                    visitType: entry.visit_type,
+                    medicalRep: entry.medical_rep_name,
+                    brick: entry.brick,
+                    event: entry.event_type,
+                    leaveType: entry.leave_type
+                };
+
+                const targetCell = document.getElementById(`day-${dayIndex}-hour-${entry.start_hour}`);
+                if (!targetCell) return;
+                
+                const planBoxElement = createPlanBoxElement(entryData);
+                targetCell.appendChild(planBoxElement);
+            });
+        }
+        
+        function createPlanBoxElement(entryData) {
+            const { type, startHour, endHour, startTimeOption } = entryData;
+            const isFullDay = startTimeOption === 'Full Day';
+            const durationHours = endHour - startHour + 1;
+            
+            let boxClass = '';
+            let contentHtml = '';
+
+            if (type === 'Event') {
+                boxClass = 'event-box';
+                contentHtml = `<p>${entryData.event}</p>`;
+                if (entryData.event === 'Admin Work' && entryData.details) {
+                    const adminType = entryData.details.split(' - ')[0];
+                    if (['Office', 'Online'].includes(adminType)) {
+                         contentHtml += `<p><span class="font-semibold">Type:</span> ${adminType}</p>`;
+                    }
+                }
+            } else if (type === 'Visit') {
+                boxClass = 'visit-box';
+                contentHtml = `<p>${entryData.visitType}</p>`;
+                if (entryData.visitType === 'Double Visit') {
+                    contentHtml += `<p><span class="font-semibold">Brick:</span> ${entryData.brick || ''}</p>`;
+                }
+            } else if (type === 'Leave') {
+                boxClass = 'leave-box';
+                contentHtml = `<p>${entryData.leaveType}</p>`;
+            }
+
+            if (!isFullDay) {
+                contentHtml += `<p class="plan-time">${getTimeDisplay(startHour, endHour, startTimeOption)}</p><div class="resize-handle"></div>`;
+            }
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = `<div class="plan-box ${boxClass}"></div>`;
+            const planBoxElement = tempDiv.firstChild;
+            
+            planBoxElement.innerHTML = contentHtml;
+            planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1)}px`;
+            planBoxElement.setAttribute('data-entry-id', entryData.id || `entry-${Date.now()}`);
+            planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
+
+            if (!isFullDay) {
+                const resizeHandle = planBoxElement.querySelector('.resize-handle');
+                if (resizeHandle) {
+                    resizeHandle.addEventListener('mousedown', startResize);
+                    resizeHandle.addEventListener('touchstart', startResize, { passive: false });
+                }
+            }
+
+            return planBoxElement;
+        }
+
+        // --- FORM HANDLING ---
         function handleEntryTypeChange() {
-            const entryTypeSelect = document.getElementById('entryTypeSelect');
-            const visitInputsContainer = document.getElementById('visitInputsContainer');
-            const eventInputsContainer = document.getElementById('eventInputsContainer');
-            const leavesInputsContainer = document.getElementById('leavesInputsContainer');
-
-            visitInputsContainer.classList.add('hidden');
-            eventInputsContainer.classList.add('hidden');
-            leavesInputsContainer.classList.add('hidden');
-
-            document.getElementById('visitTypeSelect').value = '';
-            document.getElementById('visitTimeChoice').value = '';
-            document.getElementById('visitTimeInput').value = '';
-            document.getElementById('visitTimeInputContainer').classList.add('hidden');
-            document.getElementById('medicalRepSelect').innerHTML = '<option value="">Select MR</option>';
-            document.getElementById('brickSelect').innerHTML = '<option value="">Select Brick</option>';
-            document.getElementById('mrBrickContainer').classList.add('hidden');
-            document.getElementById('visitDetails').value = '';
-
-            document.getElementById('eventSelect').value = '';
-            document.getElementById('eventTimeChoice').value = '';
-            document.getElementById('eventTimeInput').value = '';
-            document.getElementById('eventTimeInputContainer').classList.add('hidden');
-            document.getElementById('eventDetails').value = '';
-            document.getElementById('adminWorkTypeContainer').classList.add('hidden');
-            document.getElementById('adminWorkTypeSelect').value = '';
-
-            document.getElementById('leaveSelect').value = '';
-            document.getElementById('leaveTimeChoice').value = '';
-            document.getElementById('leaveTimeInput').value = '';
-            document.getElementById('leaveTimeInputContainer').classList.add('hidden');
-            document.getElementById('leaveDetails').value = '';
-
-            if (entryTypeSelect.value === 'Visit') {
-                visitInputsContainer.classList.remove('hidden');
-            } else if (entryTypeSelect.value === 'Event') {
-                eventInputsContainer.classList.remove('hidden');
-            } else if (entryTypeSelect.value === 'Leave') {
-                leavesInputsContainer.classList.remove('hidden');
-            }
-        }
-
-        function handleEventTimeChoiceChange() {
-            const eventTimeChoice = document.getElementById('eventTimeChoice');
-            const eventTimeInputContainer = document.getElementById('eventTimeInputContainer');
-            const eventTimeInput = document.getElementById('eventTimeInput');
-            if (eventTimeChoice.value === 'Pick a Time') {
-                eventTimeInputContainer.classList.remove('hidden');
-            } else {
-                eventTimeInputContainer.classList.add('hidden');
-                eventTimeInput.value = '';
-            }
-        }
-
-        function handleVisitTimeChoiceChange() {
-            const visitTimeChoice = document.getElementById('visitTimeChoice');
-            const visitTimeInputContainer = document.getElementById('visitTimeInputContainer');
-            const visitTimeInput = document.getElementById('visitTimeInput');
-            if (visitTimeChoice.value === 'Pick a Time') {
-                visitTimeInputContainer.classList.remove('hidden');
-            } else {
-                visitTimeInputContainer.classList.add('hidden');
-                visitTimeInput.value = '';
-            }
-        }
-
-        function handleLeaveTimeChoiceChange() {
-            const leaveTimeChoice = document.getElementById('leaveTimeChoice');
-            const leaveTimeInputContainer = document.getElementById('leaveTimeInputContainer');
-            const leaveTimeInput = document.getElementById('leaveTimeInput');
-            if (leaveTimeChoice.value === 'Pick a Time') {
-                leaveTimeInputContainer.classList.remove('hidden');
-            } else {
-                leaveTimeInputContainer.classList.add('hidden');
-                leaveTimeInput.value = '';
-            }
-        }
-
-        function handleEventChange() {
-            const eventSelect = document.getElementById('eventSelect');
-            const adminWorkTypeContainer = document.getElementById('adminWorkTypeContainer');
-            if (eventSelect.value === 'Admin Work') {
-                adminWorkTypeContainer.classList.remove('hidden');
-            } else {
-                adminWorkTypeContainer.classList.add('hidden');
-                document.getElementById('adminWorkTypeSelect').value = '';
-            }
-        }
-
-        function handleLeaveChange() {
+            const entryType = document.getElementById('entryTypeSelect').value;
+            document.getElementById('visitInputsContainer').classList.toggle('hidden', entryType !== 'Visit');
+            document.getElementById('eventInputsContainer').classList.toggle('hidden', entryType !== 'Event');
+            document.getElementById('leavesInputsContainer').classList.toggle('hidden', entryType !== 'Leave');
         }
 
         function handleVisitTypeChange() {
-            const visitTypeSelect = document.getElementById('visitTypeSelect');
+            const visitType = document.getElementById('visitTypeSelect').value;
             const mrBrickContainer = document.getElementById('mrBrickContainer');
-
-            if (visitTypeSelect.value === 'Double Visit') {
-                mrBrickContainer.classList.remove('hidden');
+            mrBrickContainer.classList.toggle('hidden', visitType !== 'Double Visit');
+            if (visitType === 'Double Visit') {
                 populateMedicalReps();
-            } else if (visitTypeSelect.value === 'Single Visit') {
-                mrBrickContainer.classList.add('hidden');
-                document.getElementById('medicalRepSelect').innerHTML = '<option value="">Select MR</option>';
-                document.getElementById('brickSelect').innerHTML = '<option value="">Select Brick</option>';
-            } else {
-                mrBrickContainer.classList.add('hidden');
-                document.getElementById('medicalRepSelect').innerHTML = '<option value="">Select MR</option>';
-                document.getElementById('brickSelect').innerHTML = '<option value="">Select Brick</option>';
             }
         }
+        
+        function handleEventChange() {
+            const eventType = document.getElementById('eventSelect').value;
+            document.getElementById('adminWorkTypeContainer').classList.toggle('hidden', eventType !== 'Admin Work');
+        }
+
+        function handleTimeChoiceChange(type) {
+            const timeChoice = document.getElementById(`${type}TimeChoice`).value;
+            const timeInputContainer = document.getElementById(`${type}TimeInputContainer`);
+            timeInputContainer.classList.toggle('hidden', timeChoice !== 'Pick a Time');
+        }
+        
+        function handleVisitTimeChoiceChange() { handleTimeChoiceChange('visit'); }
+        function handleEventTimeChoiceChange() { handleTimeChoiceChange('event'); }
+        function handleLeaveTimeChoiceChange() { handleTimeChoiceChange('leave'); }
+        function handleLeaveChange() { /* Future logic if needed */ }
 
         function populateMedicalReps() {
-            const dmSelect = document.getElementById('districtManager');
-            const selectedDM = dmSelect.value;
+            const selectedDM = document.getElementById('districtManager').value;
             const medicalRepSelect = document.getElementById('medicalRepSelect');
             medicalRepSelect.innerHTML = '<option value="">Select MR</option>';
             if (selectedDM) {
-                const mrsForDM = new Set();
-                allData.forEach(row => {
-                    if (row['District Manager'] === selectedDM && row['medical rep']) {
-                        mrsForDM.add(row['medical rep']);
-                    }
-                });
-                Array.from(mrsForDM).sort().forEach(mr => {
-                    const option = document.createElement('option');
-                    option.value = mr;
-                    option.textContent = mr;
-                    medicalRepSelect.appendChild(option);
+                const mrsForDM = [...new Set(allData.filter(row => row['District Manager'] === selectedDM && row['medical rep']).map(row => row['medical rep']))].sort();
+                mrsForDM.forEach(mr => {
+                    medicalRepSelect.add(new Option(mr, mr));
                 });
             }
         }
@@ -1377,549 +1166,166 @@
             const brickSelect = document.getElementById('brickSelect');
             brickSelect.innerHTML = '<option value="">Select Brick</option>';
             if (selectedMR) {
-                const bricksForMR = new Set();
-                allData.forEach(row => {
-                    if (row['medical rep'] === selectedMR && row['Brick']) {
-                        bricksForMR.add(row['Brick']);
-                    }
-                });
-                Array.from(bricksForMR).sort().forEach(brick => {
-                    const option = document.createElement('option');
-                    option.value = brick;
-                    option.textContent = brick;
-                    brickSelect.appendChild(option);
+                const bricksForMR = [...new Set(allData.filter(row => row['medical rep'] === selectedMR && row['Brick']).map(row => row['Brick']))].sort();
+                bricksForMR.forEach(brick => {
+                    brickSelect.add(new Option(brick, brick));
                 });
             }
         }
+        
+        function clearForm() {
+            document.getElementById('districtManager').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('selectedDay').innerHTML = '<option value="">Select a Day</option>';
+            document.getElementById('entryTypeSelect').value = '';
+            handleEntryTypeChange(); // This will reset all sub-forms
+            updateTableHeader('');
+            populateTimeSlotTable('');
+            document.querySelectorAll('.plan-box.selected').forEach(box => box.classList.remove('selected'));
+            hideDeleteButton();
+            hideAllPopovers();
+            if (loggedInUser) {
+                filterAndPopulateDMs(loggedInUser);
+                setDefaultStartDate();
+                updateDatesAndDaySelector();
+            }
+        }
 
+        // --- DYNAMIC ENTRY ADDITION & OVERLAP LOGIC ---
         function addPlanEntry() {
             const selectedDayValue = document.getElementById('selectedDay').value;
             const entryType = document.getElementById('entryTypeSelect').value;
-            const districtManager = document.getElementById('districtManager').value;
-            const startDate = document.getElementById('startDate').value;
-
-            if (!districtManager) {
-                showMessageBox('Please select a District Manager.');
+            if (!document.getElementById('districtManager').value || !document.getElementById('startDate').value || !selectedDayValue || !entryType) {
+                showMessageBox('Please ensure District Manager, Start Date, Day, and Entry Type are all selected.');
                 return;
             }
-            if (!startDate) {
-                showMessageBox('Please select a Week Start Date.');
-                return;
-            }
-            if (!selectedDayValue) {
-                showMessageBox('Please select a Day for the entry.');
-                return;
-            }
-            if (!entryType) {
-                showMessageBox('Please select an Entry Type (Visit, Event, or Leave).');
-                return;
-            }
-
-            let planDetailsHtml = '';
-            let entryData = {
-                day: '',
-                date: '',
-                type: entryType,
-                details: ''
-            };
 
             const [dayName, dateString, dayIndexStr] = selectedDayValue.split('|');
             const dayIndex = parseInt(dayIndexStr);
-            entryData.day = dayName;
-            entryData.date = dateString;
-            let entryStartHour = -1;
-            let entryEndHour = -1;
-            let timeDisplay = '';
-            let isFullDay = false;
-            let timeChoiceElement;
-            let isLeave = false;
-            let startTimeOption = '';
             
-            if (entryType === 'Event') {
-                const event = document.getElementById('eventSelect').value;
-                const adminWorkType = document.getElementById('adminWorkTypeSelect').value;
-                timeChoiceElement = document.getElementById('eventTimeChoice');
-                startTimeOption = timeChoiceElement.value;
+            let entryData = { day: dayName, date: dateString, type: entryType };
+            let timeChoice, timeInput;
+            let start, end, timeOption;
 
-                if (!event) {
-                    showMessageBox('Please select an Event Type.');
-                    return;
+            // 1. Collect data from the correct form section
+            if (entryType === 'Visit') {
+                entryData.visitType = document.getElementById('visitTypeSelect').value;
+                if (!entryData.visitType) { showMessageBox('Please select a Visit Type.'); return; }
+                if (entryData.visitType === 'Double Visit') {
+                    entryData.medicalRep = document.getElementById('medicalRepSelect').value;
+                    entryData.brick = document.getElementById('brickSelect').value;
+                    if (!entryData.medicalRep || !entryData.brick) { showMessageBox('Please select a Medical Rep and Brick for Double Visits.'); return; }
                 }
-                if (event === 'Admin Work' && !adminWorkType) {
-                    showMessageBox('Please select an Admin Work Type (Office or Online).');
-                    return;
+                entryData.details = document.getElementById('visitDetails').value;
+                timeOption = document.getElementById('visitTimeChoice').value;
+                timeInput = document.getElementById('visitTimeInput').value;
+            } else if (entryType === 'Event') {
+                entryData.event = document.getElementById('eventSelect').value;
+                if (!entryData.event) { showMessageBox('Please select an Event Type.'); return; }
+                if (entryData.event === 'Admin Work') {
+                    const adminType = document.getElementById('adminWorkTypeSelect').value;
+                    if (!adminType) { showMessageBox('Please select an Admin Work Type.'); return; }
+                    entryData.details = `${adminType} - ${document.getElementById('eventDetails').value}`;
+                } else {
+                    entryData.details = document.getElementById('eventDetails').value;
                 }
-                if (!startTimeOption) {
-                    showMessageBox('Please select a Time Option for the event.');
-                    return;
-                }
-                if (startTimeOption === 'Pick a Time') {
-                    const eventTimeInput = document.getElementById('eventTimeInput').value;
-                    if (!eventTimeInput) {
-                        showMessageBox('Please select a specific Event Time.');
-                        return;
-                    }
-                    entryStartHour = parseInt(eventTimeInput.split(':')[0]);
-                    entryEndHour = entryStartHour;
-                    timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`; // Fixed: display end time as start time + 1 hour
-                } else if (startTimeOption === 'AM') {
-                    entryStartHour = 9;
-                    entryEndHour = 13;
-                    timeDisplay = 'AM (9 AM - 2 PM)';
-                } else if (startTimeOption === 'PM') {
-                    entryStartHour = 14;
-                    entryEndHour = 23;
-                    timeDisplay = 'PM (2 PM - 11 PM)';
-                } else if (startTimeOption === 'Full Day') {
-                    entryStartHour = startHour;
-                    entryEndHour = endHour;
-                    timeDisplay = 'Full Day (9 AM - 11 PM)';
-                    isFullDay = true;
-                }
-                let eventDetails = document.getElementById('eventDetails').value;
-                if (event === 'Admin Work' && adminWorkType) {
-                    eventDetails = `${adminWorkType} - ${eventDetails}`;
-                    entryData.adminWorkType = adminWorkType;
-                }
-
-                entryData.event = event;
-                entryData.eventTime = timeDisplay;
-                entryData.details = eventDetails;
-                entryData.startHour = entryStartHour;
-                entryData.endHour = entryEndHour;
-                entryData.isLeave = isLeave;
-                entryData.startTimeOption = startTimeOption;
-                planDetailsHtml = `
-                    <div class="plan-box event-box"
-                         data-type="Event"
-                         data-event="${event}"
-                         data-time="${timeDisplay}"
-                         data-details="${eventDetails || ''}"
-                         data-start-hour="${entryStartHour}"
-                         data-end-hour="${entryEndHour}"
-                         data-is-leave="false"
-                         data-start-time-option="${startTimeOption}">
-                        <p>${event}</p>
-                        ${event === 'Admin Work' && adminWorkType ? `<p><span class="font-semibold">Type:</span> ${adminWorkType}</p>` : ''}
-                        ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
-                    </div>
-                `;
-            } else if (entryType === 'Visit') {
-                const visitType = document.getElementById('visitTypeSelect').value;
-                timeChoiceElement = document.getElementById('visitTimeChoice');
-                startTimeOption = timeChoiceElement.value;
-
-                if (!visitType) {
-                    showMessageBox('Please select a Visit Type.');
-                    return;
-                }
-                if (!startTimeOption) {
-                    showMessageBox('Please select a Time Option for the visit.');
-                    return;
-                }
-                if (startTimeOption === 'Pick a Time') {
-                    const visitTimeInput = document.getElementById('visitTimeInput').value;
-                    if (!visitTimeInput) {
-                        showMessageBox('Please select a specific Visit Time.');
-                        return;
-                    }
-                    entryStartHour = parseInt(visitTimeInput.split(':')[0]);
-                    entryEndHour = entryStartHour; // Fixed: start and end hour are the same for new entry
-                    timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`;
-                } else if (startTimeOption === 'AM') {
-                    entryStartHour = 9;
-                    entryEndHour = 13;
-                    timeDisplay = 'AM (9 AM - 2 PM)';
-                } else if (startTimeOption === 'PM') {
-                    entryStartHour = 14;
-                    entryEndHour = 23;
-                    timeDisplay = 'PM (2 PM - 11 PM)';
-                } else if (startTimeOption === 'Full Day') {
-                    entryStartHour = startHour;
-                    entryEndHour = endHour;
-                    timeDisplay = 'Full Day (9 AM - 11 PM)';
-                    isFullDay = true;
-                }
-                let medicalRep = '';
-                let brick = '';
-                let visitDetails = '';
-                if (visitType === 'Double Visit') {
-                    medicalRep = document.getElementById('medicalRepSelect').value;
-                    brick = document.getElementById('brickSelect').value;
-                    if (!medicalRep || !brick) {
-                        showMessageBox('For Double Visit, please select medical rep and Brick.');
-                        return;
-                    }
-                } else if (visitType === 'Single Visit') {
-                }
-                visitDetails = document.getElementById('visitDetails').value;
-                entryData.visitType = visitType;
-                entryData.visitTime = timeDisplay;
-                entryData.medicalRep = medicalRep;
-                entryData.brick = brick;
-                entryData.details = visitDetails;
-                entryData.startHour = entryStartHour;
-                entryData.endHour = entryEndHour;
-                entryData.isLeave = isLeave;
-                entryData.startTimeOption = startTimeOption;
-                planDetailsHtml = `
-                    <div class="plan-box visit-box"
-                         data-type="Visit"
-                         data-visit-type="${visitType}"
-                         data-time="${timeDisplay}"
-                         data-mr="${medicalRep}"
-                         data-brick="${brick}"
-                         data-details="${visitDetails || ''}"
-                         data-start-hour="${entryStartHour}"
-                         data-end-hour="${entryEndHour}"
-                         data-is-leave="${isLeave}"
-                         data-start-time-option="${startTimeOption}">
-                        <p>${visitType}</p>
-                        ${visitType === 'Double Visit' ? `<p><span class="font-semibold">Brick:</span> ${brick}</p>` : ''}
-                        ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
-                    </div>
-                `;
+                timeOption = document.getElementById('eventTimeChoice').value;
+                timeInput = document.getElementById('eventTimeInput').value;
             } else if (entryType === 'Leave') {
-                const leaveType = document.getElementById('leaveSelect').value;
-                timeChoiceElement = document.getElementById('leaveTimeChoice');
-                startTimeOption = timeChoiceElement.value;
-                if (!leaveType) {
-                    showMessageBox('Please select a Leave Type.');
-                    return;
-                }
-                if (!startTimeOption) {
-                    showMessageBox('Please select a Time Option for the leave.');
-                    return;
-                }
-                isLeave = true;
-                if (startTimeOption === 'Pick a Time') {
-                    const leaveTimeInput = document.getElementById('leaveTimeInput').value;
-                    if (!leaveTimeInput) {
-                        showMessageBox('Please select a specific Leave Time.');
-                        return;
-                    }
-                    entryStartHour = parseInt(leaveTimeInput.split(':')[0]);
-                    entryEndHour = entryStartHour;
-                    timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`;
-                } else if (startTimeOption === 'AM') {
-                    entryStartHour = 9;
-                    entryEndHour = 13;
-                    timeDisplay = 'AM (9 AM - 2 PM)';
-                } else if (startTimeOption === 'PM') {
-                    entryStartHour = 14;
-                    entryEndHour = 23;
-                    timeDisplay = 'PM (2 PM - 11 PM)';
-                } else if (startTimeOption === 'Full Day') {
-                    entryStartHour = startHour;
-                    entryEndHour = endHour;
-                    timeDisplay = 'Full Day (9 AM - 11 PM)';
-                    isFullDay = true;
-                }
-                const leaveDetails = document.getElementById('leaveDetails').value;
-                entryData.leaveType = leaveType;
-                entryData.leaveTime = timeDisplay;
-                entryData.details = leaveDetails;
-                entryData.startHour = entryStartHour;
-                entryData.endHour = entryEndHour;
-                entryData.isLeave = isLeave;
-                entryData.startTimeOption = startTimeOption;
-                planDetailsHtml = `
-                    <div class="plan-box leave-box"
-                         data-type="Leave"
-                         data-leave-type="${leaveType}"
-                         data-time="${timeDisplay}"
-                         data-details="${leaveDetails || ''}"
-                         data-start-hour="${entryStartHour}"
-                         data-end-hour="${entryEndHour}"
-                         data-is-leave="${isLeave}"
-                         data-start-time-option="${startTimeOption}">
-                        <p>${leaveType}</p>
-                        ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
-                    </div>
-                `;
+                entryData.leaveType = document.getElementById('leaveSelect').value;
+                if (!entryData.leaveType) { showMessageBox('Please select a Leave Type.'); return; }
+                entryData.details = document.getElementById('leaveDetails').value;
+                timeOption = document.getElementById('leaveTimeChoice').value;
+                timeInput = document.getElementById('leaveTimeInput').value;
             }
+            
+            if (!timeOption) { showMessageBox('Please select a Time Option.'); return; }
+            entryData.startTimeOption = timeOption;
 
-            let effectiveRangeStartForNewEntry = startHour;
-            let effectiveRangeEndForNewEntry = endHour;
-            if (startTimeOption === 'AM') {
-                effectiveRangeStartForNewEntry = 9;
-                effectiveRangeEndForNewEntry = 14;
-            } else if (startTimeOption === 'PM') {
-                effectiveRangeStartForNewEntry = 14;
-                effectiveRangeEndForNewEntry = 23;
-            }
+            // 2. Determine start/end hours
+            if (timeOption === 'Pick a Time') {
+                if (!timeInput) { showMessageBox('Please pick a specific time.'); return; }
+                start = parseInt(timeInput.split(':')[0]);
+                end = start; // A new entry is 1 hour long by default
+            } else if (timeOption === 'AM') { start = 9; end = 13; }
+            else if (timeOption === 'PM') { start = 14; end = 23; }
+            else if (timeOption === 'Full Day') { start = startHour; end = endHour; }
 
-            if (entryStartHour < effectiveRangeStartForNewEntry) {
-                entryStartHour = effectiveRangeStartForNewEntry;
-            }
-            if (entryEndHour > effectiveRangeEndForNewEntry) {
-                entryEndHour = effectiveRangeEndForNewEntry;
-            }
-
-            if (!isFullDay) {
-                const existingEntriesOnDay = [];
+            entryData.startHour = start;
+            entryData.endHour = end;
+            
+            // 3. Handle Full Day entries separately
+            if (timeOption === 'Full Day') {
+                // Remove all other entries for that day
                 for (let hour = startHour; hour <= endHour; hour++) {
                     const cell = document.getElementById(`day-${dayIndex}-hour-${hour}`);
-                    if (cell) {
-                        const boxesInCell = cell.querySelectorAll('.plan-box:not(.full-day-entry)');
-                        boxesInCell.forEach(box => {
-                            const data = JSON.parse(box.getAttribute('data-entry-details'));
-                            if (data.startHour === hour) {
-                                existingEntriesOnDay.push(data);
-                            }
-                        });
-                    }
+                    if (cell) cell.innerHTML = '';
                 }
-                existingEntriesOnDay.sort((a, b) => a.startHour - b.startHour);
-                let proposedStartHourForAdjustment = entryStartHour;
-                let proposedEndHourForAdjustment = entryEndHour;
-                const originalDurationHours = entryEndHour - entryStartHour + 1;
-                let foundNonOverlappingSlot = false;
-                let currentCheckStartHour = proposedStartHourForAdjustment;
-                while (currentCheckStartHour <= effectiveRangeEndForNewEntry) {
-                    let overlapsWithAnyExisting = false;
-                    let nextAvailableHourAfterOverlap = currentCheckStartHour;
-                    for (const existingEntry of existingEntriesOnDay) {
-                        const proposedEndForThisCheck = currentCheckStartHour + originalDurationHours; // Use +1 for the last hour
-                        if (currentCheckStartHour <= existingEntry.endHour && proposedEndForThisCheck >= existingEntry.startHour) {
-                            overlapsWithAnyExisting = true;
-                            nextAvailableHourAfterOverlap = Math.max(nextAvailableHourAfterOverlap, existingEntry.endHour + 1);
+                const targetCell = document.getElementById(`day-${dayIndex}-hour-${startHour}`);
+                targetCell.appendChild(createPlanBoxElement(entryData));
+                return; // Done
+            }
+
+            // 4. Overlap detection for non-Full Day entries
+            const existingEntriesOnDay = [];
+            const seenEntryIds = new Set();
+            for (let hour = startHour; hour <= endHour; hour++) {
+                const cell = document.getElementById(`day-${dayIndex}-hour-${hour}`);
+                if (cell) {
+                    cell.querySelectorAll('.plan-box').forEach(box => {
+                        const entryId = box.getAttribute('data-entry-id');
+                        if (!seenEntryIds.has(entryId)) {
+                            existingEntriesOnDay.push(JSON.parse(box.getAttribute('data-entry-details')));
+                            seenEntryIds.add(entryId);
                         }
-                    }
-                    if (!overlapsWithAnyExisting) {
-                        if ((currentCheckStartHour + originalDurationHours - 1) <= effectiveRangeEndForNewEntry) {
-                            proposedStartHourForAdjustment = currentCheckStartHour;
-                            proposedEndHourForAdjustment = currentCheckStartHour + originalDurationHours - 1;
-                            foundNonOverlappingSlot = true;
-                            break;
-                        } else {
-                            if (startTimeOption === 'AM' || startTimeOption === 'PM') {
-                                proposedStartHourForAdjustment = currentCheckStartHour;
-                                proposedEndHourForAdjustment = effectiveRangeEndForNewEntry;
-                                if (proposedStartHourForAdjustment <= proposedEndHourForAdjustment) {
-                                    foundNonOverlappingSlot = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    currentCheckStartHour = nextAvailableHourAfterOverlap;
-                    if (currentCheckStartHour > effectiveRangeEndForNewEntry) {
+                    });
+                }
+            }
+            
+            // If an existing entry is Full Day, we can't add another one
+            if (existingEntriesOnDay.some(e => e.startTimeOption === 'Full Day')) {
+                showMessageBox('Cannot add an entry on a day that is already marked as Full Day.');
+                return;
+            }
+
+            let proposedStart = entryData.startHour;
+            const duration = entryData.endHour - entryData.startHour + 1;
+            
+            let isOverlapping = true;
+            while(isOverlapping) {
+                isOverlapping = false;
+                let proposedEnd = proposedStart + duration - 1;
+                for (const existing of existingEntriesOnDay) {
+                    // Standard overlap check: (StartA <= EndB) and (EndA >= StartB)
+                    if (proposedStart <= existing.endHour && proposedEnd >= existing.startHour) {
+                        isOverlapping = true;
+                        proposedStart = existing.endHour + 1; // Try to place it right after the conflicting block
                         break;
                     }
                 }
-                if (!foundNonOverlappingSlot || proposedStartHourForAdjustment > proposedEndHourForAdjustment) {
-                    showMessageBox('Could not find an available non-overlapping time slot for this entry within the selected time option (AM/PM/Pick a Time). Please adjust existing entries or choose a different time.');
-                    return;
-                }
-                entryStartHour = proposedStartHourForAdjustment;
-                entryEndHour = proposedEndHourForAdjustment;
-                entryData.startHour = entryStartHour;
-                entryData.endHour = entryEndHour;
-                
-                // Fixed: update timeDisplay correctly after slot adjustment
-                if (startTimeOption === 'Pick a Time') {
-                    const originalInputTime = document.getElementById(entryType === 'Event' ? 'eventTimeInput' : (entryType === 'Visit' ? 'visitTimeInput' : 'leaveTimeInput')).value;
-                    const startHourParsed = parseInt(originalInputTime.split(':')[0]);
-                    timeDisplay = `${formatHourForDisplay(startHourParsed)} - ${formatHourForDisplay(entryEndHour + 1)}`;
-                } else {
-                    timeDisplay = getTimeDisplay(entryStartHour, entryEndHour, startTimeOption, null);
-                }
-
-                if (entryData.type === 'Event') {
-                    entryData.eventTime = timeDisplay;
-                } else if (entryData.type === 'Visit') {
-                    entryData.visitTime = timeDisplay;
-                } else if (entryData.type === 'Leave') {
-                    entryData.leaveTime = timeDisplay;
-                }
-            } else {
-                for (let hourToClear = startHour; hourToClear <= endHour; hourToClear++) {
-                    const cellToClear = document.getElementById(`day-${dayIndex}-hour-${hourToClear}`);
-                    if (cellToClear) {
-                        const existingNonFullDayBoxes = cellToClear.querySelectorAll('.plan-box:not(.full-day-entry)');
-                        existingNonFullDayBoxes.forEach(box => box.remove());
-                    }
-                }
             }
-
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = planDetailsHtml.trim();
-            const planBoxElement = tempDiv.firstChild;
-            planBoxElement.setAttribute('data-entry-details', JSON.stringify(entryData));
-
-            const targetCell = document.getElementById(`day-${dayIndex}-hour-${entryStartHour}`);
-            if (!targetCell) {
-                showMessageBox('Error: Could not find the target cell for the selected time.');
+            
+            // 5. Check if the non-overlapping slot is valid
+            const effectiveRangeEnd = (timeOption === 'AM') ? 13 : (timeOption === 'PM') ? 23 : endHour;
+            if (proposedStart + duration - 1 > effectiveRangeEnd) {
+                showMessageBox('Could not find an available time slot for this entry. Please adjust existing entries or choose a different time.');
                 return;
             }
             
-            if (isFullDay) {
-                 const durationHours = endHour - startHour + 1;
-                 planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
-                 planBoxElement.style.top = '0px';
-                 planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-full-day-${Date.now()}`);
-                 targetCell.appendChild(planBoxElement);
-            } else {
-                const durationHours = entryEndHour - entryStartHour + 1;
-                planBoxElement.style.height = `${cellHeight * durationHours + (durationHours - 1) * 1}px`;
-                planBoxElement.style.top = '0px';
-                planBoxElement.setAttribute('data-entry-id', `entry-${dayIndex}-${entryStartHour}-${Date.now()}`);
-                targetCell.appendChild(planBoxElement);
+            entryData.startHour = proposedStart;
+            entryData.endHour = proposedStart + duration - 1;
 
-                const resizeHandle = planBoxElement.querySelector('.resize-handle');
-                if (resizeHandle) {
-                    resizeHandle.addEventListener('mousedown', startResize);
-                    resizeHandle.addEventListener('touchstart', startResize, { passive: false });
-                }
-            }
-            
-            document.getElementById('selectedDay').value = '';
-            document.getElementById('entryTypeSelect').value = '';
-            handleEntryTypeChange();
-        }
-
-        async function deleteSelectedEntries() {
-            const selectedBoxes = document.querySelectorAll('.plan-box.selected');
-            if (selectedBoxes.length === 0) {
-                showMessageBox('No entries selected for deletion.');
-                return;
-            }
-
-            const idsToDelete = [];
-            selectedBoxes.forEach(box => {
-                const entryId = box.getAttribute('data-entry-id');
-                if (entryId && !entryId.startsWith('entry-')) {
-                    idsToDelete.push(entryId);
-                } else {
-                    // It's a temporary entry, just remove it from the DOM
-                    box.remove();
-                }
-            });
-
-            if (idsToDelete.length > 0) {
-                toggleLoading(true);
-                try {
-                    const { error } = await _supabase
-                        .from('dms_weekly_plans')
-                        .delete()
-                        .in('id', idsToDelete);
-
-                    if (error) {
-                        throw error;
-                    }
-                    showMessageBox('Selected entries deleted successfully from database!', 'Success');
-                } catch (error) {
-                    console.error('Error deleting entries from Supabase:', error);
-                    showMessageBox(`Failed to delete entries from database. Error: ${error.message}`, 'Error');
-                } finally {
-                    const startDate = document.getElementById('startDate').value;
-                    await fetchExistingPlanData(startDate);
-                    toggleLoading(false);
-                }
-            }
-            updateDeleteButtonVisibility();
-            hideAllPopovers();
-        }
-
-        const deleteEntryButton = document.getElementById('deleteEntryButton');
-        deleteEntryButton.addEventListener('click', deleteSelectedEntries);
-
-        function updateDeleteButtonVisibility() {
-            const selectedBoxes = document.querySelectorAll('.plan-box.selected');
-            if (selectedBoxes.length > 0) {
-                deleteEntryButton.style.display = 'inline-flex';
-            } else {
-                deleteEntryButton.style.display = 'none';
+            // 6. Add the new entry to the DOM
+            const targetCell = document.getElementById(`day-${dayIndex}-hour-${entryData.startHour}`);
+            if (targetCell) {
+                targetCell.appendChild(createPlanBoxElement(entryData));
             }
         }
 
-        function hideDeleteButton() {
-            deleteEntryButton.style.display = 'none';
-        }
-
-        function displayEntryPopover(planBoxElement) {
-            hideAllPopovers();
-            const popover = document.createElement('div');
-            popover.className = 'popover';
-            const entryData = JSON.parse(planBoxElement.getAttribute('data-entry-details'));
-            let contentHtml = '';
-            const type = entryData.type;
-            if (type === 'Event') {
-                contentHtml = `
-                    <p><span class="font-semibold">Event:</span> ${entryData.event}</p>
-                    ${entryData.event === 'Admin Work' && entryData.adminWorkType ? `<p><span class="font-semibold">Type:</span> ${entryData.adminWorkType}</p>` : ''}
-                    <p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption, null)}</p>
-                    <p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>
-                `;
-            } else if (type === 'Visit') {
-                contentHtml = `
-                    <p><span class="font-semibold">Visit Type:</span> ${entryData.visitType}</p>
-                    <p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption, null)}</p>
-                    ${entryData.visitType === 'Double Visit' ? `<p><span class="font-semibold">MR:</span> ${entryData.medicalRep}</p><p><span class="font-semibold">Brick:</span> ${entryData.brick}</p>` : ''}
-                    <p><span class="font-semibold">General Details:</span> ${entryData.details || 'N/A'}</p>
-                `;
-            } else if (type === 'Leave') {
-                contentHtml = `
-                    <p><span class="font-semibold">Leave Type:</span> ${entryData.leaveType}</p>
-                    <p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption, null)}</p>
-                    <p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>
-                `;
-            }
-            popover.innerHTML = `
-                ${contentHtml}
-                <button type="button" class="btn btn-danger" onclick="deleteSingleEntry(event, '${planBoxElement.getAttribute('data-entry-id')}')">Delete</button>
-            `;
-
-            const planBoxRect = planBoxElement.getBoundingClientRect();
-            
-            popover.style.left = `${planBoxRect.right + 10}px`;
-            popover.style.top = `${planBoxRect.top}px`;
-            
-            document.body.appendChild(popover);
-            popover.style.display = 'block';
-        }
-        
-        async function deleteSingleEntry(e, entryId) {
-            e.stopPropagation();
-            hideAllPopovers();
-            const planBoxElement = document.querySelector(`[data-entry-id="${entryId}"]`);
-            if (entryId && !entryId.startsWith('entry-')) {
-                toggleLoading(true);
-                try {
-                    const { error } = await _supabase
-                        .from('dms_weekly_plans')
-                        .delete()
-                        .eq('id', entryId);
-
-                    if (error) {
-                        throw error;
-                    }
-                    showMessageBox('Entry deleted successfully from database!', 'Success');
-                } catch (error) {
-                    console.error('Error deleting entry from Supabase:', error);
-                    showMessageBox(`Failed to delete entry from database. Error: ${error.message}`, 'Error');
-                } finally {
-                    const startDate = document.getElementById('startDate').value;
-                    await fetchExistingPlanData(startDate);
-                    toggleLoading(false);
-                }
-            } else {
-                if (planBoxElement) {
-                    planBoxElement.remove();
-                }
-            }
-            updateDeleteButtonVisibility();
-        }
-
-        function hideAllPopovers() {
-            document.querySelectorAll('.popover').forEach(popover => popover.remove());
-        }
-
+        // --- RESIZING LOGIC ---
         function startResize(event) {
-            if (!event.target.classList.contains('resize-handle')) {
-                return;
-            }
+            event.stopPropagation(); // Prevent click event from firing
             isResizing = true;
             currentResizingBox = event.target.closest('.plan-box');
             const clientY = event.touches ? event.touches[0].clientY : event.clientY;
@@ -1929,37 +1335,27 @@
             document.addEventListener('mouseup', stopResize);
             document.addEventListener('touchmove', doResize, { passive: false });
             document.addEventListener('touchend', stopResize);
-            hideAllPopovers(); // Hide popover when resizing starts
+            hideAllPopovers();
         }
 
         function doResize(event) {
             if (!isResizing) return;
-            event.preventDefault(); // Prevents touch scrolling
+            event.preventDefault();
             const clientY = event.touches ? event.touches[0].clientY : event.clientY;
             const deltaY = clientY - initialY;
             
             let newHeight = initialHeight + deltaY;
             let newDurationHours = Math.max(1, Math.round(newHeight / cellHeight));
             
-            const startHour = parseInt(currentResizingBox.dataset.startHour);
-            const newEndHour = Math.min(startHour + newDurationHours, endHour); // Fixed calculation of newEndHour
-            
-            const effectiveNewDurationHours = newEndHour - startHour; // Fixed: calculate duration based on newEndHour
-            
-            currentResizingBox.style.height = `${(effectiveNewDurationHours + 1) * cellHeight + effectiveNewDurationHours * 1}px`; // Fixed: calculate height based on new duration
-
             const entryData = JSON.parse(currentResizingBox.getAttribute('data-entry-details'));
-            entryData.endHour = newEndHour;
-            currentResizingBox.setAttribute('data-entry-details', JSON.stringify(entryData));
+            const newEndHour = Math.min(entryData.startHour + newDurationHours - 1, endHour);
+            const finalDuration = newEndHour - entryData.startHour + 1;
+
+            currentResizingBox.style.height = `${finalDuration * cellHeight + (finalDuration - 1)}px`;
             
-            const startTimeOption = currentResizingBox.dataset.startTimeOption;
-            let updatedTimeDisplay = getTimeDisplay(startHour, newEndHour, startTimeOption, null);
-            currentResizingBox.dataset.time = updatedTimeDisplay;
-            
-            // Update the display text inside the box immediately
             const planTimeElement = currentResizingBox.querySelector('.plan-time');
             if(planTimeElement) {
-                planTimeElement.textContent = updatedTimeDisplay;
+                planTimeElement.textContent = getTimeDisplay(entryData.startHour, newEndHour, entryData.startTimeOption);
             }
         }
 
@@ -1973,163 +1369,91 @@
 
             if (currentResizingBox) {
                 const entryData = JSON.parse(currentResizingBox.getAttribute('data-entry-details'));
-                const entryId = currentResizingBox.getAttribute('data-entry-id');
-                const newEndHour = entryData.endHour;
+                const newDurationHours = Math.max(1, Math.round(currentResizingBox.offsetHeight / cellHeight));
+                const newEndHour = Math.min(entryData.startHour + newDurationHours - 1, endHour);
 
+                // Update the data attribute for persistence
+                entryData.endHour = newEndHour;
+                currentResizingBox.setAttribute('data-entry-details', JSON.stringify(entryData));
+
+                const entryId = currentResizingBox.getAttribute('data-entry-id');
                 if (entryId && !entryId.startsWith('entry-')) {
                     const loadingSpinner = document.createElement('div');
                     loadingSpinner.className = 'box-loading-spinner';
                     currentResizingBox.appendChild(loadingSpinner);
-                    
-                    await updateSupabaseEntry(entryId, newEndHour);
-                    
+                    await updateSupabaseEntry(entryId, { end_hour: newEndHour });
                     loadingSpinner.remove();
                 }
             }
             currentResizingBox = null;
         }
-
-        async function updateSupabaseEntry(id, newEndHour) {
-            try {
-                let updateData = {
-                    end_hour: newEndHour,
-                    end_time_option: getTimeOption(JSON.parse(currentResizingBox.getAttribute('data-entry-details')).startHour, newEndHour)
-                };
-
-                const { error } = await _supabase
-                    .from('dms_weekly_plans')
-                    .update(updateData)
-                    .eq('id', id);
-
-                if (error) {
-                    throw error;
-                }
-                showMessageBox('Entry updated successfully in database!', 'Success');
-            } catch (error) {
-                console.error('Error updating entry in Supabase:', error);
-                showMessageBox(`Failed to update entry in database. Error: ${error.message}`, 'Error');
-            }
-        }
-
-        function clearLongPressTimer() {
-            if (longPressTimer) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-            }
-        }
         
-        document.getElementById('plan-table-body').addEventListener('mousedown', (e) => {
-            if (e.target.closest('.plan-box')) {
-                clearLongPressTimer();
-            }
-        });
-        
-        document.getElementById('plan-table-body').addEventListener('touchstart', (e) => {
-            const targetBox = e.target.closest('.plan-box');
-            if (targetBox) {
-                longPressTimer = setTimeout(() => {
-                    multiSelectMode = true;
-                    targetBox.classList.add('selected');
-                    updateDeleteButtonVisibility();
-                    hideAllPopovers();
-                    navigator.vibrate(100); // Haptic feedback for touch devices
-                }, 500); // 500ms for a long press
-            }
-        }, { passive: true });
-
-        document.getElementById('plan-table-body').addEventListener('touchend', (e) => {
-            clearLongPressTimer();
-        });
-        
-        document.getElementById('plan-table-body').addEventListener('touchmove', (e) => {
-            clearLongPressTimer();
-        });
-
-        document.getElementById('plan-table-body').addEventListener('click', (event) => {
-            const targetBox = event.target.closest('.plan-box');
-            
-            // Handle multi-select with Ctrl/Cmd key on PC
-            if (event.ctrlKey || event.metaKey || multiSelectMode) {
-                if (targetBox) {
-                    targetBox.classList.toggle('selected');
-                    hideAllPopovers();
-                    updateDeleteButtonVisibility();
-                }
-            } else { // Normal single click behavior
-                hideAllPopovers();
-                const selectedBoxes = document.querySelectorAll('.plan-box.selected');
-                
-                if (targetBox && !targetBox.classList.contains('selected')) {
-                    selectedBoxes.forEach(box => box.classList.remove('selected'));
-                    displayEntryPopover(targetBox);
-                    updateDeleteButtonVisibility();
-                } else if (targetBox && targetBox.classList.contains('selected')) {
-                    targetBox.classList.remove('selected');
-                    updateDeleteButtonVisibility();
-                } else if (!targetBox && selectedBoxes.length > 0) {
-                     selectedBoxes.forEach(box => box.classList.remove('selected'));
-                     updateDeleteButtonVisibility();
-                }
-            }
-        });
-        
-        // Hide popovers and deselect boxes on clicks outside the table and form.
-        document.addEventListener('click', (event) => {
-            const isClickInsideTable = event.target.closest('.scrollable-table-container');
-            const isClickInsideForm = event.target.closest('.form-section');
-            const isClickInsideNav = event.target.closest('.nav-controls');
-            const isClickInsideButtonContainer = event.target.closest('.justify-end.gap-3');
-            
-            if (!isClickInsideTable && !isClickInsideForm && !isClickInsideNav && !isClickInsideButtonContainer) {
-                hideAllPopovers();
-                document.querySelectorAll('.plan-box.selected').forEach(box => box.classList.remove('selected'));
-                updateDeleteButtonVisibility();
-                multiSelectMode = false;
-            }
-        });
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Control' || e.key === 'Meta') {
-                multiSelectMode = true;
-            }
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            if (e.key === 'Control' || e.key === 'Meta') {
-                multiSelectMode = false;
-            }
-        });
-
-        // Hide popovers on scroll
-        const scrollContainer = document.querySelector('.scrollable-table-container');
-        if (scrollContainer) {
-            scrollContainer.addEventListener('scroll', () => {
-                hideAllPopovers();
-            });
-        }
-
-
-        document.getElementById('districtManager').addEventListener('change', updateDatesAndDaySelector);
-        document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
-
-        function clearForm() {
-            document.getElementById('districtManager').value = '';
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
-            document.getElementById('selectedDay').innerHTML = '<option value="">Select a Day</option>';
-            document.getElementById('entryTypeSelect').value = '';
-            handleEntryTypeChange();
-            updateTableHeader('');
-            populateTimeSlotTable('');
-            document.querySelectorAll('.plan-box.selected').forEach(box => box.classList.remove('selected'));
-            hideDeleteButton();
+        // --- EVENT LISTENERS & POPOVERS ---
+        function displayEntryPopover(planBoxElement) {
             hideAllPopovers();
-            if (loggedInUser) {
-                filterAndPopulateDMs(loggedInUser);
-                setDefaultStartDate();
-                updateDatesAndDaySelector();
+            const popover = document.createElement('div');
+            popover.className = 'popover';
+            const entryData = JSON.parse(planBoxElement.getAttribute('data-entry-details'));
+            let contentHtml = '';
+            
+            if (entryData.type === 'Event') {
+                contentHtml = `<p><span class="font-semibold">Event:</span> ${entryData.event}</p>`;
+                if (entryData.event === 'Admin Work') {
+                     const detailsParts = entryData.details.split(' - ');
+                     contentHtml += `<p><span class="font-semibold">Type:</span> ${detailsParts[0]}</p>`;
+                     contentHtml += `<p><span class="font-semibold">Details:</span> ${detailsParts.slice(1).join(' - ') || 'N/A'}</p>`;
+                } else {
+                     contentHtml += `<p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>`;
+                }
+            } else if (entryData.type === 'Visit') {
+                contentHtml = `<p><span class="font-semibold">Visit:</span> ${entryData.visitType}</p>`;
+                if (entryData.visitType === 'Double Visit') {
+                    contentHtml += `<p><span class="font-semibold">MR:</span> ${entryData.medicalRep}</p><p><span class="font-semibold">Brick:</span> ${entryData.brick}</p>`;
+                }
+                contentHtml += `<p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>`;
+            } else if (entryData.type === 'Leave') {
+                contentHtml = `<p><span class="font-semibold">Leave:</span> ${entryData.leaveType}</p><p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>`;
             }
+            contentHtml += `<p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption)}</p>`;
+            
+            popover.innerHTML = `${contentHtml}<button type="button" class="btn btn-danger mt-2" onclick="deleteSingleEntry(event, '${planBoxElement.getAttribute('data-entry-id')}')">Delete</button>`;
+
+            const planBoxRect = planBoxElement.getBoundingClientRect();
+            document.body.appendChild(popover);
+            
+            // Position popover intelligently
+            const popoverRect = popover.getBoundingClientRect();
+            let top = planBoxRect.top;
+            let left = planBoxRect.right + 10;
+            if (left + popoverRect.width > window.innerWidth) {
+                left = planBoxRect.left - popoverRect.width - 10;
+            }
+            if (top + popoverRect.height > window.innerHeight) {
+                top = window.innerHeight - popoverRect.height - 10;
+            }
+            popover.style.left = `${left}px`;
+            popover.style.top = `${top}px`;
         }
+
+        function hideAllPopovers() {
+            document.querySelectorAll('.popover').forEach(popover => popover.remove());
+        }
+        
+        function updateDeleteButtonVisibility() {
+            const selectedBoxes = document.querySelectorAll('.plan-box.selected');
+            const deleteBtn = document.getElementById('deleteEntryButton');
+            deleteBtn.style.display = selectedBoxes.length > 0 ? 'inline-flex' : 'none';
+        }
+
+        function hideDeleteButton() {
+            document.getElementById('deleteEntryButton').style.display = 'none';
+        }
+        
+        // --- GLOBAL EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // This is a fallback if the message event doesn't fire
+            initializeApp({ username: 'Default User', title: 'admin' });
+        });
 
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'dmPlanningUserPermissions') {
@@ -2137,6 +1461,66 @@
                 initializeApp(event.data.user);
             }
         });
+        
+        document.getElementById('districtManager').addEventListener('change', updateDatesAndDaySelector);
+        document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
+        
+        document.getElementById('editPlanBtn').addEventListener('click', (e) => {
+            const form = document.getElementById('form-section-container');
+            const isHidden = form.classList.toggle('hidden');
+            e.target.textContent = isHidden ? 'Edit Plan' : 'Hide Form';
+        });
+
+        document.getElementById('prevWeekBtn').addEventListener('click', () => {
+            const startDateInput = document.getElementById('startDate');
+            const currentDate = new Date(startDateInput.value);
+            currentDate.setDate(currentDate.getDate() - 6); // Go back 7 days from current start
+            startDateInput.value = currentDate.toISOString().split('T')[0];
+            updateDatesAndDaySelector();
+        });
+
+        document.getElementById('nextWeekBtn').addEventListener('click', () => {
+            const startDateInput = document.getElementById('startDate');
+            const currentDate = new Date(startDateInput.value);
+            currentDate.setDate(currentDate.getDate() + 8); // Go forward 7 days from current start
+            startDateInput.value = currentDate.toISOString().split('T')[0];
+            updateDatesAndDaySelector();
+        });
+
+        document.getElementById('plan-table-body').addEventListener('click', (event) => {
+            const targetBox = event.target.closest('.plan-box');
+            if (event.target.closest('.resize-handle')) return; // Ignore clicks on resize handle
+
+            if (event.ctrlKey || event.metaKey || multiSelectMode) {
+                if (targetBox) {
+                    targetBox.classList.toggle('selected');
+                    hideAllPopovers();
+                }
+            } else {
+                const wasSelected = targetBox ? targetBox.classList.contains('selected') : false;
+                document.querySelectorAll('.plan-box.selected').forEach(b => b.classList.remove('selected'));
+                
+                if (targetBox && !wasSelected) {
+                    displayEntryPopover(targetBox);
+                } else {
+                    hideAllPopovers();
+                }
+            }
+            updateDeleteButtonVisibility();
+        });
+        
+        document.getElementById('deleteEntryButton').addEventListener('click', deleteSelectedEntries);
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.container')) {
+                hideAllPopovers();
+                document.querySelectorAll('.plan-box.selected').forEach(box => box.classList.remove('selected'));
+                updateDeleteButtonVisibility();
+                multiSelectMode = false;
+            }
+        });
+
+        document.querySelector('.scrollable-table-container').addEventListener('scroll', hideAllPopovers);
 
     </script>
 </body>
