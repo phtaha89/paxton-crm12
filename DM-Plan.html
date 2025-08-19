@@ -960,7 +960,8 @@
                              data-details="${entry.details || ''}"
                              data-start-hour="${entry.start_hour}"
                              data-end-hour="${entry.end_hour}"
-                             data-is-leave="${isLeave}"
+                             data-is-leave="true"
+                             data-entry-id="${entry.id}"
                              data-start-time-option="${entry.start_time_option}">
                             <p>${entry.leave_type}</p>
                             ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
@@ -1162,7 +1163,7 @@
         function getTimeOption(startHour, endHour) {
             if (startHour === 9 && endHour === 23) {
                 return 'Full Day';
-            } else if (startHour === 9 && endHour === 14) {
+            } else if (startHour === 9 && endHour === 13) {
                 return 'AM';
             } else if (startHour === 14 && endHour === 23) {
                 return 'PM';
@@ -1463,7 +1464,7 @@
                     timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`; // Fixed: display end time as start time + 1 hour
                 } else if (startTimeOption === 'AM') {
                     entryStartHour = 9;
-                    entryEndHour = 14;
+                    entryEndHour = 13;
                     timeDisplay = 'AM (9 AM - 2 PM)';
                 } else if (startTimeOption === 'PM') {
                     entryStartHour = 14;
@@ -1527,7 +1528,7 @@
                     timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`;
                 } else if (startTimeOption === 'AM') {
                     entryStartHour = 9;
-                    entryEndHour = 14;
+                    entryEndHour = 13;
                     timeDisplay = 'AM (9 AM - 2 PM)';
                 } else if (startTimeOption === 'PM') {
                     entryStartHour = 14;
@@ -1563,16 +1564,16 @@
                 entryData.startTimeOption = startTimeOption;
                 planDetailsHtml = `
                     <div class="plan-box visit-box"
-                             data-type="Visit"
-                             data-visit-type="${visitType}"
-                             data-time="${timeDisplay}"
-                             data-mr="${medicalRep}"
-                             data-brick="${brick}"
-                             data-details="${visitDetails || ''}"
-                             data-start-hour="${entryStartHour}"
-                             data-end-hour="${entryEndHour}"
-                             data-is-leave="${isLeave}"
-                             data-start-time-option="${startTimeOption}">
+                         data-type="Visit"
+                         data-visit-type="${visitType}"
+                         data-time="${timeDisplay}"
+                         data-mr="${medicalRep}"
+                         data-brick="${brick}"
+                         data-details="${visitDetails || ''}"
+                         data-start-hour="${entryStartHour}"
+                         data-end-hour="${entryEndHour}"
+                         data-is-leave="${isLeave}"
+                         data-start-time-option="${startTimeOption}">
                         <p>${visitType}</p>
                         ${visitType === 'Double Visit' ? `<p><span class="font-semibold">Brick:</span> ${brick}</p>` : ''}
                         ${!isFullDay ? `<p class="plan-time">${timeDisplay}</p><div class="resize-handle"></div>` : ''}
@@ -1602,7 +1603,7 @@
                     timeDisplay = `${formatHourForDisplay(entryStartHour)} - ${formatHourForDisplay(entryEndHour + 1)}`;
                 } else if (startTimeOption === 'AM') {
                     entryStartHour = 9;
-                    entryEndHour = 14;
+                    entryEndHour = 13;
                     timeDisplay = 'AM (9 AM - 2 PM)';
                 } else if (startTimeOption === 'PM') {
                     entryStartHour = 14;
