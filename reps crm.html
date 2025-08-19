@@ -866,7 +866,7 @@
                 max-width: 100%; /* Use full width */
                 height: 100vh; /* Use full height */
                 display: flex;
-                flex-direction: column;
+                flex-direction: row; /* Changed to row */
                 padding: 0;
                 border-radius: 0;
             }
@@ -874,6 +874,7 @@
                 flex-direction: row;
                 flex-grow: 1;
                 overflow: hidden;
+                width: 100%;
             }
             .side-navigation {
                 flex-basis: 240px; /* Slightly wider */
@@ -921,11 +922,31 @@
         
         /* --- Mobile View Fixes & Enhancements --- */
         @media (max-width: 1023px) {
+            body {
+                padding: 0;
+            }
+            .container {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+            }
              .side-navigation {
                 display: none; /* Hide the entire side nav container on mobile */
             }
             .med-rep-card-wrapper.mobile-only-header {
                 display: block; /* Show the mobile header */
+                position: sticky;
+                top: 0;
+                background-color: white;
+                z-index: 100;
+                padding: 12px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .main-content-scrollable {
+                padding: 12px;
             }
         }
         @media (max-width: 991px) {
@@ -945,7 +966,9 @@
             #weeklyPlanSection .table-container { max-height: 300px; overflow-y: auto; width: 100%; }
         }
         @media (max-width: 600px) {
-            .container { padding: 16px; }
+            .container { padding: 0; }
+            .main-content-scrollable { padding: 8px; }
+            .section-card { padding: 12px; }
             .form-row { flex-direction: column; gap: 16px; }
             .action-button { padding: 10px; font-size: 13px; }
             .tab-button { padding: 8px; font-size: 12px; }
@@ -1487,7 +1510,7 @@
                                     </div>
                                     <div class="button-group">
                                         <button id="weeklyPlanFilterButton" class="action-button submit-btn"><i class="fas fa-filter"></i> Apply Filter</button>
-                                        <button id="weeklyPlanRetrieveButton" class="action-button retrieve-btn"><i class="fas fa-sync-alt"></i> Retrieve</button>
+                                        <button id="weeklyPlanRetrieveButton" class="action-button retrieve-btn"><i class="fas fa-eye"></i> Display Plan</button>
                                     </div>
                                     <div class="filters-grid">
                                         <div class="filter-group">
