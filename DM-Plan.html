@@ -1146,11 +1146,11 @@
                     .insert(entriesToInsert);
 
                 if (insertError) {
-                    throw error;
+                    throw insertError;
                 }
 
                 showMessageBox('Plan submitted successfully!', 'Success');
-                fetchExistingPlanData(planData.startDate);
+                await fetchExistingPlanData(planData.startDate);
             }
             catch (error) {
                 console.error('Error submitting plan:', error);
@@ -1791,8 +1791,10 @@
                 const entryId = box.getAttribute('data-entry-id');
                 if (entryId && !entryId.startsWith('entry-')) {
                     idsToDelete.push(entryId);
+                } else {
+                    // It's a temporary entry, just remove it from the DOM
+                    box.remove();
                 }
-                box.remove();
             });
 
             if (idsToDelete.length > 0) {
@@ -1811,6 +1813,8 @@
                     console.error('Error deleting entries from Supabase:', error);
                     showMessageBox(`Failed to delete entries from database. Error: ${error.message}`, 'Error');
                 } finally {
+                    const startDate = document.getElementById('startDate').value;
+                    await fetchExistingPlanData(startDate);
                     toggleLoading(false);
                 }
             }
@@ -1892,13 +1896,12 @@
                         throw error;
                     }
                     showMessageBox('Entry deleted successfully from database!', 'Success');
-                    if (planBoxElement) {
-                        planBoxElement.remove();
-                    }
                 } catch (error) {
                     console.error('Error deleting entry from Supabase:', error);
                     showMessageBox(`Failed to delete entry from database. Error: ${error.message}`, 'Error');
                 } finally {
+                    const startDate = document.getElementById('startDate').value;
+                    await fetchExistingPlanData(startDate);
                     toggleLoading(false);
                 }
             } else {
