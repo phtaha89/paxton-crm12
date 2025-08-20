@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -275,11 +275,6 @@
             border: 1px solid #a5d6a7;
             color: #2e7d32;
         }
-        .alert-info {
-            background-color: #e3f2fd;
-            border: 1px solid #90caf9;
-            color: #0d47a1;
-        }
         .table-container {
             overflow-x: auto;
             margin-top: 16px;
@@ -294,7 +289,6 @@
             max-height: 600px;
             border-radius: 8px;
             overflow: hidden;
-            width: 100%;
         }
         th, td {
             padding: 12px 16px;
@@ -924,81 +918,16 @@
                 display: none;
             }
         }
-
+        
         /* --- Mobile View Fixes & Enhancements --- */
         @media (max-width: 1023px) {
-            .container {
-                flex-direction: column;
-                height: auto;
+             .side-navigation {
+                display: none; /* Hide the entire side nav container on mobile */
             }
-
-            .main-app-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 10px 0;
-                position: sticky;
-                top: 0;
-                background-color: white;
-                z-index: 200;
-                border-bottom: 1px solid #e9ecef;
-            }
-
-            .hamburger-menu {
-                cursor: pointer;
-                padding: 8px;
-                font-size: 24px;
-                color: #495057;
-            }
-            
-            .side-navigation.mobile-menu {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100vh;
-                width: 250px;
-                background-color: #f8fafc;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease-in-out;
-                z-index: 1000;
-                box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-                padding: 20px 10px;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .side-navigation.mobile-menu.open {
-                transform: translateX(0);
-            }
-            
-            .overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-                display: none;
-            }
-            
-            .overlay.open {
-                display: block;
-            }
-            
-            .main-content-wrapper {
-                margin-top: 10px;
-            }
-            
-            .mobile-only-header {
-                display: none;
-            }
-
-            .desktop-layout-wrapper .med-rep-card-wrapper {
-                display: none;
+            .med-rep-card-wrapper.mobile-only-header {
+                display: block; /* Show the mobile header */
             }
         }
-        
         @media (max-width: 991px) {
             .dashboard-header { flex-direction: column; gap: 1rem; align-items: flex-start !important; }
             .button-group { flex-direction: column; width: 100%; }
@@ -1074,20 +1003,9 @@
     </div>
 
     <div id="mainAppContainer" class="container">
-        <!-- Overlay for mobile menu -->
-        <div id="overlay" class="overlay"></div>
-
+        
         <div class="desktop-layout-wrapper">
-            <!-- Mobile Header and Menu Toggle -->
-            <header class="main-app-header lg:hidden">
-                <div class="flex items-center space-x-4">
-                    <button id="hamburgerMenu" class="hamburger-menu"><i class="fas fa-bars"></i></button>
-                    <h1 class="text-xl font-bold text-gray-900">Paxton LLC CRM</h1>
-                </div>
-            </header>
-
-            <!-- Side Navigation for Desktop & Mobile Menu -->
-            <nav class="side-navigation lg:flex" id="sideNav">
+            <nav class="side-navigation">
                 <div class="med-rep-card-wrapper">
                     <div class="med-rep-card">
                         <div class="med-rep-info">
@@ -1095,8 +1013,8 @@
                                 <i class="fas fa-spinner fa-spin"></i> Loading User...
                             </div>
                             <div class="med-rep-area" id="medRepArea">Area</div>
-                            <div class="med-rep-dm" id="medRepDM">District Manager: N/A</div>
-                            <div class="med-rep-gov" id="medRepGov">Governorate: N/A</div>
+                            <div class="med-rep-dm pc-hidden" id="medRepDM">District Manager: N/A</div>
+                            <div class="med-rep-gov pc-hidden" id="medRepGov">Governorate: N/A</div>
                         </div>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
@@ -1124,8 +1042,42 @@
                     </button>
                 </div>
             </nav>
-
+            
             <main class="main-content-scrollable">
+                <div class="med-rep-card-wrapper mobile-only-header">
+                     <div class="med-rep-card">
+                        <div class="med-rep-info">
+                            <div class="med-rep-name" id="medRepNameMobile">
+                                <i class="fas fa-spinner fa-spin"></i> Loading User...
+                            </div>
+                            <div class="med-rep-area" id="medRepAreaMobile">Area</div>
+                            <div class="med-rep-dm" id="medRepDMMobile">District Manager: N/A</div>
+                            <div class="med-rep-gov" id="medRepGovMobile">Governorate: N/A</div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <i class="fas fa-user-tie text-gray-400"></i>
+                            </span>
+                            <select id="medicalRepSelectorMobile" class="pl-10">
+                                <option value="">Select Medical Rep</option>
+                            </select>
+                        </div>
+                    </div>
+                     <div class="main-tab-group tab-group">
+                        <button id="crmMainTabBtnMobile" class="tab-button" disabled>
+                            <i class="fas fa-edit"></i> CRM
+                        </button>
+                        <button id="dashboardMainTabBtnMobile" class="tab-button" disabled>
+                            <i class="fas fa-chart-bar"></i> Customers
+                        </button>
+                        <button id="requestMainTabBtnMobile" class="tab-button" disabled>
+                            <i class="fas fa-file-alt"></i> Requests
+                        </button>
+                        <button id="weeklyPlanMainTabBtnMobile" class="tab-button" disabled>
+                            <i class="fas fa-calendar-week"></i> Weekly Plan
+                        </button>
+                    </div>
+                </div>
                 <div class="main-content-wrapper">
                     <!-- Form Section -->
                     <div id="formSection" class="section-card hidden">
@@ -1151,10 +1103,10 @@
                             </button>
                         </div>
                         <div id="hcpForm" class="hidden">
-                            <h2>
-                                <i class="fas fa-user-md"></i> HCP Submission Form
-                                <span id="hcpFormUnvisitedCount" class="unvisited-count-square hidden"></span>
-                            </h2>
+                             <h2>
+                                 <i class="fas fa-user-md"></i> HCP Submission Form
+                                 <span id="hcpFormUnvisitedCount" class="unvisited-count-square hidden"></span>
+                             </h2>
                             <div class="form-group">
                                 <label for="hcp" class="required-field">Healthcare Professional</label>
                                 <select id="hcp" required>
@@ -1257,10 +1209,10 @@
                             </div>
                         </div>
                         <div id="amForm" class="hidden">
-                            <h2>
+                             <h2>
                                 <i class="fas fa-clipboard-check"></i> AM Details Submission
                                 <span id="amFormUnvisitedCount" class="unvisited-count-square hidden"></span>
-                            </h2>
+                             </h2>
                             <div class="form-group">
                                 <label for="associatedAccount" class="required-field">Associated Account</label>
                                 <select id="associatedAccount" required>
@@ -1510,7 +1462,7 @@
 
                     <!-- Weekly Plan Section -->
                     <div id="weeklyPlanSection" class="section-card hidden">
-                        <div class="dashboard">
+                         <div class="dashboard">
                             <div class="header">
                                 <h1>Weekly Plan Dashboard</h1>
                                 <div id="weeklyPlanLoading">Loading data...</div>
@@ -1651,24 +1603,33 @@
         let currentMedRep = null;
         let loggedInUser = null;
         let globalGoogleData = [];
+        let globalGoogleSheetDataFromParent = [];
         let globalSupabaseVisits = [];
+        let visitCountsForCurrentRep = {};
         let medicalRepsAreas = new Map();
         let districtManagersGovernorates = new Map();
         let selectedBricks = [];
         let filteredHCPsForDashboard = [];
-        let globalGoogleSheetDataFromParent = []; // This variable is to hold data from the parent frame.
 
         document.addEventListener('DOMContentLoaded', () => {
             const loadingOverlay = document.getElementById('loadingOverlay');
 
-            // Consolidated alert function
             function showAlert(message, type) {
                 const alert = document.createElement('div');
-                const targetContainer = document.getElementById('requestSection').classList.contains('hidden') ? document.getElementById('alertContainer') : document.getElementById('requestAlertContainer');
                 alert.className = `alert alert-${type}`;
-                alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'info' ? 'info-circle' : 'check-circle'}"></i>${message}`;
-                targetContainer.innerHTML = '';
-                targetContainer.appendChild(alert);
+                alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
+                document.getElementById('alertContainer').innerHTML = '';
+                document.getElementById('alertContainer').appendChild(alert);
+                alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => { alert.style.display = 'none'; }, 5000);
+            }
+
+            function showRequestAlert(message, type) {
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type}`;
+                alert.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i>${message}`;
+                document.getElementById('requestAlertContainer').innerHTML = '';
+                document.getElementById('requestAlertContainer').appendChild(alert);
                 alert.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 setTimeout(() => { alert.style.display = 'none'; }, 5000);
             }
@@ -1709,16 +1670,15 @@
 
             async function fetchAllData() {
                 try {
-                    const [googleResponse, supabaseVisits] = await Promise.all([
-                        fetch(GOOGLE_SHEET_URL).then(res => {
-                            if (!res.ok) throw new Error('Failed to fetch Google Sheet data');
-                            return res.text();
-                        }),
-                        fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY)
-                    ]);
-                    globalGoogleData = parseCSV(googleResponse);
-                    globalSupabaseVisits = supabaseVisits;
-
+                    if (!globalGoogleSheetDataFromParent || globalGoogleSheetDataFromParent.length === 0) {
+                        const googleResponse = await fetch(GOOGLE_SHEET_URL);
+                        if (!googleResponse.ok) throw new Error('Failed to fetch Google Sheet data');
+                        const googleText = await googleResponse.text();
+                        globalGoogleData = parseCSV(googleText);
+                    } else {
+                        globalGoogleData = globalGoogleSheetDataFromParent;
+                    }
+                    globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
                     medicalRepsAreas.clear();
                     districtManagersGovernorates.clear();
                     globalGoogleData.forEach(row => {
@@ -1738,8 +1698,6 @@
                 } catch (error) {
                     console.error('Error fetching initial data:', error);
                     showAlert('Error loading data. Please try again later.', 'error');
-                } finally {
-                    loadingOverlay.style.display = 'none';
                 }
             }
 
@@ -1760,42 +1718,44 @@
             const medRepAreaElement = document.getElementById('medRepArea');
             const medRepDMElement = document.getElementById('medRepDM');
             const medRepGovElement = document.getElementById('medRepGov');
-            const hamburgerMenuBtn = document.getElementById('hamburgerMenu');
-            const sideNav = document.getElementById('sideNav');
-            const overlay = document.getElementById('overlay');
 
-            const mainTabButtons = document.querySelectorAll('.main-tab-group .tab-button');
+             // Mobile Header Elements
+            const medicalRepSelectorMobile = document.getElementById('medicalRepSelectorMobile');
+            const medRepNameElementMobile = document.getElementById('medRepNameMobile');
+            const medRepAreaElementMobile = document.getElementById('medRepAreaMobile');
+            const medRepDMElementMobile = document.getElementById('medRepDMMobile');
+            const medRepGovElementMobile = document.getElementById('medRepGovMobile');
+
+            const crmMainTabBtn = document.getElementById('crmMainTabBtn');
+            const dashboardMainTabBtn = document.getElementById('dashboardMainTabBtn');
+            const requestMainTabBtn = document.getElementById('requestMainTabBtn');
+            const weeklyPlanMainTabBtn = document.getElementById('weeklyPlanMainTabBtn');
+            
+            const crmMainTabBtnMobile = document.getElementById('crmMainTabBtnMobile');
+            const dashboardMainTabBtnMobile = document.getElementById('dashboardMainTabBtnMobile');
+            const requestMainTabBtnMobile = document.getElementById('requestMainTabBtnMobile');
+            const weeklyPlanMainTabBtnMobile = document.getElementById('weeklyPlanMainTabBtnMobile');
+
             const formSection = document.getElementById('formSection');
             const dashboardSection = document.getElementById('dashboardSection');
             const requestSection = document.getElementById('requestSection');
             const weeklyPlanSection = document.getElementById('weeklyPlanSection');
 
-            // Event listener for the hamburger menu button
-            hamburgerMenuBtn.addEventListener('click', () => {
-                sideNav.classList.add('mobile-menu', 'open');
-                overlay.classList.add('open');
-            });
-            // Event listeners to close the mobile menu
-            overlay.addEventListener('click', () => {
-                sideNav.classList.remove('open');
-                overlay.classList.remove('open');
-            });
-            window.addEventListener('resize', () => {
-                if (window.innerWidth >= 1024) {
-                    sideNav.classList.remove('mobile-menu', 'open');
-                    overlay.classList.remove('open');
-                }
-            });
-
-
             window.addEventListener('message', async (event) => {
                 if (event.data && event.data.type === 'loggedInUser') {
                     loggedInUser = event.data.user;
+                    medRepNameElement.innerHTML = loggedInUser.username; 
+                    medRepNameElementMobile.innerHTML = loggedInUser.username; 
+
+                    if (event.data.allGoogleSheetData) {
+                        globalGoogleSheetDataFromParent = event.data.allGoogleSheetData;
+                    }
                     console.log('CRM received loggedInUser:', loggedInUser);
                     
                     loadingOverlay.style.display = 'flex';
                     await fetchAllData();
                     handleUserRoleBasedRepSelection();
+                    loadingOverlay.style.display = 'none';
                 }
             });
 
@@ -1804,9 +1764,10 @@
                     showAlert('User data not received. Please log in again.', 'error');
                     return;
                 }
-                
-                medicalRepSelector.innerHTML = '<option value="">Select Medical Rep</option>';
-                medicalRepSelector.disabled = false;
+                [medicalRepSelector, medicalRepSelectorMobile].forEach(selector => {
+                    selector.innerHTML = '<option value="">Select Medical Rep</option>';
+                    selector.disabled = false;
+                });
                 
                 let repsToDisplay = [];
                 let defaultSelectedRep = '';
@@ -1814,7 +1775,7 @@
                     case 'Medical Representative':
                         repsToDisplay = [loggedInUser.username];
                         defaultSelectedRep = loggedInUser.username;
-                        medicalRepSelector.disabled = true;
+                        [medicalRepSelector, medicalRepSelectorMobile].forEach(s => s.disabled = true);
                         break;
                     case 'District Manager':
                         const dmName = loggedInUser.username;
@@ -1831,9 +1792,11 @@
                 }
                 
                 populateSelect(medicalRepSelector, repsToDisplay);
+                populateSelect(medicalRepSelectorMobile, repsToDisplay);
 
                 if (defaultSelectedRep) {
                     medicalRepSelector.value = defaultSelectedRep;
+                    medicalRepSelectorMobile.value = defaultSelectedRep;
                 }
                 medicalRepSelector.dispatchEvent(new Event('change'));
             }
@@ -1845,21 +1808,25 @@
                 medRepAreaElement.textContent = currentMedRep.area;
                 medRepDMElement.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
                 
+                medRepNameElementMobile.innerHTML = currentMedRep.name;
+                medRepAreaElementMobile.textContent = currentMedRep.area;
+                medRepDMElementMobile.textContent = `District Manager: ${currentMedRep.districtManager || 'N/A'}`;
+
                 const dmGovernorates = districtManagersGovernorates.get(currentMedRep.districtManager);
                 const govText = (dmGovernorates && dmGovernorates.size > 0) ? `Governorates: ${Array.from(dmGovernorates).join(', ')}` : `Governorate: N/A`;
                 medRepGovElement.textContent = govText;
+                medRepGovElementMobile.textContent = govText;
             }
 
-            function handleRepSelectionChange(event) {
-                const selectedRepName = event.target.value;
-                if (!selectedRepName) {
+            function handleRepSelectionChange(selectedRepName) {
+                 if (!selectedRepName) {
                     currentMedRep = null;
-                    medRepNameElement.textContent = 'Medical Rep Name';
-                    medRepAreaElement.textContent = 'Area';
-                    medRepDMElement.textContent = 'District Manager: N/A';
-                    medRepGovElement.textContent = 'Governorate: N/A';
+                    [medRepNameElement, medRepNameElementMobile].forEach(el => el.textContent = 'Medical Rep Name');
+                    [medRepAreaElement, medRepAreaElementMobile].forEach(el => el.textContent = 'Area');
+                    [medRepDMElement, medRepDMElementMobile].forEach(el => el.textContent = 'District Manager: N/A');
+                    [medRepGovElement, medRepGovElementMobile].forEach(el => el.textContent = 'Governorate: N/A');
                     
-                    [...mainTabButtons].forEach(btn => btn.disabled = true);
+                    [crmMainTabBtn, dashboardMainTabBtn, requestMainTabBtn, weeklyPlanMainTabBtn, crmMainTabBtnMobile, dashboardMainTabBtnMobile, requestMainTabBtnMobile, weeklyPlanMainTabBtnMobile].forEach(btn => btn.disabled = true);
                     formManager.handleReset();
                     dashboardManager.resetDashboard();
                     requestFormManager.resetForm();
@@ -1872,7 +1839,7 @@
                 if (repData) {
                     updateRepCard(repData);
 
-                    [...mainTabButtons].forEach(btn => btn.disabled = false);
+                    [crmMainTabBtn, dashboardMainTabBtn, requestMainTabBtn, weeklyPlanMainTabBtn, crmMainTabBtnMobile, dashboardMainTabBtnMobile, requestMainTabBtnMobile, weeklyPlanMainTabBtnMobile].forEach(btn => btn.disabled = false);
                     formManager.initializeRepSpecificData(currentMedRep.name);
                     dashboardManager.initializeDashboardForRep(currentMedRep.name);
                     requestFormManager.initialize(currentMedRep.name);
@@ -1884,8 +1851,19 @@
                 }
             }
 
-            medicalRepSelector.addEventListener('change', handleRepSelectionChange);
+            medicalRepSelector.addEventListener('change', () => {
+                medicalRepSelectorMobile.value = medicalRepSelector.value;
+                handleRepSelectionChange(medicalRepSelector.value);
+            });
+            medicalRepSelectorMobile.addEventListener('change', () => {
+                medicalRepSelector.value = medicalRepSelectorMobile.value;
+                handleRepSelectionChange(medicalRepSelectorMobile.value);
+            });
 
+
+            const mainTabButtons = document.querySelectorAll('.main-tab-group .tab-button');
+            const mainTabButtonsMobile = document.querySelectorAll('.mobile-only-header .main-tab-group .tab-button');
+            
             function showMainSection(sectionType) {
                 formManager.handleReset();
                 dashboardManager.resetDashboard();
@@ -1893,14 +1871,16 @@
                 weeklyPlanManager.reset();
                 [formSection, dashboardSection, requestSection, weeklyPlanSection].forEach(sec => sec.classList.add('hidden'));
                 
-                [...mainTabButtons].forEach(button => button.classList.remove('selected'));
+                mainTabButtons.forEach(button => button.classList.remove('selected'));
+                mainTabButtonsMobile.forEach(button => button.classList.remove('selected'));
 
                 const internalTabGroup = formSection.querySelector('.tab-group');
                 const formActionButtons = formSection.querySelector('.action-button-group');
 
                 if (sectionType === 'crm') {
                     formSection.classList.remove('hidden');
-                    document.getElementById('crmMainTabBtn').classList.add('selected');
+                    crmMainTabBtn.classList.add('selected');
+                    crmMainTabBtnMobile.classList.add('selected');
                     internalTabGroup.classList.remove('hidden');
                     formActionButtons.classList.remove('hidden');
                     formManager.elements.submitBtn.disabled = true;
@@ -1908,7 +1888,8 @@
                     formManager.elements.retrieveBtn.disabled = false;
                 } else if (sectionType === 'dashboard') {
                     dashboardSection.classList.remove('hidden');
-                    document.getElementById('dashboardMainTabBtn').classList.add('selected');
+                    dashboardMainTabBtn.classList.add('selected');
+                    dashboardMainTabBtnMobile.classList.add('selected');
                     internalTabGroup.classList.add('hidden');
                     formActionButtons.classList.add('hidden');
                     dashboardManager.elements.filterButton.disabled = false;
@@ -1916,7 +1897,8 @@
                     dashboardManager.applyFilter();
                 } else if (sectionType === 'request') {
                     requestSection.classList.remove('hidden');
-                    document.getElementById('requestMainTabBtn').classList.add('selected');
+                    requestMainTabBtn.classList.add('selected');
+                    requestMainTabBtnMobile.classList.add('selected');
                     internalTabGroup.classList.add('hidden');
                     formActionButtons.classList.add('hidden');
                     requestFormManager.initialize(currentMedRep.name);
@@ -1925,17 +1907,13 @@
                     requestFormManager.showTab('personal');
                 } else if (sectionType === 'weeklyPlan') {
                     weeklyPlanSection.classList.remove('hidden');
-                    document.getElementById('weeklyPlanMainTabBtn').classList.add('selected');
+                    weeklyPlanMainTabBtn.classList.add('selected');
+                    weeklyPlanMainTabBtnMobile.classList.add('selected');
                     weeklyPlanManager.initialize(currentMedRep.name);
                 }
-                
-                // Close mobile menu if open
-                if (sideNav.classList.contains('mobile-menu')) {
-                    sideNav.classList.remove('open');
-                    overlay.classList.remove('open');
-                }
             }
-            [...mainTabButtons].forEach(btn => btn.addEventListener('click', () => showMainSection(btn.id.replace('MainTabBtn', ''))));
+            mainTabButtons.forEach(btn => btn.addEventListener('click', () => showMainSection(btn.id.replace('MainTabBtn', ''))));
+            mainTabButtonsMobile.forEach(btn => btn.addEventListener('click', () => showMainSection(btn.id.replace('MainTabBtnMobile', ''))));
 
             class FormManager {
                 constructor() {
@@ -2000,7 +1978,7 @@
                 initializeRepSpecificData(repName) {
                     this.updateHcpOptions(repName); this.updateBrickOptions(repName); this.updateAmBrickOptions(repName);
                     this.updateAssociatedAccounts(repName); this.updateUnvisitedHcpCount(); this.updateUnvisitedAmAccountCount();
-                    [this.elements.hcpBtn, this.elements.pharmacyBtn, this.elements.eventBtn, this.elements.amBtn, document.getElementById('crmMainTabBtn'), document.getElementById('dashboardMainTabBtn'), document.getElementById('requestMainTabBtn'), document.getElementById('weeklyPlanMainTabBtn')].forEach(el => el.disabled = false);
+                    [this.elements.hcpBtn, this.elements.pharmacyBtn, this.elements.eventBtn, this.elements.amBtn, crmMainTabBtn, dashboardMainTabBtn, requestMainTabBtn, weeklyPlanMainTabBtn].forEach(el => el.disabled = false);
                 }
                 showForm(formType) {
                     this.handleReset(); this.setCurrentDateTimeInCairo();
@@ -2023,16 +2001,17 @@
                 setLoading(isLoading) {
                     this.isLoading = isLoading;
                     [this.elements.submitBtn, this.elements.resetBtn, this.elements.retrieveBtn, ...this.elements.internalTabButtons].forEach(el => el.disabled = isLoading);
-                    if (!isLoading && currentMedRep && document.getElementById('crmMainTabBtn').classList.contains('selected')) {
+                    if (!isLoading && currentMedRep && crmMainTabBtn.classList.contains('selected')) {
                         [this.elements.hcpBtn, this.elements.pharmacyBtn, this.elements.eventBtn, this.elements.amBtn].forEach(el => el.disabled = false);
                     }
                 }
                 validateComment(comment) {
-                    if (!comment || comment.trim().length === 0) {
-                        return "Comment cannot be empty.";
-                    }
-                    return null; // No error
-                }
+                    if (!comment || comment.trim().length === 0) {
+                        return "Comment cannot be empty.";
+                    }
+                    // The restrictive check for English characters has been removed to allow Arabic.
+                    return null; // No error
+                }
                 async handleSubmit() {
                     if (this.isLoading) return;
                     this.setLoading(true);
@@ -2253,7 +2232,7 @@
                     if (!currentMedRep) return;
                     const badge = this.elements.amFormUnvisitedCountBadge;
                     badge.classList.add('hidden'); badge.textContent = '';
-                    this.updateAssociatedAccounts(currentMedRep.name);
+                    this.updateAssociatedAccounts(currentMedRep.name); 
                 }
                 getCurrentMonthStart() {
                     const nowInCairo = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
@@ -2339,6 +2318,9 @@
                     if (currentMedRep) { this.updateUnvisitedHcpCount(); this.updateUnvisitedAmAccountCount(); }
                 }
             }
+
+            // --- Dashboard, Request, WeeklyPlan classes would follow a similar refactored structure ---
+            // NOTE: For brevity, only the fixed FormManager is shown in full. Other classes are included below.
             class DashboardManager {
                 constructor() {
                     this.elements = {
@@ -2368,10 +2350,10 @@
                     this.updateCountDisplay(); this.applyFilter(); this.setLoading(false);
                 }
                 processVisitDataForCurrentRep() {
-                    this.visitCounts = {};
+                    visitCountsForCurrentRep = {};
                     const currentMonthStart = formManager.getCurrentMonthStart();
                     const filteredVisits = globalSupabaseVisits.filter(visit => visit.medical_rep === currentMedRep.name && new Date(visit.visit_date) >= new Date(currentMonthStart));
-                    filteredVisits.forEach(visit => { this.visitCounts[visit.hcp_name] = (this.visitCounts[visit.hcp_name] || 0) + 1; });
+                    filteredVisits.forEach(visit => { visitCountsForCurrentRep[visit.hcp_name] = (visitCountsForCurrentRep[visit.hcp_name] || 0) + 1; });
                 }
                 populateBricksForRep(repName) {
                     const uniqueBricks = [...new Set(globalGoogleData.filter(row => row['medical rep'] === repName).map(row => row['Brick']).filter(Boolean))];
@@ -2396,10 +2378,10 @@
                     const filteredGoogleDataForRep = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
                     const selectedDay = this.elements.dayFilterSelect.value;
                     if (selectedOption === 'unvisited') {
-                        count = filteredGoogleDataForRep.filter(row => (!this.visitCounts[row['HCPS']] || this.visitCounts[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
+                        count = filteredGoogleDataForRep.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
                         displayText = `Unvisited HCPs (${selectedBricks.length > 0 ? selectedBricks.join(', ') : 'All Bricks'}) Count: `;
                     } else if (selectedOption === 'remaining') {
-                        count = filteredGoogleDataForRep.filter(row => (parseInt(row['T.V']) || 0) > (this.visitCounts[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
+                        count = filteredGoogleDataForRep.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
                         displayText = `Remaining Visits (${selectedBricks.length > 0 ? selectedBricks.join(', ') : 'All Bricks'}) Count: `;
                     } else if (selectedOption === 'full') {
                         count = filteredGoogleDataForRep.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
@@ -2416,9 +2398,9 @@
                     if (errorMsg) { this.elements.hcpTable.classList.add('hidden'); this.elements.searchContainer.classList.add('hidden'); return; }
                     const googleDataForCurrentRep = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
                     if (selectedOption === 'unvisited') {
-                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (!this.visitCounts[row['HCPS']] || this.visitCounts[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
+                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     } else if (selectedOption === 'remaining') {
-                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (parseInt(row['T.V']) || 0) > (this.visitCounts[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
+                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     } else {
                         filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     }
@@ -2427,7 +2409,7 @@
                 populateHCPTable(hcpData, selectedDay) {
                     this.elements.hcpTableBody.innerHTML = '';
                     hcpData.forEach(row => {
-                        const actualVisits = this.visitCounts[row['HCPS']] || 0, targetVisits = parseInt(row['T.V']) || 0, remainingVisits = targetVisits - actualVisits;
+                        const actualVisits = visitCountsForCurrentRep[row['HCPS']] || 0, targetVisits = parseInt(row['T.V']) || 0, remainingVisits = targetVisits - actualVisits;
                         const remainingClass = remainingVisits <= 0 ? 'light-green' : (remainingVisits < targetVisits ? 'light-yellow' : 'light-red');
                         const tr = this.elements.hcpTableBody.insertRow();
                         tr.innerHTML = `<td class="sticky">${row['HCPS']}</td><td>${row['Speciality']}</td><td>${row['Class']}</td><td>${row['T.V']}</td><td class="${remainingClass}">${remainingVisits}</td><td>${row['Brick']}</td><td>${row['Address']}</td><td>${row['Mobile']}</td> <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td><td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td><td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td><td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td><td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td><td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>`;
@@ -2550,7 +2532,7 @@
                     this.clearAllErrors();
                     const medRep = this.currentRepName, area = this.elements.areaSelect.value, customerTypeDropdown = this.elements.customerTypeSelect.value, customerName = this.elements.customerNameInput.value;
                     let selectedAccountOrDoctor = '', valid = true;
-                    if (!medRep) { showAlert("Medical Rep information is missing.", "error"); valid = false; }
+                    if (!medRep) { showRequestAlert("Medical Rep information is missing.", "error"); valid = false; }
                     if (!area) { this.showError(this.elements.areaError, "Area is required."); valid = false; }
                     if (!customerTypeDropdown) { this.showError(this.elements.customerTypeError, "Customer Type is required."); valid = false; }
                     if (customerTypeDropdown === 'AM Accounts') {
@@ -2569,10 +2551,10 @@
                         const requestData = { medRep, area, customerType: selectedAccountOrDoctor, customerName, date: this.elements.dateInput.value, requestTitle: this.elements.requestTitleInput.value, requestDetails: this.elements.requestDetailsTextarea.value, status: "Requested" };
                         try {
                             const response = await fetch(REQUESTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_API_KEY, 'Authorization': `Bearer ${SUPABASE_API_KEY}` }, body: JSON.stringify(requestData) });
-                            if (response.ok) { showAlert("Customer Request submitted successfully!", "success"); this.resetCustomerForm(); this.fetchTotalCustomerRequests(); }
-                            else { const errorData = await response.json(); console.error('Error submitting customer request:', errorData); showAlert("Failed to submit customer request: " + errorData.message, "error"); }
-                        } catch (error) { console.error('Error:', error); showAlert("An error occurred while submitting the customer request.", "error"); }
-                    } else { showAlert('Please fill in all required fields for Customer Request.', 'error'); }
+                            if (response.ok) { showRequestAlert("Customer Request submitted successfully!", "success"); this.resetCustomerForm(); this.fetchTotalCustomerRequests(); }
+                            else { const errorData = await response.json(); console.error('Error submitting customer request:', errorData); showRequestAlert("Failed to submit customer request: " + errorData.message, "error"); }
+                        } catch (error) { console.error('Error:', error); showRequestAlert("An error occurred while submitting the customer request.", "error"); }
+                    } else { showRequestAlert('Please fill in all required fields for Customer Request.', 'error'); }
                 }
                 async submitPersonalRequest() {
                     this.clearAllErrors();
@@ -2588,10 +2570,10 @@
                         const requestData = { medRep: personalName, area: personalArea, customerType: "Personal", customerName: personalName, date: personalDate, requestTitle: personalRequestTitle, requestDetails: this.elements.personalRequestDetailsTextarea.value, status: "Requested" };
                         try {
                             const response = await fetch(REQUESTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_API_KEY, 'Authorization': `Bearer ${SUPABASE_API_KEY}` }, body: JSON.stringify(requestData) });
-                            if (response.ok) { showAlert("Personal Request submitted successfully!", "success"); this.resetPersonalForm(); this.fetchTotalPersonalRequests(); }
-                            else { const errorData = await response.json(); console.error('Error submitting personal request:', errorData); showAlert("Failed to submit personal request: " + errorData.message, "error"); }
-                        } catch (error) { console.error('Error:', error); showAlert("An error occurred while submitting the personal request.", "error"); }
-                    } else { showAlert('Please fill in all required fields for Personal Request.', 'error'); }
+                            if (response.ok) { showRequestAlert("Personal Request submitted successfully!", "success"); this.resetPersonalForm(); this.fetchTotalPersonalRequests(); }
+                            else { const errorData = await response.json(); console.error('Error submitting personal request:', errorData); showRequestAlert("Failed to submit personal request: " + errorData.message, "error"); }
+                        } catch (error) { console.error('Error:', error); showRequestAlert("An error occurred while submitting the personal request.", "error"); }
+                    } else { showRequestAlert('Please fill in all required fields for Personal Request.', 'error'); }
                 }
                 resetCustomerForm() {
                     this.elements.areaSelect.innerHTML = '<option value="">Select an Area</option>'; this.elements.areaContainer.classList.add('hidden');
@@ -2611,11 +2593,11 @@
                 async retrieveCustomerRequests() {
                     const medRep = this.currentRepName, requestDetailsDisplay = this.elements.customerRequestDetailsDisplayDiv;
                     requestDetailsDisplay.innerHTML = '';
-                    if (!medRep) { showAlert("Medical Rep information is missing.", "error"); return; }
+                    if (!medRep) { showRequestAlert("Medical Rep information is missing.", "error"); return; }
                     let filters = [`customerType=neq.Personal`];
                     const associatedAreas = medicalRepsAreas.get(medRep);
                     if (associatedAreas && associatedAreas.size > 0) { filters.push(`area=in.(${Array.from(associatedAreas).join(',')})`); }
-                    else { showAlert("No associated areas found.", "info"); this.elements.retrievedCustomerRequestsDiv.classList.add('hidden'); return; }
+                    else { showRequestAlert("No associated areas found.", "info"); this.elements.retrievedCustomerRequestsDiv.classList.add('hidden'); return; }
                     const fullQueryUrl = `${REQUESTS_URL}?${filters.join('&')}&order=date.desc`;
                     try {
                         const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY);
@@ -2629,13 +2611,13 @@
                                 requestDetailsDisplay.appendChild(note);
                             });
                             this.elements.retrievedCustomerRequestsDiv.classList.remove('hidden');
-                        } else { showAlert("No customer requests found for your associated areas.", "info"); this.elements.retrievedCustomerRequestsDiv.classList.add('hidden'); }
-                    } catch (error) { console.error('Error fetching customer requests:', error); showAlert("An error occurred while retrieving customer requests.", "error"); }
+                        } else { showRequestAlert("No customer requests found for your associated areas.", "info"); this.elements.retrievedCustomerRequestsDiv.classList.add('hidden'); }
+                    } catch (error) { console.error('Error fetching customer requests:', error); showRequestAlert("An error occurred while retrieving customer requests.", "error"); }
                 }
                 async retrievePersonalRequests() {
                     const personalName = this.elements.personalNameSelect.value, personalRequestDetailsDisplay = this.elements.personalRequestDetailsDisplayDiv;
                     personalRequestDetailsDisplay.innerHTML = '';
-                    if (!personalName) { showAlert("Please select your Name to retrieve personal requests.", "error"); return; }
+                    if (!personalName) { showRequestAlert("Please select your Name to retrieve personal requests.", "error"); return; }
                     const fullQueryUrl = `${REQUESTS_URL}?customerType=eq.Personal&medRep=eq.${personalName}&order=date.desc`;
                     try {
                         const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY);
@@ -2649,8 +2631,8 @@
                                 personalRequestDetailsDisplay.appendChild(note);
                             });
                             this.elements.retrievedPersonalRequestsDiv.classList.remove('hidden');
-                        } else { showAlert("No personal requests found for the selected name.", "info"); this.elements.retrievedPersonalRequestsDiv.classList.add('hidden'); }
-                    } catch (error) { console.error('Error fetching personal requests:', error); showAlert("An error occurred while fetching total personal requests.", "error"); }
+                        } else { showRequestAlert("No personal requests found for the selected name.", "info"); this.elements.retrievedPersonalRequestsDiv.classList.add('hidden'); }
+                    } catch (error) { console.error('Error fetching personal requests:', error); showRequestAlert("An error occurred while fetching total personal requests.", "error"); }
                 }
                 async fetchTotalCustomerRequests() {
                     const medRep = this.currentRepName; let filters = [`customerType=neq.Personal`];
@@ -2661,14 +2643,14 @@
                     } else { this.elements.customerRequestCountSpan.innerText = '0'; return; }
                     const fullQueryUrl = `${REQUESTS_URL}?${filters.join('&')}`;
                     try { const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY); this.elements.customerRequestCountSpan.innerText = data.length; }
-                    catch (error) { console.error('Error fetching total customer requests:', error); showAlert("An error occurred while fetching total customer requests.", "error"); }
+                    catch (error) { console.error('Error fetching total customer requests:', error); showRequestAlert("An error occurred while fetching total customer requests.", "error"); }
                 }
                 async fetchTotalPersonalRequests() {
                     const personalName = this.elements.personalNameSelect.value; let filters = [`customerType=eq.Personal`];
                     if (personalName) { filters.push(`medRep=eq.${personalName}`); } else { this.elements.personalRequestCountSpan.innerText = '0'; return; }
                     const fullQueryUrl = `${REQUESTS_URL}?${filters.join('&')}`;
                     try { const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY); this.elements.personalRequestCountSpan.innerText = data.length; }
-                    catch (error) { console.error('Error fetching total personal requests:', error); showAlert("An error occurred while fetching total personal requests.", "error"); }
+                    catch (error) { console.error('Error fetching total personal requests:', error); showRequestAlert("An error occurred while fetching total personal requests.", "error"); }
                 }
             }
             class WeeklyPlanManager {
@@ -2754,10 +2736,9 @@
                     const sortedData = filteredData.sort((a, b) => { const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0), remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0); const targetA = parseInt(a['T.V']) || 0, targetB = parseInt(b['T.V']) || 0; if (remainingA === targetA && remainingB !== targetB) return -1; if (remainingB === targetB && remainingA !== targetA) return 1; return remainingB - remainingA; });
                     sortedData.forEach(row => {
                         const actualVisits = this.visitCounts[row['HCPS']] || 0, targetVisits = parseInt(row['T.V']) || 0, remainingVisits = targetVisits - actualVisits;
-                        const remainingCellClass = remainingVisits === targetVisits ? 'remaining-visit' : 'not-remaining';
-                        const tr = document.createElement('tr'); const remainingDayData = row[selectedDay] || '';
+                        const tr = document.createElement('tr'); const remainingCellClass = remainingVisits === targetVisits ? 'remaining-visit' : 'not-remaining';
                         tr.innerHTML = `<td>${row['HCPS']}</td><td>${row['Speciality']}</td><td>${row['Class']}</td><td>${row['T.V']}</td><td class="${remainingCellClass}">${remainingVisits}</td><td>${row['Brick']}</td><td>${row['Address']}</td><td>${row['Mobile']}</td><td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td><td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td><td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td><td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td><td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td><td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>`;
-                        tr.addEventListener('click', () => { if (!this.elements.dayFilter.value) { this.showMessage('Please select a Day first.', 'error'); return; } this.addToWeeklyPlan(row['HCPS'], remainingDayData, this.elements.dayFilter.value, row['Speciality']); this.elements.hcpTableBody.removeChild(tr); });
+                        tr.addEventListener('click', () => { if (!this.elements.dayFilter.value) { this.showMessage('Please select a Day first.', 'error'); return; } this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']); this.elements.hcpTableBody.removeChild(tr); });
                         this.elements.hcpTableBody.appendChild(tr);
                     });
                     this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
@@ -2877,8 +2858,8 @@
                                     if (item.Speciality === 'AM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].am.push(entry);
                                     if (item.Speciality === 'PM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].pm.push(entry);
                                 } else {
-                                    const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
-                                    if(isPriority) this.weeklyPlanData[day].am.push(entry); else this.weeklyPlanData[day].pm.push(entry);
+                                     const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
+                                     if(isPriority) this.weeklyPlanData[day].am.push(entry); else this.weeklyPlanData[day].pm.push(entry);
                                 }
                             }
                         });
@@ -2924,7 +2905,7 @@
             // Initial state setup
             loadingOverlay.style.display = 'flex';
             [formSection, dashboardSection, requestSection, weeklyPlanSection].forEach(sec => sec.classList.add('hidden'));
-            [...mainTabButtons].forEach(btn => btn.disabled = true);
+            [crmMainTabBtn, dashboardMainTabBtn, requestMainTabBtn, weeklyPlanMainTabBtn, crmMainTabBtnMobile, dashboardMainTabBtnMobile, requestMainTabBtnMobile, weeklyPlanMainTabBtnMobile].forEach(btn => btn.disabled = true);
         });
     </script>
 </body>
