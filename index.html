@@ -45,8 +45,6 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
             color: var(--text-color-dark);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -54,29 +52,34 @@
 
         /* Main container for the application, taking full available width and height */
         .container {
-            max-width: 1500px; /* Slightly reduced max-width */
-            margin: 0 auto;
-            padding: 12px; /* Slightly reduced padding */
             width: 100%;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
+            height: 100vh;
         }
 
         /* Header styling with flexbox for alignment */
         .header {
+            background: var(--card-bg);
+            padding: 6px 12px;
+            /* UPDATED: Added a slightly more visible but still light shadow */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+            position: relative;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+        
+        /* NEW: Inner wrapper for header content to constrain its width */
+        .header-inner {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--card-bg);
-            padding: 6px 18px; /* Adjusted padding */
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 0.2rem; /* Reduced margin */
-            position: relative;
-            z-index: 100;
             gap: 10px;
-            flex-wrap: nowrap; /* Ensure user card and logout button are always in one row */
+            flex-wrap: nowrap;
+            width: 100%;
+            max-width: 1500px;
+            margin: 0 auto;
         }
 
         /* User Card Styling */
@@ -138,7 +141,7 @@
             font-weight: 500;
             font-size: 0.85rem; /* Slightly smaller */
             border: none;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease; /* UPDATED: Faster transition */
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -192,8 +195,9 @@
         .banner {
             background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
             color: white;
-            padding: 10px 22px; /* Decreased height for slimmer banner */
-            margin-bottom: 15px;
+            /* UPDATED: Decreased padding and margin for a slimmer banner */
+            padding: 8px 20px; 
+            margin-bottom: 10px;
             border-radius: 16px; /* Matched from dashboard */
             box-shadow: var(--shadow-lg);
             position: relative;
@@ -203,6 +207,10 @@
             flex-direction: row;
             align-items: center;
             gap: 18px;
+            max-width: 1500px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         /* Grain texture from dashboard */
@@ -236,14 +244,14 @@
         }
 
         .banner h1 {
-            font-size: 1.8rem; /* Slightly smaller */
+            font-size: 1.6rem; /* UPDATED: Slightly smaller */
             font-weight: 700;
             margin-bottom: 2px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .banner .subtitle {
-            font-size: 0.85rem; /* Slightly smaller */
+            font-size: 0.8rem; /* UPDATED: Slightly smaller */
             opacity: 0.98;
             font-weight: 400;
         }
@@ -261,10 +269,14 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); /* Adjusted minmax */
             gap: 18px; /* Adjusted gap */
-            padding: 12px 0;
+            padding: 12px;
             flex-grow: 1;
             align-content: start;
             overflow-y: auto; /* Enable scrolling for tabs only */
+            max-width: 1500px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         /* Styling for each navigation card */
@@ -275,7 +287,7 @@
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* UPDATED: Faster transition */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -338,21 +350,17 @@
             line-height: 1.4;
         }
         
-        /* Full page view container */
+        /* Full page view container - MODIFIED */
         .full-page-view {
-            background: var(--card-bg);
-            border-radius: 18px; /* Matched from dashboard */
-            box-shadow: var(--shadow-lg);
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            /* SMOOTHER TRANSITION: Increased duration and distance */
-            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateY(15px);
+            /* UPDATED: Faster, lighter transition */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(10px);
             opacity: 0;
-            height: 100%; /* Increased height */
         }
 
         .full-page-view.active {
@@ -478,7 +486,7 @@
             text-align: center;
             width: 100%;
             max-width: 360px;
-            animation: fadeInFromCenter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* New animation */
+            animation: fadeInFromCenter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* UPDATED: Faster animation */
             position: relative;
         }
 
@@ -571,7 +579,7 @@
             flex-direction: column;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease; /* UPDATED: Faster transition */
             z-index: 2000;
         }
 
@@ -891,14 +899,15 @@
         @media (max-width: 768px) {
             body { overflow: hidden; } /* Prevent body scroll on mobile */
             .container { padding: 8px; height: 100vh; }
-            .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; position: sticky; top: 0; z-index: 100; }
+            /* UPDATED: Removed sticky position to prevent jumping on scroll */
+            .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
             .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
             .user-name { font-size: 0.7rem; }
             .user-title { font-size: 0.6rem; }
             .header-buttons { width: auto; justify-content: flex-start; order: 1; flex-grow: 1; }
             .header-button { flex-grow: 0; padding: 5px 7px; font-size: 0.7rem; }
             .logout-button { width: 70px; display: none; }
-            .banner { padding: 6px 12px; gap: 8px; } /* Removed sticky positioning */
+            .banner { padding: 6px 12px; gap: 8px; }
             .company-logo { max-width: 40px; }
             .banner h1 { font-size: 1.2rem; }
             .banner .subtitle { font-size: 0.65rem; }
@@ -958,25 +967,27 @@
     <!-- Main Application Content (hidden until login) -->
     <div id="appContent" class="container hidden">
         <div class="header">
-            <button id="mobileMenuButton" class="mobile-menu-button"><i class="fas fa-bars"></i></button>
-            <div class="header-buttons">
-                <button id="logoutButton" class="header-button logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
-                <button id="backButton" class="header-button back-button hidden"><i class="fas fa-arrow-left"></i> Back</button>
-                <!-- NEW: Refresh Button -->
-                <button id="refreshButton" class="header-button refresh-button hidden"><i class="fas fa-sync-alt"></i></button>
-                <div class="notification-bell hidden" id="notificationBell">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-count" id="notificationCount">0</span>
-                    <div class="notification-dropdown hidden" id="notificationDropdown">
-                        <!-- Notification items will be inserted here -->
+            <div class="header-inner">
+                <button id="mobileMenuButton" class="mobile-menu-button"><i class="fas fa-bars"></i></button>
+                <div class="header-buttons">
+                    <button id="logoutButton" class="header-button logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    <button id="backButton" class="header-button back-button hidden"><i class="fas fa-arrow-left"></i> Back</button>
+                    <!-- NEW: Refresh Button -->
+                    <button id="refreshButton" class="header-button refresh-button hidden"><i class="fas fa-sync-alt"></i></button>
+                    <div class="notification-bell hidden" id="notificationBell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count" id="notificationCount">0</span>
+                        <div class="notification-dropdown hidden" id="notificationDropdown">
+                            <!-- Notification items will be inserted here -->
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div id="userCard" class="user-card hidden">
-                <i class="fas fa-user-circle user-card-icon"></i>
-                <div class="user-info">
-                    <span id="userCardName" class="user-name"></span>
-                    <span id="userCardTitle" class="user-title"></span>
+                <div id="userCard" class="user-card hidden">
+                    <i class="fas fa-user-circle user-card-icon"></i>
+                    <div class="user-info">
+                        <span id="userCardName" class="user-name"></span>
+                        <span id="userCardTitle" class="user-title"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1279,7 +1290,7 @@
                  detailsHtml += `
                     <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
                     <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
-                 `;
+               `;
             }
 
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
@@ -1340,7 +1351,7 @@
             overlay.classList.add('show');
             setTimeout(() => {
                 overlay.classList.remove('show');
-                if (callback) setTimeout(callback, 400);
+                if (callback) setTimeout(callback, 300); // UPDATED: Faster callback timing
             }, duration);
         }
 
@@ -1460,7 +1471,7 @@
                         activeView.classList.add('hidden');
                         const iframe = activeView.querySelector('iframe');
                         if (iframe) iframe.src = 'about:blank';
-                    }, 400);
+                    }, 300); // UPDATED: Faster transition timing
                 }
             }
             currentActiveViewId = 'homeView';
@@ -1494,7 +1505,7 @@
                         prevActiveView.classList.add('hidden');
                         const prevIframe = prevActiveView.querySelector('iframe');
                         if (prevIframe) prevIframe.src = 'about:blank';
-                    }, 400);
+                    }, 300); // UPDATED: Faster transition timing
                 }
             }
             currentActiveViewId = viewId;
