@@ -26,6 +26,9 @@
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
             --border-radius: 12px;
+            --transition-duration-fast: 0.2s;
+            --transition-duration-normal: 0.3s;
+            --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* Base styles for all elements */
@@ -64,8 +67,11 @@
 
         /* Header styling with flexbox for alignment */
         /* FIX: Header is now a non-growing flex item. No more jumping on scroll. */
+        /* ENHANCEMENT: Added backdrop-filter for a modern, glassy effect */
         .header {
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            backdrop-filter: blur(10px); /* Glassy blur effect */
+            -webkit-backdrop-filter: blur(10px);
             padding: 6px 12px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.07);
             position: relative;
@@ -143,7 +149,7 @@
             font-size: 0.85rem;
             border: none;
             /* FIX: Using a more modern easing function for smoother animations */
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition-duration-fast) var(--transition-easing);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -186,7 +192,7 @@
             background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
             color: white;
             padding: 8px 20px;
-            margin-bottom: 10px;
+            margin: 10px auto;
             border-radius: 16px;
             box-shadow: var(--shadow-lg);
             position: relative;
@@ -197,9 +203,7 @@
             align-items: center;
             gap: 18px;
             max-width: 1500px;
-            width: 100%;
-            margin-left: auto;
-            margin-right: auto;
+            width: 98%;
         }
 
         .banner::before {
@@ -274,7 +278,7 @@
             cursor: pointer;
             text-align: center;
             /* FIX: Using a smoother, more modern easing function */
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all var(--transition-duration-normal) var(--transition-easing);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -328,6 +332,7 @@
         }
         
         /* Full page view container */
+        /* ENHANCEMENT: Made transitions smoother and faster for a better feel */
         .full-page-view {
             flex-grow: 1;
             display: flex;
@@ -335,7 +340,7 @@
             position: relative;
             overflow: hidden;
             /* FIX: Updated transition for a smoother, faster feel */
-            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity var(--transition-duration-fast) var(--transition-easing), transform var(--transition-duration-fast) var(--transition-easing);
             transform: translateY(10px);
             opacity: 0;
         }
@@ -345,7 +350,7 @@
             transform: translateY(0);
             display: flex;
         }
-
+        
         /* Iframe container within full page view */
         .iframe-container-fpv {
             flex-grow: 1;
@@ -532,7 +537,7 @@
             flex-direction: column;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity var(--transition-duration-normal) ease, visibility var(--transition-duration-normal) ease;
             z-index: 2000;
         }
 
@@ -559,9 +564,9 @@
             color: var(--background-gradient-end);
             flex-shrink: 0; /* Prevent footer from shrinking */
         }
-
+        /* FIX: Ensure the footer is displayed correctly when it should be visible on mobile */
         .footer.show { display: block; }
-
+        
         /* New Professional Intro Animation Styles */
         .intro-overlay {
             position: fixed;
@@ -731,7 +736,7 @@
             z-index: 2000;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity var(--transition-duration-normal) ease, visibility var(--transition-duration-normal) ease;
         }
         .custom-modal-overlay.show {
             opacity: 1;
@@ -746,7 +751,7 @@
             max-width: 500px;
             transform: scale(0.9);
             opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
+            transition: transform var(--transition-duration-normal) ease, opacity var(--transition-duration-normal) ease;
         }
         .custom-modal-overlay.show .custom-modal-content {
             transform: scale(1);
@@ -985,8 +990,8 @@
             <div class="error-state" id="errorNestedIframe"><div class="error-icon">⚠️</div><div class="error-title">Page Not Found</div><div class="error-text">The requested file could not be loaded.</div></div>
             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
         </div>
-        <footer class="footer">Developed by DrTahaDesigns</footer>
     </div>
+    <footer class="footer">Developed by DrTahaDesigns</footer>
 
     <!-- Side Menu -->
     <div id="sideMenuOverlay" class="side-menu-overlay"></div>
@@ -1226,9 +1231,9 @@
 
             if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
                  detailsHtml += `
-                    <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
-                    <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
-               `;
+                     <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
+                     <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
+                `;
             }
 
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
@@ -1384,27 +1389,36 @@
         }
 
         function showHome() {
-            document.getElementById('homeView').classList.remove('hidden');
+            // FIX: This function now manages the transition smoothly.
+            const homeView = document.getElementById('homeView');
+            const prevActiveView = document.getElementById(currentActiveViewId);
+
             document.querySelector('.footer').classList.add('show');
             document.getElementById('backButton').classList.add('hidden');
             document.getElementById('refreshButton').classList.remove('hidden');
-            if (loggedInUser) {
-                applyUserPermissions();
-                document.getElementById('logoutButton').classList.remove('hidden');
-            } else {
-                document.getElementById('logoutButton').classList.add('hidden');
-            }
-            if (currentActiveViewId && currentActiveViewId !== 'homeView') {
-                const activeView = document.getElementById(currentActiveViewId);
-                if (activeView) {
-                    activeView.classList.remove('active');
+            document.getElementById('logoutButton').classList.remove('hidden');
+
+            if (prevActiveView && prevActiveView !== homeView) {
+                prevActiveView.classList.remove('active');
+                // Use a short delay to allow the CSS transition to play before hiding
+                setTimeout(() => {
+                    prevActiveView.classList.add('hidden');
+                    const iframe = prevActiveView.querySelector('iframe');
+                    if (iframe) iframe.src = 'about:blank';
+                    homeView.classList.remove('hidden');
+                    // Use a very short delay to re-apply the "active" class and start the entrance animation
                     setTimeout(() => {
-                        activeView.classList.add('hidden');
-                        const iframe = activeView.querySelector('iframe');
-                        if (iframe) iframe.src = 'about:blank';
-                    }, 300);
-                }
+                        homeView.classList.add('active');
+                        // Ensure the transition is reset before re-applying the class
+                        homeView.classList.remove('active');
+                        homeView.classList.add('active');
+                    }, 10);
+                }, 200); // This delay should match or be slightly less than the CSS transition
+            } else {
+                homeView.classList.remove('hidden');
+                homeView.classList.add('active');
             }
+
             currentActiveViewId = 'homeView';
             localStorage.setItem('currentPage', 'home');
             lastPageHistory = [];
@@ -1420,29 +1434,40 @@
                 return;
             }
             const { viewId, fileName, isNested } = config;
-            if (currentActiveViewId !== 'homeView' && !isNested) lastPageHistory.push(currentActiveViewId);
+
+            const targetView = document.getElementById(viewId);
+            const prevActiveView = document.getElementById(currentActiveViewId);
+
+            if (currentActiveViewId !== viewId) {
+                 if (currentActiveViewId && currentActiveViewId !== 'homeView') {
+                    lastPageHistory.push(currentActiveViewId);
+                 }
+            }
             
+            // Immediately hide the home view
             document.getElementById('homeView').classList.add('hidden');
             document.querySelector('.footer').classList.remove('show');
             document.getElementById('backButton').classList.remove('hidden');
             document.getElementById('refreshButton').classList.remove('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
 
-            if (currentActiveViewId && currentActiveViewId !== viewId) {
-                const prevActiveView = document.getElementById(currentActiveViewId);
-                if (prevActiveView) {
-                    prevActiveView.classList.remove('active');
-                    setTimeout(() => {
-                        prevActiveView.classList.add('hidden');
-                        const prevIframe = prevActiveView.querySelector('iframe');
-                        if (prevIframe) prevIframe.src = 'about:blank';
-                    }, 300);
-                }
+            // Hide the previously active view with a transition
+            if (prevActiveView && prevActiveView !== targetView) {
+                prevActiveView.classList.remove('active');
+                setTimeout(() => {
+                    prevActiveView.classList.add('hidden');
+                    const prevIframe = prevActiveView.querySelector('iframe');
+                    if (prevIframe) prevIframe.src = 'about:blank';
+                }, 200);
             }
+
+            // Show the target view after a slight delay for a smooth transition effect
+            setTimeout(() => {
+                targetView.classList.remove('hidden');
+                setTimeout(() => targetView.classList.add('active'), 10);
+            }, 50);
+
             currentActiveViewId = viewId;
-            const targetView = document.getElementById(viewId);
-            targetView.classList.remove('hidden');
-            setTimeout(() => targetView.classList.add('active'), 10);
             localStorage.setItem('currentPage', page);
 
             if (page === 'dm-crm') {
@@ -1461,7 +1486,7 @@
                 
                 const sendDataToIframe = () => {
                     if (loggedInUser && iframe.contentWindow) {
-                         const message = { user: loggedInUser };
+                        const message = { user: loggedInUser };
                         if (page === 'dashboard') {
                             message.type = 'dashboardLogin';
                             message.username = sessionStorage.getItem('dashboardUsername');
@@ -1608,18 +1633,13 @@
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
             document.getElementById('sideMenuLogoutButton').addEventListener('click', handleLogout);
             document.getElementById('backButton').addEventListener('click', () => {
-                if (currentActiveViewId === 'nestedIframeView') {
-                    const nestedIframeView = document.getElementById('nestedIframeView');
-                    const dmCrmView = document.getElementById('dmCrmView');
-                    if (nestedIframeView) nestedIframeView.classList.add('hidden');
-                    if (dmCrmView) {
-                        dmCrmView.classList.remove('hidden');
-                        dmCrmView.classList.add('active');
-                        currentActiveViewId = 'dmCrmView';
-                        localStorage.setItem('currentPage', 'dm-crm');
-                    }
+                if (currentActiveViewId === 'dmCrmView') {
+                    showHome();
+                } else if (currentActiveViewId === 'nestedIframeView') {
+                    loadPage('dm-crm');
                 } else if (lastPageHistory.length > 0) {
-                        loadPage(lastPageHistory.pop());
+                    const lastPage = lastPageHistory.pop();
+                    loadPage(lastPage);
                 } else {
                     showHome();
                 }
