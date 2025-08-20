@@ -38,39 +38,42 @@
         /* Body and HTML for full height layout */
         html, body {
             height: 100%;
-            overflow-x: hidden; /* Prevent horizontal scroll on mobile menu */
+            overflow: hidden; /* Prevent body scrolling */
         }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
-            min-height: 100vh;
             color: var(--text-color-dark);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            display: flex; /* Use flexbox for the body */
+            flex-direction: column; /* Stack children vertically */
         }
 
         /* Main container for the application, taking full available width and height */
+        /* FIX: Changed to a flex container to manage layout and footer positioning */
         .container {
             width: 100%;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Prevent container from scrolling */
         }
 
         /* Header styling with flexbox for alignment */
+        /* FIX: Header is now a non-growing flex item. No more jumping on scroll. */
         .header {
             background: var(--card-bg);
             padding: 6px 12px;
-            /* UPDATED: Added a slightly more visible but still light shadow */
             box-shadow: 0 2px 6px rgba(0,0,0,0.07);
             position: relative;
             z-index: 100;
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
         
-        /* NEW: Inner wrapper for header content to constrain its width */
+        /* Inner wrapper for header content to constrain its width */
         .header-inner {
             display: flex;
             justify-content: space-between;
@@ -86,20 +89,18 @@
         .user-card {
             display: flex;
             align-items: center;
-            gap: 10px; /* Reduced gap */
-            padding: 6px 12px; /* Adjusted padding */
+            gap: 10px;
+            padding: 6px 12px;
             background: #f1f5f9;
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-sm);
             flex-shrink: 0;
-            order: 2; /* User card on right */
-            width: fit-content; /* Make width fit content */
-            max-width: 180px; /* Smaller max-width for user card */
+            order: 2;
+            width: fit-content;
+            max-width: 180px;
         }
 
-        .user-card-icon {
-            font-size: 1.4rem; /* Slightly smaller */
-        }
+        .user-card-icon { font-size: 1.4rem; }
 
         .user-info {
             display: flex;
@@ -108,21 +109,21 @@
         }
 
         .user-name {
-            font-weight: 600; /* Slightly less bold */
-            font-size: 0.9rem; /* Slightly smaller */
+            font-weight: 600;
+            font-size: 0.9rem;
             color: var(--text-color-dark);
-            white-space: nowrap; /* Prevent name wrapping */
+            white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis; /* Add ellipsis if too long */
+            text-overflow: ellipsis;
         }
 
         .user-title {
-            font-size: 0.8rem; /* Slightly smaller */
+            font-size: 0.8rem;
             color: var(--text-color-light);
             font-weight: 400;
-            white-space: nowrap; /* Prevent title wrapping */
+            white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis; /* Add ellipsis if too long */
+            text-overflow: ellipsis;
         }
 
         /* Button group in header */
@@ -130,18 +131,19 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            order: 1; /* Buttons on left (including logout) */
+            order: 1;
         }
 
         /* Button base styling */
         .header-button {
-            padding: 7px 14px; /* Adjusted padding */
+            padding: 7px 14px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.85rem; /* Slightly smaller */
+            font-size: 0.85rem;
             border: none;
-            transition: all 0.2s ease; /* UPDATED: Faster transition */
+            /* FIX: Using a more modern easing function for smoother animations */
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -159,46 +161,33 @@
             background: var(--primary-light);
             color: var(--background-gradient-start);
         }
-
-        .back-button:hover {
-            background: #a0cffc;
-        }
+        .back-button:hover { background: #a0cffc; }
         
-        /* NEW: Refresh button styling */
         .refresh-button {
-            background: #60a5fa; /* A nice blue */
+            background: #60a5fa;
             color: var(--white);
-            padding: 7px 10px; /* Make it more circular */
+            padding: 7px 10px;
         }
-
-        .refresh-button:hover {
-            background: var(--primary-dark);
-        }
+        .refresh-button:hover { background: var(--primary-dark); }
 
         .logout-button {
-            background: #ef4444; /* Red color for logout */
+            background: #ef4444;
             color: var(--white);
-            width: 90px; /* Fixed smaller width for logout button */
-            justify-content: center; /* Center content within the button */
+            width: 90px;
+            justify-content: center;
         }
-
-        .logout-button:hover {
-            background: #dc2626;
-        }
+        .logout-button:hover { background: #dc2626; }
 
         /* Utility class to hide elements */
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
-        /* Banner styling with gradient and new animation */
+        /* Banner styling */
         .banner {
             background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
             color: white;
-            /* UPDATED: Decreased padding and margin for a slimmer banner */
-            padding: 8px 20px; 
+            padding: 8px 20px;
             margin-bottom: 10px;
-            border-radius: 16px; /* Matched from dashboard */
+            border-radius: 16px;
             box-shadow: var(--shadow-lg);
             position: relative;
             overflow: hidden;
@@ -213,21 +202,16 @@
             margin-right: auto;
         }
 
-        /* Grain texture from dashboard */
         .banner::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="10" cy="90" r="1" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
             z-index: 0;
             opacity: 0.2;
             pointer-events: none;
         }
 
-        /* Company Logo styling within the banner */
         .company-logo {
             max-width: 65px;
             height: auto;
@@ -244,35 +228,37 @@
         }
 
         .banner h1 {
-            font-size: 1.6rem; /* UPDATED: Slightly smaller */
+            font-size: 1.6rem;
             font-weight: 700;
             margin-bottom: 2px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .banner .subtitle {
-            font-size: 0.8rem; /* UPDATED: Slightly smaller */
+            font-size: 0.8rem;
             opacity: 0.98;
             font-weight: 400;
         }
         
         /* Home view container */
+        /* FIX: Changed flex properties to ensure content scrolls while footer stays visible */
         .home-view {
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
-            overflow: hidden; /* For mobile scroll */
+            flex-grow: 1; /* Allows this view to fill available space */
+            overflow: hidden; /* Contains scrolling within this element */
         }
 
         /* Home view grid for navigation cards */
+        /* FIX: This grid is now the primary scrolling area on the home page */
         .home-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); /* Adjusted minmax */
-            gap: 18px; /* Adjusted gap */
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 18px;
             padding: 12px;
             flex-grow: 1;
             align-content: start;
-            overflow-y: auto; /* Enable scrolling for tabs only */
+            overflow-y: auto; /* Enable scrolling for the grid only */
             max-width: 1500px;
             width: 100%;
             margin-left: auto;
@@ -282,17 +268,18 @@
         /* Styling for each navigation card */
         .main-card {
             background: var(--card-bg);
-            padding: 16px; /* Adjusted padding */
-            border-radius: 16px; /* Matched from dashboard */
+            padding: 16px;
+            border-radius: 16px;
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* UPDATED: Faster transition */
+            /* FIX: Using a smoother, more modern easing function */
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 120px; /* Adjusted height */
+            min-height: 120px;
             position: relative;
             overflow: hidden;
             border: 1px solid var(--border-color);
@@ -312,53 +299,43 @@
             box-shadow: var(--shadow-sm);
             border-color: #cbd5e1;
         }
-
         .main-card.disabled:hover {
             transform: none;
             box-shadow: var(--shadow-sm);
             border-color: #cbd5e1;
         }
 
-        /* Icon styling for cards */
         .main-card-icon {
-            font-size: 2rem; /* Slightly smaller */
+            font-size: 2rem;
             margin-bottom: 8px;
             color: var(--background-gradient-end);
             line-height: 1;
         }
+        .main-card.disabled .main-card-icon { color: var(--text-color-light); }
 
-        .main-card.disabled .main-card-icon {
-            color: var(--text-color-light);
-        }
-
-        /* Title styling for cards */
         .main-card-title {
-            font-size: 1.1rem; /* Slightly smaller */
+            font-size: 1.1rem;
             font-weight: 600;
             color: var(--text-color-dark);
             margin-bottom: 3px;
         }
+        .main-card.disabled .main-card-title { color: var(--text-color-light); }
 
-        .main-card.disabled .main-card-title {
-            color: var(--text-color-light);
-        }
-
-        /* Subtitle styling for cards */
         .main-card-subtitle {
-            font-size: 0.75rem; /* Slightly smaller */
+            font-size: 0.75rem;
             color: var(--text-color-light);
             line-height: 1.4;
         }
         
-        /* Full page view container - MODIFIED */
+        /* Full page view container */
         .full-page-view {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            /* UPDATED: Faster, lighter transition */
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            /* FIX: Updated transition for a smoother, faster feel */
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             transform: translateY(10px);
             opacity: 0;
         }
@@ -392,10 +369,7 @@
         .error-state, .loading {
             display: none;
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(255, 255, 255, 0.95);
             z-index: 10;
             justify-content: center;
@@ -404,9 +378,7 @@
             border-radius: var(--border-radius);
         }
 
-        .error-state.show, .loading.show {
-            display: flex;
-        }
+        .error-state.show, .loading.show { display: flex; }
 
         .error-icon { font-size: 2.5rem; margin-bottom: 15px; color: #ef4444; }
         .error-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; }
@@ -447,22 +419,7 @@
             50% { opacity: 0.6; transform: scale(1.1); }
         }
 
-        /* Demo styles for missing pages */
-        .demo-content {
-            padding: 30px;
-            text-align: center;
-            color: var(--text-color-dark);
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .demo-content h2 { color: var(--background-gradient-end); margin-bottom: 15px; font-size: 1.8rem; }
-        .demo-content p { color: var(--text-color-light); font-size: 1rem; line-height: 1.5; max-width: 500px; }
-
-        /* Login Page Styles - Matched with Dashboard */
+        /* Login Page Styles */
         .login-container {
             display: flex;
             justify-content: center;
@@ -470,8 +427,7 @@
             min-height: 100vh;
             background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 100%;
             height: 100%;
             z-index: 1000;
@@ -486,7 +442,7 @@
             text-align: center;
             width: 100%;
             max-width: 360px;
-            animation: fadeInFromCenter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); /* UPDATED: Faster animation */
+            animation: fadeInFromCenter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
         }
 
@@ -552,9 +508,7 @@
             transition: background-color 0.2s;
         }
 
-        .login-box button:hover {
-            background-color: var(--primary-dark);
-        }
+        .login-box button:hover { background-color: var(--primary-dark); }
 
         .login-box .error-message {
             color: #ef4444;
@@ -567,8 +521,7 @@
         /* Full-page Blurred Message Overlay */
         .full-page-message-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 100%;
             height: 100%;
             background: rgba(29, 54, 93, 0.85);
@@ -579,7 +532,7 @@
             flex-direction: column;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease; /* UPDATED: Faster transition */
+            transition: opacity 0.3s ease, visibility 0.3s ease;
             z-index: 2000;
         }
 
@@ -594,37 +547,33 @@
         }
 
         /* Footer Styling */
+        /* FIX: Footer is now a non-growing flex item, always visible at the bottom. */
         .footer {
-            display: none; /* Hidden by default */
-            margin-top: auto;
-            padding: 8px 15px; /* Reduced padding for a slimmer footer */
+            display: none; /* Hidden by default, shown via JS */
+            padding: 8px 15px;
             text-align: center;
-            font-size: 0.75rem; /* Slightly smaller font size */
+            font-size: 0.75rem;
             background: #f1f5f9;
             border-top: 1px solid var(--border-color);
             font-weight: bold;
             color: var(--background-gradient-end);
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevent footer from shrinking */
         }
 
-        .footer.show {
-            display: block; /* Show only on home screen */
-        }
+        .footer.show { display: block; }
 
         /* New Professional Intro Animation Styles */
         .intro-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 3000;
             opacity: 1;
-            transition: opacity 0.5s ease-out 2.5s; /* Start fading out after 2.5s */
+            transition: opacity 0.5s ease-out 2.5s;
         }
 
         .intro-overlay.fade-out {
@@ -639,9 +588,7 @@
             animation: fadeInContent 1s ease-out forwards;
         }
 
-        @keyframes fadeInContent {
-            to { opacity: 1; }
-        }
+        @keyframes fadeInContent { to { opacity: 1; } }
 
         .logo-container {
             position: relative;
@@ -660,10 +607,8 @@
 
         .loading-circle {
             position: absolute;
-            top: -10px;
-            left: -10px;
-            width: 170px;
-            height: 170px;
+            top: -10px; left: -10px;
+            width: 170px; height: 170px;
             border: 5px solid transparent;
             border-top-color: var(--primary-light);
             border-right-color: var(--primary-light);
@@ -758,12 +703,8 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
-        .notification-item:hover {
-            background-color: #f1f5f9;
-        }
-        .notification-item:last-child {
-            border-bottom: none;
-        }
+        .notification-item:hover { background-color: #f1f5f9; }
+        .notification-item:last-child { border-bottom: none; }
         .notification-title {
             font-weight: 600;
             color: var(--text-color-dark);
@@ -778,13 +719,11 @@
             margin-top: 4px;
         }
 
-        /* NEW: Request Modal Styles */
+        /* Request Modal Styles */
         .custom-modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: rgba(0,0,0,0.6);
             display: flex;
             justify-content: center;
@@ -839,9 +778,7 @@
             color: var(--text-color-dark);
             line-height: 1.6;
         }
-        .modal-body .detail-pair {
-            margin-bottom: 12px;
-        }
+        .modal-body .detail-pair { margin-bottom: 12px; }
         .modal-body .detail-pair strong {
             color: var(--text-color-dark);
             display: block;
@@ -850,9 +787,7 @@
             font-size: 0.8rem;
             text-transform: uppercase;
         }
-        .modal-body .detail-pair span {
-            color: var(--text-color-light);
-        }
+        .modal-body .detail-pair span { color: var(--text-color-light); }
         .modal-footer {
             margin-top: 20px;
             padding-top: 15px;
@@ -897,9 +832,7 @@
         }
 
         @media (max-width: 768px) {
-            body { overflow: hidden; } /* Prevent body scroll on mobile */
             .container { padding: 8px; height: 100vh; }
-            /* UPDATED: Removed sticky position to prevent jumping on scroll */
             .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
             .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
             .user-name { font-size: 0.7rem; }
@@ -972,7 +905,6 @@
                 <div class="header-buttons">
                     <button id="logoutButton" class="header-button logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     <button id="backButton" class="header-button back-button hidden"><i class="fas fa-arrow-left"></i> Back</button>
-                    <!-- NEW: Refresh Button -->
                     <button id="refreshButton" class="header-button refresh-button hidden"><i class="fas fa-sync-alt"></i></button>
                     <div class="notification-bell hidden" id="notificationBell">
                         <i class="fas fa-bell"></i>
@@ -1053,9 +985,8 @@
             <div class="error-state" id="errorNestedIframe"><div class="error-icon">⚠️</div><div class="error-title">Page Not Found</div><div class="error-text">The requested file could not be loaded.</div></div>
             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
         </div>
+        <footer class="footer">Developed by DrTahaDesigns</footer>
     </div>
-
-    <footer class="footer">Developed by DrTahaDesigns</footer>
 
     <!-- Side Menu -->
     <div id="sideMenuOverlay" class="side-menu-overlay"></div>
@@ -1070,7 +1001,7 @@
         </div>
     </div>
     
-    <!-- NEW: Request Details Modal -->
+    <!-- Request Details Modal -->
     <div id="requestModal" class="custom-modal-overlay">
         <div class="custom-modal-content">
             <div class="modal-header">
@@ -1133,10 +1064,11 @@
 
         async function fetchGoogleSheetData() {
             try {
-                const response = await fetch(GOOGLE_SHEET_URL);
+                // FIX: Add a cache-busting query parameter to ensure fresh data is fetched
+                const response = await fetch(`${GOOGLE_SHEET_URL}&_=${new Date().getTime()}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const csvText = await response.text();
-                googleSheetData = parseCSV(csvText); // Store in global variable
+                googleSheetData = parseCSV(csvText);
             } catch (error) {
                 console.error('Error fetching or parsing Google Sheet data:', error);
             }
@@ -1179,7 +1111,6 @@
 
             if (!loggedInUser) return;
 
-            // Hide notification bell for Medical Representatives
             if (loggedInUser.title === 'Medical Representative') {
                 notificationBell.classList.add('hidden');
                 return;
@@ -1199,8 +1130,9 @@
                     return;
                 }
             }
-
-            const { data, error } = await query;
+            
+            // FIX: Order by date descending to get the newest notifications first
+            const { data, error } = await query.order('date', { ascending: false });
 
             if (error) {
                 console.error('Error fetching notifications:', error);
@@ -1223,7 +1155,7 @@
                 data.forEach(req => {
                     const item = document.createElement('div');
                     item.className = 'notification-item';
-                    item.dataset.requestId = req.id; // Use dataset for cleaner code
+                    item.dataset.requestId = req.id;
                     const requestDate = new Date(req.date).toLocaleDateString('en-GB', {
                         day: '2-digit', month: 'short', year: 'numeric'
                     });
@@ -1233,7 +1165,9 @@
                         <div class="notification-rep">By: ${req.medRep}</div>
                         <div class="notification-date">${requestDate}</div>
                     `;
-                    item.addEventListener('click', () => showRequestModal(req.id)); // Add click listener
+                    item.addEventListener('click', () => showRequestModal(req.id));
+                    // FIX: Use appendChild, as the data is already sorted correctly from the query.
+                    // This ensures the list renders in the correct chronological order (newest on top).
                     notificationDropdown.appendChild(item);
                 });
 
@@ -1243,6 +1177,11 @@
         }
 
         function subscribeToNotifications() {
+            // FIX: This function sets up the real-time listener. When any change
+            // (insert, update, delete) happens in the 'requests' table, Supabase
+            // sends a message. The code then waits 500ms and re-fetches all
+            // notifications to ensure the UI is perfectly in sync. This is how
+            // new notifications appear without needing a page refresh.
             if (notificationChannel) {
                 supabase.removeChannel(notificationChannel);
                 notificationChannel = null;
@@ -1250,8 +1189,8 @@
 
             notificationChannel = supabase.channel('public:requests')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
-                    console.log('Change received!', payload);
-                    setTimeout(fetchNotifications, 500);
+                    console.log('Real-time change received!', payload);
+                    setTimeout(fetchNotifications, 500); // Re-fetch data on any change
                 })
                 .subscribe((status, err) => {
                     if (status === 'SUBSCRIBED') {
@@ -1263,7 +1202,6 @@
                 });
         }
         
-        // NEW: Show request details in a modal
         async function showRequestModal(requestId) {
             const { data, error } = await supabase.from('requests').select('*').eq('id', requestId).single();
 
@@ -1296,7 +1234,6 @@
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
             modalDetails.innerHTML = detailsHtml;
 
-            // Populate status dropdown based on request type
             let statusOptions = '';
             if (data.customerType && data.customerType.toLowerCase() === 'personal') {
                 statusOptions = `
@@ -1318,14 +1255,12 @@
             modalStatusSelect.innerHTML = statusOptions;
             modalStatusSelect.value = data.status;
 
-            // Remove previous event listener and add a new one
-            modalStatusSelect.onchange = null; // Clear old listener
+            modalStatusSelect.onchange = null;
             modalStatusSelect.onchange = () => updateRequestStatus(requestId, modalStatusSelect.value);
 
             modal.classList.add('show');
         }
 
-        // NEW: Update request status in Supabase
         async function updateRequestStatus(requestId, newStatus) {
             const { error } = await supabase.from('requests').update({ status: newStatus }).eq('id', requestId);
 
@@ -1335,11 +1270,10 @@
             } else {
                 showBlurredMessage('Status updated successfully!', 1500);
                 closeRequestModal();
-                fetchNotifications(); // Refresh notifications
+                // No need to call fetchNotifications() here, the real-time subscription will trigger it automatically.
             }
         }
 
-        // NEW: Close the request modal
         function closeRequestModal() {
             document.getElementById('requestModal').classList.remove('show');
         }
@@ -1351,7 +1285,7 @@
             overlay.classList.add('show');
             setTimeout(() => {
                 overlay.classList.remove('show');
-                if (callback) setTimeout(callback, 300); // UPDATED: Faster callback timing
+                if (callback) setTimeout(callback, 300);
             }, duration);
         }
 
@@ -1369,7 +1303,6 @@
                 console.log('Unsubscribed from notifications.');
             }
 
-            // State reset
             loggedInUser = null;
             currentActiveViewId = null;
             updateAndShowUserCard();
@@ -1445,10 +1378,8 @@
         }
 
         function handleLogout() {
-            // **MODIFIED**: Immediately clear all storage data on logout action.
             localStorage.clear();
             sessionStorage.clear();
-            // Then proceed with the UI transition and full state reset.
             showBlurredMessage('See you soon!', 1500, showLoginPage);
         }
 
@@ -1456,7 +1387,7 @@
             document.getElementById('homeView').classList.remove('hidden');
             document.querySelector('.footer').classList.add('show');
             document.getElementById('backButton').classList.add('hidden');
-            document.getElementById('refreshButton').classList.remove('hidden'); // Show refresh button on home
+            document.getElementById('refreshButton').classList.remove('hidden');
             if (loggedInUser) {
                 applyUserPermissions();
                 document.getElementById('logoutButton').classList.remove('hidden');
@@ -1471,7 +1402,7 @@
                         activeView.classList.add('hidden');
                         const iframe = activeView.querySelector('iframe');
                         if (iframe) iframe.src = 'about:blank';
-                    }, 300); // UPDATED: Faster transition timing
+                    }, 300);
                 }
             }
             currentActiveViewId = 'homeView';
@@ -1494,7 +1425,7 @@
             document.getElementById('homeView').classList.add('hidden');
             document.querySelector('.footer').classList.remove('show');
             document.getElementById('backButton').classList.remove('hidden');
-            document.getElementById('refreshButton').classList.remove('hidden'); // Show refresh button
+            document.getElementById('refreshButton').classList.remove('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
 
             if (currentActiveViewId && currentActiveViewId !== viewId) {
@@ -1505,7 +1436,7 @@
                         prevActiveView.classList.add('hidden');
                         const prevIframe = prevActiveView.querySelector('iframe');
                         if (prevIframe) prevIframe.src = 'about:blank';
-                    }, 300); // UPDATED: Faster transition timing
+                    }, 300);
                 }
             }
             currentActiveViewId = viewId;
@@ -1525,9 +1456,9 @@
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
                 
-                iframe.src = fileName;
+                // FIX: Add a timestamp to the URL to bypass browser cache on every load.
+                iframe.src = `${fileName}?t=${new Date().getTime()}`;
                 
-                // OPTIMIZED: This function sends data to the iframe.
                 const sendDataToIframe = () => {
                     if (loggedInUser && iframe.contentWindow) {
                          const message = { user: loggedInUser };
@@ -1542,15 +1473,13 @@
                         } else { 
                             message.type = 'loggedInUser';
                         }
-                        // The '*' means the message can be sent to any origin.
                         iframe.contentWindow.postMessage(message, '*');
                     }
                 };
                 
-                // The 'onload' event is the most reliable way to know the iframe is ready.
                 iframe.onload = () => {
                     loadingOverlay.classList.remove('show');
-                    sendDataToIframe(); // Send data once the iframe has fully loaded.
+                    sendDataToIframe();
                 };
                 iframe.onerror = () => {
                     loadingOverlay.classList.remove('show');
@@ -1699,37 +1628,34 @@
             document.getElementById('closeMenuButton').addEventListener('click', closeSideMenu);
             document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
             
-            // **MODIFIED**: Refresh button event listener
-            document.getElementById('refreshButton').addEventListener('click', () => {
-                // Fetch new notifications on every refresh click
-                fetchNotifications();
+            document.getElementById('refreshButton').addEventListener('click', async () => {
+                // FIX: Refresh logic now re-fetches all necessary data and forces a cache-less reload.
+                showBlurredMessage('Refreshing...', 1000);
+                await fetchGoogleSheetData(); // Re-fetch sheet data for user mapping
+                fetchNotifications(); // Re-fetch notifications
 
                 if (!currentActiveViewId) return;
 
                 const activeView = document.getElementById(currentActiveViewId);
                 if (!activeView) return;
 
-                // Handle home screen refresh
                 if (currentActiveViewId === 'homeView') {
-                    renderMainGrid(); // Re-renders the cards
-                    showBlurredMessage('Refreshed', 1000);
+                    renderMainGrid();
                 } 
-                // Handle DM CRM sub-grid refresh (this is a view without an iframe)
                 else if (currentActiveViewId === 'dmCrmView') {
                      const config = navConfig.home.pages.find(p => p.id === 'dm-crm');
                      if (config) {
                          renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
-                         showBlurredMessage('Refreshed', 1000);
                      }
                 }
-                // Handle iframe refresh for all other views
                 else {
                     const iframe = activeView.querySelector('iframe');
                     if (iframe && iframe.contentWindow) {
                         const loadingOverlay = activeView.querySelector('.loading');
                         if (loadingOverlay) loadingOverlay.classList.add('show');
-                        // The iframe's own 'onload' event will hide the loader again
-                        iframe.contentWindow.location.reload();
+                        // Force a reload by changing the src to a new unique URL
+                        const currentSrc = iframe.src.split('?')[0];
+                        iframe.src = `${currentSrc}?t=${new Date().getTime()}`;
                     }
                 }
             });
@@ -1747,7 +1673,6 @@
                 }
             });
             
-            // NEW: Modal close listeners
             document.getElementById('modalCloseButton').addEventListener('click', closeRequestModal);
             document.getElementById('requestModal').addEventListener('click', (event) => {
                 if (event.target.id === 'requestModal') {
