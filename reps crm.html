@@ -690,16 +690,17 @@
             text-align: left; /* Explicitly left-align text */
             justify-content: flex-start; /* Align children to the left */
         }
-        #requestSection h1::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background-color: #4361ee;
-        }
+        #requestSection h1 {
+    color: #212b36;
+    text-align: center;
+    margin-bottom: 14px;
+    font-size: 18px;
+    font-weight: 600;
+    position: relative;
+    text-align: left;
+    justify-content: flex-start;
+}
+
         #requestSection label {
             display: block;
             margin-top: 10px;
@@ -804,6 +805,22 @@
             --warning: #f59e0b; --danger: #ef4444; --background: #f1f5f9; --card: #ffffff;
             --text: #1e293b; --border: #cbd5e1; --speciality-bg: #d1fae5; --v-t-color: #dc2626;
             --accent-purple: #8b5cf6; --accent-blue: #3b82f6;
+
+            /* Add these classes to your CSS */
+.remaining-equal {
+    background-color: #fee2e2; /* light red */
+}
+.remaining-less {
+    background-color: #fef3c7; /* light orange */
+}
+.remaining-zero-or-negative {
+    background-color: #dcfce7; /* light green */
+}
+.remaining-zero-or-negative.negative {
+    color: #dc3545; /* red */
+    font-weight: bold;
+}
+
         }
         #weeklyPlanSection .dashboard { max-width: 100%; margin: 0 auto; padding: 0.3rem; }
         #weeklyPlanSection .header { background: var(--card); border-radius: 0.75rem; padding: 0.25rem; margin-bottom: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
@@ -2796,7 +2813,6 @@
 
                 populateHCPTable(hcpData, selectedDay) {
     this.elements.hcpTableBody.innerHTML = '';
-
     // Sort the data based on remaining visits
     const sortedData = hcpData.sort((a, b) => {
         const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
@@ -2812,14 +2828,27 @@
         const actualVisits = this.visitCounts[row['HCPS']] || 0;
         const targetVisits = parseInt(row['T.V']) || 0;
         const remainingVisits = targetVisits - actualVisits;
+
+        // Determine the class for the Remaining column
+        let remainingClass = '';
+        if (remainingVisits <= 0) {
+            remainingClass = 'remaining-zero-or-negative';
+            if (remainingVisits < 0) {
+                remainingClass += ' negative';
+            }
+        } else if (remainingVisits < targetVisits) {
+            remainingClass = 'remaining-less';
+        } else {
+            remainingClass = 'remaining-equal';
+        }
+
         const tr = document.createElement('tr');
-        const remainingCellClass = remainingVisits <= 0 ? 'remaining-visit' : 'not-remaining';
         tr.innerHTML = `
             <td>${row['HCPS']}</td>
             <td>${row['Speciality']}</td>
             <td>${row['Class']}</td>
             <td>${row['T.V']}</td>
-            <td class="${remainingCellClass}">${remainingVisits}</td>
+            <td class="${remainingClass}">${remainingVisits}</td>
             <td>${row['Brick']}</td>
             <td>${row['Address']}</td>
             <td>${row['Mobile']}</td>
@@ -2830,6 +2859,7 @@
             <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
             <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
         `;
+
         tr.addEventListener('click', () => {
             if (!this.elements.dayFilter.value) {
                 this.showMessage('Please select a Day first.', 'error');
@@ -2838,6 +2868,7 @@
             this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
             this.elements.hcpTableBody.removeChild(tr);
         });
+
         this.elements.hcpTableBody.appendChild(tr);
     });
 
@@ -3010,5 +3041,6 @@
     </script>
 </body>
 </html>
+
 
 
