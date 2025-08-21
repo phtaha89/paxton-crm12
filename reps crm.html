@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -687,9 +687,19 @@
             font-size: 18px;
             font-weight: 600;
             position: relative;
-            text-align: left;
-            justify-content: flex-start;
+            text-align: left; /* Explicitly left-align text */
+            justify-content: flex-start; /* Align children to the left */
         }
+        #requestSection h1 {
+    color: #212b36;
+    text-align: center;
+    margin-bottom: 14px;
+    font-size: 18px;
+    font-weight: 600;
+    position: relative;
+    text-align: left;
+    justify-content: flex-start;
+}
 
         #requestSection label {
             display: block;
@@ -772,6 +782,7 @@
 
         #requestSection .designer-info { text-align: center; font-size: 12px; color: #6c757d; margin-top: 10px; }
         #requestSection h3 { text-align: center; color: #3a3a3a; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
+        #requestSection .error { color: #dc3545; font-size: 12px; margin-top: -5px; margin-bottom: 10px; display: none; }
         #requestSection .tab-container { display: flex; justify-content: center; margin-bottom: 1rem; background: #f7fafc; border-bottom: 1px solid #e2e8f0; border-radius: 8px 8px 0 0; }
         #requestSection .tab-button { background-color: transparent; border: none; padding: 0.75rem 1.5rem; cursor: pointer; font-size: 0.875rem; font-weight: 500; color: #718096; transition: all 0.2s ease; border-bottom: 2px solid transparent; }
         #requestSection .tab-button.active { color: #1a365d; border-bottom: 2px solid #1a365d; background-color: #ffffff; }
@@ -784,6 +795,7 @@
         #requestSection .note-box-done::before { background: #2e7d32; }
         #requestSection .note-box-canceled { background-color: #ffebee; border: 1px solid #ef9a9a; color: #c62828; }
         #requestSection .note-box-canceled::before { background: #c62828; }
+        #requestSection .note-box-done .note-header, #requestSection .note-box-canceled .note-header { color: inherit; }
         #requestSection .note-box-done div strong, #requestSection .note-box-canceled div strong { color: inherit; }
         #requestSection .header h1::after { background-color: #4361ee; }
 
@@ -795,23 +807,20 @@
             --accent-purple: #8b5cf6; --accent-blue: #3b82f6;
 
             /* Add these classes to your CSS */
-            .remaining-equal {
-                background-color: #fee2e2; /* light red */
-            }
-            .remaining-less {
-                background-color: #fef3c7; /* light orange */
-            }
-            .remaining-zero-or-negative {
-                background-color: #dcfce7; /* light green */
-            }
-            .remaining-zero-or-negative.negative {
-                color: #dc3545; /* red */
-                font-weight: bold;
-            }
-            .dragging {
-                opacity: 0.5;
-                border: 2px dashed #4361ee;
-            }
+.remaining-equal {
+    background-color: #fee2e2; /* light red */
+}
+.remaining-less {
+    background-color: #fef3c7; /* light orange */
+}
+.remaining-zero-or-negative {
+    background-color: #dcfce7; /* light green */
+}
+.remaining-zero-or-negative.negative {
+    color: #dc3545; /* red */
+    font-weight: bold;
+}
+
         }
         #weeklyPlanSection .dashboard { max-width: 100%; margin: 0 auto; padding: 0.3rem; }
         #weeklyPlanSection .header { background: var(--card); border-radius: 0.75rem; padding: 0.25rem; margin-bottom: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
@@ -855,6 +864,7 @@
         #weeklyPlanSection #weeklyPlanHcpTable th:first-child { background: var(--primary); color: white; z-index: 6; }
         #weeklyPlanSection .table-container .card-title { font-size: 0.75rem; }
         #weeklyPlanSection #weeklyPlanAmActivitiesTable td, #weeklyPlanSection #weeklyPlanPmActivitiesTable td { word-break: break-word; white-space: normal; padding: 0.5rem; }
+        #weeklyPlanSection .event-box { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.3rem; padding: 0.3rem; margin: 0.2rem 0; position: relative; width: 100px; }
         #weeklyPlanSection #weeklyPlanResetButton { background-color: #e0e0e0; color: #424242; border: 1px solid #bdbdbd; }
         #weeklyPlanSection #weeklyPlanResetButton:hover { background-color: #c0c0c0; color: #212121; }
 
@@ -968,6 +978,14 @@
             #weeklyPlanSection .card { padding: 0.75rem; margin-bottom: 0.5rem; width: 100%; }
             #weeklyPlanSection .table-container { max-height: 300px; overflow-y: auto; width: 100%; }
         }
+        @media (max-width: 600px) {
+            .container { padding: 16px; }
+            .form-row { flex-direction: column; gap: 16px; }
+            .action-button { padding: 10px; font-size: 13px; }
+            .tab-button { padding: 8px; font-size: 12px; }
+            .tab-button i { margin-right: 4px; }
+            th, td { padding: 10px 12px; font-size: 12px; }
+        }
 
         /* --- Scroll to Top Button --- */
         #scrollToTopBtn {
@@ -1010,21 +1028,6 @@
             flex-direction: column;
             gap: 1rem;
         }
-
-        /* Sticky header and cell for weekly plan */
-        #weeklyPlanHcpTable th:first-child,
-        #weeklyPlanHcpTable td:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 10;
-            background-color: #f8f9fa; /* Match header color for the sticky cell */
-            font-weight: 600;
-        }
-        #weeklyPlanHcpTable th:first-child {
-            background-color: var(--primary);
-            color: white;
-            z-index: 11;
-        }
     </style>
 </head>
 <body>
@@ -1060,16 +1063,16 @@
 
                 <div class="main-tab-group tab-group">
                     <button id="crmMainTabBtn" class="tab-button" disabled>
-                        <i class="fas fa-edit"></i> <span class="tab-title">CRM</span>
+                        <i class="fas fa-edit"></i> CRM
                     </button>
                     <button id="dashboardMainTabBtn" class="tab-button" disabled>
-                        <i class="fas fa-chart-bar"></i> <span class="tab-title">Customers Lists</span>
+                        <i class="fas fa-chart-bar"></i> Customers Lists
                     </button>
                     <button id="requestMainTabBtn" class="tab-button" disabled>
-                        <i class="fas fa-paper-plane"></i> <span class="tab-title">Requests</span>
+                        <i class="fas fa-paper-plane"></i> Requests
                     </button>
                     <button id="weeklyPlanMainTabBtn" class="tab-button" disabled>
-                        <i class="fas fa-calendar-week"></i> <span class="tab-title">Weekly Plan</span>
+                        <i class="fas fa-calendar-week"></i> Weekly Plan
                     </button>
                 </div>
             </nav>
@@ -1241,8 +1244,8 @@
                         </div>
                         <div id="amForm" class="hidden">
                              <h2>
-                                 <i class="fas fa-clipboard-check"></i> AM Details Submission
-                                 <span id="amFormUnvisitedCount" class="unvisited-count-square hidden"></span>
+                                <i class="fas fa-clipboard-check"></i> AM Details Submission
+                                <span id="amFormUnvisitedCount" class="unvisited-count-square hidden"></span>
                              </h2>
                             <div class="form-group">
                                 <label for="associatedAccount" class="required-field">Associated Account</label>
@@ -1502,7 +1505,7 @@
                             </div>
                             <h1 class="form-title">Weekly Plan Form</h1>
                         </div>
-                        <div class="dashboard">
+                         <div class="dashboard">
                             <div class="header">
                                 <div id="weeklyPlanLoading">Loading data...</div>
                                 <div id="weeklyPlanError" class="message error" style="display: none;"></div>
@@ -1562,7 +1565,7 @@
                                         <table id="weeklyPlanHcpTable" style="display: none;">
                                             <thead>
                                                 <tr>
-                                                    <th class="sticky-col">HCPS</th><th>Speciality</th><th>Class</th><th>T.V</th>
+                                                    <th>HCPS</th><th>Speciality</th><th>Class</th><th>T.V</th>
                                                     <th>Remaining</th><th>Brick</th><th>Address</th><th>Mobile</th>
                                                     <th>Sat</th><th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th>
                                                 </tr>
@@ -1597,7 +1600,7 @@
                                                     <th id="wednesdayAmHeader">Wednesday</th><th id="thursdayAmHeader">Thursday</th>
                                                 </tr>
                                             </thead>
-                                            <tbody><tr><td id="saturdayAm" class="drop-zone" data-day="Saturday" data-time="am" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="sundayAm" class="drop-zone" data-day="Sunday" data-time="am" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="mondayAm" class="drop-zone" data-day="Monday" data-time="am" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="tuesdayAm" class="drop-zone" data-day="Tuesday" data-time="am" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="wednesdayAm" class="drop-zone" data-day="Wednesday" data-time="am" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="thursdayAm" class="drop-zone" data-day="Thursday" data-time="am" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td></tr></tbody>
+                                            <tbody><tr><td id="saturdayAm"></td><td id="sundayAm"></td><td id="mondayAm"></td><td id="tuesdayAm"></td><td id="wednesdayAm"></td><td id="thursdayAm"></td></tr></tbody>
                                         </table>
                                     </div>
                                     <div id="weeklyPlanPmActivitiesTable" class="table-container">
@@ -1610,7 +1613,7 @@
                                                     <th id="wednesdayPmHeader">Wednesday</th><th id="thursdayPmHeader">Thursday</th>
                                                 </tr>
                                             </thead>
-                                            <tbody><tr><td id="saturdayPm" class="drop-zone" data-day="Saturday" data-time="pm" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="sundayPm" class="drop-zone" data-day="Sunday" data-time="pm" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="mondayPm" class="drop-zone" data-day="Monday" data-time="pm" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="tuesdayPm" class="drop-zone" data-day="Tuesday" data-time="pm" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="wednesdayPm" class="drop-zone" data-day="Wednesday" data-time="pm" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td><td id="thursdayPm" class="drop-zone" data-day="Thursday" data-time="pm" ondragover="weeklyPlanManager.handleDragOver(event)" ondrop="weeklyPlanManager.handleDrop(event)"></td></tr></tbody>
+                                            <tbody><tr><td id="saturdayPm"></td><td id="sundayPm"></td><td id="mondayPm"></td><td id="tuesdayPm"></td><td id="wednesdayPm"></td><td id="thursdayPm"></td></tr></tbody>
                                         </table>
                                     </div>
                                     <div class="button-group">
@@ -1866,7 +1869,7 @@
                     currentMedRep = null;
                     [medRepNameElement, medRepNameElementMobile].forEach(el => el.textContent = 'Medical Rep Name');
                     [medRepAreaElement, medRepAreaElementMobile].forEach(el => el.textContent = 'Area');
-                    [medRepDMElement, medRepDMMobile].forEach(el => el.textContent = 'District Manager: N/A');
+                    [medRepDMElement, medRepDMElementMobile].forEach(el => el.textContent = 'District Manager: N/A');
                     [medRepGovElement, medRepGovElementMobile].forEach(el => el.textContent = 'Governorate: N/A');
                     
                     [crmMainTabBtn, dashboardMainTabBtn, requestMainTabBtn, weeklyPlanMainTabBtn, crmMainTabBtnMobile, dashboardMainTabBtnMobile, requestMainTabBtnMobile, weeklyPlanMainTabBtnMobile].forEach(btn => btn.disabled = true);
@@ -1900,7 +1903,7 @@
             });
             medicalRepSelectorMobile.addEventListener('change', () => {
                 medicalRepSelector.value = medicalRepSelectorMobile.value;
-                handleRepSelectionChange(medicalRepSelector.value);
+                handleRepSelectionChange(medicalRepSelectorMobile.value);
             });
 
 
@@ -2068,12 +2071,12 @@
                     }
                 }
                 validateComment(comment) {
-                    if (!comment || comment.trim().length === 0) {
-                        return "Comment cannot be empty.";
-                    }
-                    // The restrictive check for English characters has been removed to allow Arabic.
-                    return null; // No error
-                }
+                    if (!comment || comment.trim().length === 0) {
+                        return "Comment cannot be empty.";
+                    }
+                    // The restrictive check for English characters has been removed to allow Arabic.
+                    return null; // No error
+                }
                 async handleSubmit() {
                     if (this.isLoading) return;
                     this.setLoading(true);
@@ -2294,7 +2297,7 @@
                     if (!currentMedRep) return;
                     const badge = this.elements.amFormUnvisitedCountBadge;
                     badge.classList.add('hidden'); badge.textContent = '';
-                    this.updateAssociatedAccounts(currentMedRep.name);
+                    this.updateAssociatedAccounts(currentMedRep.name); 
                 }
                 getCurrentMonthStart() {
                     const nowInCairo = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
@@ -2679,7 +2682,7 @@
                     } catch (error) { console.error('Error fetching customer requests:', error); showRequestAlert("An error occurred while retrieving customer requests.", "error"); }
                 }
                 async retrievePersonalRequests() {
-                    const personalName = this.elements.personalNameSelect.value; personalRequestDetailsDisplay = this.elements.personalRequestDetailsDisplayDiv;
+                    const personalName = this.elements.personalNameSelect.value, personalRequestDetailsDisplay = this.elements.personalRequestDetailsDisplayDiv;
                     personalRequestDetailsDisplay.innerHTML = '';
                     if (!personalName) { showRequestAlert("Please select your Name to retrieve personal requests.", "error"); return; }
                     const fullQueryUrl = `${REQUESTS_URL}?customerType=eq.Personal&medRep=eq.${personalName}&order=date.desc`;
@@ -2769,7 +2772,7 @@
                 }
                 processVisitData() {
                     const currentMonthStart = formManager.getCurrentMonthStart();
-                    const currentMonthVisits = globalSupabaseVisits.filter(visit => visit.medical_rep === currentMedRep.name && formManager.getCairoDate(new Date(visit.visit_date)) >= currentMonthStart);
+                    const currentMonthVisits = globalSupabaseVisits.filter(visit => formManager.getCairoDate(new Date(visit.visit_date)) >= currentMonthStart);
                     this.visitCounts = {}; currentMonthVisits.forEach(visit => { this.visitCounts[visit.hcp_name] = (this.visitCounts[visit.hcp_name] || 0) + 1; });
                 }
                 handleRepChange() {
@@ -2809,104 +2812,68 @@
                 }
 
                 populateHCPTable(hcpData, selectedDay) {
-                    this.elements.hcpTableBody.innerHTML = '';
-                    // Sort the data based on remaining visits
-                    const sortedData = hcpData.sort((a, b) => {
-                        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
-                        const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
-                        const targetA = parseInt(a['T.V']) || 0;
-                        const targetB = parseInt(b['T.V']) || 0;
-                        if (remainingA === targetA && remainingB !== targetB) return -1;
-                        if (remainingB === targetB && remainingA !== targetA) return 1;
-                        return remainingB - remainingA;
-                    });
+    this.elements.hcpTableBody.innerHTML = '';
+    // Sort the data based on remaining visits
+    const sortedData = hcpData.sort((a, b) => {
+        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
+        const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
+        const targetA = parseInt(a['T.V']) || 0;
+        const targetB = parseInt(b['T.V']) || 0;
+        if (remainingA === targetA && remainingB !== targetB) return -1;
+        if (remainingB === targetB && remainingA !== targetA) return 1;
+        return remainingB - remainingA;
+    });
 
-                    sortedData.forEach(row => {
-                        const actualVisits = this.visitCounts[row['HCPS']] || 0;
-                        const targetVisits = parseInt(row['T.V']) || 0;
-                        const remainingVisits = targetVisits - actualVisits;
+    sortedData.forEach(row => {
+        const actualVisits = this.visitCounts[row['HCPS']] || 0;
+        const targetVisits = parseInt(row['T.V']) || 0;
+        const remainingVisits = targetVisits - actualVisits;
 
-                        // Determine the class for the Remaining column
-                        let remainingClass = '';
-                        if (remainingVisits <= 0) {
-                            remainingClass = 'remaining-zero-or-negative';
-                            if (remainingVisits < 0) {
-                                remainingClass += ' negative';
-                            }
-                        } else if (remainingVisits < targetVisits) {
-                            remainingClass = 'remaining-less';
-                        } else {
-                            remainingClass = 'remaining-equal';
-                        }
+        // Determine the class for the Remaining column
+        let remainingClass = '';
+        if (remainingVisits <= 0) {
+            remainingClass = 'remaining-zero-or-negative';
+            if (remainingVisits < 0) {
+                remainingClass += ' negative';
+            }
+        } else if (remainingVisits < targetVisits) {
+            remainingClass = 'remaining-less';
+        } else {
+            remainingClass = 'remaining-equal';
+        }
 
-                        const tr = document.createElement('tr');
-                        tr.setAttribute('draggable', 'true');
-                        tr.addEventListener('dragstart', (event) => {
-                            event.dataTransfer.setData('text/plain', JSON.stringify(row));
-                            event.currentTarget.classList.add('dragging');
-                        });
-                        tr.addEventListener('dragend', (event) => {
-                             event.currentTarget.classList.remove('dragging');
-                        });
-                        tr.innerHTML = `
-                            <td class="sticky">${row['HCPS']}</td>
-                            <td>${row['Speciality']}</td>
-                            <td>${row['Class']}</td>
-                            <td>${row['T.V']}</td>
-                            <td class="${remainingClass}">${remainingVisits}</td>
-                            <td>${row['Brick']}</td>
-                            <td>${row['Address']}</td>
-                            <td>${row['Mobile']}</td>
-                            <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
-                            <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
-                            <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
-                            <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
-                            <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
-                            <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
-                        `;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${row['HCPS']}</td>
+            <td>${row['Speciality']}</td>
+            <td>${row['Class']}</td>
+            <td>${row['T.V']}</td>
+            <td class="${remainingClass}">${remainingVisits}</td>
+            <td>${row['Brick']}</td>
+            <td>${row['Address']}</td>
+            <td>${row['Mobile']}</td>
+            <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
+            <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
+            <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
+            <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
+            <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
+            <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
+        `;
 
-                        this.elements.hcpTableBody.appendChild(tr);
-                    });
+        tr.addEventListener('click', () => {
+            if (!this.elements.dayFilter.value) {
+                this.showMessage('Please select a Day first.', 'error');
+                return;
+            }
+            this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
+            this.elements.hcpTableBody.removeChild(tr);
+        });
 
-                    this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
-                }
-                
-                handleDragOver(event) {
-                    event.preventDefault(); // This is crucial to allow dropping
-                }
+        this.elements.hcpTableBody.appendChild(tr);
+    });
 
-                handleDrop(event) {
-                    event.preventDefault();
-                    const data = event.dataTransfer.getData('text/plain');
-                    if (data) {
-                        const row = JSON.parse(data);
-                        const targetCell = event.currentTarget;
-                        const day = targetCell.dataset.day;
-                        const time = targetCell.dataset.time;
-
-                        // Check if the HCP is already in the plan for this time slot
-                        const alreadyScheduled = this.weeklyPlanData[day][time].some(item => item.name === row['HCPS']);
-                        if (alreadyScheduled) {
-                            this.showMessage('This HCP is already scheduled for this time slot.', 'error');
-                            return;
-                        }
-
-                        const hcpRow = globalGoogleData.find(r => r['HCPS'] === row['HCPS']);
-                        if (hcpRow) {
-                            this.addToWeeklyPlan(hcpRow['HCPS'], hcpRow[day], day, hcpRow['Speciality']);
-
-                            // Find and remove the row from the source table
-                            const tableRows = this.elements.hcpTableBody.getElementsByTagName('tr');
-                            for (let i = 0; i < tableRows.length; i++) {
-                                if (tableRows[i].textContent.includes(row['HCPS'])) {
-                                    tableRows[i].remove();
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                
+    this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
+}
                 addToWeeklyPlan(hcpName, visitTime, day, speciality) {
                     const hcpRow = globalGoogleData.find(row => row['HCPS'] === hcpName);
                     if (hcpRow) {
@@ -3022,8 +2989,8 @@
                                     if (item.Speciality === 'AM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].am.push(entry);
                                     if (item.Speciality === 'PM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].pm.push(entry);
                                 } else {
-                                    const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
-                                    if(isPriority) this.weeklyPlanData[day].am.push(entry); else this.weeklyPlanData[day].pm.push(entry);
+                                     const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
+                                     if(isPriority) this.weeklyPlanData[day].am.push(entry); else this.weeklyPlanData[day].pm.push(entry);
                                 }
                             }
                         });
