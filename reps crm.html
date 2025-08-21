@@ -775,6 +775,7 @@
             width: fit-content;
             margin: 15px auto 0;
             cursor: pointer;
+            text-align: left;
         }
         #requestSection .designer-info { text-align: center; font-size: 12px; color: #6c757d; margin-top: 10px; }
         #requestSection h3 { text-align: center; color: #3a3a3a; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
@@ -1487,8 +1488,7 @@
                         </div>
                          <div class="dashboard">
                             <div class="header">
-                                <h1>Weekly Plan Dashboard</h1>
-                                <div id="weeklyPlanLoading">Loading data...</div>
+                                                                <div id="weeklyPlanLoading">Loading data...</div>
                                 <div id="weeklyPlanError" class="message error" style="display: none;"></div>
                                 <div id="weeklyPlanSuccess" class="message success" style="display: none;"></div>
                                 <div id="weeklyPlanContent" style="display: none;">
@@ -2773,24 +2773,70 @@
                     this.elements.statsDisplay.textContent = `Unvisited HCPs in ${selectedBrick || 'total'}: ${unvisitedCount}`; this.elements.statsDisplay.style.display = 'block';
                 }
                 applyFilter() {
-                    const selectedRep = this.elements.medicalReps.value, selectedDay = this.elements.dayFilter.value, selectedBrick = this.elements.bricks.value;
-                    if (!selectedRep) { this.showMessage('Please select a Medical Representative.', 'error'); return; }
-                    let filteredHCPs = globalGoogleData.filter(row => row['medical rep'] === selectedRep && (selectedDay === '' || row[selectedDay].trim() !== '') && (selectedBrick === '' || row['Brick'] === selectedBrick) && !this.movedHCPs.has(row['HCPS']));
-                    this.populateHCPTable(filteredHCPs, selectedDay);
-                }
+    const selectedRep = this.elements.medicalReps.value,
+          selectedDay = this.elements.dayFilter.value,
+          selectedBrick = this.elements.bricks.value;
+    if (!selectedRep) {
+        this.showMessage('Please select a Medical Representative.', 'error');
+        return;
+    }
+    // Remove the remaining visits filter and show all HCPs
+    let filteredHCPs = globalGoogleData.filter(row =>
+        row['medical rep'] === selectedRep &&
+        (selectedDay === '' || row[selectedDay].trim() !== '') &&
+        (selectedBrick === '' || row['Brick'] === selectedBrick) &&
+        !this.movedHCPs.has(row['HCPS'])
+    );
+    this.populateHCPTable(filteredHCPs, selectedDay);
+}
+
                 populateHCPTable(hcpData, selectedDay) {
-                    this.elements.hcpTableBody.innerHTML = '';
-                    const filteredData = hcpData.filter(row => (parseInt(row['T.V']) || 0) - (this.visitCounts[row['HCPS']] || 0) > 0);
-                    const sortedData = filteredData.sort((a, b) => { const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0), remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0); const targetA = parseInt(a['T.V']) || 0, targetB = parseInt(b['T.V']) || 0; if (remainingA === targetA && remainingB !== targetB) return -1; if (remainingB === targetB && remainingA !== targetA) return 1; return remainingB - remainingA; });
-                    sortedData.forEach(row => {
-                        const actualVisits = this.visitCounts[row['HCPS']] || 0, targetVisits = parseInt(row['T.V']) || 0, remainingVisits = targetVisits - actualVisits;
-                        const tr = document.createElement('tr'); const remainingCellClass = remainingVisits === targetVisits ? 'remaining-visit' : 'not-remaining';
-                        tr.innerHTML = `<td>${row['HCPS']}</td><td>${row['Speciality']}</td><td>${row['Class']}</td><td>${row['T.V']}</td><td class="${remainingCellClass}">${remainingVisits}</td><td>${row['Brick']}</td><td>${row['Address']}</td><td>${row['Mobile']}</td><td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td><td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td><td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td><td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td><td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td><td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>`;
-                        tr.addEventListener('click', () => { if (!this.elements.dayFilter.value) { this.showMessage('Please select a Day first.', 'error'); return; } this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']); this.elements.hcpTableBody.removeChild(tr); });
-                        this.elements.hcpTableBody.appendChild(tr);
-                    });
-                    this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
-                }
+    this.elements.hcpTableBody.innerHTML = '';
+    // Remove the remaining visits filter and show all HCPs
+    const sortedData = hcpData.sort((a, b) => {
+        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0),
+              remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
+        const targetA = parseInt(a['T.V']) || 0,
+              targetB = parseInt(b['T.V']) || 0;
+        if (remainingA === targetA && remainingB !== targetB) return -1;
+        if (remainingB === targetB && remainingA !== targetA) return 1;
+        return remainingB - remainingA;
+    });
+    sortedData.forEach(row => {
+        const actualVisits = this.visitCounts[row['HCPS']] || 0,
+              targetVisits = parseInt(row['T.V']) || 0,
+              remainingVisits = targetVisits - actualVisits;
+        const tr = document.createElement('tr');
+        const remainingCellClass = remainingVisits <= 0 ? 'remaining-visit' : 'not-remaining';
+        tr.innerHTML = `
+            <td>${row['HCPS']}</td>
+            <td>${row['Speciality']}</td>
+            <td>${row['Class']}</td>
+            <td>${row['T.V']}</td>
+            <td class="${remainingCellClass}">${remainingVisits}</td>
+            <td>${row['Brick']}</td>
+            <td>${row['Address']}</td>
+            <td>${row['Mobile']}</td>
+            <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
+            <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
+            <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
+            <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
+            <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
+            <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
+        `;
+        tr.addEventListener('click', () => {
+            if (!this.elements.dayFilter.value) {
+                this.showMessage('Please select a Day first.', 'error');
+                return;
+            }
+            this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
+            this.elements.hcpTableBody.removeChild(tr);
+        });
+        this.elements.hcpTableBody.appendChild(tr);
+    });
+    this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
+}
+
                 addToWeeklyPlan(hcpName, visitTime, day, speciality) {
                     const hcpRow = globalGoogleData.find(row => row['HCPS'] === hcpName);
                     if (hcpRow) {
