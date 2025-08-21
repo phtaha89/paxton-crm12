@@ -241,7 +241,7 @@
         .retrieve-btn {
             background-color: #2e8540;
             color: white;
-            box-shadow: 0 4p x 12px rgba(46, 133, 64, 0.2);
+            box-shadow: 0 4px 12px rgba(46, 133, 64, 0.2);
         }
         .retrieve-btn:hover:not(:disabled) {
             background-color: #267438;
@@ -927,29 +927,6 @@
             .med-rep-card-wrapper.mobile-only-header {
                 display: block; /* Show the mobile header */
             }
-            .mobile-tab-button span {
-                /* Hide the text by default */
-                display: none;
-                /* Allow for transition on hover/focus */
-                transition: all 0.3s ease;
-            }
-            .mobile-tab-button i {
-                /* Center icon when text is hidden */
-                margin-right: 0;
-            }
-
-            /* On hover or focus, show the text and add space */
-            .mobile-tab-button:hover span,
-            .mobile-tab-button:focus span,
-            .mobile-tab-button.selected span {
-                display: inline-block;
-                margin-left: 8px;
-            }
-             .mobile-tab-button:hover i,
-             .mobile-tab-button:focus i,
-             .mobile-tab-button.selected i {
-                margin-right: 8px;
-            }
         }
         @media (max-width: 991px) {
             .dashboard-header { flex-direction: column; gap: 1rem; align-items: flex-start !important; }
@@ -1022,7 +999,7 @@
 <body>
     <div id="loadingOverlay">
         <div class="loading-spinner"></div>
-        <p class="text-gray-600">Loading initial user data...</p>
+        <p class="text-gray-600">Loading CRM Data...</p>
     </div>
 
     <div id="mainAppContainer" class="container">
@@ -1087,17 +1064,17 @@
                         </div>
                     </div>
                      <div class="main-tab-group tab-group">
-                        <button id="crmMainTabBtnMobile" class="tab-button mobile-tab-button" disabled>
-                            <i class="fas fa-edit"></i> <span>CRM</span>
+                        <button id="crmMainTabBtnMobile" class="tab-button" disabled>
+                            <i class="fas fa-edit"></i> CRM
                         </button>
-                        <button id="dashboardMainTabBtnMobile" class="tab-button mobile-tab-button" disabled>
-                            <i class="fas fa-chart-bar"></i> <span>Customers</span>
+                        <button id="dashboardMainTabBtnMobile" class="tab-button" disabled>
+                            <i class="fas fa-chart-bar"></i> Customers
                         </button>
-                        <button id="requestMainTabBtnMobile" class="tab-button mobile-tab-button" disabled>
-                            <i class="fas fa-file-alt"></i> <span>Requests</span>
+                        <button id="requestMainTabBtnMobile" class="tab-button" disabled>
+                            <i class="fas fa-file-alt"></i> Requests
                         </button>
-                        <button id="weeklyPlanMainTabBtnMobile" class="tab-button mobile-tab-button" disabled>
-                            <i class="fas fa-calendar-week"></i> <span>Weekly Plan</span>
+                        <button id="weeklyPlanMainTabBtnMobile" class="tab-button" disabled>
+                            <i class="fas fa-calendar-week"></i> Weekly Plan
                         </button>
                     </div>
                 </div>
@@ -1693,11 +1670,14 @@
 
             async function fetchAllData() {
                 try {
-                    const googleResponse = await fetch(GOOGLE_SHEET_URL);
-                    if (!googleResponse.ok) throw new Error('Failed to fetch Google Sheet data');
-                    const googleText = await googleResponse.text();
-                    globalGoogleData = parseCSV(googleText);
-                    
+                    if (!globalGoogleSheetDataFromParent || globalGoogleSheetDataFromParent.length === 0) {
+                        const googleResponse = await fetch(GOOGLE_SHEET_URL);
+                        if (!googleResponse.ok) throw new Error('Failed to fetch Google Sheet data');
+                        const googleText = await googleResponse.text();
+                        globalGoogleData = parseCSV(googleText);
+                    } else {
+                        globalGoogleData = globalGoogleSheetDataFromParent;
+                    }
                     globalSupabaseVisits = await fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY);
                     medicalRepsAreas.clear();
                     districtManagersGovernorates.clear();
@@ -1766,16 +1746,16 @@
                     loggedInUser = event.data.user;
                     medRepNameElement.innerHTML = loggedInUser.username; 
                     medRepNameElementMobile.innerHTML = loggedInUser.username; 
-                    loadingOverlay.style.display = 'none';
 
                     if (event.data.allGoogleSheetData) {
                         globalGoogleSheetDataFromParent = event.data.allGoogleSheetData;
                     }
                     console.log('CRM received loggedInUser:', loggedInUser);
                     
-                    // Asynchronously fetch all data after the user card is loaded
+                    loadingOverlay.style.display = 'flex';
                     await fetchAllData();
                     handleUserRoleBasedRepSelection();
+                    loadingOverlay.style.display = 'none';
                 }
             });
 
@@ -2869,7 +2849,7 @@
                         this.reset(); this.elements.medicalReps.value = selectedRep; this.handleRepChange();
                         this.elements.startDate.value = startDate; this.elements.endDate.value = endDate;
                         data.forEach(item => {
-                            const day = item.visit_day, entry = { name: item.hcp_name, visit_time: item.visit_time, Speciality: item.Speciality, brick: item.brick, isNew: false };
+                            const day = item.visit_day, entry = { name: item.hcp_name, time: item.visit_time, speciality: item.Speciality, brick: item.brick, isNew: false };
                             const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.hcp_name);
                             const movedKey = isEvent ? item.hcp_name + item.brick : item.hcp_name;
                             this.movedHCPs.add(movedKey);
