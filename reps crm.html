@@ -764,19 +764,20 @@
         .note-box-canceled { background-color: #ffebee; border: 1px solid #ef9a9a; }
         .note-header { font-weight: bold; font-size: 12px; color: #4361ee; }
         #requestSection h2 {
-            font-weight: 600;
-            font-size: 14px;
-            margin-top: 15px;
-            padding: 6px;
-            border-radius: 9px;
-            display: block;
-            background-color: #ffffff;
-            border: 1px solid #e9ecef;
-            width: fit-content;
-            margin: 15px auto 0;
-            cursor: pointer;
-            text-align: left;
-        }
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 15px;
+    padding: 6px;
+    border-radius: 9px;
+    display: block;
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    width: fit-content;
+    margin: 15px 0 0 0;
+    cursor: pointer;
+    text-align: left; /* Add this line */
+}
+
         #requestSection .designer-info { text-align: center; font-size: 12px; color: #6c757d; margin-top: 10px; }
         #requestSection h3 { text-align: center; color: #3a3a3a; margin-bottom: 10px; font-size: 14px; font-weight: 600; }
         #requestSection .error { color: #dc3545; font-size: 12px; margin-top: -5px; margin-bottom: 10px; display: none; }
@@ -1488,7 +1489,7 @@
                         </div>
                          <div class="dashboard">
                             <div class="header">
-                                                                <div id="weeklyPlanLoading">Loading data...</div>
+                                <div id="weeklyPlanLoading">Loading data...</div>
                                 <div id="weeklyPlanError" class="message error" style="display: none;"></div>
                                 <div id="weeklyPlanSuccess" class="message success" style="display: none;"></div>
                                 <div id="weeklyPlanContent" style="display: none;">
@@ -2773,39 +2774,43 @@
                     this.elements.statsDisplay.textContent = `Unvisited HCPs in ${selectedBrick || 'total'}: ${unvisitedCount}`; this.elements.statsDisplay.style.display = 'block';
                 }
                 applyFilter() {
-    const selectedRep = this.elements.medicalReps.value,
-          selectedDay = this.elements.dayFilter.value,
-          selectedBrick = this.elements.bricks.value;
-    if (!selectedRep) {
-        this.showMessage('Please select a Medical Representative.', 'error');
-        return;
-    }
-    // Remove the remaining visits filter and show all HCPs
-    let filteredHCPs = globalGoogleData.filter(row =>
-        row['medical rep'] === selectedRep &&
-        (selectedDay === '' || row[selectedDay].trim() !== '') &&
-        (selectedBrick === '' || row['Brick'] === selectedBrick) &&
-        !this.movedHCPs.has(row['HCPS'])
-    );
-    this.populateHCPTable(filteredHCPs, selectedDay);
-}
+                    const selectedRep = this.elements.medicalReps.value;
+                    const selectedDay = this.elements.dayFilter.value;
+                    const selectedBrick = this.elements.bricks.value;
+
+                    if (!selectedRep) {
+                        this.showMessage('Please select a Medical Representative.', 'error');
+                        return;
+                    }
+
+                    let filteredHCPs = globalGoogleData.filter(row => {
+                        return row['medical rep'] === selectedRep &&
+                               (selectedDay === '' || row[selectedDay].trim() !== '') &&
+                               (selectedBrick === '' || row['Brick'] === selectedBrick) &&
+                               !this.movedHCPs.has(row['HCPS']);
+                    });
+
+                    this.populateHCPTable(filteredHCPs, selectedDay);
+                }
 
                 populateHCPTable(hcpData, selectedDay) {
     this.elements.hcpTableBody.innerHTML = '';
-    // Remove the remaining visits filter and show all HCPs
+
+    // Sort the data based on remaining visits
     const sortedData = hcpData.sort((a, b) => {
-        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0),
-              remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
-        const targetA = parseInt(a['T.V']) || 0,
-              targetB = parseInt(b['T.V']) || 0;
+        const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
+        const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
+        const targetA = parseInt(a['T.V']) || 0;
+        const targetB = parseInt(b['T.V']) || 0;
         if (remainingA === targetA && remainingB !== targetB) return -1;
         if (remainingB === targetB && remainingA !== targetA) return 1;
         return remainingB - remainingA;
     });
+
     sortedData.forEach(row => {
-        const actualVisits = this.visitCounts[row['HCPS']] || 0,
-              targetVisits = parseInt(row['T.V']) || 0,
-              remainingVisits = targetVisits - actualVisits;
+        const actualVisits = this.visitCounts[row['HCPS']] || 0;
+        const targetVisits = parseInt(row['T.V']) || 0;
+        const remainingVisits = targetVisits - actualVisits;
         const tr = document.createElement('tr');
         const remainingCellClass = remainingVisits <= 0 ? 'remaining-visit' : 'not-remaining';
         tr.innerHTML = `
@@ -2834,9 +2839,9 @@
         });
         this.elements.hcpTableBody.appendChild(tr);
     });
+
     this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
 }
-
                 addToWeeklyPlan(hcpName, visitTime, day, speciality) {
                     const hcpRow = globalGoogleData.find(row => row['HCPS'] === hcpName);
                     if (hcpRow) {
