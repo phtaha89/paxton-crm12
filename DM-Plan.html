@@ -151,6 +151,15 @@
             align-items: center;
             margin-bottom: 15px;
         }
+
+        /* Adjusted form panel header for desktop view */
+        @media (min-width: 769px) {
+            .form-panel-header {
+                justify-content: flex-start;
+                gap: 15px;
+            }
+        }
+        
         .form-panel-header h2 {
             font-size: 1.2rem;
             font-weight: 600;
@@ -346,7 +355,7 @@
         /* --- Notification Styles --- */
         .notification {
             position: fixed;
-            bottom: 20px;
+            top: 20px; /* Moved to top */
             left: 50%;
             transform: translateX(-50%);
             background: #28a745;
@@ -430,7 +439,8 @@
         <!-- Top-level controls for context -->
         <div class="header-controls">
             <h1>Weekly Plan</h1>
-            <button type="button" class="btn btn-primary" id="editPlanBtn">Edit Plan</button>
+            <!-- The Edit Plan button is now in the form-panel-header in desktop view -->
+            <!-- <button type="button" class="btn btn-primary" id="editPlanBtn">Edit Plan</button> -->
         </div>
         <div class="top-controls-row">
             <div class="flex-col">
@@ -466,6 +476,8 @@
             <div class="form-panel">
                 <div class="form-panel-header" id="form-panel-header-desktop">
                     <h2>Add/Edit Entry</h2>
+                    <!-- Added Edit Plan button here for PC view -->
+                    <button type="button" class="btn btn-primary" id="editPlanBtn">Edit Plan</button>
                 </div>
                 <div id="form-section-container" class="form-section hidden">
                     <!-- Form content remains the same -->
@@ -1381,9 +1393,27 @@
         document.getElementById('districtManager').addEventListener('change', updateDatesAndDaySelector);
         document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
         
-        document.getElementById('editPlanBtn').addEventListener('click', (e) => {
+        // This is the original header-controls button, which is hidden on desktop
+        const headerEditBtn = document.getElementById('editPlanBtn');
+        const formPanelHeader = document.querySelector('.form-panel-header');
+        
+        // The edit button in the form header.
+        const formEditBtn = document.createElement('button');
+        formEditBtn.type = 'button';
+        formEditBtn.className = 'btn btn-primary';
+        formEditBtn.id = 'formEditBtn';
+        formEditBtn.textContent = 'Edit Plan';
+        if (window.innerWidth > 768) {
+            headerEditBtn.classList.add('hidden');
+            formPanelHeader.appendChild(formEditBtn);
+        } else {
+            // For mobile view, the original button is shown and the new one is not.
+             formEditBtn.classList.add('hidden');
+        }
+
+        function toggleEditPlanForm() {
             const form = document.getElementById('form-section-container');
-            const button = e.target;
+            const button = window.innerWidth > 768 ? formEditBtn : headerEditBtn;
             const isHidden = form.classList.toggle('hidden');
             
             if (isHidden) {
@@ -1395,7 +1425,11 @@
                 button.classList.remove('btn-primary');
                 button.classList.add('btn-danger');
             }
-        });
+        }
+
+        // Event listeners for the buttons
+        headerEditBtn.addEventListener('click', toggleEditPlanForm);
+        formEditBtn.addEventListener('click', toggleEditPlanForm);
 
         function navigateWeek(direction) {
             const startDateInput = document.getElementById('startDate');
@@ -1424,7 +1458,7 @@
                     } else {
                         const form = document.getElementById('form-section-container');
                         form.classList.add('hidden');
-                        const editBtn = document.getElementById('editPlanBtn');
+                        const editBtn = window.innerWidth > 768 ? formEditBtn : headerEditBtn;
                         editBtn.textContent = 'Edit Plan';
                         editBtn.classList.remove('btn-danger');
                         editBtn.classList.add('btn-primary');
@@ -1462,7 +1496,7 @@
                 const form = document.getElementById('form-section-container');
                 if (!form.classList.contains('hidden')) {
                     form.classList.add('hidden');
-                    const editBtn = document.getElementById('editPlanBtn');
+                    const editBtn = window.innerWidth > 768 ? formEditBtn : headerEditBtn;
                     editBtn.textContent = 'Edit Plan';
                     editBtn.classList.remove('btn-danger');
                     editBtn.classList.add('btn-primary');
