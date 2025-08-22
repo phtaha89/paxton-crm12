@@ -1050,6 +1050,35 @@
             hideAllPopovers();
         }
 
+        function resetFormInputs() {
+            // Reset the form fields to their default state
+            document.getElementById('selectedDay').value = '';
+            document.getElementById('entryTypeSelect').value = '';
+            document.getElementById('visitTypeSelect').value = '';
+            document.getElementById('visitTimeChoice').value = '';
+            document.getElementById('visitTimeInput').value = '';
+            document.getElementById('medicalRepSelect').value = '';
+            document.getElementById('brickSelect').value = '';
+            document.getElementById('visitDetails').value = '';
+            document.getElementById('eventSelect').value = '';
+            document.getElementById('eventTimeChoice').value = '';
+            document.getElementById('eventTimeInput').value = '';
+            document.getElementById('eventDetails').value = '';
+            document.getElementById('leaveSelect').value = '';
+            document.getElementById('leaveTimeChoice').value = '';
+            document.getElementById('leaveTimeInput').value = '';
+            document.getElementById('leaveDetails').value = '';
+
+            // Hide the conditional sections of the form
+            handleEntryTypeChange();
+            handleVisitTypeChange();
+            handleEventChange();
+            handleLeaveChange();
+            handleVisitTimeChoiceChange();
+            handleEventTimeChoiceChange();
+            handleLeaveTimeChoiceChange();
+        }
+
         // --- DYNAMIC ENTRY ADDITION & OVERLAP LOGIC ---
         async function addPlanEntry() {
             const selectedDayValue = document.getElementById('selectedDay').value;
@@ -1166,8 +1195,9 @@
                 await fetchExistingPlanData(document.getElementById('startDate').value);
                 showMessageBox('Entry added successfully.');
                 
-                // Keep the form visible after adding an entry
+                // Keep the form visible and reset inputs after adding an entry
                 showForm();
+                resetFormInputs();
 
             } catch (error) {
                 console.error('Error adding entry:', error);
@@ -1266,10 +1296,11 @@
                     contentHtml += `<p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>`;
                     break;
                 case 'Leave':
-                    contentHtml = `<p><span class="font-semibold">Leave:</span> ${entryData.leaveType}</p><p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>`;
+                    boxClass = 'leave-box';
+                    contentHtml = `<p>${entryData.leaveType}</p>`;
                     break;
             }
-            contentHtml += `<p><span class="font-semibold">Time:</span> ${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption)}</p>`;
+            contentHtml += `<p class="plan-time">${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption)}</p>`;
             popover.innerHTML = `${contentHtml}<button type="button" class="btn btn-danger mt-2" onclick="deleteSingleEntry(event, '${entryData.id}')">Delete</button>`;
             const planBoxRect = planBoxElement.getBoundingClientRect();
             document.body.appendChild(popover);
