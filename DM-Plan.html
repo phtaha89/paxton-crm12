@@ -343,6 +343,26 @@
         }
         .modal-content p { font-size: 14px; margin-bottom: 20px; }
         
+        /* --- Notification Styles --- */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #28a745;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 999;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .notification.hide {
+            opacity: 0;
+        }
+
         /* --- Utility --- */
         .hidden { display: none !important; }
         .flex-col { display: flex; flex-direction: column; }
@@ -645,6 +665,21 @@
             document.getElementById('loading-overlay').classList.toggle('hidden', !show);
         }
 
+        // Renamed from showMessageBox to be used specifically for non-blocking notifications
+        function showTemporaryMessage(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Auto-hide the notification after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('hide');
+                notification.addEventListener('transitionend', () => notification.remove());
+            }, 3000);
+        }
+
+        // This function will now be used exclusively for blocking alert messages (errors, confirmations)
         function showMessageBox(message, title = 'Notification') {
             if (document.querySelector('.modal-box')) return;
             const modalBox = document.createElement('div');
@@ -834,7 +869,8 @@
                     if (error) throw error;
                 }
                 selectedBoxes.forEach(box => box.remove());
-                showMessageBox('Selected entries deleted successfully!', 'Success');
+                // Updated: Use new temporary notification for success
+                showTemporaryMessage('Selected entries deleted successfully!');
             } catch (error) {
                 console.error('Error deleting entries:', error);
                 showMessageBox(`Failed to delete entries. Error: ${error.message}`, 'Error');
@@ -857,7 +893,8 @@
                 try {
                     const { error } = await _supabase.from('dms_weekly_plans').delete().eq('id', entryId);
                     if (error) throw error;
-                    showMessageBox('Entry deleted successfully!', 'Success');
+                    // Updated: Use new temporary notification for success
+                    showTemporaryMessage('Entry deleted successfully!');
                     planBoxElement.remove();
                 } catch (error) {
                     console.error('Error deleting entry:', error);
@@ -1193,7 +1230,8 @@
                 if (error) throw error;
                 
                 await fetchExistingPlanData(document.getElementById('startDate').value);
-                showMessageBox('Entry added successfully.');
+                // Updated: Use new temporary notification for success
+                showTemporaryMessage('Entry added successfully.');
                 
                 // Keep the form visible and reset inputs after adding an entry
                 showForm();
