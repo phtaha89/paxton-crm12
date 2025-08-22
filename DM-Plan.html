@@ -354,7 +354,7 @@
         .mt-3 { margin-top: 12px; }
         .font-semibold { font-weight: 600; }
 
-        /* --- Mobile View (as requested) --- */
+        /* --- Mobile View (as requested) */
         @media (max-width: 768px) {
             html, body {
                 height: auto;
@@ -658,6 +658,18 @@
             `;
             document.body.appendChild(modalBox);
         }
+        
+        // Function to make sure the form is visible and the button state is correct
+        function showForm() {
+            const form = document.getElementById('form-section-container');
+            const button = document.getElementById('editPlanBtn');
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                button.textContent = 'Hide Form';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-danger');
+            }
+        }
 
         // --- DATA FETCHING & PARSING ---
         function parseCSV(csv) {
@@ -737,10 +749,21 @@
         
         function setDefaultStartDate() {
             const today = new Date();
-            const dayOfWeek = today.getDay();
-            let daysSinceSaturday = (dayOfWeek < 6) ? dayOfWeek + 1 : 0;
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - daysSinceSaturday);
+            const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            let startOfWeek;
+
+            // Check if it's Thursday or later in the week.
+            // If so, the default view should be the *next* week's plan.
+            if (dayOfWeek >= 4) { // 4 is Thursday, 5 is Friday, 6 is Saturday
+                const daysUntilNextSaturday = (6 - dayOfWeek + 7) % 7;
+                startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() + daysUntilNextSaturday);
+            } else {
+                // Otherwise, show the current week's plan.
+                const daysSinceSaturday = (dayOfWeek < 6) ? dayOfWeek + 1 : 0;
+                startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - daysSinceSaturday);
+            }
             startOfWeek.setUTCHours(0, 0, 0, 0);
             document.getElementById('startDate').value = startOfWeek.toISOString().split('T')[0];
         }
@@ -871,6 +894,7 @@
             daysOfWeek.forEach((dayName, index) => {
                 const currentDate = new Date(startDate);
                 currentDate.setUTCDate(startDate.getUTCDate() + index);
+                // Modified: Removed the weekday from the table header date string
                 const dateString = currentDate.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' });
                 const th = document.createElement('th');
                 th.innerHTML = `<div><span>${dayName}</span><br><span style="font-weight:400;">${dateString}</span></div>`;
@@ -899,7 +923,7 @@
         }
         
         function clearPlanTableBody() {
-             populateTimeSlotTable(document.getElementById('startDate').value);
+            populateTimeSlotTable(document.getElementById('startDate').value);
         }
 
         function populatePlanTable(entries) {
@@ -938,7 +962,7 @@
                 case 'Visit':
                     boxClass = 'visit-box';
                     contentHtml = `<p>${entryData.visitType}</p>`;
-                    if (entryData.visitType === 'Double Visit') contentHtml += `<p><span class="font-semibold">Brick:</span> ${entryData.brick || ''}</p>`;
+                    if (entryData.visitType === 'Double Visit') contentHtml += `<p><span class="font-semibold">MR:</span> ${entryData.medicalRep}</p><p><span class="font-semibold">Brick:</span> ${entryData.brick}</p>`;
                     break;
                 case 'Leave':
                     boxClass = 'leave-box';
@@ -1141,6 +1165,9 @@
                 
                 await fetchExistingPlanData(document.getElementById('startDate').value);
                 showMessageBox('Entry added successfully.');
+                
+                // Keep the form visible after adding an entry
+                showForm();
 
             } catch (error) {
                 console.error('Error adding entry:', error);
@@ -1324,14 +1351,7 @@
                     hideAllPopovers();
                     const selectedCount = document.querySelectorAll('.plan-box.selected').length;
                     if (selectedCount > 0) {
-                        const form = document.getElementById('form-section-container');
-                        if (form.classList.contains('hidden')) {
-                            form.classList.remove('hidden');
-                            const editBtn = document.getElementById('editPlanBtn');
-                            editBtn.textContent = 'Hide Form';
-                            editBtn.classList.remove('btn-primary');
-                            editBtn.classList.add('btn-danger');
-                        }
+                        showForm();
                     } else {
                         const form = document.getElementById('form-section-container');
                         form.classList.add('hidden');
@@ -1387,14 +1407,7 @@
                 multiSelectMode = true;
                 targetBox.classList.add('selected');
                 updateDeleteButtonVisibility();
-                const form = document.getElementById('form-section-container');
-                if (form.classList.contains('hidden')) {
-                    form.classList.remove('hidden');
-                    const editBtn = document.getElementById('editPlanBtn');
-                    editBtn.textContent = 'Hide Form';
-                    editBtn.classList.remove('btn-primary');
-                    editBtn.classList.add('btn-danger');
-                }
+                showForm();
                 if ('vibrate' in navigator) navigator.vibrate(50);
             }, 500);
         }, { passive: true });
