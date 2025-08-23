@@ -172,10 +172,17 @@
             .print-hidden { display: none !important; }
         }
         
-        /* Fix for mobile layout stretching */
-        .overflow-x-auto {
-            -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
-        }
+        /* Mobile-specific table styling */
+@media (max-width: 767px) {
+    #reports-table {
+        min-width: 600px; /* Minimum width for the table */
+    }
+    #report-details-section .overflow-x-auto {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    }
+}
+
     </style>
 </head>
 <body class="bg-gray-100 flex min-h-screen">
@@ -454,17 +461,20 @@
         </div>
     </div>
     <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-        <table id="reports-table" class="min-w-max divide-y divide-gray-200">
-            <thead id="reports-table-head" class="bg-gray-100">
-                <!-- Headers will be dynamically generated here -->
-            </thead>
-            <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
-                <!-- Submitted data will be appended here -->
-            </tbody>
-        </table>
+        <div class="min-w-[600px]"> <!-- Enforce minimum width for the table -->
+            <table id="reports-table" class="w-full divide-y divide-gray-200">
+                <thead id="reports-table-head" class="bg-gray-100">
+                    <!-- Headers will be dynamically generated here -->
+                </thead>
+                <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- Submitted data will be appended here -->
+                </tbody>
+            </table>
+        </div>
         <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
     </div>
 </div>
+
 
         </div>
         
