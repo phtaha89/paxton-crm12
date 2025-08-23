@@ -235,7 +235,8 @@
             font-weight: 600;
             border-radius: 9999px;
         }
-         /* Coaching evaluation form style improvements */
+        
+        /* Coaching evaluation form style improvements */
         #coaching-evaluation-form {
             display: grid;
             gap: 1rem;
@@ -246,21 +247,40 @@
                 grid-template-columns: 1fr 2fr;
             }
         }
-        #coaching-evaluation-form .grid.gap-4 {
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        #coaching-evaluation-form .evaluation-field {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        #coaching-evaluation-form .md\:col-span-1 {
-            grid-column: span 1;
+        #coaching-evaluation-form .evaluation-field > label {
+             white-space: nowrap;
+             overflow: hidden;
+             text-overflow: ellipsis;
         }
-        #coaching-evaluation-form .md\:col-span-2 {
-            grid-column: span 2;
+        #coaching-evaluation-form .star-rating {
+            flex-shrink: 0;
         }
-        #coaching-evaluation-form .border-r {
-            border-right: 1px solid #e5e7eb;
-            padding-right: 1rem;
+        @media (min-width: 768px) {
+            #coaching-evaluation-form .md\:col-span-1 {
+                grid-column: span 1;
+            }
+            #coaching-evaluation-form .md\:col-span-2 {
+                grid-column: span 2;
+            }
+            #coaching-evaluation-form .border-r {
+                border-right: 1px solid #e5e7eb;
+                padding-right: 1rem;
+            }
+            #coaching-evaluation-form .text-center {
+                text-align: center;
+            }
         }
-        #coaching-evaluation-form .text-center {
-            text-align: center;
+
+        @media (max-width: 767px) {
+            #coaching-evaluation-form .evaluation-field {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -734,26 +754,26 @@
                     <div class="col-span-1 border-r pr-4">
                         <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
                         <div class="space-y-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
+                            <div class="evaluation-field">
+                                <label class="text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="feedback_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
+                            <div class="evaluation-field">
+                                <label class="text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="opening_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
+                            <div class="evaluation-field">
+                                <label class="text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="asking_for_commitment_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
+                            <div class="evaluation-field">
+                                <label class="text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="handling_objection_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
@@ -762,28 +782,27 @@
                     </div>
                     <!-- Other Skills Columns -->
                     <div class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
-                                <div class="star-rating mt-1" data-field="planning_score">
-                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                </div>
+                        <div class="evaluation-field">
+                            <label class="text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
+                            <div class="star-rating mt-1" data-field="planning_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
-                                <div class="star-rating mt-1" data-field="time_management_score">
-                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                </div>
+                        </div>
+                        <div class="evaluation-field">
+                            <label class="text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
+                            <div class="star-rating mt-1" data-field="time_management_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
-                            <div class="md:col-span-2 flex justify-between items-center">
-                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
-                                <div class="star-rating mt-1" data-field="medical_product_knowledge_score">
-                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                </div>
+                        </div>
+                        <div class="md:col-span-2 evaluation-field">
+                            <label class="text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
+                            <div class="star-rating mt-1" data-field="medical_product_knowledge_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                     </div>
                     <!-- Conclusions Box -->
-                    <div class="mt-6">
+                    <div class="mt-6 col-span-full">
                         <label for="coaching-conclusions" class="block text-sm font-medium text-gray-700">Conclusions<span class="error-star" data-for="coaching-conclusions">*</span></label>
                         <textarea id="coaching-conclusions" name="coaching-conclusions" rows="3" class="mt-1 block w-full shadow-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 p-2"></textarea>
                     </div>
@@ -887,6 +906,273 @@
     </div>
 
 
+    <!-- Modal for full row details -->
+    <div id="row-details-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Full Report Details</h3>
+                <button id="close-row-details-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="row-details-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Details will be dynamically loaded here -->
+            </div>
+            <div class="flex justify-end border-t pt-4">
+                <button id="ok-row-details-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Double Visit -->
+    <div id="visit-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Select Today's Visits</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Visits will be dynamically loaded here -->
+            </div>
+            <div class="flex justify-end space-x-2 border-t pt-4">
+                <button id="save-visits" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">Save</button>
+                <button id="cancel-visits" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for displaying visit dates -->
+    <div id="dates-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="dates-modal-title" class="text-lg font-semibold text-gray-800">Visit Dates</h3>
+                <button id="close-dates-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="dates-modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Dates will be dynamically loaded here -->
+            </div>
+            <div class="flex justify-end border-t pt-4">
+                <button id="ok-dates-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coaching Evaluation Modal -->
+    <div id="coaching-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-2/3 lg:w-1/2 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Coaching Evaluation</h3>
+                <button id="close-coaching-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="coaching-modal-content" class="overflow-y-auto space-y-4 flex-grow mb-4 pr-2">
+                <div id="coaching-modal-header-info" class="space-y-2 mb-4 border-b pb-2">
+                    <!-- Dynamic content here -->
+                </div>
+                <form id="coaching-evaluation-form" class="md:grid grid-cols-3 gap-4">
+                    <input type="hidden" id="coaching-report-id">
+                    <!-- Evaluation Fields -->
+                    <div class="col-span-1 border-r pr-4">
+                        <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
+                        <div class="space-y-3">
+                            <div class="evaluation-field">
+                                <label class="text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="feedback_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
+                            </div>
+                            <div class="evaluation-field">
+                                <label class="text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="opening_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
+                            </div>
+                            <div class="evaluation-field">
+                                <label class="text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="asking_for_commitment_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
+                            </div>
+                            <div class="evaluation-field">
+                                <label class="text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="handling_objection_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Other Skills Columns -->
+                    <div class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="evaluation-field">
+                            <label class="text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
+                            <div class="star-rating mt-1" data-field="planning_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                            </div>
+                        </div>
+                        <div class="evaluation-field">
+                            <label class="text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
+                            <div class="star-rating mt-1" data-field="time_management_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 evaluation-field">
+                            <label class="text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
+                            <div class="star-rating mt-1" data-field="medical_product_knowledge_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Conclusions Box -->
+                    <div class="mt-6 col-span-full">
+                        <label for="coaching-conclusions" class="block text-sm font-medium text-gray-700">Conclusions<span class="error-star" data-for="coaching-conclusions">*</span></label>
+                        <textarea id="coaching-conclusions" name="coaching-conclusions" rows="3" class="mt-1 block w-full shadow-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 p-2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-end space-x-2 border-t pt-4">
+                <button id="submit-coaching-report" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">Submit</button>
+                <button id="reset-coaching-form" type="button" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition">Reset</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Read-only Coaching Report View Modal -->
+    <div id="coaching-view-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-11/12 md:w-2/3 lg:w-1/2 max-h-[90vh] flex flex-col">
+            <div id="coaching-view-print-area" class="p-6 flex-grow overflow-y-auto">
+                <div class="flex justify-between items-center pb-3 border-b mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Coaching Report</h3>
+                    <button id="close-coaching-view-modal" class="text-gray-400 hover:text-gray-600 print-hidden">&times;</button>
+                </div>
+                <div class="space-y-4">
+                    <!-- Report Header -->
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-semibold">Medical Rep:</span>
+                            <span id="view-med-rep-name"></span>
+                        </div>
+                        <div>
+                            <span class="font-semibold">Double Visit Date:</span>
+                            <span id="view-visit-date"></span>
+                        </div>
+                    </div>
+                    <div class="text-sm p-2 bg-gray-50 rounded-md border">
+                        <p class="font-semibold">Visit Details:</p>
+                        <p id="view-visit-details"></p>
+                    </div>
+                    
+                    <!-- Evaluation Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
+                        <!-- Selling Skills Column -->
+                        <div class="md:col-span-1 border-r pr-4">
+                            <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <label class="block text-sm font-medium text-gray-700">Feedback</label>
+                                    <div class="star-rating read-only" data-field="view_feedback_score">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <label class="block text-sm font-medium text-gray-700">Opening</label>
+                                    <div class="star-rating read-only" data-field="view_opening_score">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <label class="block text-sm font-medium text-gray-700">Asking for commitment</label>
+                                    <div class="star-rating read-only" data-field="view_asking_for_commitment_score">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <label class="block text-sm font-medium text-gray-700">Handling objection</label>
+                                    <div class="star-rating read-only" data-field="view_handling_objection_score">
+                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Other Skills Columns -->
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Planning</label>
+                                <div class="star-rating read-only" data-field="view_planning_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                             <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Time Management</label>
+                                <div class="star-rating read-only" data-field="view_time_management_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                             <div class="md:col-span-2 flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge</label>
+                                <div class="star-rating read-only" data-field="view_medical_product_knowledge_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Conclusions Box -->
+                    <div class="mt-4 border-t pt-4">
+                        <p class="font-semibold text-sm">Conclusions:</p>
+                        <p id="view-conclusions" class="text-sm p-2 bg-gray-50 rounded-md border mt-1"></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Print button removed from here -->
+        </div>
+    </div>
+
+
+    <!-- Modal for full row details -->
+    <div id="row-details-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Full Report Details</h3>
+                <button id="close-row-details-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="row-details-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Details will be dynamically loaded here -->
+            </div>
+            <div class="flex justify-end border-t pt-4">
+                <button id="ok-row-details-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Double Visit -->
+    <div id="visit-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Select Today's Visits</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Visits will be dynamically loaded here -->
+            </div>
+            <div class="flex justify-end space-x-2 border-t pt-4">
+                <button id="save-visits" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">Save</button>
+                <button id="cancel-visits" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for displaying visit dates -->
+    <div id="dates-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="dates-modal-title" class="text-lg font-semibold text-gray-800">Visit Dates</h3>
+                <button id="close-dates-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="dates-modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Dates will be dynamically loaded here -->
+            </div>
+            <div class="flex justify-end border-t pt-4">
+                <button id="ok-dates-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- PapaParse and html2pdf CDNs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
@@ -1421,10 +1707,8 @@
                         } else if (key === 'created_at') {
                             newCell.textContent = formatUTCTime(report.created_at);
                         } else if (key === 'comment') {
-                            const originalComment = report[key] || 'N/A';
-                            // Truncate comment only for PC view, hide on mobile
-                            newCell.textContent = originalComment;
-                            newCell.className = 'px-3 py-2 text-gray-500 hidden md:table-cell'; // Remove whitespace-nowrap and hide on mobile
+                            newCell.textContent = report[key] || 'N/A';
+                            newCell.className = 'px-3 py-2 text-gray-500 hidden md:table-cell'; // Hide comment on mobile
                         } else {
                             newCell.textContent = report[key] || 'N/A';
                         }
@@ -1532,12 +1816,13 @@
 
                 showNotification('Report submitted successfully!', 'success');
                 await fetchReportsFromSupabase(dmName);
-                hideModal();
+
                 form.reset();
+                activityRadios.forEach(radio => radio.checked = false);
+                updateFormVisibility();
                 dmNameSelect.value = dmName;
                 updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
                 selectedVisitsInput.value = '';
-                updateFormVisibility();
                 activityRadios.forEach(radio => radio.disabled = false);
             });
 
@@ -1679,7 +1964,6 @@
                     updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
                     selectedVisitsInput.value = '';
                     activityRadios.forEach(radio => radio.disabled = false);
-                    fetchAndDisplayPendingCoachingReports(dmName); // Update pending count
                 }
             });
 
@@ -2150,32 +2434,84 @@
                 if (filterValue !== 'All') {
                     reportsToRender = reportsToRender.filter(report => report.status === filterValue);
                 }
+                
+                if (!dmName) {
+                    // For "All District Managers", display DM and Med Rep columns
+                    reportsToRender.forEach(visit => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-100 cursor-pointer';
+                        row.dataset.visitId = visit.id;
+
+                        const dateCell = document.createElement('td');
+                        dateCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
+                        dateCell.textContent = visit.created_at.substring(0, 10);
+                        row.appendChild(dateCell);
+
+                        const dmCell = document.createElement('td');
+                        dmCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
+                        dmCell.textContent = visit.dm_name;
+                        row.appendChild(dmCell);
+
+                        const medRepCell = document.createElement('td');
+                        medRepCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
+                        medRepCell.textContent = visit.med_rep;
+                        row.appendChild(medRepCell);
+
+                        const brickCell = document.createElement('td');
+                        brickCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
+                        brickCell.textContent = visit.brick;
+                        row.appendChild(brickCell);
+                        
+                        const commentCell = document.createElement('td');
+                        commentCell.className = 'px-3 py-2 whitespace-normal text-gray-500 hidden md:table-cell'; // Hide on mobile
+                        commentCell.textContent = visit.comment;
+                        row.appendChild(commentCell);
+                        
+                        const statusCell = document.createElement('td');
+                        statusCell.className = 'px-3 py-2 whitespace-nowrap';
+                        statusCell.innerHTML = `<span class="status-badge ${visit.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">${visit.status}</span>`;
+                        row.appendChild(statusCell);
+                        
+                        row.addEventListener('click', () => openCoachingModal(visit.id, visit.status));
+                        coachingReportsTableBody.appendChild(row);
+                    });
+                } else {
+                    // Only display Medical Rep column if a specific DM is selected
+                    reportsToRender.forEach(visit => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-100 cursor-pointer';
+                        row.dataset.visitId = visit.id;
+
+                        const dateCell = document.createElement('td');
+                        dateCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
+                        dateCell.textContent = visit.created_at.substring(0, 10);
+                        row.appendChild(dateCell);
+
+                        const brickCell = document.createElement('td');
+                        brickCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
+                        brickCell.textContent = visit.brick;
+                        row.appendChild(brickCell);
+                        
+                        const commentCell = document.createElement('td');
+                        commentCell.className = 'px-3 py-2 whitespace-normal text-gray-500 hidden md:table-cell'; // Hide on mobile
+                        commentCell.textContent = visit.comment;
+                        row.appendChild(commentCell);
+                        
+                        const statusCell = document.createElement('td');
+                        statusCell.className = 'px-3 py-2 whitespace-nowrap';
+                        statusCell.innerHTML = `<span class="status-badge ${visit.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">${visit.status}</span>`;
+                        row.appendChild(statusCell);
+                        
+                        row.addEventListener('click', () => openCoachingModal(visit.id, visit.status));
+                        coachingReportsTableBody.appendChild(row);
+                    });
+                }
 
                 if (reportsToRender.length === 0) {
                     noCoachingReportsMessage.classList.remove('hidden');
                     return;
                 }
                 noCoachingReportsMessage.classList.add('hidden');
-
-                reportsToRender.forEach(visit => {
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-100 cursor-pointer';
-                    row.dataset.visitId = visit.id;
-                    
-                    row.innerHTML = `
-                        <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.created_at.substring(0, 10)}</td>
-                        <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.brick}</td>
-                        <td class="px-3 py-2 whitespace-normal text-gray-500">${visit.comment}</td>
-                        <td class="px-3 py-2 whitespace-nowrap">
-                            <span class="status-badge ${visit.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
-                                ${visit.status}
-                            </span>
-                        </td>
-                    `;
-                    
-                    row.addEventListener('click', () => openCoachingModal(visit.id, visit.status));
-                    coachingReportsTableBody.appendChild(row);
-                });
             };
             
             const openCoachingModal = async (visitId, status) => {
@@ -2330,8 +2666,12 @@
                     showNotification('Coaching report submitted successfully.', 'success');
                     closeCoachingModal();
                     // Refresh the table to show the 'Completed' status
-                    await fetchAndRenderCoachingReports(dmNameSelect.value, coachingMedRepNameSelect.value);
-                    fetchAndDisplayPendingCoachingReports(dmNameSelect.value);
+                    await fetchAndRenderCoachingReports(coachingDmNameFilter.value, coachingMedRepNameSelect.value);
+                    if (coachingDmNameFilter.value) {
+                         fetchAndDisplayPendingCoachingReports(coachingDmNameFilter.value);
+                    } else if (loggedInUser) {
+                         fetchAndDisplayPendingCoachingReports(loggedInUser.title === 'admin' ? '' : loggedInUser.username);
+                    }
                 }
             });
             
@@ -2353,6 +2693,7 @@
                     dmNameSelect.disabled = false;
                     coachingDmNameFilter.value = '';
                     coachingMedRepNameSelect.disabled = true;
+                    fetchAndDisplayPendingCoachingReports('');
                 } else if (user && user.title && user.title.toLowerCase() === 'district manager') {
                     dmNameSelect.disabled = true;
                     const option = document.createElement('option');
@@ -2362,6 +2703,7 @@
                     dmNameSelect.appendChild(option);
 
                     coachingDmNameFilter.innerHTML = `<option value="${user.username}">${user.username}</option>`;
+                    coachingDmNameFilter.value = user.username;
                     coachingDmNameFilter.disabled = true;
                     coachingMedRepNameSelect.disabled = false;
 
