@@ -172,16 +172,25 @@
             .print-hidden { display: none !important; }
         }
         
-        /* Mobile-specific table styling */
+       /* Mobile-specific styling */
 @media (max-width: 767px) {
-    #reports-table {
-        min-width: 600px; /* Minimum width for the table */
-    }
+    /* Ensure the table container scrolls horizontally */
     #report-details-section .overflow-x-auto {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     }
+
+    /* Set a minimum width for the table */
+    #report-details-section .min-w-[700px] {
+        min-width: 700px;
+    }
+
+    /* Prevent the table from shrinking */
+    #reports-table {
+        width: 100%;
+    }
 }
+
 
     </style>
 </head>
@@ -460,8 +469,11 @@
             <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
         </div>
     </div>
-    <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-        <div class="min-w-[600px]"> <!-- Enforce minimum width for the table -->
+
+    <!-- Dedicated scrolling container for the table -->
+    <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+        <!-- Table container with minimum width -->
+        <div class="min-w-[700px]">
             <table id="reports-table" class="w-full divide-y divide-gray-200">
                 <thead id="reports-table-head" class="bg-gray-100">
                     <!-- Headers will be dynamically generated here -->
@@ -471,10 +483,10 @@
                 </tbody>
             </table>
         </div>
-        <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
     </div>
-</div>
 
+    <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
+</div>
 
         </div>
         
