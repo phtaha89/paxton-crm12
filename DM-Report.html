@@ -6,7 +6,7 @@
     <title>DM Report System</title>
     <!-- Tailwind CSS CDN for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for star icons -->
+    <!-- Font Awesome for star icons and other icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
         tailwind.config = {
@@ -20,12 +20,18 @@
         };
     </script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        /* Base styles from the original code */
         body {
             font-family: 'Inter', sans-serif;
             font-size: 0.875rem;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            background-color: #f5f7fa; /* Light background */
+            background-image: linear-gradient(to top, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%);
+            color: #333;
         }
         label, input, select, textarea, button {
             font-size: 0.875rem;
@@ -33,9 +39,6 @@
         th, td {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
-        }
-        .container {
-            max-width: 900px;
         }
         .modal {
             transition: opacity 0.3s ease-in-out;
@@ -72,75 +75,6 @@
         .notification.error { background-color: #F44336; color: white; }
         .notification.info { background-color: #2196F3; color: white; }
 
-        /* --- Navigation Tabs Styling --- */
-        .tab-button {
-            border-radius: 0.5rem 0.5rem 0 0;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .tab-button.active {
-            background-color: #ffffff;
-            color: #1f2937;
-            font-weight: 600;
-        }
-        .tab-button:not(.active) {
-            background-color: #e5e7eb;
-            color: #6b7280;
-        }
-        #side-nav { display: none; }
-        #top-nav { display: flex; }
-
-        /* --- Desktop Navigation --- */
-        @media (min-width: 768px) {
-            #top-nav { display: none; }
-            #side-nav {
-                display: flex;
-                flex-direction: column;
-                width: 15rem;
-                min-height: 100vh;
-                background-color: #f3f4f6;
-                padding: 1rem;
-                transition: width 0.3s ease-in-out;
-            }
-            #side-nav .tab-button {
-                border-radius: 0.5rem;
-                margin-bottom: 0.5rem;
-                width: 100%;
-                text-align: left;
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-            }
-            #main-app {
-                width: calc(100vw - 15rem);
-                min-height: 100vh;
-                border-radius: 0;
-                transition: width 0.3s ease-in-out;
-            }
-            /* Collapsed Sidebar Styles */
-            #side-nav.collapsed {
-                width: 5rem;
-            }
-            #side-nav.collapsed .tab-button-text, #side-nav.collapsed #nav-header-text {
-                display: none;
-            }
-            #side-nav.collapsed .tab-button {
-                justify-content: center;
-            }
-            #main-app.sidebar-collapsed {
-                width: calc(100vw - 5rem);
-            }
-        }
-        
-        #monthly-details-tab-content {
-            background-color: #f3f4f6;
-            overflow-y: auto;
-        }
-        #dm-name {
-            min-height: 2.5rem;
-            border-width: 1px;
-            border-color: #d1d5db;
-        }
-        
         /* Star rating styles */
         .star-rating .fa-star {
             color: #e4e5e9;
@@ -171,434 +105,659 @@
             .print-area { position: absolute; left: 0; top: 0; width: 100%; }
             .print-hidden { display: none !important; }
         }
+
+        /* --- New Layout Styles from attached file --- */
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Prevent body scroll on desktop */
+            padding: 0; /* Remove body padding on desktop */
+        }
+        .main-container {
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: row;
+            padding: 0;
+            border-radius: 0;
+        }
+        .desktop-layout-wrapper {
+            flex-direction: row;
+            flex-grow: 1;
+            overflow: hidden;
+            width: 100%;
+        }
+        .side-navigation {
+            flex-basis: 240px;
+            flex-shrink: 0;
+            background-color: white; /* Light background for the sidebar */
+            border-right: 1px solid #e9ecef;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-tab-group {
+            flex-direction: column;
+            gap: 8px;
+            background-color: transparent;
+            padding: 0;
+            margin-top: 1rem;
+        }
+        .side-navigation .tab-button {
+            flex: none;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .side-navigation .tab-button i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            margin-right: 12px;
+        }
+        .side-navigation .tab-button.active {
+            background-color: #4361ee;
+            color: white;
+            box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
+        }
+        .side-navigation .tab-button:not(.active) {
+            color: #495057;
+            background-color: transparent;
+        }
+        .side-navigation .tab-button:hover:not(.active) {
+             background-color: #f3f4f6;
+        }
+        .main-content-scrollable {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f5f7fa; /* Match body background */
+        }
+        .mobile-only-header { display: none; }
         
-       /* Mobile-specific styling */
-@media (max-width: 767px) {
-    /* Ensure the outer container does NOT stretch */
-    #report-details-section {
-        width: 100%;
-        overflow: hidden;
-    }
+        /* Mobile View Fixes & Enhancements */
+        @media (max-width: 1023px) {
+            body {
+                overflow-x: hidden;
+                padding: 12px;
+                display: block; /* Allow normal block display */
+            }
+            .main-container {
+                height: auto;
+                flex-direction: column;
+                padding: 14px;
+                border-radius: 8px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                background-color: white;
+            }
+            .side-navigation { display: none; }
+            .mobile-only-header {
+                display: block;
+                background-color: white;
+            }
+            .main-content-scrollable {
+                padding: 0;
+            }
+            #top-nav {
+                display: flex;
+            }
+            .tab-button {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+            }
+            #top-nav .tab-button {
+                border-radius: 0;
+            }
+            #top-nav .tab-button.active {
+                background-color: #ffffff;
+                color: #1f2937;
+                font-weight: 600;
+                border-bottom: 2px solid #4361ee;
+            }
+            #top-nav .tab-button:not(.active) {
+                background-color: #e5e7eb;
+                color: #6b7280;
+            }
+        }
 
-    /* Enable horizontal scrolling for the table container */
-    #report-details-section .overflow-x-auto {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    }
+        /* Specific styles for forms */
+        .form-section {
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border: 1px solid #e9ecef;
+            background-color: white;
+        }
+        .form-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .form-title {
+            color: #212b36;
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+        }
+        .form-logo {
+            width: 36px;
+            height: 36px;
+            background-color: #4361ee;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 18px;
+        }
+        .med-rep-card-wrapper {
+            margin-bottom: 1rem;
+        }
+        .med-rep-card {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .med-rep-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .med-rep-name {
+            font-weight: 600;
+            color: #3a3a3a;
+            font-size: 14px;
+        }
+        .med-rep-area {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .action-button {
+            padding: 10px;
+            border-radius: 18px;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .submit-btn {
+            background-color: #4361ee;
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+        }
+        .submit-btn:hover:not(:disabled) {
+            background-color: #3a56d4;
+            transform: translateY(-1px);
+        }
+        .reset-btn {
+            background-color: #fff;
+            color: red;
+            border: 1px solid #dce0e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .reset-btn:hover:not(:disabled) {
+            background-color: #f8f9fa;
+        }
+        .retrieve-btn {
+            background-color: #2e8540;
+            color: white;
+            box-shadow: 0 4px 12px rgba(46, 133, 64, 0.2);
+        }
+        .retrieve-btn:hover:not(:disabled) {
+            background-color: #267438;
+            transform: translateY(-1px);
+        }
+        .disabled-button {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-    /* Inner container with fixed minimum width */
-    #report-details-section div[style*="min-width"] {
-        min-width: 700px;
-        width: fit-content;
-    }
+        /* Specific adjustments for monthly details page */
+        #monthly-details-tab-content {
+            background-color: #f5f7fa;
+            overflow-y: auto;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 12px;
+        }
 
-    /* Table should not shrink */
-    #reports-table {
-        width: 100%;
-    }
-}
-
-
-
+        /* Table responsiveness on mobile */
+        @media (max-width: 767px) {
+            #report-details-section .overflow-x-auto {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            #report-details-section .min-w-[700px] {
+                min-width: 700px;
+            }
+            #reports-table {
+                width: 100%;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-100 flex min-h-screen">
+<body class="flex min-h-screen">
 
     <!-- Notification Container -->
     <div id="notification-container"></div>
 
-    <!-- Sidebar Navigation for PC -->
-    <nav id="side-nav" class="bg-white shadow-lg p-4 print-hidden">
-        <div class="flex justify-between items-center mb-4">
-            <h2 id="nav-header-text" class="text-xl font-bold text-gray-800">DM System</h2>
-            <button id="nav-toggle-btn" class="p-2 rounded-md hover:bg-gray-200">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
-        <button id="dm-report-tab" class="tab-button active px-4 py-2 text-sm md:text-base font-medium">
-            <i class="fas fa-file-alt fa-fw"></i> <span class="tab-button-text">DM Report</span>
-        </button>
-        <button id="coaching-report-tab" class="tab-button relative px-4 py-2 text-sm md:text-base font-medium">
-            <i class="fas fa-chalkboard-teacher fa-fw"></i> <span class="tab-button-text">Coaching Report</span>
-            <span id="coaching-badge" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
-        </button>
-        <button id="monthly-details-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">
-            <i class="fas fa-chart-pie fa-fw"></i> <span class="tab-button-text">Monthly Details</span>
-        </button>
-    </nav>
-    
+    <!-- Main Container to hold everything, matching the layout -->
+    <div id="main-app-container" class="main-container">
 
-    <!-- Main Content Container with Tabs -->
-    <div id="main-app" class="flex flex-col flex-grow bg-white md:rounded-2xl md:shadow-2xl md:space-y-4">
-
-        <!-- Top Navigation for Mobile -->
-        <div id="top-nav" class="flex border-b border-gray-200 print-hidden">
-            <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm md:text-base font-medium">DM Report</button>
-            <button id="coaching-report-tab-mobile" class="tab-button relative flex-1 px-4 py-2 text-sm md:text-base font-medium">
-                Coaching Report
-                <span id="coaching-badge-mobile" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
-            </button>
-            <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm md:text-base font-medium">Monthly Details</button>
-        </div>
-
-
-        <!-- Tab Content Containers -->
-        <div id="dm-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6">
-            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">DM Report System</h1>
-
-            <form id="report-form" class="space-y-4">
-
-                <!-- District Manager Name and Live Date -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="dm-name" class="block text-xs font-medium text-gray-700">District Manager Name</label>
-                        <select id="dm-name" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+        <!-- Sidebar Navigation for PC -->
+        <nav class="side-navigation print-hidden">
+            <div class="med-rep-card-wrapper">
+                <div class="med-rep-card bg-gray-100">
+                    <div class="med-rep-info">
+                        <div class="med-rep-name" id="medRepName">
+                            <i class="fas fa-spinner fa-spin"></i> Loading User...
+                        </div>
+                        <div class="med-rep-area" id="medRepArea">Area</div>
+                    </div>
+                    <div class="relative mt-2">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-user-tie text-gray-400"></i>
+                        </span>
+                        <select id="dm-name" class="pl-10 block w-full p-2 border-gray-300 rounded-md shadow-sm bg-white text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="" disabled selected>Loading...</option>
                         </select>
-                        <p id="dm-name-error" class="error-message">Please select a District Manager.</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700">Date and Time</label>
-                        <div id="live-time" class="mt-1 p-1 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-center font-semibold text-gray-600">
-                            Loading...
-                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Activity Type Radio Buttons -->
-                <div class="mt-4">
-                    <label class="block text-xs font-medium text-gray-700">Activity Type</label>
-                    <div class="mt-1 grid grid-cols-3 gap-2 md:gap-4">
-                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                            <input type="radio" name="activity-type" value="Visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                            <span class="ml-1 text-gray-700 text-xs">Visits</span>
-                        </label>
-                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                            <input type="radio" name="activity-type" value="Event" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                            <span class="ml-1 text-gray-700 text-xs">Event</span>
-                        </label>
-                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                            <input type="radio" name="activity-type" value="Leave" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                            <span class="ml-1 text-gray-700 text-xs">Leave</span>
-                        </label>
-                    </div>
-                    <p id="activity-type-error" class="error-message">Please select an activity type.</p>
+            <div class="main-tab-group">
+                <button id="dm-report-tab" class="tab-button active">
+                    <i class="fas fa-file-alt fa-fw"></i> <span>DM Report</span>
+                </button>
+                <button id="coaching-report-tab" class="tab-button relative">
+                    <i class="fas fa-chalkboard-teacher fa-fw"></i> <span>Coaching Report</span>
+                    <span id="coaching-badge" class="absolute top-2 right-4 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+                <button id="monthly-details-tab" class="tab-button">
+                    <i class="fas fa-chart-pie fa-fw"></i> <span>Monthly Details</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Wrapper with Tabs -->
+        <div id="main-app" class="main-content-scrollable flex flex-col flex-grow">
+
+            <!-- Top Navigation for Mobile (adapted from the new layout) -->
+            <div id="top-nav" class="flex border-b border-gray-200 print-hidden bg-white shadow-sm p-2 mb-4 rounded-xl md:hidden">
+                <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm font-medium">DM Report</button>
+                <button id="coaching-report-tab-mobile" class="tab-button relative flex-1 px-4 py-2 text-sm font-medium">
+                    Coaching Report
+                    <span id="coaching-badge-mobile" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+                </button>
+                <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm font-medium">Monthly Details</button>
+            </div>
+
+            <!-- Tab Content Containers -->
+            <div id="dm-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 form-section">
+                <div class="form-header">
+                    <div class="form-logo"><i class="fas fa-file-alt"></i></div>
+                    <h1 class="form-title">DM Report System</h1>
                 </div>
 
-                <!-- Conditional Forms -->
-                <div id="conditional-forms">
+                <form id="report-form" class="space-y-4">
 
-                    <!-- Visits Form -->
-                    <div id="visits-form" class="p-4 rounded-md shadow-inner space-y-4 hidden form-border-visits" >
-                        <h3 class="text-sm font-semibold text-gray-800">Visits Details</h3>
-                        <div>
-                            <label for="visit-type" class="block text-xs font-medium text-gray-700">Visit Type</label>
-                            <select id="visit-type" name="visit-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                <option value="Double Visit">Double Visit</option>
-                                <option value="Single Visit">Single Visit</option>
+                    <!-- District Manager Name and Live Date -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:hidden">
+                            <label class="block text-xs font-medium text-gray-700">District Manager Name</label>
+                            <select id="dm-name-mobile" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="" disabled selected>Loading...</option>
                             </select>
+                            <p id="dm-name-error" class="error-message">Please select a District Manager.</p>
                         </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Date and Time</label>
+                            <div id="live-time" class="mt-1 p-1 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-center font-semibold text-gray-600">
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
 
-                        <!-- Double Visit Form -->
-                        <div id="double-visit-form" class="space-y-2">
-                            <!-- Option to choose between manual entry or today's visits -->
-                            <div id="double-visit-options" class="space-y-2">
+                    <!-- Activity Type Radio Buttons -->
+                    <div class="mt-4">
+                        <label class="block text-xs font-medium text-gray-700">Activity Type</label>
+                        <div class="mt-1 grid grid-cols-3 gap-2 md:gap-4">
+                            <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                                <input type="radio" name="activity-type" value="Visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-1 text-gray-700 text-xs">Visits</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                                <input type="radio" name="activity-type" value="Event" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-1 text-gray-700 text-xs">Event</span>
+                            </label>
+                            <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                                <input type="radio" name="activity-type" value="Leave" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-1 text-gray-700 text-xs">Leave</span>
+                            </label>
+                        </div>
+                        <p id="activity-type-error" class="error-message">Please select an activity type.</p>
+                    </div>
+
+                    <!-- Conditional Forms -->
+                    <div id="conditional-forms">
+
+                        <!-- Visits Form -->
+                        <div id="visits-form" class="p-4 rounded-md shadow-inner space-y-4 hidden form-border-visits" >
+                            <h3 class="text-sm font-semibold text-gray-800">Visits Details</h3>
+                            <div>
+                                <label for="visit-type" class="block text-xs font-medium text-gray-700">Visit Type</label>
+                                <select id="visit-type" name="visit-type" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="Double Visit">Double Visit</option>
+                                    <option value="Single Visit">Single Visit</option>
+                                </select>
+                            </div>
+
+                            <!-- Double Visit Form -->
+                            <div id="double-visit-form" class="space-y-2">
+                                <div id="double-visit-options" class="space-y-2">
+                                    <div>
+                                        <label for="med-rep-name" class="block text-xs font-medium text-gray-700">Medical Rep Name</label>
+                                        <select id="med-rep-name" name="med-rep-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="" disabled selected>Select DM first</option>
+                                        </select>
+                                        <p id="med-rep-name-error" class="error-message">Please select a Medical Rep.</p>
+                                    </div>
+                                    <div id="double-visit-mode" class="hidden space-y-2">
+                                        <label class="block text-xs font-medium text-gray-700">Select Report Mode</label>
+                                        <div class="flex items-center space-x-4">
+                                            <label class="flex items-center">
+                                                <input type="radio" name="double-visit-mode" value="manual" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                                <span class="ml-1 text-gray-700 text-xs">Add Manually</span>
+                                            </label>
+                                            <label class="flex items-center">
+                                                <input type="radio" name="double-visit-mode" value="visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                                <span class="ml-1 text-gray-700 text-xs">Select from Today's Visits</span>
+                                            </label>
+                                        </div>
+                                        <p id="double-visit-mode-error" class="error-message">Please select a report mode.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Manual Double Visit Form (hidden by default) -->
+                                <div id="manual-double-visit-form" class="space-y-2 hidden">
+                                    <div>
+                                        <label for="period-double" class="block text-xs font-medium text-gray-700">Period</label>
+                                        <select id="period-double" name="period-double" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                            <option value="Full Day" selected>Full Day</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="brick-double" class="block text-xs font-medium text-gray-700">Brick</label>
+                                        <select id="brick-double" name="brick-double" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="" disabled selected>Select Medical Rep first</option>
+                                        </select>
+                                        <p id="brick-double-error" class="error-message">Please select a Brick.</p>
+                                    </div>
+                                    <div>
+                                        <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
+                                        <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                        <p id="details-double-manual-error" class="error-message">Please provide a comment.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Visits Modal Trigger (hidden by default) -->
+                                <div id="visits-modal-trigger" class="space-y-2 hidden">
+                                    <div>
+                                        <label for="period-double-visits" class="block text-xs font-medium text-gray-700">Period</label>
+                                        <select id="period-double-visits" name="period-double-visits" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="AM">AM</option>
+                                            <option value="PM">PM</option>
+                                            <option value="Full Day" selected>Full Day</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="brick-double-visits" class="block text-xs font-medium text-gray-700">Brick</label>
+                                        <select id="brick-double-visits" name="brick-double-visits" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="" disabled selected>Select Medical Rep first</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" id="open-visits-modal" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                                        Select Today's Visits
+                                    </button>
+                                </div>
+                                <input type="hidden" id="selected-visits-double" name="selected-visits-double">
+                            </div>
+
+                            <!-- Single Visit Form -->
+                            <div id="single-visit-form" class="space-y-2 hidden">
                                 <div>
-                                    <label for="med-rep-name" class="block text-xs font-medium text-gray-700">Medical Rep Name</label>
-                                    <select id="med-rep-name" name="med-rep-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <label for="period-single" class="block text-xs font-medium text-gray-700">Period</label>
+                                    <select id="period-single" name="period-single" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                        <option value="Full Day" selected>Full Day</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
+                                    <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                         <option value="" disabled selected>Select DM first</option>
                                     </select>
-                                    <p id="med-rep-name-error" class="error-message">Please select a Medical Rep.</p>
+                                    <p id="brick-single-error" class="error-message">Please select a Brick.</p>
                                 </div>
-                                <div id="double-visit-mode" class="hidden space-y-2">
-                                    <label class="block text-xs font-medium text-gray-700">Select Report Mode</label>
-                                    <div class="flex items-center space-x-4">
-                                        <label class="flex items-center">
-                                            <input type="radio" name="double-visit-mode" value="manual" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                            <span class="ml-1 text-gray-700 text-xs">Add Manually</span>
-                                        </label>
-                                        <label class="flex items-center">
-                                            <input type="radio" name="double-visit-mode" value="visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                            <span class="ml-1 text-gray-700 text-xs">Select from Today's Visits</span>
-                                        </label>
-                                    </div>
-                                    <p id="double-visit-mode-error" class="error-message">Please select a report mode.</p>
+                                <div>
+                                    <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
+                                    <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                    <p id="details-single-error" class="error-message">Please provide a comment.</p>
                                 </div>
                             </div>
-
-                            <!-- Manual Double Visit Form (hidden by default) -->
-                            <div id="manual-double-visit-form" class="space-y-2 hidden">
-                                <div>
-                                    <label for="period-double" class="block text-xs font-medium text-gray-700">Period</label>
-                                    <select id="period-double" name="period-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                        <option value="Full Day" selected>Full Day</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="brick-double" class="block text-xs font-medium text-gray-700">Brick</label>
-                                    <select id="brick-double" name="brick-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                        <option value="" disabled selected>Select Medical Rep first</option>
-                                    </select>
-                                    <p id="brick-double-error" class="error-message">Please select a Brick.</p>
-                                </div>
-                                <div>
-                                    <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
-                                    <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                    <p id="details-double-manual-error" class="error-message">Please provide a comment.</p>
-                                </div>
-                            </div>
-
-                            <!-- Visits Modal Trigger (hidden by default) -->
-                            <div id="visits-modal-trigger" class="space-y-2 hidden">
-                                <div>
-                                    <label for="period-double-visits" class="block text-xs font-medium text-gray-700">Period</label>
-                                    <select id="period-double-visits" name="period-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                        <option value="Full Day" selected>Full Day</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="brick-double-visits" class="block text-xs font-medium text-gray-700">Brick</label>
-                                    <select id="brick-double-visits" name="brick-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                        <option value="" disabled selected>Select Medical Rep first</option>
-                                    </select>
-                                </div>
-                                <button type="button" id="open-visits-modal" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
-                                    Select Today's Visits
-                                </button>
-                            </div>
-                            <input type="hidden" id="selected-visits-double" name="selected-visits-double">
                         </div>
 
-                        <!-- Single Visit Form -->
-                        <div id="single-visit-form" class="space-y-2 hidden">
+                        <!-- Event Form -->
+                        <div id="event-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-events">
+                            <h3 class="text-sm font-semibold text-gray-800">Event Details</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div>
+                                    <label for="event-type" class="block text-xs font-medium text-gray-700">Event Type</label>
+                                    <select id="event-type" name="event-type" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="Meeting">Meeting</option>
+                                        <option value="Event">Event</option>
+                                        <option value="Admin Work">Admin Work</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="period-event" class="block text-xs font-medium text-gray-700">Period</label>
+                                    <select id="period-event" name="period-event" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                        <option value="Full Day" selected>Full Day</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div>
-                                <label for="period-single" class="block text-xs font-medium text-gray-700">Period</label>
-                                <select id="period-single" name="period-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
+                                <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <p id="details-event-error" class="error-message">Please provide a comment.</p>
+                            </div>
+                        </div>
+
+                        <!-- Leave Form -->
+                        <div id="leave-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-leaves">
+                            <h3 class="text-sm font-semibold text-gray-800">Leave Details</h3>
+                            <div>
+                                <label for="leave-type" class="block text-xs font-medium text-gray-700">Leave Type</label>
+                                <select id="leave-type" name="leave-type" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="Annual Leave">Annual Leave</option>
+                                    <option value="Sick Leave">Sick Leave</option>
+                                    <option value="Casual Leave">Casual Leave</option>
+                                    <option value="Official Leave">Official Leave</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="period-leave" class="block text-xs font-medium text-gray-700">Period</label>
+                                <select id="period-leave" name="period-leave" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                     <option value="AM">AM</option>
                                     <option value="PM">PM</option>
                                     <option value="Full Day" selected>Full Day</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
-                                <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                    <option value="" disabled selected>Select DM first</option>
-                                </select>
-                                <p id="brick-single-error" class="error-message">Please select a Brick.</p>
+                                <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
+                                <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <p id="details-leave-error" class="error-message">Please provide a comment.</p>
                             </div>
-                            <div>
-                                <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
-                                <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                <p id="details-single-error" class="error-message">Please provide a comment.</p>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex flex-row justify-center space-x-2 md:space-x-4 mt-4 print-hidden">
+                        <button type="submit" class="flex-1 md:flex-initial md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
+                            Submit
+                        </button>
+                        <button type="button" id="reset-button" class="flex-1 md:flex-initial md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                            Reset
+                        </button>
+                        <button type="button" id="retrieve-button" class="flex-1 md:flex-initial md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                            Retrieve
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Submitted Data Table -->
+                <div id="report-details-section" class="mt-8 hidden form-section">
+                    <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4 print-hidden">
+                        <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
+                        <div class="flex space-x-2 w-full md:w-auto">
+                            <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+                        <div style="min-width: 700px; width: fit-content;">
+                            <table id="reports-table" class="w-full divide-y divide-gray-200">
+                                <thead id="reports-table-head" class="bg-gray-100">
+                                </thead>
+                                <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
+                </div>
+            </div>
+
+            <!-- Coaching Report Tab Content -->
+            <div id="coaching-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden form-section">
+                <div class="form-header">
+                    <div class="form-logo"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <h1 class="form-title">Coaching Report</h1>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="coaching-med-rep-name" class="block text-xs font-medium text-gray-700">Medical Representative</label>
+                        <select id="coaching-med-rep-name" name="coaching-med-rep-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="" disabled selected>Select DM first</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="coaching-status-filter" class="block text-xs font-medium text-gray-700">Filter by Status</label>
+                        <select id="coaching-status-filter" name="coaching-status-filter" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="All">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="coaching-report-table-container" class="mt-8 hidden form-section">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Double Visits This Month</h2>
+                    <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+                        <table id="coaching-reports-table" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brick</th>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coaching-reports-table-body" class="bg-white divide-y divide-gray-200">
+                            </tbody>
+                        </table>
+                        <div id="no-coaching-reports-message" class="hidden text-center text-gray-500 p-4">No double visits to display for this representative this month.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Details Tab Content -->
+            <div id="monthly-details-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
+                <div id="monthly-details-print-area" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 id="monthly-report-title" class="text-xl md:text-3xl font-bold text-gray-800"></h2>
+                    </div>
+
+                    <div id="analysis-content" class="space-y-6">
+                        <!-- Three Summary Boxes -->
+                        <div id="analysis-summary-boxes" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Filed Visits Box -->
+                            <div id="filed-visits-box" class="bg-blue-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-blue-600">
+                                <h3 class="font-semibold text-lg mb-1">Filed Visits</h3>
+                                <div class="text-3xl font-bold"><span id="filed-visits-count">0</span></div>
+                                <div class="text-sm">Total Filed Days</div>
+                            </div>
+                            <!-- Events Box -->
+                            <div id="events-box" class="bg-purple-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-purple-600">
+                                <h3 class="font-semibold text-lg mb-1">Events</h3>
+                                <div class="text-3xl font-bold"><span id="events-count">0</span></div>
+                                <div class="text-sm">Total Event Days</div>
+                            </div>
+                            <!-- Leaves Box -->
+                            <div id="leaves-box" class="bg-red-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-red-600">
+                                <h3 class="font-semibold text-lg mb-1">Leaves</h3>
+                                <div class="text-3xl font-bold"><span id="leaves-count">0</span></div>
+                                <div class="text-sm">Total Leave Days</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Details Sections -->
+                        <div id="filed-visits-details-section" class="mt-8 hidden">
+                            <h3 id="filed-visits-details-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
+                            <div id="double-visits-details" class="space-y-2">
+                            </div>
+                            <div id="single-visits-details" class="space-y-2 mt-4">
+                            </div>
+                        </div>
+
+                        <div id="events-details-section" class="mt-8 hidden">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Event Details</h3>
+                            <div id="events-details" class="space-y-2">
+                            </div>
+                        </div>
+
+                        <div id="leaves-details-section" class="mt-8 hidden">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Details</h3>
+                            <div id="leaves-details" class="space-y-2">
+                            </div>
+                        </div>
+
+                        <div id="analysis-summary-section" class="hidden">
+                            <div class="w-full flex items-center justify-center">
+                                <div id="activity-chart-container" class="w-full flex items-center justify-center">
+                                    <canvas id="activity-chart"></canvas>
                                 </div>
-                        </div>
-                    </div>
-
-                    <!-- Event Form -->
-                    <div id="event-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-events">
-                        <h3 class="text-sm font-semibold text-gray-800">Event Details</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            <div>
-                                <label for="event-type" class="block text-xs font-medium text-gray-700">Event Type</label>
-                                <select id="event-type" name="event-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                    <option value="Meeting">Meeting</option>
-                                    <option value="Event">Event</option>
-                                    <option value="Admin Work">Admin Work</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="period-event" class="block text-xs font-medium text-gray-700">Period</label>
-                                <select id="period-event" name="period-event" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                    <option value="AM">AM</option>
-                                    <option value="PM">PM</option>
-                                    <option value="Full Day" selected>Full Day</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div>
-                            <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
-                            <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
-                            <p id="details-event-error" class="error-message">Please provide a comment.</p>
-                        </div>
-                    </div>
-
-                    <!-- Leave Form -->
-                    <div id="leave-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-leaves">
-                        <h3 class="text-sm font-semibold text-gray-800">Leave Details</h3>
-                        <div>
-                            <label for="leave-type" class="block text-xs font-medium text-gray-700">Leave Type</label>
-                            <select id="leave-type" name="leave-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                <option value="Annual Leave">Annual Leave</option>
-                                <option value="Sick Leave">Sick Leave</option>
-                                <option value="Casual Leave">Casual Leave</option>
-                                <option value="Official Leave">Official Leave</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="period-leave" class="block text-xs font-medium text-gray-700">Period</label>
-                            <select id="period-leave" name="period-leave" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                                <option value="AM">AM</option>
-                                <option value="PM">PM</option>
-                                <option value="Full Day" selected>Full Day</option>
-                            </select>
-                        </div>
-                        <!-- New comment box for leave form -->
-                        <div>
-                            <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
-                            <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
-                            <p id="details-leave-error" class="error-message">Please provide a comment.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex flex-row justify-center space-x-2 md:space-x-4 mt-4 print-hidden">
-                    <button type="submit" class="flex-1 md:flex-initial md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
-                        Submit
-                    </button>
-                    <button type="button" id="reset-button" class="flex-1 md:flex-initial md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
-                        Reset
-                    </button>
-                    <button type="button" id="retrieve-button" class="flex-1 md:flex-initial md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
-                        Retrieve
-                    </button>
-                </div>
-            </form>
-
-            <!-- Submitted Data Table -->
-            <div id="report-details-section" class="mt-8 hidden">
-    <!-- Header and search bar (unchanged) -->
-    <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4 print-hidden">
-        <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
-        <div class="flex space-x-2 w-full md:w-auto">
-            <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-        </div>
-    </div>
-
-    <!-- Fixed-width container for the table -->
-    <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-        <!-- Inner container with a fixed minimum width -->
-        <div style="min-width: 700px; width: fit-content;">
-            <table id="reports-table" class="w-full divide-y divide-gray-200">
-                <thead id="reports-table-head" class="bg-gray-100">
-                    <!-- Headers will be dynamically generated here -->
-                </thead>
-                <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
-                    <!-- Submitted data will be appended here -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
-</div>
-
-        </div>
-        
-        <!-- Coaching Report Tab Content -->
-        <div id="coaching-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
-            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">Coaching Report</h1>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="coaching-med-rep-name" class="block text-xs font-medium text-gray-700">Medical Representative</label>
-                    <select id="coaching-med-rep-name" name="coaching-med-rep-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                        <option value="" disabled selected>Select DM first</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="coaching-status-filter" class="block text-xs font-medium text-gray-700">Filter by Status</label>
-                    <select id="coaching-status-filter" name="coaching-status-filter" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
-                        <option value="All">All</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="coaching-report-table-container" class="mt-8 hidden">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Double Visits This Month</h2>
-                <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-                    <table id="coaching-reports-table" class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brick</th>
-                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
-                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="coaching-reports-table-body" class="bg-white divide-y divide-gray-200">
-                            <!-- Double visit data will be appended here -->
-                        </tbody>
-                    </table>
-                    <div id="no-coaching-reports-message" class="hidden text-center text-gray-500 p-4">No double visits to display for this representative this month.</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Monthly Details Tab Content -->
-        <div id="monthly-details-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
-            <div id="monthly-details-print-area" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 id="monthly-report-title" class="text-xl md:text-3xl font-bold text-gray-800"></h2>
-                </div>
-
-                <div id="analysis-content" class="space-y-6">
-                    <!-- Three Summary Boxes -->
-                    <div id="analysis-summary-boxes" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Filed Visits Box -->
-                        <div id="filed-visits-box" class="bg-blue-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-blue-600">
-                            <h3 class="font-semibold text-lg mb-1">Filed Visits</h3>
-                            <div class="text-3xl font-bold"><span id="filed-visits-count">0</span></div>
-                            <div class="text-sm">Total Filed Days</div>
-                        </div>
-                        <!-- Events Box -->
-                        <div id="events-box" class="bg-purple-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-purple-600">
-                            <h3 class="font-semibold text-lg mb-1">Events</h3>
-                            <div class="text-3xl font-bold"><span id="events-count">0</span></div>
-                            <div class="text-sm">Total Event Days</div>
-                        </div>
-                        <!-- Leaves Box -->
-                        <div id="leaves-box" class="bg-red-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-red-600">
-                            <h3 class="font-semibold text-lg mb-1">Leaves</h3>
-                            <div class="text-3xl font-bold"><span id="leaves-count">0</span></div>
-                            <div class="text-sm">Total Leave Days</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Details Sections -->
-                    <div id="filed-visits-details-section" class="mt-8 hidden">
-                        <h3 id="filed-visits-details-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
-                        <div id="double-visits-details" class="space-y-2">
-                            <!-- Double visits per med rep will be loaded here -->
-                        </div>
-                        <div id="single-visits-details" class="space-y-2 mt-4">
-                            <!-- Single visits will be loaded here -->
-                        </div>
-                    </div>
-
-                    <div id="events-details-section" class="mt-8 hidden">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Event Details</h3>
-                        <div id="events-details" class="space-y-2">
-                            <!-- Events will be loaded here -->
-                        </div>
-                    </div>
-
-                    <div id="leaves-details-section" class="mt-8 hidden">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Details</h3>
-                        <div id="leaves-details" class="space-y-2">
-                            <!-- Leaves will be loaded here -->
-                        </div>
-                    </div>
-
-                    <div id="analysis-summary-section" class="hidden">
-                        <div class="w-full h-80 flex items-center justify-center">
-                            <div id="activity-chart-container" class="w-full h-80 flex items-center justify-center">
-                                <canvas id="activity-chart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -606,7 +765,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Modal for Double Visit -->
     <div id="visit-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
@@ -616,7 +774,6 @@
                 <button id="close-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
             </div>
             <div id="modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
-                <!-- Visits will be dynamically loaded here -->
             </div>
             <div class="flex justify-end space-x-2 border-t pt-4">
                 <button id="save-visits" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">Save</button>
@@ -633,7 +790,6 @@
                 <button id="close-row-details-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
             </div>
             <div id="row-details-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
-                <!-- Details will be dynamically loaded here -->
             </div>
             <div class="flex justify-end border-t pt-4">
                 <button id="ok-row-details-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
@@ -649,7 +805,6 @@
                 <button id="close-dates-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
             </div>
             <div id="dates-modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
-                <!-- Dates will be dynamically loaded here -->
             </div>
             <div class="flex justify-end border-t pt-4">
                 <button id="ok-dates-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
@@ -666,11 +821,9 @@
             </div>
             <div id="coaching-modal-content" class="overflow-y-auto space-y-4 flex-grow mb-4 pr-2">
                 <div id="coaching-modal-header-info" class="space-y-2 mb-4 border-b pb-2">
-                    <!-- Dynamic content here -->
                 </div>
                 <form id="coaching-evaluation-form">
                     <input type="hidden" id="coaching-report-id">
-                    <!-- Evaluation Fields -->
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
@@ -715,7 +868,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Conclusions Box -->
                     <div class="mt-6">
                         <label for="coaching-conclusions" class="block text-sm font-medium text-gray-700">Conclusions<span class="error-star" data-for="coaching-conclusions">*</span></label>
                         <textarea id="coaching-conclusions" name="coaching-conclusions" rows="3" class="mt-1 block w-full shadow-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 p-2"></textarea>
@@ -738,7 +890,6 @@
                     <button id="close-coaching-view-modal" class="text-gray-400 hover:text-gray-600 print-hidden">&times;</button>
                 </div>
                 <div class="space-y-4">
-                    <!-- Report Header -->
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
                             <span class="font-semibold">Medical Rep:</span>
@@ -754,7 +905,6 @@
                         <p id="view-visit-details"></p>
                     </div>
                     
-                    <!-- Evaluation Section -->
                     <div class="space-y-3 border-t pt-4">
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Feedback</label>
@@ -799,7 +949,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Conclusions Box -->
                     <div class="mt-4 border-t pt-4">
                         <p class="font-semibold text-sm">Conclusions:</p>
                         <p id="view-conclusions" class="text-sm p-2 bg-gray-50 rounded-md border mt-1"></p>
@@ -841,9 +990,8 @@
             let submittedReports = []; // To store all reports fetched from Supabase
             
             // Get form and modal elements
-            const mainAppDiv = document.getElementById('main-app');
-            const sideNav = document.getElementById('side-nav');
-            const navToggleBtn = document.getElementById('nav-toggle-btn');
+            const mainAppDiv = document.getElementById('main-app-container');
+            const sideNav = document.querySelector('.side-navigation');
             const dmReportTabContent = document.getElementById('dm-report-tab-content');
             const monthlyDetailsTabContent = document.getElementById('monthly-details-tab-content');
             const coachingReportTabContent = document.getElementById('coaching-report-tab-content');
@@ -859,6 +1007,7 @@
 
             const form = document.getElementById('report-form');
             const dmNameSelect = document.getElementById('dm-name');
+            const dmNameSelectMobile = document.getElementById('dm-name-mobile');
             const liveTimeDiv = document.getElementById('live-time');
             const activityRadios = document.getElementsByName('activity-type');
             const visitsForm = document.getElementById('visits-form');
@@ -949,11 +1098,10 @@
             const closeCoachingViewModalBtn = document.getElementById('close-coaching-view-modal');
             const coachingViewPrintArea = document.getElementById('coaching-view-print-area');
 
-            // --- Sidebar Toggle Logic ---
-            navToggleBtn.addEventListener('click', () => {
-                sideNav.classList.toggle('collapsed');
-                mainAppDiv.classList.toggle('sidebar-collapsed');
-            });
+            // Header Elements
+            const medRepNameElement = document.getElementById('medRepName');
+            const medRepAreaElement = document.getElementById('medRepArea');
+
 
             // Function to show custom message notification
             let notificationTimeout;
@@ -1050,12 +1198,15 @@
             
             // Function to populate DM dropdown after data is fetched
             const populateDmDropdown = (dmNames) => {
-                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
-                dmNames.forEach(name => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    dmNameSelect.appendChild(option);
+                const dmSelects = [dmNameSelect, dmNameSelectMobile].filter(el => el);
+                dmSelects.forEach(select => {
+                    select.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                    dmNames.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        select.appendChild(option);
+                    });
                 });
             };
 
@@ -1144,9 +1295,12 @@
                 doubleVisitModeRadios.forEach(radio => radio.checked = false);
             });
 
-            // Event listener for DM name dropdown
-            dmNameSelect.addEventListener('change', async () => {
-                const dmName = dmNameSelect.value;
+            // Event listener for DM name dropdown (both desktop and mobile)
+            const handleDmNameChange = async (event) => {
+                const dmName = event.target.value;
+                if(event.target.id === 'dm-name') dmNameSelectMobile.value = dmName;
+                if(event.target.id === 'dm-name-mobile') dmNameSelect.value = dmName;
+
                 if (dmName) {
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
@@ -1182,7 +1336,9 @@
                     updateFormVisibility();
                     reportDetailsSection.classList.add('hidden');
                 }
-            });
+            };
+            dmNameSelect.addEventListener('change', handleDmNameChange);
+            dmNameSelectMobile.addEventListener('change', handleDmNameChange);
             
             const coachingFilterChanged = () => {
                 const dmName = dmNameSelect.value;
@@ -1249,17 +1405,15 @@
 
             const formatHeader = (key) => {
                 return key.replace(/([A-Z])/g, ' $1')
-                         .replace(/^./, str => str.toUpperCase());
+                             .replace(/^./, str => str.toUpperCase());
             };
             
             // Helper function to format UTC time string to 12-hour format
             const formatUTCTime = (dateString) => {
                 if (!dateString) return 'N/A';
-                const timePart = dateString.substring(11, 19);
-                let [hours, minutes, seconds] = timePart.split(':');
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                hours = hours % 12 || 12;
-                return `${hours}:${minutes}:${seconds} ${ampm}`;
+                const date = new Date(dateString);
+                const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Africa/Cairo' };
+                return date.toLocaleString('en-US', options);
             };
 
             // Function to render the reports table with corrected date/time formatting
@@ -1519,8 +1673,8 @@
                         }
                         const selectedMode = document.querySelector('input[name="double-visit-mode"]:checked')?.value;
                         if (!selectedMode) {
-                             showError('double-visit-mode-error', 'Please select a report mode.');
-                             isValid = false;
+                            showError('double-visit-mode-error', 'Please select a report mode.');
+                            isValid = false;
                         } else if (selectedMode === 'manual') {
                             if (!brickDoubleSelect.value) {
                                 showError('brick-double-error', 'Please select a Brick.');
@@ -1567,7 +1721,7 @@
                         isValid = false;
                     }
                     if(isValid) {
-                             newReport = {
+                            newReport = {
                                 dm_name: dmName,
                                 activity_type: `Event (${document.getElementById('event-type').value})`,
                                 period: document.getElementById('period-event').value,
@@ -1577,7 +1731,7 @@
                             };
                     }
                 } else if (activityType === 'Leave') {
-                     if (!document.getElementById('details-leave').value.trim()) {
+                    if (!document.getElementById('details-leave').value.trim()) {
                         showError('details-leave-error', 'Please provide a comment.');
                         isValid = false;
                     }
@@ -1683,6 +1837,16 @@
                     allTabs.forEach((tab, index) => {
                         tab.classList.toggle('active', index === activeIndex);
                     });
+                    // Sync the desktop and mobile tabs
+                    const otherTabs = document.querySelectorAll('.main-tab-group .tab-button');
+                    otherTabs.forEach((tab, index) => {
+                         if (index === activeIndex) {
+                            tab.classList.add('active', 'selected');
+                         } else {
+                            tab.classList.remove('active', 'selected');
+                         }
+                    });
+
                     allContent.forEach((content, index) => {
                         content.classList.toggle('hidden', index !== activeIndex);
                     });
@@ -1825,7 +1989,7 @@
                         doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${getUniqueDaysCount(visitDetails)} double visit day(s)`;
                         doubleVisitItem.addEventListener('click', () => {
                              showDatesModal(`Double Visits with ${medRep}`, visitDetails);
-                         });
+                           });
                         doubleVisitsDetailsDiv.appendChild(doubleVisitItem);
                     }
                 } else {
@@ -1835,13 +1999,13 @@
                 // Single Visits
                 singleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Single Visits</h4>`;
                 if (analysis.visits.single.length > 0) {
-                     const singleVisitItem = document.createElement('div');
-                     singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                     singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${getUniqueDaysCount(analysis.visits.single)} day(s)`;
-                     singleVisitItem.addEventListener('click', () => {
-                         showDatesModal(`Single Visit Dates`, analysis.visits.single);
-                     });
-                     singleVisitsDetailsDiv.appendChild(singleVisitItem);
+                      const singleVisitItem = document.createElement('div');
+                      singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                      singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${getUniqueDaysCount(analysis.visits.single)} day(s)`;
+                      singleVisitItem.addEventListener('click', () => {
+                          showDatesModal(`Single Visit Dates`, analysis.visits.single);
+                        });
+                      singleVisitsDetailsDiv.appendChild(singleVisitItem);
                 } else {
                     singleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No single visits recorded this month.</p>`;
                 }
@@ -1923,7 +2087,7 @@
                             legend: { position: 'right' },
                             title: { display: true, text: 'Monthly Activity Breakdown (Days)' }
                         },
-                         maintainAspectRatio: false,
+                          maintainAspectRatio: false,
                     }
                 });
 
@@ -2202,9 +2366,10 @@
                 }
             });
             
+            // Replaced window.onload logic to use `DOMContentLoaded`
+            // and the messaging API for user data.
             window.addEventListener('message', async function(event) {
                 if (event.data && event.data.type === 'dmReportUserPermissions') {
-                    console.log('DM Report received user data:', event.data.user);
                     loggedInUser = event.data.user;
                     await initializeReportSystem(loggedInUser);
                 }
@@ -2213,32 +2378,41 @@
             async function initializeReportSystem(user) {
                 await fetchData();
                 
-                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
-
+                const dmSelects = [dmNameSelect, dmNameSelectMobile].filter(el => el);
+                dmSelects.forEach(select => {
+                    select.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                });
+                
                 if (user && user.title && user.title.toLowerCase() === 'admin') {
-                    dmNameSelect.disabled = false;
-                    allDmNames.forEach(name => {
-                        const option = document.createElement('option');
-                        option.value = name;
-                        option.textContent = name;
-                        dmNameSelect.appendChild(option);
+                    dmSelects.forEach(select => {
+                        select.disabled = false;
+                        allDmNames.forEach(name => {
+                            const option = document.createElement('option');
+                            option.value = name;
+                            option.textContent = name;
+                            select.appendChild(option);
+                        });
                     });
                 } else if (user && user.title && user.title.toLowerCase() === 'district manager') {
-                    dmNameSelect.disabled = true;
-                    const option = document.createElement('option');
-                    option.value = user.username;
-                    option.textContent = user.username;
-                    option.selected = true;
-                    dmNameSelect.appendChild(option);
+                    dmSelects.forEach(select => {
+                        select.disabled = false;
+                        const option = document.createElement('option');
+                        option.value = user.username;
+                        option.textContent = user.username;
+                        option.selected = true;
+                        select.appendChild(option);
+                    });
 
-                    activityRadios.forEach(radio => radio.disabled = false);
-                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
-                    updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
-                    await updateCoachingBadge();
+                    // Update header
+                    medRepName.textContent = user.username;
+                    medRepArea.textContent = 'District Manager';
+
+                    dmNameSelect.dispatchEvent(new Event('change'));
                 }
             }
             
             dmNameSelect.disabled = true;
+            dmNameSelectMobile.disabled = true;
             activityRadios.forEach(radio => radio.disabled = true);
             updateFormVisibility();
         });
