@@ -447,24 +447,25 @@
 
             <!-- Submitted Data Table -->
             <div id="report-details-section" class="mt-8 hidden">
-                <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4 print-hidden">
-                    <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
-                    <div class="flex space-x-2 w-full md:w-auto">
-                        <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-                    </div>
-                </div>
-                <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-                    <table id="reports-table" class="min-w-full divide-y divide-gray-200">
-                        <thead id="reports-table-head" class="bg-gray-100">
-                            <!-- Headers will be dynamically generated here -->
-                        </thead>
-                        <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
-                            <!-- Submitted data will be appended here -->
-                        </tbody>
-                    </table>
-                    <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
-                </div>
-            </div>
+    <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4 print-hidden">
+        <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
+        <div class="flex space-x-2 w-full md:w-auto">
+            <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+        </div>
+    </div>
+    <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+        <table id="reports-table" class="min-w-max divide-y divide-gray-200">
+            <thead id="reports-table-head" class="bg-gray-100">
+                <!-- Headers will be dynamically generated here -->
+            </thead>
+            <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
+                <!-- Submitted data will be appended here -->
+            </tbody>
+        </table>
+        <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
+    </div>
+</div>
+
         </div>
         
         <!-- Coaching Report Tab Content -->
