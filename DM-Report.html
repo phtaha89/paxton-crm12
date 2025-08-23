@@ -135,16 +135,6 @@
             padding: 20px 10px;
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease-in-out; /* Add transition for smooth collapse */
-        }
-        .side-navigation.collapsed {
-            flex-basis: 60px;
-        }
-        .side-navigation.collapsed .tab-button span {
-            display: none;
-        }
-        .side-navigation.collapsed .tab-button i {
-            margin-right: 0;
         }
         .main-tab-group {
             flex-direction: column;
@@ -187,10 +177,6 @@
             overflow-y: auto;
             padding: 20px;
             background-color: #f5f7fa; /* Match body background */
-            transition: all 0.3s ease-in-out;
-        }
-        .main-app.sidebar-collapsed {
-             margin-left: 60px;
         }
         .mobile-only-header { display: none; }
         
@@ -220,17 +206,14 @@
             #top-nav {
                 display: flex;
             }
+            .tab-button {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+            }
             #top-nav .tab-button {
                 border-radius: 0;
-            }
-            #top-nav .tab-button span {
-                display: none;
-                margin-left: 8px;
-                font-size: 13px;
-                line-height: 1;
-            }
-            #top-nav .tab-button i {
-                margin-right: 0;
             }
             #top-nav .tab-button.active {
                 background-color: #ffffff;
@@ -241,9 +224,6 @@
             #top-nav .tab-button:not(.active) {
                 background-color: #e5e7eb;
                 color: #6b7280;
-            }
-            #top-nav .tab-button.active span {
-                display: inline;
             }
         }
 
@@ -381,16 +361,26 @@
     <div id="main-app-container" class="main-container">
 
         <!-- Sidebar Navigation for PC -->
-        <nav id="side-nav" class="side-navigation print-hidden">
-            <div class="med-rep-card-wrapper flex justify-between items-center px-2 py-4">
-                <div class="flex items-center space-x-2">
-                    <div class="form-logo"><i class="fas fa-chart-line"></i></div>
-                    <h2 class="text-lg font-bold text-gray-800">DM System</h2>
+        <nav class="side-navigation print-hidden">
+            <div class="med-rep-card-wrapper">
+                <div class="med-rep-card bg-gray-100">
+                    <div class="med-rep-info">
+                        <div class="med-rep-name" id="medRepName">
+                            <i class="fas fa-spinner fa-spin"></i> Loading User...
+                        </div>
+                        <div class="med-rep-area" id="medRepArea">Area</div>
+                    </div>
+                    <div class="relative mt-2">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-user-tie text-gray-400"></i>
+                        </span>
+                        <select id="dm-name" class="pl-10 block w-full p-2 border-gray-300 rounded-md shadow-sm bg-white text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="" disabled selected>Loading...</option>
+                        </select>
+                    </div>
                 </div>
-                <button id="nav-toggle-btn" class="p-2 rounded-md hover:bg-gray-200 text-gray-500">
-                    <i class="fas fa-bars"></i>
-                </button>
             </div>
+
             <div class="main-tab-group">
                 <button id="dm-report-tab" class="tab-button active">
                     <i class="fas fa-file-alt fa-fw"></i> <span>DM Report</span>
@@ -408,21 +398,14 @@
         <!-- Main Content Wrapper with Tabs -->
         <div id="main-app" class="main-content-scrollable flex flex-col flex-grow">
 
-            <!-- Top Navigation for Mobile -->
+            <!-- Top Navigation for Mobile (adapted from the new layout) -->
             <div id="top-nav" class="flex border-b border-gray-200 print-hidden bg-white shadow-sm p-2 mb-4 rounded-xl md:hidden">
-                <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm font-medium flex-col">
-                    <i class="fas fa-file-alt fa-fw"></i>
-                    <span>DM Report</span>
-                </button>
-                <button id="coaching-report-tab-mobile" class="tab-button relative flex-1 px-4 py-2 text-sm font-medium flex-col">
-                    <i class="fas fa-chalkboard-teacher fa-fw"></i>
-                    <span>Coaching Report</span>
+                <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm font-medium">DM Report</button>
+                <button id="coaching-report-tab-mobile" class="tab-button relative flex-1 px-4 py-2 text-sm font-medium">
+                    Coaching Report
                     <span id="coaching-badge-mobile" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
                 </button>
-                <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm font-medium flex-col">
-                    <i class="fas fa-chart-pie fa-fw"></i>
-                    <span>Monthly Details</span>
-                </button>
+                <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm font-medium">Monthly Details</button>
             </div>
 
             <!-- Tab Content Containers -->
@@ -436,9 +419,9 @@
 
                     <!-- District Manager Name and Live Date -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="dm-name" class="block text-xs font-medium text-gray-700">District Manager Name</label>
-                            <select id="dm-name" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <div class="md:hidden">
+                            <label class="block text-xs font-medium text-gray-700">District Manager Name</label>
+                            <select id="dm-name-mobile" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                 <option value="" disabled selected>Loading...</option>
                             </select>
                             <p id="dm-name-error" class="error-message">Please select a District Manager.</p>
@@ -1008,8 +991,7 @@
             
             // Get form and modal elements
             const mainAppDiv = document.getElementById('main-app-container');
-            const sideNav = document.getElementById('side-nav');
-            const navToggleBtn = document.getElementById('nav-toggle-btn');
+            const sideNav = document.querySelector('.side-navigation');
             const dmReportTabContent = document.getElementById('dm-report-tab-content');
             const monthlyDetailsTabContent = document.getElementById('monthly-details-tab-content');
             const coachingReportTabContent = document.getElementById('coaching-report-tab-content');
@@ -1025,6 +1007,7 @@
 
             const form = document.getElementById('report-form');
             const dmNameSelect = document.getElementById('dm-name');
+            const dmNameSelectMobile = document.getElementById('dm-name-mobile');
             const liveTimeDiv = document.getElementById('live-time');
             const activityRadios = document.getElementsByName('activity-type');
             const visitsForm = document.getElementById('visits-form');
@@ -1118,12 +1101,6 @@
             // Header Elements
             const medRepNameElement = document.getElementById('medRepName');
             const medRepAreaElement = document.getElementById('medRepArea');
-
-            // --- Sidebar Toggle Logic ---
-            navToggleBtn.addEventListener('click', () => {
-                sideNav.classList.toggle('collapsed');
-                mainApp.classList.toggle('sidebar-collapsed');
-            });
 
 
             // Function to show custom message notification
@@ -1221,7 +1198,7 @@
             
             // Function to populate DM dropdown after data is fetched
             const populateDmDropdown = (dmNames) => {
-                const dmSelects = [dmNameSelect].filter(el => el);
+                const dmSelects = [dmNameSelect, dmNameSelectMobile].filter(el => el);
                 dmSelects.forEach(select => {
                     select.innerHTML = `<option value="" disabled selected>Select DM</option>`;
                     dmNames.forEach(name => {
@@ -1318,9 +1295,12 @@
                 doubleVisitModeRadios.forEach(radio => radio.checked = false);
             });
 
-            // Event listener for DM name dropdown (only one now)
+            // Event listener for DM name dropdown (both desktop and mobile)
             const handleDmNameChange = async (event) => {
                 const dmName = event.target.value;
+                if(event.target.id === 'dm-name') dmNameSelectMobile.value = dmName;
+                if(event.target.id === 'dm-name-mobile') dmNameSelect.value = dmName;
+
                 if (dmName) {
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
@@ -1358,6 +1338,7 @@
                 }
             };
             dmNameSelect.addEventListener('change', handleDmNameChange);
+            dmNameSelectMobile.addEventListener('change', handleDmNameChange);
             
             const coachingFilterChanged = () => {
                 const dmName = dmNameSelect.value;
@@ -1857,21 +1838,14 @@
                         tab.classList.toggle('active', index === activeIndex);
                     });
                     // Sync the desktop and mobile tabs
-                    const desktopTabs = [dmReportTabButton, coachingReportTabButton, monthlyDetailsTabButton];
-                    const mobileTabs = [dmReportTabButtonMobile, coachingReportTabButtonMobile, monthlyDetailsTabButtonMobile];
-                    
-                    const setTabState = (tab, isActive) => {
-                        tab.classList.toggle('active', isActive);
-                        tab.classList.toggle('selected', isActive);
-                        const span = tab.querySelector('span');
-                        if(span) span.style.display = isActive ? 'inline' : 'none';
-                    };
-                    
-                    if (window.innerWidth >= 1024) { // Desktop
-                         desktopTabs.forEach((tab, index) => setTabState(tab, index === activeIndex));
-                    } else { // Mobile
-                         mobileTabs.forEach((tab, index) => setTabState(tab, index === activeIndex));
-                    }
+                    const otherTabs = document.querySelectorAll('.main-tab-group .tab-button');
+                    otherTabs.forEach((tab, index) => {
+                         if (index === activeIndex) {
+                            tab.classList.add('active', 'selected');
+                         } else {
+                            tab.classList.remove('active', 'selected');
+                         }
+                    });
 
                     allContent.forEach((content, index) => {
                         content.classList.toggle('hidden', index !== activeIndex);
@@ -1879,18 +1853,8 @@
                 };
 
                 reportTab.addEventListener('click', () => switchTab(0));
-                dmReportTabButtonMobile.addEventListener('click', () => switchTab(0));
 
                 coachingTab.addEventListener('click', () => {
-                    const selectedDm = dmNameSelect.value;
-                    if (!selectedDm) {
-                        showNotification('Please select a District Manager from the DM Report tab first.', 'error');
-                        switchTab(0);
-                        return;
-                    }
-                    switchTab(1);
-                });
-                coachingReportTabButtonMobile.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
                     if (!selectedDm) {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
@@ -1903,16 +1867,6 @@
                 detailsTab.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
                     if (!selectedDm) {
-                        showNotification('Please select a District Manager from the DM Report tab first.', 'error');
-                        switchTab(0);
-                        return;
-                    }
-                    switchTab(2);
-                    renderAnalysisPage();
-                });
-                monthlyDetailsTabButtonMobile.addEventListener('click', () => {
-                     const selectedDm = dmNameSelect.value;
-                     if (!selectedDm) {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
                         switchTab(0);
                         return;
@@ -2412,6 +2366,8 @@
                 }
             });
             
+            // Replaced window.onload logic to use `DOMContentLoaded`
+            // and the messaging API for user data.
             window.addEventListener('message', async function(event) {
                 if (event.data && event.data.type === 'dmReportUserPermissions') {
                     loggedInUser = event.data.user;
@@ -2422,24 +2378,30 @@
             async function initializeReportSystem(user) {
                 await fetchData();
                 
-                const dmSelect = dmNameSelect;
-                dmSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                const dmSelects = [dmNameSelect, dmNameSelectMobile].filter(el => el);
+                dmSelects.forEach(select => {
+                    select.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                });
                 
                 if (user && user.title && user.title.toLowerCase() === 'admin') {
-                    dmSelect.disabled = false;
-                    allDmNames.forEach(name => {
-                        const option = document.createElement('option');
-                        option.value = name;
-                        option.textContent = name;
-                        dmSelect.appendChild(option);
+                    dmSelects.forEach(select => {
+                        select.disabled = false;
+                        allDmNames.forEach(name => {
+                            const option = document.createElement('option');
+                            option.value = name;
+                            option.textContent = name;
+                            select.appendChild(option);
+                        });
                     });
                 } else if (user && user.title && user.title.toLowerCase() === 'district manager') {
-                    dmSelect.disabled = false;
-                    const option = document.createElement('option');
-                    option.value = user.username;
-                    option.textContent = user.username;
-                    option.selected = true;
-                    dmSelect.appendChild(option);
+                    dmSelects.forEach(select => {
+                        select.disabled = false;
+                        const option = document.createElement('option');
+                        option.value = user.username;
+                        option.textContent = user.username;
+                        option.selected = true;
+                        select.appendChild(option);
+                    });
 
                     // Update header
                     medRepName.textContent = user.username;
@@ -2450,6 +2412,7 @@
             }
             
             dmNameSelect.disabled = true;
+            dmNameSelectMobile.disabled = true;
             activityRadios.forEach(radio => radio.disabled = true);
             updateFormVisibility();
         });
