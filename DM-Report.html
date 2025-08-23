@@ -175,28 +175,6 @@
         /* Fix for mobile layout stretching */
         .overflow-x-auto {
             -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
-            overflow-x: auto;
-        }
-
-        /* Set min-width for the table to prevent collapsing on mobile */
-        #reports-table th,
-        #reports-table td {
-            min-width: 100px; /* Adjust as needed */
-        }
-
-        #reports-table th:nth-child(1),
-        #reports-table td:nth-child(1) {
-            min-width: 150px;
-        }
-
-        #reports-table th:nth-child(3),
-        #reports-table td:nth-child(3) {
-            min-width: 150px;
-        }
-        
-        #reports-table th:nth-child(4),
-        #reports-table td:nth-child(4) {
-            min-width: 100px;
         }
     </style>
 </head>
@@ -216,8 +194,9 @@
         <button id="dm-report-tab" class="tab-button active px-4 py-2 text-sm md:text-base font-medium">
             <i class="fas fa-file-alt fa-fw"></i> <span class="tab-button-text">DM Report</span>
         </button>
-        <button id="coaching-report-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">
+        <button id="coaching-report-tab" class="tab-button relative px-4 py-2 text-sm md:text-base font-medium">
             <i class="fas fa-chalkboard-teacher fa-fw"></i> <span class="tab-button-text">Coaching Report</span>
+            <span id="coaching-badge" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
         </button>
         <button id="monthly-details-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">
             <i class="fas fa-chart-pie fa-fw"></i> <span class="tab-button-text">Monthly Details</span>
@@ -231,7 +210,10 @@
         <!-- Top Navigation for Mobile -->
         <div id="top-nav" class="flex border-b border-gray-200 print-hidden">
             <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm md:text-base font-medium">DM Report</button>
-            <button id="coaching-report-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm md:text-base font-medium">Coaching Report</button>
+            <button id="coaching-report-tab-mobile" class="tab-button relative flex-1 px-4 py-2 text-sm md:text-base font-medium">
+                Coaching Report
+                <span id="coaching-badge-mobile" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+            </button>
             <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm md:text-base font-medium">Monthly Details</button>
         </div>
 
@@ -450,14 +432,14 @@
                 </div>
 
                 <!-- Buttons -->
-                <div class="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mt-4 print-hidden">
-                    <button type="submit" class="w-full md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
+                <div class="flex flex-row justify-center space-x-2 md:space-x-4 mt-4 print-hidden">
+                    <button type="submit" class="flex-1 md:flex-initial md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
                         Submit
                     </button>
-                    <button type="button" id="reset-button" class="w-full md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                    <button type="button" id="reset-button" class="flex-1 md:flex-initial md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
                         Reset
                     </button>
-                    <button type="button" id="retrieve-button" class="w-full md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                    <button type="button" id="retrieve-button" class="flex-1 md:flex-initial md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
                         Retrieve
                     </button>
                 </div>
@@ -471,7 +453,7 @@
                         <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
                     </div>
                 </div>
-                <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+                <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
                     <table id="reports-table" class="min-w-full divide-y divide-gray-200">
                         <thead id="reports-table-head" class="bg-gray-100">
                             <!-- Headers will be dynamically generated here -->
@@ -662,27 +644,27 @@
                         <div class="md:col-span-1 border-r pr-4">
                             <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
                             <div class="space-y-3">
-                                <div>
+                                <div class="flex justify-between items-center">
                                     <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
-                                    <div class="star-rating mt-1" data-field="feedback_score">
+                                    <div class="star-rating" data-field="feedback_score">
                                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     </div>
                                 </div>
-                                <div>
+                                <div class="flex justify-between items-center">
                                     <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
-                                    <div class="star-rating mt-1" data-field="opening_score">
+                                    <div class="star-rating" data-field="opening_score">
                                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     </div>
                                 </div>
-                                <div>
+                                <div class="flex justify-between items-center">
                                     <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
-                                    <div class="star-rating mt-1" data-field="asking_for_commitment_score">
+                                    <div class="star-rating" data-field="asking_for_commitment_score">
                                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     </div>
                                 </div>
-                                <div>
+                                <div class="flex justify-between items-center">
                                     <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
-                                    <div class="star-rating mt-1" data-field="handling_objection_score">
+                                    <div class="star-rating" data-field="handling_objection_score">
                                         <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     </div>
                                 </div>
@@ -690,21 +672,21 @@
                         </div>
                         <!-- Other Skills Columns -->
                         <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div>
+                             <div class="flex justify-between items-center">
                                 <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
-                                <div class="star-rating mt-1" data-field="planning_score">
+                                <div class="star-rating" data-field="planning_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
-                             <div>
+                             <div class="flex justify-between items-center">
                                 <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
-                                <div class="star-rating mt-1" data-field="time_management_score">
+                                <div class="star-rating" data-field="time_management_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
-                             <div class="md:col-span-2">
+                             <div class="md:col-span-2 flex justify-between items-center">
                                 <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
-                                <div class="star-rating mt-1" data-field="medical_product_knowledge_score">
+                                <div class="star-rating" data-field="medical_product_knowledge_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
@@ -987,10 +969,15 @@
                 }, 5000); // 5 seconds
             };
 
-            // New modal functions
-            const showDatesModal = (title, dates) => {
+            // New modal functions for dates with period
+            const showDatesModal = (title, items) => {
                 datesModalTitle.textContent = title;
-                datesModalContent.innerHTML = dates.map(date => `<p class="text-sm text-gray-700 p-1 border-b">${date}</p>`).join('');
+                datesModalContent.innerHTML = items.map(item => 
+                    `<div class="flex justify-between text-sm text-gray-700 p-2 border-b last:border-b-0">
+                        <span>${item.date}</span>
+                        <span class="font-semibold bg-gray-100 px-2 py-0.5 rounded-full text-xs">${item.period}</span>
+                    </div>`
+                ).join('');
                 datesModal.classList.remove('hidden');
             };
 
@@ -1013,7 +1000,7 @@
                     return `
                         <div class="p-2 border-b last:border-b-0">
                             <p class="font-semibold text-gray-800">${formattedKey}:</p>
-                            <p class="text-sm text-gray-600">${formattedValue}</p>
+                            <p class="text-sm text-gray-600 break-words">${formattedValue}</p>
                         </div>
                     `;
                 }).join('');
@@ -1145,12 +1132,13 @@
             });
 
             // Event listener for DM name dropdown
-            dmNameSelect.addEventListener('change', () => {
+            dmNameSelect.addEventListener('change', async () => {
                 const dmName = dmNameSelect.value;
                 if (dmName) {
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
                     updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect); // Also update coaching tab
+                    await updateCoachingBadge(); // Update badge when DM changes
                     reportDetailsSection.classList.add('hidden');
                     coachingReportTableContainer.classList.add('hidden');
                     submittedReports = [];
@@ -1341,13 +1329,25 @@
                         
                         newRow.appendChild(newCell);
                     });
+                    
+                    // Add click listener for mobile modal
+                    newRow.addEventListener('click', () => {
+                        if (window.innerWidth < 768) { // Only trigger on mobile view
+                            const clickedReport = submittedReports.find(r => r.id == newRow.dataset.id);
+                            if (clickedReport) {
+                                showRowDetailsModal(clickedReport);
+                            }
+                        }
+                    });
+
                     reportsTableBody.appendChild(newRow);
                 });
 
-                // Add event listener for the view more links
+                // Add event listener for the "etc" view more links (for desktop)
                 document.querySelectorAll('.view-more').forEach(link => {
                     link.addEventListener('click', (event) => {
                         event.preventDefault();
+                        event.stopPropagation(); // Prevent row click from firing
                         const reportId = event.target.dataset.id;
                         const report = submittedReports.find(r => r.id.toString() === reportId);
                         if (report) {
@@ -1454,6 +1454,7 @@
 
                 showNotification('Report submitted successfully!', 'success');
                 await fetchReportsFromSupabase(dmName);
+                await updateCoachingBadge();
                 hideModal();
                 form.reset();
                 dmNameSelect.value = dmName;
@@ -1593,6 +1594,9 @@
 
                     showNotification('Report submitted successfully!', 'success');
                     await fetchReportsFromSupabase(dmName);
+                    if (newReport.activity_type.includes('Double Visit')) {
+                        await updateCoachingBadge();
+                    }
 
                     form.reset();
                     activityRadios.forEach(radio => radio.checked = false);
@@ -1754,189 +1758,137 @@
                 }
                 
                 const analysis = {
-                    visits: { single: {}, double: {} },
-                    events: {},
-                    leaves: {}
-                };
-                
-                const activityCounts = {
-                    'Visits (Single Visit)': 0,
-                    'Visits (Double Visit)': 0,
-                    'Event (Meeting)': 0,
-                    'Event (Event)': 0,
-                    'Event (Admin Work)': 0,
-                    'Leave (Annual Leave)': 0,
-                    'Leave (Sick Leave)': 0,
-                    'Leave (Casual Leave)': 0,
-                    'Leave (Official Leave)': 0,
+                    visits: { single: [], double: [] },
+                    events: [],
+                    leaves: []
                 };
                 
                 allMonthlyReports.forEach(report => {
                     const activity = report.activity_type;
                     const date = report.created_at.substring(0, 10);
+                    const period = report.period || 'N/A';
 
                     if (activity.includes('Visits')) {
                         if (activity.includes('Single Visit')) {
-                            if (!analysis.visits.single[date]) {
-                                analysis.visits.single[date] = 1;
-                                activityCounts['Visits (Single Visit)']++;
-                            }
+                            analysis.visits.single.push({ date, period });
                         }
                         if (activity.includes('Double Visit')) {
-                            const medRep = report.med_rep;
-                            if (medRep && medRep !== 'N/A') {
-                                if (!analysis.visits.double[date]) {
-                                    analysis.visits.double[date] = {};
-                                }
-                                if (!analysis.visits.double[date][medRep]) {
-                                    analysis.visits.double[date][medRep] = { count: 1, dates: [date] };
-                                    activityCounts['Visits (Double Visit)']++;
-                                } else {
-                                    if (!analysis.visits.double[date][medRep].dates.includes(date)) {
-                                        analysis.visits.double[date][medRep].dates.push(date);
-                                    }
-                                }
-                            }
+                            analysis.visits.double.push({ date, period, med_rep: report.med_rep });
                         }
                     } else if (activity.includes('Event')) {
-                        const eventType = activity.split('(')[1].replace(')', '');
-                        const fullEventType = `Event (${eventType})`;
-                        if (!analysis.events[fullEventType]) {
-                            analysis.events[fullEventType] = {};
-                        }
-                         if (!analysis.events[fullEventType][date]) {
-                            analysis.events[fullEventType][date] = 1;
-                            activityCounts[fullEventType]++;
-                        }
+                        const eventType = activity.match(/\(([^)]+)\)/)[1];
+                        analysis.events.push({ date, period, type: eventType });
                     } else if (activity.includes('Leave')) {
-                        const leaveType = activity.split('(')[1].replace(')', '');
-                        const fullLeaveType = `Leave (${leaveType})`;
-                        if (!analysis.leaves[fullLeaveType]) {
-                            analysis.leaves[fullLeaveType] = {};
-                        }
-                        if (!analysis.leaves[fullLeaveType][date]) {
-                            analysis.leaves[fullLeaveType][date] = 1;
-                            activityCounts[fullLeaveType]++;
-                        }
+                        const leaveType = activity.match(/\(([^)]+)\)/)[1];
+                        analysis.leaves.push({ date, period, type: leaveType });
                     }
                 });
                 
-                const totalSingleVisits = Object.keys(analysis.visits.single).length;
-                let totalDoubleVisits = 0;
-                let totalDoubleVisitDates = {};
-                for (const date in analysis.visits.double) {
-                    for (const medRep in analysis.visits.double[date]) {
-                        totalDoubleVisits++;
-                        if(!totalDoubleVisitDates[medRep]) {
-                            totalDoubleVisitDates[medRep] = [];
-                        }
-                        if (!totalDoubleVisitDates[medRep].includes(date)) {
-                            totalDoubleVisitDates[medRep].push(date);
-                        }
-                    }
-                }
-                const totalEvents = Object.values(analysis.events).reduce((sum, dates) => sum + Object.keys(dates).length, 0);
-                const totalLeaves = Object.values(analysis.leaves).reduce((sum, dates) => sum + Object.keys(dates).length, 0);
-                const totalFiledVisits = totalSingleVisits + totalDoubleVisits;
+                const getUniqueDaysCount = (arr) => new Set(arr.map(item => item.date)).size;
+                
+                const totalFiledVisits = getUniqueDaysCount([...analysis.visits.single, ...analysis.visits.double]);
+                const totalEvents = getUniqueDaysCount(analysis.events);
+                const totalLeaves = getUniqueDaysCount(analysis.leaves);
                 
                 filedVisitsCountSpan.textContent = totalFiledVisits;
                 eventsCountSpan.textContent = totalEvents;
                 leavesCountSpan.textContent = totalLeaves;
                 
-                filedVisitsBox.title = `Single Visits: ${totalSingleVisits}, Double Visits: ${totalDoubleVisits}`;
-
-                filedVisitsDetailsTitle.textContent = `Filed Visits for ${month}`;
-                doubleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Double Visits</h4>`;
-                const doubleVisitsByRep = {};
+                // --- Render Details Sections ---
                 
-                for(const date in analysis.visits.double) {
-                    for(const medRep in analysis.visits.double[date]) {
-                        if (!doubleVisitsByRep[medRep]) {
-                            doubleVisitsByRep[medRep] = [];
-                        }
-                        doubleVisitsByRep[medRep].push(date);
-                    }
-                }
+                // Double Visits
+                doubleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Double Visits</h4>`;
+                const doubleVisitsByRep = analysis.visits.double.reduce((acc, visit) => {
+                    if (!acc[visit.med_rep]) acc[visit.med_rep] = [];
+                    acc[visit.med_rep].push({ date: visit.date, period: visit.period });
+                    return acc;
+                }, {});
 
                 if (Object.keys(doubleVisitsByRep).length > 0) {
                     for (const medRep in doubleVisitsByRep) {
-                            const uniqueDates = [...new Set(doubleVisitsByRep[medRep])];
-                            const doubleVisitItem = document.createElement('div');
-                            doubleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                            doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${uniqueDates.length} double visit(s)`;
-                            doubleVisitItem.addEventListener('click', () => {
-                                 showDatesModal(`Double Visits with ${medRep}`, uniqueDates);
-                             });
-                            doubleVisitsDetailsDiv.appendChild(doubleVisitItem);
-                        }
+                        const visitDetails = doubleVisitsByRep[medRep];
+                        const doubleVisitItem = document.createElement('div');
+                        doubleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                        doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${getUniqueDaysCount(visitDetails)} double visit day(s)`;
+                        doubleVisitItem.addEventListener('click', () => {
+                             showDatesModal(`Double Visits with ${medRep}`, visitDetails);
+                         });
+                        doubleVisitsDetailsDiv.appendChild(doubleVisitItem);
+                    }
                 } else {
                     doubleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No double visits recorded this month.</p>`;
                 }
                 
+                // Single Visits
                 singleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Single Visits</h4>`;
-                const singleVisitDates = Object.keys(analysis.visits.single);
-                if (singleVisitDates.length > 0) {
+                if (analysis.visits.single.length > 0) {
                      const singleVisitItem = document.createElement('div');
                      singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                     singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${singleVisitDates.length} day(s)`;
+                     singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${getUniqueDaysCount(analysis.visits.single)} day(s)`;
                      singleVisitItem.addEventListener('click', () => {
-                         showDatesModal(`Single Visit Dates`, singleVisitDates);
+                         showDatesModal(`Single Visit Dates`, analysis.visits.single);
                      });
                      singleVisitsDetailsDiv.appendChild(singleVisitItem);
                 } else {
                     singleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No single visits recorded this month.</p>`;
                 }
                 
+                // Events
                 eventsDetailsDiv.innerHTML = '';
-                const eventTypes = Object.keys(analysis.events);
-                if (eventTypes.length > 0) {
-                    eventTypes.forEach(eventType => {
-                        const eventDates = Object.keys(analysis.events[eventType]);
+                const eventsByType = analysis.events.reduce((acc, event) => {
+                    if (!acc[event.type]) acc[event.type] = [];
+                    acc[event.type].push({ date: event.date, period: event.period });
+                    return acc;
+                }, {});
+                if (Object.keys(eventsByType).length > 0) {
+                    for (const type in eventsByType) {
+                        const eventDetails = eventsByType[type];
                         const eventItem = document.createElement('div');
                         eventItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                        eventItem.innerHTML = `<span class="font-bold">${eventType.replace('Event (', '').replace(')', '')}:</span> ${eventDates.length} day(s)`;
+                        eventItem.innerHTML = `<span class="font-bold">${type}:</span> ${getUniqueDaysCount(eventDetails)} day(s)`;
                         eventItem.addEventListener('click', () => {
-                            showDatesModal(`${eventType.replace('Event (', '').replace(')', '')} Dates`, eventDates);
+                            showDatesModal(`${type} Dates`, eventDetails);
                         });
                         eventsDetailsDiv.appendChild(eventItem);
-                    });
+                    }
                 } else {
                     eventsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No events recorded this month.</p>`;
                 }
                 
+                // Leaves
                 leavesDetailsDiv.innerHTML = '';
-                const leaveTypes = Object.keys(analysis.leaves);
-                if (leaveTypes.length > 0) {
-                    leaveTypes.forEach(leaveType => {
-                        const leaveDates = Object.keys(analysis.leaves[leaveType]);
+                const leavesByType = analysis.leaves.reduce((acc, leave) => {
+                    if (!acc[leave.type]) acc[leave.type] = [];
+                    acc[leave.type].push({ date: leave.date, period: leave.period });
+                    return acc;
+                }, {});
+                if (Object.keys(leavesByType).length > 0) {
+                    for (const type in leavesByType) {
+                        const leaveDetails = leavesByType[type];
                         const leaveItem = document.createElement('div');
                         leaveItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                        leaveItem.innerHTML = `<span class="font-bold">${leaveType.replace('Leave (', '').replace(')', '')}:</span> ${leaveDates.length} day(s)`;
+                        leaveItem.innerHTML = `<span class="font-bold">${type}:</span> ${getUniqueDaysCount(leaveDetails)} day(s)`;
                         leaveItem.addEventListener('click', () => {
-                            showDatesModal(`${leaveType.replace('Leave (', '').replace(')', '')} Dates`, leaveDates);
+                            showDatesModal(`${type} Dates`, leaveDetails);
                         });
                         leavesDetailsDiv.appendChild(leaveItem);
-                    });
+                    }
                 } else {
                     leavesDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No leaves recorded this month.</p>`;
                 }
 
-                const chartLabels = Object.keys(activityCounts);
-                const chartData = Object.values(activityCounts);
+                // --- Chart Logic ---
+                const activityCounts = {
+                    'Single Visits': getUniqueDaysCount(analysis.visits.single),
+                    'Double Visits': getUniqueDaysCount(analysis.visits.double),
+                    ...Object.keys(eventsByType).reduce((acc, type) => ({...acc, [type]: getUniqueDaysCount(eventsByType[type])}), {}),
+                    ...Object.keys(leavesByType).reduce((acc, type) => ({...acc, [type]: getUniqueDaysCount(leavesByType[type])}), {}),
+                };
                 
-                const filteredChartData = [];
-                const filteredChartLabels = [];
-                for (let i = 0; i < chartData.length; i++) {
-                    if (chartData[i] > 0) {
-                        filteredChartData.push(chartData[i]);
-                        filteredChartLabels.push(chartLabels[i]);
-                    }
-                }
+                const filteredChartLabels = Object.keys(activityCounts).filter(key => activityCounts[key] > 0);
+                const filteredChartData = filteredChartLabels.map(key => activityCounts[key]);
 
-
-                if (myChart) {
-                    myChart.destroy();
-                }
+                if (myChart) myChart.destroy();
 
                 myChart = new Chart(activityChartCtx, {
                     type: 'pie',
@@ -1956,7 +1908,7 @@
                         responsive: true,
                         plugins: {
                             legend: { position: 'right' },
-                            title: { display: true, text: 'Monthly Activity Breakdown' }
+                            title: { display: true, text: 'Monthly Activity Breakdown (Days)' }
                         },
                          maintainAspectRatio: false,
                     }
@@ -1966,6 +1918,47 @@
             };
 
             // --- COACHING REPORT LOGIC ---
+            const updateCoachingBadge = async () => {
+                const dmName = dmNameSelect.value;
+                const badge = document.getElementById('coaching-badge');
+                const badgeMobile = document.getElementById('coaching-badge-mobile');
+
+                if (!dmName) {
+                    badge.classList.add('hidden');
+                    badgeMobile.classList.add('hidden');
+                    return;
+                }
+
+                const now = new Date();
+                const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+
+                const { data: doubleVisits, error } = await supabase
+                    .from(REPORTS_TABLE).select('id').eq('dm_name', dmName)
+                    .eq('activity_type', 'Visits (Double Visit)').gte('created_at', startOfMonth);
+
+                if (error || !doubleVisits || doubleVisits.length === 0) {
+                    badge.classList.add('hidden');
+                    badgeMobile.classList.add('hidden');
+                    return;
+                }
+
+                const visitIds = doubleVisits.map(v => v.id);
+                const { data: coachingData } = await supabase
+                    .from(COACHING_REPORTS_TABLE).select('dm_report_id').in('dm_report_id', visitIds);
+                    
+                const completedIds = new Set((coachingData || []).map(item => item.dm_report_id));
+                const pendingCount = doubleVisits.filter(v => !completedIds.has(v.id)).length;
+
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount;
+                    badgeMobile.textContent = pendingCount;
+                    badge.classList.remove('hidden');
+                    badgeMobile.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                    badgeMobile.classList.add('hidden');
+                }
+            };
             
             const fetchAndRenderCoachingReports = async (dmName, medRepName) => {
                 coachingReportTableContainer.classList.remove('hidden');
@@ -2190,6 +2183,7 @@
                 } else {
                     showNotification('Coaching report submitted successfully.', 'success');
                     closeCoachingModal();
+                    await updateCoachingBadge();
                     // Refresh the table to show the 'Completed' status
                     await fetchAndRenderCoachingReports(dmNameSelect.value, coachingMedRepNameSelect.value);
                 }
@@ -2227,6 +2221,7 @@
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
                     updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
+                    await updateCoachingBadge();
                 }
             }
             
