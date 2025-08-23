@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>District Manager Reporting System</title>
+    <title>DM Report System</title>
     <!-- Tailwind CSS CDN for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for star icons -->
@@ -220,7 +220,7 @@
 
         <!-- Tab Content Containers -->
         <div id="dm-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6">
-            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">District Manager Reporting</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">DM Report System</h1>
 
             <form id="report-form" class="space-y-4">
 
@@ -639,56 +639,47 @@
                 <form id="coaching-evaluation-form">
                     <input type="hidden" id="coaching-report-id">
                     <!-- Evaluation Fields -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Selling Skills Column -->
-                        <div class="md:col-span-1 border-r pr-4">
-                            <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
-                                    <div class="star-rating" data-field="feedback_score">
-                                        <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
-                                    <div class="star-rating" data-field="opening_score">
-                                        <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
-                                    <div class="star-rating" data-field="asking_for_commitment_score">
-                                        <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
-                                    <div class="star-rating" data-field="handling_objection_score">
-                                        <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                    </div>
-                                </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
+                            <div class="star-rating" data-field="feedback_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
-                        <!-- Other Skills Columns -->
-                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div class="flex justify-between items-center">
-                                <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
-                                <div class="star-rating" data-field="planning_score">
-                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
+                            <div class="star-rating" data-field="opening_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
-                             <div class="flex justify-between items-center">
-                                <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
-                                <div class="star-rating" data-field="time_management_score">
-                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
+                            <div class="star-rating" data-field="asking_for_commitment_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
-                             <div class="md:col-span-2 flex justify-between items-center">
-                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
-                                <div class="star-rating" data-field="medical_product_knowledge_score">
-                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
+                            <div class="star-rating" data-field="handling_objection_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
+                            <div class="star-rating" data-field="planning_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
+                            <div class="star-rating" data-field="time_management_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
+                            <div class="star-rating" data-field="medical_product_knowledge_score">
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                     </div>
@@ -732,56 +723,47 @@
                     </div>
                     
                     <!-- Evaluation Section -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
-                        <!-- Selling Skills Column -->
-                        <div class="md:col-span-1 border-r pr-4">
-                            <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700">Feedback</label>
-                                    <div class="star-rating read-only" data-field="view_feedback_score">
-                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700">Opening</label>
-                                    <div class="star-rating read-only" data-field="view_opening_score">
-                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700">Asking for commitment</label>
-                                    <div class="star-rating read-only" data-field="view_asking_for_commitment_score">
-                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <label class="block text-sm font-medium text-gray-700">Handling objection</label>
-                                    <div class="star-rating read-only" data-field="view_handling_objection_score">
-                                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                    </div>
-                                </div>
+                    <div class="space-y-3 border-t pt-4">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Feedback</label>
+                            <div class="star-rating read-only" data-field="view_feedback_score">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
                         </div>
-                        <!-- Other Skills Columns -->
-                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div class="flex justify-between items-center">
-                                <label class="block text-sm font-medium text-gray-700">Planning</label>
-                                <div class="star-rating read-only" data-field="view_planning_score">
-                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Opening</label>
+                            <div class="star-rating read-only" data-field="view_opening_score">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                             <div class="flex justify-between items-center">
-                                <label class="block text-sm font-medium text-gray-700">Time Management</label>
-                                <div class="star-rating read-only" data-field="view_time_management_score">
-                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Asking for commitment</label>
+                            <div class="star-rating read-only" data-field="view_asking_for_commitment_score">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
-                             <div class="md:col-span-2 flex justify-between items-center">
-                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge</label>
-                                <div class="star-rating read-only" data-field="view_medical_product_knowledge_score">
-                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                                </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Handling objection</label>
+                            <div class="star-rating read-only" data-field="view_handling_objection_score">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Planning</label>
+                            <div class="star-rating read-only" data-field="view_planning_score">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Time Management</label>
+                            <div class="star-rating read-only" data-field="view_time_management_score">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge</label>
+                            <div class="star-rating read-only" data-field="view_medical_product_knowledge_score">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
                         </div>
                     </div>
@@ -792,7 +774,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Print button removed from here -->
         </div>
     </div>
 
