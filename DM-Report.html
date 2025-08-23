@@ -1168,6 +1168,38 @@
             const closeCoachingViewModalBtn = document.getElementById('close-coaching-view-modal');
             const coachingViewPrintArea = document.getElementById('coaching-view-print-area');
 
+            // --- FUNCTION DEFINITIONS ---
+
+            // MODIFICATION: Changed to function declarations and moved up to fix ReferenceError
+            function updateFormVisibility() {
+                const selectedActivity = document.querySelector('input[name="activity-type"]:checked')?.value;
+                visitsForm.classList.add('hidden');
+                eventForm.classList.add('hidden');
+                leaveForm.classList.add('hidden');
+
+                if (selectedActivity === 'Visits') {
+                    visitsForm.classList.remove('hidden');
+                    updateVisitTypeVisibility();
+                } else if (selectedActivity === 'Event') {
+                    eventForm.classList.remove('hidden');
+                } else if (selectedActivity === 'Leave') {
+                    leaveForm.classList.remove('hidden');
+                }
+            }
+
+            function updateVisitTypeVisibility() {
+                const selectedVisitType = visitTypeSelect.value;
+                doubleVisitForm.classList.add('hidden');
+                singleVisitForm.classList.add('hidden');
+
+                if (selectedVisitType === 'Double Visit') {
+                    doubleVisitForm.classList.remove('hidden');
+                    manualDoubleVisitForm.classList.add('hidden');
+                    visitsModalTriggerDiv.classList.add('hidden');
+                } else if (selectedVisitType === 'Single Visit') {
+                    singleVisitForm.classList.remove('hidden');
+                }
+            }
 
             // --- MODAL & NOTIFICATION LOGIC ---
             let confirmCallback = null;
@@ -2360,6 +2392,11 @@
             dmNameSelect.disabled = true;
             activityRadios.forEach(radio => radio.disabled = true);
             updateFormVisibility();
+
+             // Event listeners for activity and visit type changes
+            activityRadios.forEach(radio => radio.addEventListener('change', updateFormVisibility));
+            visitTypeSelect.addEventListener('change', updateVisitTypeVisibility);
+
         });
     </script>
 </body>
