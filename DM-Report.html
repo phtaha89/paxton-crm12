@@ -151,7 +151,8 @@
             top: 4px;
             right: 4px;
         }
-        .side-navigation.collapsed .med-rep-card-wrapper {
+        /* MODIFICATION: CSS rule to hide title when collapsed */
+        .side-navigation.collapsed #sidebar-title {
             display: none;
         }
         .main-tab-group {
@@ -669,7 +670,6 @@
                     </div>
 
                     <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-                        <!-- MODIFICATION: Removed inline style to fix width issue -->
                         <div>
                             <table id="reports-table" class="w-full divide-y divide-gray-200">
                                 <thead id="reports-table-head" class="bg-gray-100">
@@ -1426,23 +1426,6 @@
                     
                     reportsTableBody.appendChild(newRow);
                 });
-
-                reportsTableBody.addEventListener('click', (event) => {
-                    const target = event.target.closest('.delete-report-btn');
-                    if (target) {
-                        handleDeleteReport(target.dataset.id);
-                    } else if (event.target.closest('.view-more')) {
-                         event.preventDefault();
-                         event.stopPropagation();
-                         const reportId = event.target.closest('.view-more').dataset.id;
-                         const report = submittedReports.find(r => r.id.toString() === reportId);
-                         if (report) showRowDetailsModal(report);
-                    } else if (window.innerWidth < 768 && event.target.closest('tr')) {
-                        const reportId = event.target.closest('tr').dataset.id;
-                        const report = submittedReports.find(r => r.id == reportId);
-                        if (report) showRowDetailsModal(report);
-                    }
-                });
             };
 
             const fetchTodaysVisits = async (medRepName) => {
@@ -2149,12 +2132,6 @@
                     });
                     coachingReportsTableBody.appendChild(row);
                 });
-                 coachingReportsTableBody.addEventListener('click', (event) => {
-                    const target = event.target.closest('.delete-coaching-btn');
-                    if (target) {
-                        handleDeleteCoachingReport(target.dataset.id);
-                    }
-                });
             };
             
             const openCoachingModal = async (visitId, status) => {
@@ -2341,7 +2318,6 @@
             toggleSidebarBtn.addEventListener('click', () => {
                 sideNav.classList.toggle('collapsed');
                 mainContent.classList.toggle('full-width');
-                document.getElementById('sidebar-title').classList.toggle('hidden');
             });
 
             // Initial state setup
