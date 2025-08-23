@@ -143,19 +143,18 @@
         }
         .side-navigation.collapsed .tab-button {
             justify-content: center;
-            position: relative; /* Ensure badge positioning */
         }
         .side-navigation.collapsed .tab-button span {
             display: none;
         }
+        /* MODIFICATION: Show badge when sidebar is collapsed */
+        .side-navigation.collapsed .tab-button #coaching-badge {
+            display: flex;
+            top: 4px;
+            right: 4px;
+        }
         .side-navigation.collapsed .med-rep-card-wrapper {
             display: none;
-        }
-        .side-navigation .tab-button span {
-            margin-left: 12px;
-        }
-        .side-navigation.collapsed .tab-button span.coaching-badge-wrapper {
-            display: block; /* Show the badge container */
         }
         .main-tab-group {
             flex-direction: column;
@@ -201,7 +200,11 @@
             overflow-y: auto;
             padding: 20px;
             background-color: #f5f7fa; /* Match body background */
-            transition: all 0.3s ease; /* Smooth transition for resizing */
+            width: calc(100% - 240px);
+            transition: width 0.3s ease;
+        }
+        .main-content-scrollable.full-width {
+            width: calc(100% - 60px);
         }
         .mobile-only-header { display: none; }
         .dynamic-mobile-title {
@@ -212,16 +215,17 @@
         @media (max-width: 1023px) {
             body {
                 overflow-x: hidden;
-                padding: 0; /* Removed padding */
-                display: block;
+                padding: 12px; /* Keep some padding on the body */
+                display: block; /* Allow normal block display */
             }
+            /* MODIFICATION: Remove the frame effect on mobile */
             .main-container {
                 height: auto;
                 flex-direction: column;
-                padding: 0; /* Removed padding */
-                border-radius: 0; /* Removed border radius */
-                box-shadow: none; /* Removed box shadow */
-                background-color: #f5f7fa;
+                padding: 0;
+                border-radius: 0;
+                box-shadow: none;
+                background-color: transparent;
             }
             .side-navigation { display: none; }
             .mobile-only-header {
@@ -235,22 +239,17 @@
                 font-weight: 700;
                 color: #212b36;
                 text-align: center;
-                padding: 12px 0;
-                margin-bottom: 0;
+                margin-bottom: 12px;
             }
             .main-content-scrollable {
-                padding: 12px; /* Set padding here for mobile */
-                width: 100%; 
+                padding: 0;
+                width: 100%; /* Ensure full width on mobile */
             }
             #top-nav {
                 display: flex;
                 flex-direction: row;
                 justify-content: center;
                 border-bottom: 1px solid #e9ecef;
-                padding: 0;
-                margin-bottom: 12px;
-                background-color: white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.04);
             }
             #top-nav .tab-button {
                 flex: 1;
@@ -260,22 +259,16 @@
                 background-color: transparent;
                 color: #495057;
                 border-bottom: 2px solid transparent;
-                position: relative;
             }
             #top-nav .tab-button span {
-                display: none;
+                display: none; /* Hide text on mobile tabs */
+            }
+            #top-nav .tab-button i {
+                margin-right: 0;
             }
             #top-nav .tab-button.active {
                 color: #4361ee;
                 border-bottom-color: #4361ee;
-            }
-            /* Simplified form-section for mobile */
-            .form-section {
-                box-shadow: none;
-                border: none;
-                border-radius: 0;
-                padding: 0;
-                background-color: transparent;
             }
         }
 
@@ -312,7 +305,32 @@
             color: white;
             font-size: 18px;
         }
-        
+        .med-rep-card-wrapper {
+            margin-bottom: 1rem;
+        }
+        .med-rep-card {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .med-rep-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .med-rep-name {
+            font-weight: 600;
+            color: #3a3a3a;
+            font-size: 14px;
+        }
+        .med-rep-area {
+            font-size: 12px;
+            color: #6c757d;
+        }
         .action-button {
             padding: 10px;
             border-radius: 18px;
@@ -364,9 +382,9 @@
             padding: 12px;
         }
         
-        /* Adjusted font and padding sizes for analysis page */
+        /* MODIFICATION: Adjusted font size for analysis page title */
         #monthly-report-title {
-            font-size: 1.5rem; /* Reduced from 2xl/3xl */
+            font-size: 1.25rem; /* Reduced from 1.5rem */
         }
         .analysis-summary-box h3 {
             font-size: 1rem; /* Reduced from lg */
@@ -403,6 +421,17 @@
 
         <!-- Sidebar Navigation for PC -->
         <nav class="side-navigation print-hidden">
+            <div class="med-rep-card-wrapper">
+                <div class="med-rep-card bg-gray-100">
+                    <div class="med-rep-info">
+                        <div class="med-rep-name" id="medRepName">
+                            <i class="fas fa-spinner fa-spin"></i> Loading User...
+                        </div>
+                        <div class="med-rep-area" id="medRepArea">Area</div>
+                    </div>
+                </div>
+            </div>
+            
             <button id="toggle-sidebar" class="self-end mb-4 text-gray-500 hover:text-gray-700 transition hidden md:block">
                 <i class="fas fa-bars"></i>
             </button>
@@ -412,9 +441,9 @@
                     <i class="fas fa-file-alt fa-fw"></i> <span>DM Report</span>
                 </button>
                 <button id="coaching-report-tab" class="tab-button relative">
-                    <i class="fas fa-chalkboard-teacher fa-fw"></i>
+                    <i class="fas fa-chalkboard-teacher fa-fw"></i> 
                     <span>Coaching Report</span>
-                    <!-- Moved badge outside the span to prevent it from disappearing -->
+                    <!-- MODIFICATION: Badge moved outside the span to be visible when collapsed -->
                     <span id="coaching-badge" class="absolute top-2 right-4 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
                 </button>
                 <button id="monthly-details-tab" class="tab-button">
@@ -430,7 +459,7 @@
             <div id="mobile-header-title" class="dynamic-mobile-title md:hidden">DM Report</div>
 
             <!-- Top Navigation for Mobile (adapted from the new layout) -->
-            <div id="top-nav" class="flex border-b border-gray-200 print-hidden md:hidden">
+            <div id="top-nav" class="flex border-b border-gray-200 print-hidden bg-white shadow-sm p-2 mb-4 rounded-xl md:hidden">
                 <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm font-medium"><i class="fas fa-file-alt fa-fw"></i> <span>DM Report</span></button>
                 <button id="coaching-report-tab-mobile" class="tab-button relative flex-1 px-4 py-2 text-sm font-medium">
                     <i class="fas fa-chalkboard-teacher fa-fw"></i> <span>Coaching Report</span>
@@ -1024,6 +1053,7 @@
             const mainAppDiv = document.getElementById('main-app-container');
             const sideNav = document.querySelector('.side-navigation');
             const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+            const mainContent = document.getElementById('main-app'); // Get main content area for width toggle
             const dmReportTabContent = document.getElementById('dm-report-tab-content');
             const monthlyDetailsTabContent = document.getElementById('monthly-details-tab-content');
             const coachingReportTabContent = document.getElementById('coaching-report-tab-content');
@@ -1432,7 +1462,7 @@
 
             const formatHeader = (key) => {
                 return key.replace(/([A-Z])/g, ' $1')
-                                 .replace(/^./, str => str.toUpperCase());
+                                    .replace(/^./, str => str.toUpperCase());
             };
             
             // Helper function to format UTC time string to 12-hour format
@@ -1465,7 +1495,9 @@
                 noReportsMessage.classList.add('hidden');
 
                 const headers = Object.keys(filteredReports[0]).filter(key => key !== 'dm_name' && key !== 'id');
-                const allHeaders = ['day_date', ...headers];
+                // MODIFICATION: Reorder columns to put Activity Type first
+                const allHeaders = ['activity_type', 'day_date', ...headers.filter(h => h !== 'activity_type')];
+
 
                 const headerRow = document.createElement('tr');
                 headerRow.innerHTML = allHeaders.map(header => {
@@ -1505,8 +1537,9 @@
                         if (key === 'day_date') {
                             const date = new Date(report.created_at);
                             const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
-                            const formattedDate = report.created_at.substring(0, 10);
-                            newCell.textContent = `${dayName} - ${formattedDate}`;
+                            // MODIFICATION: Format date without the year
+                            const formattedDateWithoutYear = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+                            newCell.textContent = `${dayName} - ${formattedDateWithoutYear}`;
                         } else if (key === 'created_at') {
                             newCell.textContent = formatUTCTime(report.created_at);
                         } else if (key === 'comment') {
@@ -1748,14 +1781,14 @@
                         isValid = false;
                     }
                     if(isValid) {
-                            newReport = {
-                                dm_name: dmName,
-                                activity_type: `Event (${document.getElementById('event-type').value})`,
-                                period: document.getElementById('period-event').value,
-                                brick: 'N/A',
-                                med_rep: 'N/A',
-                                comment: document.getElementById('details-event').value,
-                            };
+                        newReport = {
+                            dm_name: dmName,
+                            activity_type: `Event (${document.getElementById('event-type').value})`,
+                            period: document.getElementById('period-event').value,
+                            brick: 'N/A',
+                            med_rep: 'N/A',
+                            comment: document.getElementById('details-event').value,
+                        };
                     }
                 } else if (activityType === 'Leave') {
                     if (!document.getElementById('details-leave').value.trim()) {
@@ -1957,10 +1990,10 @@
                 allMonthlyReports = monthlyReports || [];
 
                 if (allMonthlyReports.length === 0) {
-                     showNotification(`No reports found for ${selectedDm} this month.`, 'info');
-                     analysisSummarySection.classList.add('hidden');
-                     if (myChart) myChart.destroy();
-                     return;
+                        showNotification(`No reports found for ${selectedDm} this month.`, 'info');
+                        analysisSummarySection.classList.add('hidden');
+                        if (myChart) myChart.destroy();
+                        return;
                 }
                 
                 const analysis = {
@@ -2017,7 +2050,7 @@
                         doubleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
                         doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${getUniqueDaysCount(visitDetails)} double visit day(s)`;
                         doubleVisitItem.addEventListener('click', () => {
-                               showDatesModal(`Double Visits with ${medRep}`, visitDetails);
+                                showDatesModal(`Double Visits with ${medRep}`, visitDetails);
                             });
                         doubleVisitsDetailsDiv.appendChild(doubleVisitItem);
                     }
@@ -2028,13 +2061,13 @@
                 // Single Visits
                 singleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Single Visits</h4>`;
                 if (analysis.visits.single.length > 0) {
-                     const singleVisitItem = document.createElement('div');
-                     singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                     singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${getUniqueDaysCount(analysis.visits.single)} day(s)`;
-                     singleVisitItem.addEventListener('click', () => {
-                         showDatesModal(`Single Visit Dates`, analysis.visits.single);
-                         });
-                     singleVisitsDetailsDiv.appendChild(singleVisitItem);
+                        const singleVisitItem = document.createElement('div');
+                        singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                        singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${getUniqueDaysCount(analysis.visits.single)} day(s)`;
+                        singleVisitItem.addEventListener('click', () => {
+                            showDatesModal(`Single Visit Dates`, analysis.visits.single);
+                            });
+                        singleVisitsDetailsDiv.appendChild(singleVisitItem);
                 } else {
                     singleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No single visits recorded this month.</p>`;
                 }
@@ -2435,9 +2468,10 @@
                 }
             }
 
-            // Sidebar toggle functionality
+            // MODIFICATION: Sidebar toggle functionality with content width adjustment
             toggleSidebarBtn.addEventListener('click', () => {
                 sideNav.classList.toggle('collapsed');
+                mainContent.classList.toggle('full-width');
             });
 
             // Initial state setup
