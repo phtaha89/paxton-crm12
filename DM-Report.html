@@ -194,6 +194,12 @@
             overflow-y: auto;
             padding: 20px;
             background-color: #f5f7fa; /* Match body background */
+            /* New rule to fix the layout when sidebar collapses */
+            width: calc(100% - 240px);
+            transition: width 0.3s ease;
+        }
+        .main-content-scrollable.full-width {
+            width: calc(100% - 60px);
         }
         .mobile-only-header { display: none; }
         .dynamic-mobile-title {
@@ -231,6 +237,7 @@
             }
             .main-content-scrollable {
                 padding: 0;
+                width: 100%; /* Ensure full width on mobile */
             }
             #top-nav {
                 display: flex;
@@ -891,25 +898,25 @@
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
                             <div class="star-rating" data-field="handling_objection_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
                             <div class="star-rating" data-field="planning_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
                             <div class="star-rating" data-field="time_management_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
                             <div class="star-rating" data-field="medical_product_knowledge_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                             </div>
                         </div>
                     </div>
@@ -1729,7 +1736,7 @@
                                 newReport = {
                                     dm_name: dmName,
                                     activity_type: `Visits (Double Visit)`,
-                                    period: document.getElementById('period-double-manual').value,
+                                    period: document.getElementById('period-double').value,
                                     brick: brickDoubleSelect.value,
                                     med_rep: medRepNameSelect.value,
                                     comment: document.getElementById('details-double-manual').value,
