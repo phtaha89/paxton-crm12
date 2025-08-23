@@ -22,14 +22,14 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
-        /* Base styles from the original code */
+        /* Base styles */
         body {
             font-family: 'Inter', sans-serif;
             font-size: 0.875rem;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            background-color: #f5f7fa; /* Light background */
+            background-color: #f5f7fa;
             background-image: linear-gradient(to top, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%);
             color: #333;
         }
@@ -106,7 +106,7 @@
             .print-hidden { display: none !important; }
         }
 
-        /* --- New Layout Styles from attached file --- */
+        /* --- New Layout Styles --- */
         html, body {
             height: 100%;
             overflow: hidden; /* Prevent body scroll on desktop */
@@ -130,11 +130,25 @@
         .side-navigation {
             flex-basis: 240px;
             flex-shrink: 0;
-            background-color: white; /* Light background for the sidebar */
+            background-color: white;
             border-right: 1px solid #e9ecef;
             padding: 20px 10px;
             display: flex;
             flex-direction: column;
+            transition: flex-basis 0.3s ease;
+        }
+        .side-navigation.collapsed {
+            flex-basis: 60px;
+            overflow: hidden;
+        }
+        .side-navigation.collapsed .tab-button {
+            justify-content: center;
+        }
+        .side-navigation.collapsed .tab-button span {
+            display: none;
+        }
+        .side-navigation.collapsed .med-rep-card-wrapper {
+            display: none;
         }
         .main-tab-group {
             flex-direction: column;
@@ -160,6 +174,9 @@
             text-align: center;
             margin-right: 12px;
         }
+        .side-navigation.collapsed .tab-button i {
+            margin-right: 0;
+        }
         .side-navigation .tab-button.active {
             background-color: #4361ee;
             color: white;
@@ -170,7 +187,7 @@
             background-color: transparent;
         }
         .side-navigation .tab-button:hover:not(.active) {
-             background-color: #f3f4f6;
+            background-color: #f3f4f6;
         }
         .main-content-scrollable {
             flex-grow: 1;
@@ -179,6 +196,9 @@
             background-color: #f5f7fa; /* Match body background */
         }
         .mobile-only-header { display: none; }
+        .dynamic-mobile-title {
+            display: none;
+        }
         
         /* Mobile View Fixes & Enhancements */
         @media (max-width: 1023px) {
@@ -198,32 +218,44 @@
             .side-navigation { display: none; }
             .mobile-only-header {
                 display: block;
-                background-color: white;
+                background-color: transparent;
+                margin-bottom: 12px;
+            }
+            .dynamic-mobile-title {
+                display: block;
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: #212b36;
+                text-align: center;
+                margin-bottom: 12px;
             }
             .main-content-scrollable {
                 padding: 0;
             }
             #top-nav {
                 display: flex;
-            }
-            .tab-button {
-                display: flex;
                 flex-direction: row;
-                align-items: center;
                 justify-content: center;
+                border-bottom: 1px solid #e9ecef;
             }
             #top-nav .tab-button {
+                flex: 1;
+                justify-content: center;
+                padding: 12px 0;
                 border-radius: 0;
+                background-color: transparent;
+                color: #495057;
+                border-bottom: 2px solid transparent;
+            }
+            #top-nav .tab-button span {
+                display: none; /* Hide text on mobile tabs */
+            }
+            #top-nav .tab-button i {
+                margin-right: 0;
             }
             #top-nav .tab-button.active {
-                background-color: #ffffff;
-                color: #1f2937;
-                font-weight: 600;
-                border-bottom: 2px solid #4361ee;
-            }
-            #top-nav .tab-button:not(.active) {
-                background-color: #e5e7eb;
-                color: #6b7280;
+                color: #4361ee;
+                border-bottom-color: #4361ee;
             }
         }
 
@@ -336,6 +368,20 @@
             box-shadow: none;
             padding: 12px;
         }
+        
+        /* Adjusted font and padding sizes for analysis page */
+        #monthly-report-title {
+            font-size: 1.5rem; /* Reduced from 2xl/3xl */
+        }
+        .analysis-summary-box h3 {
+            font-size: 1rem; /* Reduced from lg */
+        }
+        .analysis-summary-box .text-3xl {
+            font-size: 2rem; /* Reduced from 3xl */
+        }
+        .analysis-summary-box {
+            padding: 0.75rem; /* Reduced padding from p-4 */
+        }
 
         /* Table responsiveness on mobile */
         @media (max-width: 767px) {
@@ -370,16 +416,12 @@
                         </div>
                         <div class="med-rep-area" id="medRepArea">Area</div>
                     </div>
-                    <div class="relative mt-2">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <i class="fas fa-user-tie text-gray-400"></i>
-                        </span>
-                        <select id="dm-name" class="pl-10 block w-full p-2 border-gray-300 rounded-md shadow-sm bg-white text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <option value="" disabled selected>Loading...</option>
-                        </select>
-                    </div>
                 </div>
             </div>
+            
+            <button id="toggle-sidebar" class="self-end mb-4 text-gray-500 hover:text-gray-700 transition hidden md:block">
+                <i class="fas fa-bars"></i>
+            </button>
 
             <div class="main-tab-group">
                 <button id="dm-report-tab" class="tab-button active">
@@ -398,14 +440,17 @@
         <!-- Main Content Wrapper with Tabs -->
         <div id="main-app" class="main-content-scrollable flex flex-col flex-grow">
 
+            <!-- Mobile View Dynamic Title -->
+            <div id="mobile-header-title" class="dynamic-mobile-title md:hidden">DM Report</div>
+
             <!-- Top Navigation for Mobile (adapted from the new layout) -->
             <div id="top-nav" class="flex border-b border-gray-200 print-hidden bg-white shadow-sm p-2 mb-4 rounded-xl md:hidden">
-                <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm font-medium">DM Report</button>
+                <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm font-medium"><i class="fas fa-file-alt fa-fw"></i> <span>DM Report</span></button>
                 <button id="coaching-report-tab-mobile" class="tab-button relative flex-1 px-4 py-2 text-sm font-medium">
-                    Coaching Report
+                    <i class="fas fa-chalkboard-teacher fa-fw"></i> <span>Coaching Report</span>
                     <span id="coaching-badge-mobile" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
                 </button>
-                <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm font-medium">Monthly Details</button>
+                <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm font-medium"><i class="fas fa-chart-pie fa-fw"></i> <span>Monthly Details</span></button>
             </div>
 
             <!-- Tab Content Containers -->
@@ -419,9 +464,9 @@
 
                     <!-- District Manager Name and Live Date -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:hidden">
+                        <div>
                             <label class="block text-xs font-medium text-gray-700">District Manager Name</label>
-                            <select id="dm-name-mobile" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <select id="dm-name-select" name="dm-name-select" class="pl-3 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                 <option value="" disabled selected>Loading...</option>
                             </select>
                             <p id="dm-name-error" class="error-message">Please select a District Manager.</p>
@@ -706,28 +751,28 @@
             <div id="monthly-details-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
                 <div id="monthly-details-print-area" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 id="monthly-report-title" class="text-xl md:text-3xl font-bold text-gray-800"></h2>
+                        <h2 id="monthly-report-title" class="text-xl md:text-2xl font-bold text-gray-800"></h2>
                     </div>
 
                     <div id="analysis-content" class="space-y-6">
                         <!-- Three Summary Boxes -->
                         <div id="analysis-summary-boxes" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- Filed Visits Box -->
-                            <div id="filed-visits-box" class="bg-blue-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-blue-600">
+                            <div id="filed-visits-box" class="analysis-summary-box bg-blue-500 text-white p-3 rounded-md shadow-lg cursor-pointer transition hover:bg-blue-600">
                                 <h3 class="font-semibold text-lg mb-1">Filed Visits</h3>
-                                <div class="text-3xl font-bold"><span id="filed-visits-count">0</span></div>
+                                <div class="text-2xl font-bold"><span id="filed-visits-count">0</span></div>
                                 <div class="text-sm">Total Filed Days</div>
                             </div>
                             <!-- Events Box -->
-                            <div id="events-box" class="bg-purple-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-purple-600">
+                            <div id="events-box" class="analysis-summary-box bg-purple-500 text-white p-3 rounded-md shadow-lg cursor-pointer transition hover:bg-purple-600">
                                 <h3 class="font-semibold text-lg mb-1">Events</h3>
-                                <div class="text-3xl font-bold"><span id="events-count">0</span></div>
+                                <div class="text-2xl font-bold"><span id="events-count">0</span></div>
                                 <div class="text-sm">Total Event Days</div>
                             </div>
                             <!-- Leaves Box -->
-                            <div id="leaves-box" class="bg-red-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-red-600">
+                            <div id="leaves-box" class="analysis-summary-box bg-red-500 text-white p-3 rounded-md shadow-lg cursor-pointer transition hover:bg-red-600">
                                 <h3 class="font-semibold text-lg mb-1">Leaves</h3>
-                                <div class="text-3xl font-bold"><span id="leaves-count">0</span></div>
+                                <div class="text-2xl font-bold"><span id="leaves-count">0</span></div>
                                 <div class="text-sm">Total Leave Days</div>
                             </div>
                         </div>
@@ -742,13 +787,13 @@
                         </div>
 
                         <div id="events-details-section" class="mt-8 hidden">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4">Event Details</h3>
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Event Details</h3>
                             <div id="events-details" class="space-y-2">
                             </div>
                         </div>
 
                         <div id="leaves-details-section" class="mt-8 hidden">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Details</h3>
+                            <h3 class="text-lg font-bold text-gray-800 mb-4">Leave Details</h3>
                             <div id="leaves-details" class="space-y-2">
                             </div>
                         </div>
@@ -992,9 +1037,11 @@
             // Get form and modal elements
             const mainAppDiv = document.getElementById('main-app-container');
             const sideNav = document.querySelector('.side-navigation');
+            const toggleSidebarBtn = document.getElementById('toggle-sidebar');
             const dmReportTabContent = document.getElementById('dm-report-tab-content');
             const monthlyDetailsTabContent = document.getElementById('monthly-details-tab-content');
             const coachingReportTabContent = document.getElementById('coaching-report-tab-content');
+            const mobileHeaderTitle = document.getElementById('mobile-header-title');
 
             const dmReportTabButton = document.getElementById('dm-report-tab');
             const monthlyDetailsTabButton = document.getElementById('monthly-details-tab');
@@ -1006,8 +1053,7 @@
             const reportDetailsSection = document.getElementById('report-details-section');
 
             const form = document.getElementById('report-form');
-            const dmNameSelect = document.getElementById('dm-name');
-            const dmNameSelectMobile = document.getElementById('dm-name-mobile');
+            const dmNameSelect = document.getElementById('dm-name-select');
             const liveTimeDiv = document.getElementById('live-time');
             const activityRadios = document.getElementsByName('activity-type');
             const visitsForm = document.getElementById('visits-form');
@@ -1198,15 +1244,13 @@
             
             // Function to populate DM dropdown after data is fetched
             const populateDmDropdown = (dmNames) => {
-                const dmSelects = [dmNameSelect, dmNameSelectMobile].filter(el => el);
-                dmSelects.forEach(select => {
-                    select.innerHTML = `<option value="" disabled selected>Select DM</option>`;
-                    dmNames.forEach(name => {
-                        const option = document.createElement('option');
-                        option.value = name;
-                        option.textContent = name;
-                        select.appendChild(option);
-                    });
+                const dmSelect = dmNameSelect;
+                dmSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                dmNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    dmSelect.appendChild(option);
                 });
             };
 
@@ -1295,11 +1339,9 @@
                 doubleVisitModeRadios.forEach(radio => radio.checked = false);
             });
 
-            // Event listener for DM name dropdown (both desktop and mobile)
+            // Event listener for DM name dropdown
             const handleDmNameChange = async (event) => {
                 const dmName = event.target.value;
-                if(event.target.id === 'dm-name') dmNameSelectMobile.value = dmName;
-                if(event.target.id === 'dm-name-mobile') dmNameSelect.value = dmName;
 
                 if (dmName) {
                     activityRadios.forEach(radio => radio.disabled = false);
@@ -1338,7 +1380,6 @@
                 }
             };
             dmNameSelect.addEventListener('change', handleDmNameChange);
-            dmNameSelectMobile.addEventListener('change', handleDmNameChange);
             
             const coachingFilterChanged = () => {
                 const dmName = dmNameSelect.value;
@@ -1405,7 +1446,7 @@
 
             const formatHeader = (key) => {
                 return key.replace(/([A-Z])/g, ' $1')
-                             .replace(/^./, str => str.toUpperCase());
+                                 .replace(/^./, str => str.toUpperCase());
             };
             
             // Helper function to format UTC time string to 12-hour format
@@ -1688,7 +1729,7 @@
                                 newReport = {
                                     dm_name: dmName,
                                     activity_type: `Visits (Double Visit)`,
-                                    period: document.getElementById('period-double').value,
+                                    period: document.getElementById('period-double-manual').value,
                                     brick: brickDoubleSelect.value,
                                     med_rep: medRepNameSelect.value,
                                     comment: document.getElementById('details-double-manual').value,
@@ -1833,45 +1874,46 @@
                 const allTabs = [reportTab, coachingTab, detailsTab];
                 const allContent = [dmReportTabContent, coachingReportTabContent, monthlyDetailsTabContent];
 
-                const switchTab = (activeIndex) => {
+                const tabNames = {
+                    'dm-report-tab': 'DM Report',
+                    'coaching-report-tab': 'Coaching Report',
+                    'monthly-details-tab': 'Monthly Details'
+                };
+
+                const switchTab = (activeIndex, tabId) => {
                     allTabs.forEach((tab, index) => {
                         tab.classList.toggle('active', index === activeIndex);
                     });
-                    // Sync the desktop and mobile tabs
-                    const otherTabs = document.querySelectorAll('.main-tab-group .tab-button');
-                    otherTabs.forEach((tab, index) => {
-                         if (index === activeIndex) {
-                            tab.classList.add('active', 'selected');
-                         } else {
-                            tab.classList.remove('active', 'selected');
-                         }
-                    });
-
+                    
                     allContent.forEach((content, index) => {
                         content.classList.toggle('hidden', index !== activeIndex);
                     });
+
+                    // Update the mobile header title
+                    if (window.innerWidth < 1024) {
+                        mobileHeaderTitle.textContent = tabNames[tabId];
+                    }
                 };
 
-                reportTab.addEventListener('click', () => switchTab(0));
-
+                reportTab.addEventListener('click', () => switchTab(0, 'dm-report-tab'));
                 coachingTab.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
                     if (!selectedDm) {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
-                        switchTab(0);
+                        switchTab(0, 'dm-report-tab');
                         return;
                     }
-                    switchTab(1);
+                    switchTab(1, 'coaching-report-tab');
                 });
 
                 detailsTab.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
                     if (!selectedDm) {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
-                        switchTab(0);
+                        switchTab(0, 'dm-report-tab');
                         return;
                     }
-                    switchTab(2);
+                    switchTab(2, 'monthly-details-tab');
                     renderAnalysisPage();
                 });
             };
@@ -1906,8 +1948,9 @@
                 }
 
                 const now = new Date();
-                const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-                monthlyReportTitle.textContent = `Current Month Report Details for ${month}`;
+                const monthName = now.toLocaleString('en-US', { month: 'long' });
+                const yearShort = now.getFullYear().toString().slice(-2);
+                monthlyReportTitle.textContent = `Month Report Details for ${monthName} ${yearShort}`;
 
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
                 const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
@@ -1988,8 +2031,8 @@
                         doubleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
                         doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${getUniqueDaysCount(visitDetails)} double visit day(s)`;
                         doubleVisitItem.addEventListener('click', () => {
-                             showDatesModal(`Double Visits with ${medRep}`, visitDetails);
-                           });
+                               showDatesModal(`Double Visits with ${medRep}`, visitDetails);
+                            });
                         doubleVisitsDetailsDiv.appendChild(doubleVisitItem);
                     }
                 } else {
@@ -1999,13 +2042,13 @@
                 // Single Visits
                 singleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Single Visits</h4>`;
                 if (analysis.visits.single.length > 0) {
-                      const singleVisitItem = document.createElement('div');
-                      singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                      singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${getUniqueDaysCount(analysis.visits.single)} day(s)`;
-                      singleVisitItem.addEventListener('click', () => {
-                          showDatesModal(`Single Visit Dates`, analysis.visits.single);
-                        });
-                      singleVisitsDetailsDiv.appendChild(singleVisitItem);
+                     const singleVisitItem = document.createElement('div');
+                     singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                     singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${getUniqueDaysCount(analysis.visits.single)} day(s)`;
+                     singleVisitItem.addEventListener('click', () => {
+                         showDatesModal(`Single Visit Dates`, analysis.visits.single);
+                         });
+                     singleVisitsDetailsDiv.appendChild(singleVisitItem);
                 } else {
                     singleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No single visits recorded this month.</p>`;
                 }
@@ -2084,8 +2127,17 @@
                     options: {
                         responsive: true,
                         plugins: {
-                            legend: { position: 'right' },
-                            title: { display: true, text: 'Monthly Activity Breakdown (Days)' }
+                            legend: { 
+                                position: 'right',
+                                labels: {
+                                    font: { size: 10 }
+                                }
+                            },
+                            title: { 
+                                display: true, 
+                                text: 'Monthly Activity Breakdown (Days)',
+                                font: { size: 14 }
+                            }
                         },
                           maintainAspectRatio: false,
                     }
@@ -2378,41 +2430,32 @@
             async function initializeReportSystem(user) {
                 await fetchData();
                 
-                const dmSelects = [dmNameSelect, dmNameSelectMobile].filter(el => el);
-                dmSelects.forEach(select => {
-                    select.innerHTML = `<option value="" disabled selected>Select DM</option>`;
-                });
-                
                 if (user && user.title && user.title.toLowerCase() === 'admin') {
-                    dmSelects.forEach(select => {
-                        select.disabled = false;
-                        allDmNames.forEach(name => {
-                            const option = document.createElement('option');
-                            option.value = name;
-                            option.textContent = name;
-                            select.appendChild(option);
-                        });
-                    });
+                    dmNameSelect.disabled = false;
+                    populateDmDropdown(allDmNames);
+                    medRepNameElement.textContent = user.username;
+                    medRepAreaElement.textContent = 'Admin';
                 } else if (user && user.title && user.title.toLowerCase() === 'district manager') {
-                    dmSelects.forEach(select => {
-                        select.disabled = false;
-                        const option = document.createElement('option');
-                        option.value = user.username;
-                        option.textContent = user.username;
-                        option.selected = true;
-                        select.appendChild(option);
-                    });
-
-                    // Update header
-                    medRepName.textContent = user.username;
-                    medRepArea.textContent = 'District Manager';
-
+                    dmNameSelect.disabled = true;
+                    const option = document.createElement('option');
+                    option.value = user.username;
+                    option.textContent = user.username;
+                    option.selected = true;
+                    dmNameSelect.appendChild(option);
+                    
+                    medRepNameElement.textContent = user.username;
+                    medRepAreaElement.textContent = 'District Manager';
                     dmNameSelect.dispatchEvent(new Event('change'));
                 }
             }
-            
+
+            // Sidebar toggle functionality
+            toggleSidebarBtn.addEventListener('click', () => {
+                sideNav.classList.toggle('collapsed');
+            });
+
+            // Initial state setup
             dmNameSelect.disabled = true;
-            dmNameSelectMobile.disabled = true;
             activityRadios.forEach(radio => radio.disabled = true);
             updateFormVisibility();
         });
