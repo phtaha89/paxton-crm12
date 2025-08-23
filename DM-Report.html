@@ -146,14 +146,14 @@
         .side-navigation.collapsed .tab-button > span:not(#coaching-badge) {
             display: none;
         }
-        .side-navigation.collapsed .tab-button #coaching-badge {
-            display: flex;
-            top: 4px;
-            right: 4px;
-        }
         /* MODIFICATION: CSS rule to hide title when collapsed */
         .side-navigation.collapsed #sidebar-title {
             display: none;
+        }
+        /* MODIFICATION: Adjusted badge position for collapsed sidebar */
+        .side-navigation.collapsed #coaching-badge {
+            top: 12px;
+            right: 12px;
         }
         .main-tab-group {
             flex-direction: column;
@@ -397,7 +397,7 @@
             <div class="flex justify-between items-center mb-4">
                  <h2 id="sidebar-title" class="text-lg font-bold text-gray-800">DM Portal</h2>
                  <button id="toggle-sidebar" class="text-gray-500 hover:text-gray-700 transition hidden md:block">
-                    <i class="fas fa-bars"></i>
+                     <i class="fas fa-bars"></i>
                  </button>
             </div>
 
@@ -408,7 +408,7 @@
                 <button id="coaching-report-tab" class="tab-button relative">
                     <i class="fas fa-chalkboard-teacher fa-fw"></i> 
                     <span>Coaching Report</span>
-                    <span id="coaching-badge" class="absolute top-2 right-4 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+                    <span id="coaching-badge" class="absolute top-3 right-3 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
                 </button>
                 <button id="monthly-details-tab" class="tab-button">
                     <i class="fas fa-chart-pie fa-fw"></i> <span>Monthly Details</span>
@@ -678,8 +678,8 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
                     </div>
-                    <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
                 </div>
             </div>
 
@@ -865,25 +865,25 @@
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
                             <div class="star-rating" data-field="handling_objection_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
                             <div class="star-rating" data-field="planning_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
                             <div class="star-rating" data-field="time_management_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
                             <div class="star-rating" data-field="medical_product_knowledge_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                     </div>
@@ -1315,14 +1315,14 @@
                  showConfirmModal('Are you sure you want to delete this coaching evaluation? This action cannot be undone.', async () => {
                     const { error } = await supabase.from(COACHING_REPORTS_TABLE).delete().eq('id', reportId);
                      if (error) {
-                        showNotification('Failed to delete coaching report.', 'error');
-                        console.error('Delete error:', error);
-                    } else {
-                        showNotification('Coaching report deleted successfully.', 'success');
-                        fetchAndRenderCoachingReports(dmNameSelect.value, coachingMedRepNameSelect.value);
-                        updateCoachingBadge();
-                    }
-                });
+                         showNotification('Failed to delete coaching report.', 'error');
+                         console.error('Delete error:', error);
+                     } else {
+                         showNotification('Coaching report deleted successfully.', 'success');
+                         fetchAndRenderCoachingReports(dmNameSelect.value, coachingMedRepNameSelect.value);
+                         updateCoachingBadge();
+                     }
+                 });
             };
 
             const fetchReportsFromSupabase = async (dmName = '') => {
@@ -1529,7 +1529,8 @@
                 hideModal();
                 form.reset();
                 dmNameSelect.value = dmName;
-                updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
+                updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
+                updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
                 selectedVisitsInput.value = '';
                 updateFormVisibility();
                 activityRadios.forEach(radio => radio.disabled = false);
@@ -1673,7 +1674,8 @@
                     activityRadios.forEach(radio => radio.checked = false);
                     updateFormVisibility();
                     dmNameSelect.value = dmName;
-                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
+                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
+                    updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
                     selectedVisitsInput.value = '';
                     activityRadios.forEach(radio => radio.disabled = false);
                 }
@@ -1697,7 +1699,8 @@
                 dmNameSelect.value = dmName;
                 if (dmName) {
                     activityRadios.forEach(radio => radio.disabled = false);
-                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
+                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
+                    updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
                 }
                 
                 selectedVisitsInput.value = '';
@@ -1735,7 +1738,10 @@
                 const tabNames = {
                     'dm-report-tab': 'DM Report',
                     'coaching-report-tab': 'Coaching Report',
-                    'monthly-details-tab': 'Monthly Details'
+                    'monthly-details-tab': 'Monthly Details',
+                    'dm-report-tab-mobile': 'DM Report',
+                    'coaching-report-tab-mobile': 'Coaching Report',
+                    'monthly-details-tab-mobile': 'Monthly Details'
                 };
 
                 const switchTab = (activeIndex, tabId) => {
@@ -1752,25 +1758,25 @@
                     }
                 };
 
-                reportTab.addEventListener('click', () => switchTab(0, 'dm-report-tab'));
+                reportTab.addEventListener('click', () => switchTab(0, reportTabId));
                 coachingTab.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
                     if (!selectedDm) {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
-                        switchTab(0, 'dm-report-tab');
+                        switchTab(0, reportTabId);
                         return;
                     }
-                    switchTab(1, 'coaching-report-tab');
+                    switchTab(1, coachingTabId);
                 });
 
                 detailsTab.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
                     if (!selectedDm) {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
-                        switchTab(0, 'dm-report-tab');
+                        switchTab(0, reportTabId);
                         return;
                     }
-                    switchTab(2, 'monthly-details-tab');
+                    switchTab(2, detailsTabId);
                     renderAnalysisPage();
                 });
             };
@@ -1996,7 +2002,7 @@
                                 font: { size: 14 }
                             }
                         },
-                          maintainAspectRatio: false,
+                         maintainAspectRatio: false,
                     }
                 });
 
@@ -2325,14 +2331,84 @@
             activityRadios.forEach(radio => radio.disabled = true);
             updateFormVisibility();
 
-             // Event listeners for activity and visit type changes
+            // --- NEW/FIXED EVENT LISTENERS ---
+
+            // Function to populate Med Rep and Brick dropdowns based on selected DM
+            const updateAssociatedDropdowns = (sourceDmSelect, targetMedRepSelect, targetBrickSelects = []) => {
+                const selectedDm = sourceDmSelect.value;
+                
+                // This will enable/disable the activity radios based on DM selection
+                activityRadios.forEach(radio => radio.disabled = !selectedDm);
+
+                if (!selectedDm) {
+                    targetMedRepSelect.innerHTML = `<option value="" disabled selected>Select DM first</option>`;
+                    targetBrickSelects.forEach(sel => sel.innerHTML = `<option value="" disabled selected>Select DM first</option>`);
+                    return;
+                }
+
+                const filteredData = allSheetData.filter(row => row[1] === selectedDm);
+                const medRepNames = [...new Set(filteredData.map(item => item[3]).filter(Boolean))];
+                const dmBricks = [...new Set(filteredData.map(item => item[9]).filter(Boolean))];
+
+                targetMedRepSelect.innerHTML = `<option value="" disabled selected>Select Med Rep</option>`;
+                medRepNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    targetMedRepSelect.appendChild(option);
+                });
+                
+                if (targetBrickSelects && targetBrickSelects.length > 0) {
+                    const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                    targetBrickSelects.forEach(sel => {
+                        if(sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                    });
+                }
+            };
+
+            // Single, comprehensive event listener for the main DM dropdown
+            dmNameSelect.addEventListener('change', (event) => {
+                const dmName = event.target.value;
+                
+                // Update dropdowns on both DM Report and Coaching Report tabs
+                updateAssociatedDropdowns(event.target, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
+                updateAssociatedDropdowns(event.target, coachingMedRepNameSelect);
+
+                // Reset coaching tab state
+                coachingMedRepNameSelect.value = '';
+                coachingStatusFilter.value = 'All';
+                coachingReportTableContainer.classList.add('hidden');
+                coachingReportsTableBody.innerHTML = '';
+                noCoachingReportsMessage.classList.add('hidden');
+
+                // Reset report details on the first tab
+                reportDetailsSection.classList.add('hidden');
+                submittedReports = [];
+                renderReports(submittedReports, dmName);
+                
+                // Update the coaching badge
+                updateCoachingBadge();
+            });
+
+            // Add listeners for the coaching tab dropdowns
+            coachingMedRepNameSelect.addEventListener('change', () => {
+                const dmName = dmNameSelect.value;
+                const medRepName = coachingMedRepNameSelect.value;
+                if (dmName && medRepName) {
+                    fetchAndRenderCoachingReports(dmName, medRepName);
+                }
+            });
+
+            coachingStatusFilter.addEventListener('change', () => {
+                 const dmName = dmNameSelect.value;
+                 const medRepName = coachingMedRepNameSelect.value;
+                 if(dmName && medRepName) {
+                    fetchAndRenderCoachingReports(dmName, medRepName);
+                 }
+            });
+
             activityRadios.forEach(radio => radio.addEventListener('change', updateFormVisibility));
             visitTypeSelect.addEventListener('change', updateVisitTypeVisibility);
-
-            // MODIFICATION: Added event listener for dmNameSelect to also update coaching dropdown
-            dmNameSelect.addEventListener('change', (event) => {
-                updateAssociatedDropdowns(event.target, coachingMedRepNameSelect);
-            });
 
         });
     </script>
