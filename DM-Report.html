@@ -507,9 +507,10 @@
                                     <option value="Single Visit">Single Visit</option>
                                 </select>
                             </div>
-
+    
                             <!-- Double Visit Form -->
                             <div id="double-visit-form" class="space-y-2">
+                                <!-- Option to choose between manual entry or today's visits -->
                                 <div id="double-visit-options" class="space-y-2">
                                     <div>
                                         <label for="med-rep-name" class="block text-xs font-medium text-gray-700">Medical Rep Name</label>
@@ -533,7 +534,7 @@
                                         <p id="double-visit-mode-error" class="error-message">Please select a report mode.</p>
                                     </div>
                                 </div>
-
+    
                                 <!-- Manual Double Visit Form (hidden by default) -->
                                 <div id="manual-double-visit-form" class="space-y-2 hidden">
                                     <div>
@@ -553,11 +554,11 @@
                                     </div>
                                     <div>
                                         <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
-                                        <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm"></textarea>
+                                        <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
                                         <p id="details-double-manual-error" class="error-message">Please provide a comment.</p>
                                     </div>
                                 </div>
-
+    
                                 <!-- Visits Modal Trigger (hidden by default) -->
                                 <div id="visits-modal-trigger" class="space-y-2 hidden">
                                     <div>
@@ -580,7 +581,7 @@
                                 </div>
                                 <input type="hidden" id="selected-visits-double" name="selected-visits-double">
                             </div>
-
+    
                             <!-- Single Visit Form -->
                             <div id="single-visit-form" class="space-y-2 hidden">
                                 <div>
@@ -600,12 +601,12 @@
                                 </div>
                                 <div>
                                     <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
-                                    <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm"></textarea>
+                                    <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
                                     <p id="details-single-error" class="error-message">Please provide a comment.</p>
-                                </div>
+                                    </div>
                             </div>
                         </div>
-
+    
                         <!-- Event Form -->
                         <div id="event-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-events">
                             <h3 class="text-sm font-semibold text-gray-800">Event Details</h3>
@@ -629,11 +630,11 @@
                             </div>
                             <div>
                                 <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
-                                <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm"></textarea>
+                                <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
                                 <p id="details-event-error" class="error-message">Please provide a comment.</p>
                             </div>
                         </div>
-
+    
                         <!-- Leave Form -->
                         <div id="leave-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-leaves">
                             <h3 class="text-sm font-semibold text-gray-800">Leave Details</h3>
@@ -649,14 +650,15 @@
                             <div>
                                 <label for="period-leave" class="block text-xs font-medium text-gray-700">Period</label>
                                 <select id="period-leave" name="period-leave" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="AM">AM</option>
-                                    <option value="PM">PM</option>
-                                    <option value="Full Day" selected>Full Day</option>
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                        <option value="Full Day" selected>Full Day</option>
                                 </select>
                             </div>
+                            <!-- New comment box for leave form -->
                             <div>
                                 <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
-                                <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm"></textarea>
+                                <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
                                 <p id="details-leave-error" class="error-message">Please provide a comment.</p>
                             </div>
                         </div>
