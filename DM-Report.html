@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DM Report System</title>
+    <title>District Manager Reporting System</title>
     <!-- Tailwind CSS CDN for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for star icons and other icons -->
+    <!-- Font Awesome for star icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
         tailwind.config = {
@@ -20,17 +20,12 @@
         };
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        /* Base styles */
         body {
             font-family: 'Inter', sans-serif;
             font-size: 0.875rem;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            background-color: #f5f7fa;
-            color: #333;
         }
         label, input, select, textarea, button {
             font-size: 0.875rem;
@@ -38,6 +33,9 @@
         th, td {
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
+        }
+        .container {
+            max-width: 900px;
         }
         .modal {
             transition: opacity 0.3s ease-in-out;
@@ -74,6 +72,91 @@
         .notification.error { background-color: #F44336; color: white; }
         .notification.info { background-color: #2196F3; color: white; }
 
+        /* --- Navigation Tabs Styling --- */
+        .tab-button {
+            border-radius: 0.5rem 0.5rem 0 0;
+            transition: background-color 0.2s, color 0.2s;
+            position: relative;
+        }
+        .tab-button.active {
+            background-color: #ffffff;
+            color: #1f2937;
+            font-weight: 600;
+        }
+        .tab-button:not(.active) {
+            background-color: #e5e7eb;
+            color: #6b7280;
+        }
+        .notification-badge {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            background-color: #EF4444; /* red-500 */
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.625rem;
+            width: 1rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        #side-nav { display: none; }
+        #top-nav { display: flex; }
+
+        /* --- Desktop Navigation --- */
+        @media (min-width: 768px) {
+            #top-nav { display: none; }
+            #side-nav {
+                display: flex;
+                flex-direction: column;
+                width: 15rem;
+                min-height: 100vh;
+                background-color: #f3f4f6;
+                padding: 1rem;
+                transition: width 0.3s ease-in-out;
+            }
+            #side-nav .tab-button {
+                border-radius: 0.5rem;
+                margin-bottom: 0.5rem;
+                width: 100%;
+                text-align: left;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            #main-app {
+                width: calc(100vw - 15rem);
+                min-height: 100vh;
+                border-radius: 0;
+                transition: width 0.3s ease-in-out;
+            }
+            /* Collapsed Sidebar Styles */
+            #side-nav.collapsed {
+                width: 5rem;
+            }
+            #side-nav.collapsed .tab-button-text, #side-nav.collapsed #nav-header-text {
+                display: none;
+            }
+            #side-nav.collapsed .tab-button {
+                justify-content: center;
+            }
+            #main-app.sidebar-collapsed {
+                width: calc(100vw - 5rem);
+            }
+        }
+        
+        #monthly-details-tab-content {
+            background-color: #f3f4f6;
+            overflow-y: auto;
+        }
+        #dm-name {
+            min-height: 2.5rem;
+            border-width: 1px;
+            border-color: #d1d5db;
+        }
+        
         /* Star rating styles */
         .star-rating .fa-star {
             color: #e4e5e9;
@@ -104,677 +187,424 @@
             .print-area { position: absolute; left: 0; top: 0; width: 100%; }
             .print-hidden { display: none !important; }
         }
+        
+        /* Fix for mobile layout stretching */
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+            overflow-x: auto;
+        }
 
-        /* --- New Layout Styles --- */
-        html, body {
-            height: 100%;
-            overflow: hidden; /* Prevent body scroll on desktop */
-            padding: 0; /* Remove body padding on desktop */
+        /* Set min-width for the table to prevent collapsing on mobile */
+        #reports-table th,
+        #reports-table td {
+            min-width: 100px; /* Adjust as needed */
         }
-        .main-container {
-            width: 100%;
-            max-width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: row;
-            padding: 0;
-            border-radius: 0;
+
+        #reports-table th:nth-child(1),
+        #reports-table td:nth-child(1) {
+            min-width: 150px;
         }
-        .desktop-layout-wrapper {
-            flex-direction: row;
-            flex-grow: 1;
-            overflow: hidden;
-            width: 100%;
-        }
-        .side-navigation {
-            flex-basis: 240px;
-            flex-shrink: 0;
-            background-color: white;
-            border-right: 1px solid #e9ecef;
-            padding: 20px 10px;
-            display: flex;
-            flex-direction: column;
-            transition: flex-basis 0.3s ease;
-        }
-        .side-navigation.collapsed {
-            flex-basis: 60px;
-            overflow: hidden;
-        }
-        .side-navigation.collapsed .tab-button {
-            justify-content: center;
-        }
-        .side-navigation.collapsed .tab-button > span:not(#coaching-badge) {
-            display: none;
-        }
-        .side-navigation.collapsed #sidebar-title {
-            display: none;
-        }
-        .side-navigation.collapsed #coaching-badge {
-            top: 12px;
-            right: 12px;
-        }
-        .main-tab-group {
-            flex-direction: column;
-            gap: 8px;
-            background-color: transparent;
-            padding: 0;
-            margin-top: 1rem;
-        }
-        .side-navigation .tab-button {
-            flex: none;
-            justify-content: flex-start;
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 14px;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-        }
-        .side-navigation .tab-button i {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-            margin-right: 12px;
-        }
-        .side-navigation.collapsed .tab-button i {
-            margin-right: 0;
-        }
-        .side-navigation .tab-button.active {
-            background-color: #4361ee;
-            color: white;
-            box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
-        }
-        .side-navigation .tab-button:not(.active) {
-            color: #495057;
-            background-color: transparent;
-        }
-        .side-navigation .tab-button:hover:not(.active) {
-            background-color: #f3f4f6;
-        }
-        .main-content-scrollable {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background-color: #f5f7fa;
-            width: calc(100% - 240px);
-            transition: width 0.3s ease;
-        }
-        .main-content-scrollable.full-width {
-            width: calc(100% - 60px);
-        }
-        .mobile-only-header { display: none; }
-        .dynamic-mobile-title {
-            display: none;
+
+        #reports-table th:nth-child(3),
+        #reports-table td:nth-child(3) {
+            min-width: 150px;
         }
         
-        /* Mobile View Fixes & Enhancements */
-        @media (max-width: 1023px) {
-            body {
-                overflow-x: hidden;
-                display: block;
-                background-color: #f5f7fa;
-                padding: 0;
-            }
-            .main-container {
-                height: auto;
-                flex-direction: column;
-                padding: 12px;
-                border-radius: 0;
-                box-shadow: none;
-                background-color: transparent;
-            }
-            .side-navigation { display: none; }
-            .mobile-only-header {
-                display: block;
-                background-color: transparent;
-                margin-bottom: 12px;
-            }
-            .dynamic-mobile-title {
-                display: block;
-                font-size: 1.25rem;
-                font-weight: 700;
-                color: #212b36;
-                text-align: center;
-                margin-bottom: 12px;
-            }
-            .main-content-scrollable {
-                padding: 0;
-                width: 100%;
-            }
-            #top-nav {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                border-bottom: 1px solid #e9ecef;
-            }
-            #top-nav .tab-button {
-                flex: 1;
-                justify-content: center;
-                padding: 12px 0;
-                border-radius: 0;
-                background-color: transparent;
-                color: #495057;
-                border-bottom: 2px solid transparent;
-            }
-            /* MODIFICATION: Hide text span but not the badge span */
-            #top-nav .tab-button span:not(#coaching-badge-mobile) {
-                display: none;
-            }
-            #top-nav .tab-button i {
-                margin-right: 0;
-            }
-            #top-nav .tab-button.active {
-                color: #4361ee;
-                border-bottom-color: #4361ee;
-            }
-        }
-
-        /* Specific styles for forms */
-        .form-section {
-            padding: 16px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-            border: 1px solid #e9ecef;
-            background-color: white;
-        }
-        .form-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 14px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #e9ecef;
-        }
-        .form-title {
-            color: #212b36;
-            font-size: 18px;
-            font-weight: 600;
-            flex: 1;
-        }
-        .form-logo {
-            width: 36px;
-            height: 36px;
-            background-color: #4361ee;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            color: white;
-            font-size: 18px;
-        }
-        .action-button {
-            padding: 10px;
-            border-radius: 18px;
-            font-weight: 600;
-            font-size: 12px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .submit-btn {
-            background-color: #4361ee;
-            color: white;
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
-        }
-        .submit-btn:hover:not(:disabled) {
-            background-color: #3a56d4;
-            transform: translateY(-1px);
-        }
-        .reset-btn {
-            background-color: #fff;
-            color: red;
-            border: 1px solid #dce0e5;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .reset-btn:hover:not(:disabled) {
-            background-color: #f8f9fa;
-        }
-        .retrieve-btn {
-            background-color: #2e8540;
-            color: white;
-            box-shadow: 0 4px 12px rgba(46, 133, 64, 0.2);
-        }
-        .retrieve-btn:hover:not(:disabled) {
-            background-color: #267438;
-            transform: translateY(-1px);
-        }
-        .disabled-button {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Specific adjustments for monthly details page */
-        #monthly-details-tab-content {
-            background-color: #f5f7fa;
-            overflow-y: auto;
-            border-radius: 0;
-            box-shadow: none;
-            padding: 12px;
-        }
-        
-        #monthly-report-title {
-            font-size: 1.25rem;
-        }
-        .analysis-summary-box h3 {
-            font-size: 1rem;
-        }
-        .analysis-summary-box .text-3xl {
-            font-size: 2rem;
-        }
-        .analysis-summary-box {
-            padding: 0.75rem;
-        }
-
-        /* Table responsiveness on mobile */
-        @media (max-width: 767px) {
-            #report-details-section .overflow-x-auto {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            #report-details-section .min-w-[700px] {
-                min-width: 700px;
-            }
-            #reports-table {
-                width: 100%;
-            }
+        #reports-table th:nth-child(4),
+        #reports-table td:nth-child(4) {
+            min-width: 100px;
         }
     </style>
 </head>
-<body class="flex min-h-screen">
+<body class="bg-gray-100 flex min-h-screen">
 
     <!-- Notification Container -->
     <div id="notification-container"></div>
 
-    <!-- Main Container to hold everything, matching the layout -->
-    <div id="main-app-container" class="main-container">
+    <!-- Sidebar Navigation for PC -->
+    <nav id="side-nav" class="bg-white shadow-lg p-4 print-hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 id="nav-header-text" class="text-xl font-bold text-gray-800">DM System</h2>
+            <button id="nav-toggle-btn" class="p-2 rounded-md hover:bg-gray-200">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <button id="dm-report-tab" class="tab-button active px-4 py-2 text-sm md:text-base font-medium">
+            <i class="fas fa-file-alt fa-fw"></i> <span class="tab-button-text">DM Report</span>
+        </button>
+        <button id="coaching-report-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">
+            <i class="fas fa-chalkboard-teacher fa-fw"></i> <span class="tab-button-text">Coaching Report</span>
+            <span id="coaching-badge-side" class="notification-badge hidden">0</span>
+        </button>
+        <button id="monthly-details-tab" class="tab-button px-4 py-2 text-sm md:text-base font-medium">
+            <i class="fas fa-chart-pie fa-fw"></i> <span class="tab-button-text">Monthly Details</span>
+        </button>
+    </nav>
+    
 
-        <!-- Sidebar Navigation for PC -->
-        <nav class="side-navigation print-hidden">
-            <div class="flex justify-between items-center mb-4">
-                 <h2 id="sidebar-title" class="text-lg font-bold text-gray-800">DM Portal</h2>
-                 <button id="toggle-sidebar" class="text-gray-500 hover:text-gray-700 transition hidden md:block">
-                     <i class="fas fa-bars"></i>
-                 </button>
-            </div>
+    <!-- Main Content Container with Tabs -->
+    <div id="main-app" class="flex flex-col flex-grow bg-white md:rounded-2xl md:shadow-2xl md:space-y-4">
 
-            <div class="main-tab-group">
-                <button id="dm-report-tab" class="tab-button active">
-                    <i class="fas fa-file-alt fa-fw"></i> <span>DM Report</span>
-                </button>
-                <button id="coaching-report-tab" class="tab-button relative">
-                    <i class="fas fa-chalkboard-teacher fa-fw"></i> 
-                    <span>Coaching Report</span>
-                    <span id="coaching-badge" class="absolute top-3 right-3 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
-                </button>
-                <button id="monthly-details-tab" class="tab-button">
-                    <i class="fas fa-chart-pie fa-fw"></i> <span>Monthly Details</span>
-                </button>
-            </div>
-        </nav>
+        <!-- Top Navigation for Mobile -->
+        <div id="top-nav" class="flex border-b border-gray-200 print-hidden">
+            <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm md:text-base font-medium">DM Report</button>
+            <button id="coaching-report-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm md:text-base font-medium">Coaching Report
+                <span id="coaching-badge-top" class="notification-badge hidden">0</span>
+            </button>
+            <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm md:text-base font-medium">Monthly Details</button>
+        </div>
 
-        <!-- Main Content Wrapper with Tabs -->
-        <div id="main-app" class="main-content-scrollable flex flex-col flex-grow">
 
-            <!-- Mobile View Dynamic Title -->
-            <div id="mobile-header-title" class="dynamic-mobile-title md:hidden">DM Report</div>
+        <!-- Tab Content Containers -->
+        <div id="dm-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">District Manager Reporting</h1>
 
-            <!-- Top Navigation for Mobile (adapted from the new layout) -->
-            <div id="top-nav" class="flex border-b border-gray-200 print-hidden bg-white shadow-sm p-2 mb-4 rounded-xl md:hidden">
-                <button id="dm-report-tab-mobile" class="tab-button active flex-1 px-4 py-2 text-sm font-medium"><i class="fas fa-file-alt fa-fw"></i> <span>DM Report</span></button>
-                <button id="coaching-report-tab-mobile" class="tab-button relative flex-1 px-4 py-2 text-sm font-medium">
-                    <i class="fas fa-chalkboard-teacher fa-fw"></i> <span>Coaching Report</span>
-                    <span id="coaching-badge-mobile" class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
-                </button>
-                <button id="monthly-details-tab-mobile" class="tab-button flex-1 px-4 py-2 text-sm font-medium"><i class="fas fa-chart-pie fa-fw"></i> <span>Monthly Details</span></button>
-            </div>
+            <form id="report-form" class="space-y-4">
 
-            <!-- Tab Content Containers -->
-            <div id="dm-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 form-section">
-                <div class="form-header">
-                    <div class="form-logo"><i class="fas fa-file-alt"></i></div>
-                    <h1 class="form-title">DM Report System</h1>
+                <!-- District Manager Name and Live Date -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="dm-name" class="block text-xs font-medium text-gray-700">District Manager Name</label>
+                        <select id="dm-name" name="dm-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                            <option value="" disabled selected>Loading...</option>
+                        </select>
+                        <p id="dm-name-error" class="error-message">Please select a District Manager.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Date and Time</label>
+                        <div id="live-time" class="mt-1 p-1 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-center font-semibold text-gray-600">
+                            Loading...
+                        </div>
+                    </div>
                 </div>
 
-                <form id="report-form" class="space-y-4">
+                <!-- Activity Type Radio Buttons -->
+                <div class="mt-4">
+                    <label class="block text-xs font-medium text-gray-700">Activity Type</label>
+                    <div class="mt-1 grid grid-cols-3 gap-2 md:gap-4">
+                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="activity-type" value="Visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-1 text-gray-700 text-xs">Visits</span>
+                        </label>
+                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="activity-type" value="Event" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-1 text-gray-700 text-xs">Event</span>
+                        </label>
+                        <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
+                            <input type="radio" name="activity-type" value="Leave" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                            <span class="ml-1 text-gray-700 text-xs">Leave</span>
+                        </label>
+                    </div>
+                    <p id="activity-type-error" class="error-message">Please select an activity type.</p>
+                </div>
 
-                    <!-- District Manager Name and Live Date -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Conditional Forms -->
+                <div id="conditional-forms">
+
+                    <!-- Visits Form -->
+                    <div id="visits-form" class="p-4 rounded-md shadow-inner space-y-4 hidden form-border-visits" >
+                        <h3 class="text-sm font-semibold text-gray-800">Visits Details</h3>
                         <div>
-                            <label class="block text-xs font-medium text-gray-700">District Manager Name</label>
-                            <select id="dm-name-select" name="dm-name-select" class="pl-3 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                <option value="" disabled selected>Loading...</option>
+                            <label for="visit-type" class="block text-xs font-medium text-gray-700">Visit Type</label>
+                            <select id="visit-type" name="visit-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="Double Visit">Double Visit</option>
+                                <option value="Single Visit">Single Visit</option>
                             </select>
-                            <p id="dm-name-error" class="error-message">Please select a District Manager.</p>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-700">Date and Time</label>
-                            <div id="live-time" class="mt-1 p-1 bg-gray-50 border border-gray-300 rounded-md shadow-sm text-center font-semibold text-gray-600">
-                                Loading...
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Activity Type Radio Buttons -->
-                    <div class="mt-4">
-                        <label class="block text-xs font-medium text-gray-700">Activity Type</label>
-                        <div class="mt-1 grid grid-cols-3 gap-2 md:gap-4">
-                            <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                                <input type="radio" name="activity-type" value="Visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-1 text-gray-700 text-xs">Visits</span>
-                            </label>
-                            <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                                <input type="radio" name="activity-type" value="Event" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-1 text-gray-700 text-xs">Event</span>
-                            </label>
-                            <label class="flex items-center p-2 bg-white border border-gray-300 rounded-md cursor-pointer hover:bg-blue-50 transition duration-150 ease-in-out">
-                                <input type="radio" name="activity-type" value="Leave" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-1 text-gray-700 text-xs">Leave</span>
-                            </label>
-                        </div>
-                        <p id="activity-type-error" class="error-message">Please select an activity type.</p>
-                    </div>
-
-                    <!-- Conditional Forms -->
-                    <div id="conditional-forms">
-
-                        <!-- Visits Form -->
-                        <div id="visits-form" class="p-4 rounded-md shadow-inner space-y-4 hidden form-border-visits" >
-                            <h3 class="text-sm font-semibold text-gray-800">Visits Details</h3>
-                            <div>
-                                <label for="visit-type" class="block text-xs font-medium text-gray-700">Visit Type</label>
-                                <select id="visit-type" name="visit-type" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="Double Visit">Double Visit</option>
-                                    <option value="Single Visit">Single Visit</option>
-                                </select>
-                            </div>
-
-                            <!-- Double Visit Form -->
-                            <div id="double-visit-form" class="space-y-2">
-                                <div id="double-visit-options" class="space-y-2">
-                                    <div>
-                                        <label for="med-rep-name" class="block text-xs font-medium text-gray-700">Medical Rep Name</label>
-                                        <select id="med-rep-name" name="med-rep-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="" disabled selected>Select DM first</option>
-                                        </select>
-                                        <p id="med-rep-name-error" class="error-message">Please select a Medical Rep.</p>
-                                    </div>
-                                    <div id="double-visit-mode" class="hidden space-y-2">
-                                        <label class="block text-xs font-medium text-gray-700">Select Report Mode</label>
-                                        <div class="flex items-center space-x-4">
-                                            <label class="flex items-center">
-                                                <input type="radio" name="double-visit-mode" value="manual" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                                <span class="ml-1 text-gray-700 text-xs">Add Manually</span>
-                                            </label>
-                                            <label class="flex items-center">
-                                                <input type="radio" name="double-visit-mode" value="visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
-                                                <span class="ml-1 text-gray-700 text-xs">Select from Today's Visits</span>
-                                            </label>
-                                        </div>
-                                        <p id="double-visit-mode-error" class="error-message">Please select a report mode.</p>
-                                    </div>
-                                </div>
-
-                                <!-- Manual Double Visit Form (hidden by default) -->
-                                <div id="manual-double-visit-form" class="space-y-2 hidden">
-                                    <div>
-                                        <label for="period-double" class="block text-xs font-medium text-gray-700">Period</label>
-                                        <select id="period-double" name="period-double" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="AM">AM</option>
-                                            <option value="PM">PM</option>
-                                            <option value="Full Day" selected>Full Day</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="brick-double" class="block text-xs font-medium text-gray-700">Brick</label>
-                                        <select id="brick-double" name="brick-double" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="" disabled selected>Select Medical Rep first</option>
-                                        </select>
-                                        <p id="brick-double-error" class="error-message">Please select a Brick.</p>
-                                    </div>
-                                    <div>
-                                        <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
-                                        <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                        <p id="details-double-manual-error" class="error-message">Please provide a comment.</p>
-                                    </div>
-                                </div>
-
-                                <!-- Visits Modal Trigger (hidden by default) -->
-                                <div id="visits-modal-trigger" class="space-y-2 hidden">
-                                    <div>
-                                        <label for="period-double-visits" class="block text-xs font-medium text-gray-700">Period</label>
-                                        <select id="period-double-visits" name="period-double-visits" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="AM">AM</option>
-                                            <option value="PM">PM</option>
-                                            <option value="Full Day" selected>Full Day</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label for="brick-double-visits" class="block text-xs font-medium text-gray-700">Brick</label>
-                                        <select id="brick-double-visits" name="brick-double-visits" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="" disabled selected>Select Medical Rep first</option>
-                                        </select>
-                                    </div>
-                                    <button type="button" id="open-visits-modal" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
-                                        Select Today's Visits
-                                    </button>
-                                </div>
-                                <input type="hidden" id="selected-visits-double" name="selected-visits-double">
-                            </div>
-
-                            <!-- Single Visit Form -->
-                            <div id="single-visit-form" class="space-y-2 hidden">
+                        <!-- Double Visit Form -->
+                        <div id="double-visit-form" class="space-y-2">
+                            <!-- Option to choose between manual entry or today's visits -->
+                            <div id="double-visit-options" class="space-y-2">
                                 <div>
-                                    <label for="period-single" class="block text-xs font-medium text-gray-700">Period</label>
-                                    <select id="period-single" name="period-single" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="AM">AM</option>
-                                        <option value="PM">PM</option>
-                                        <option value="Full Day" selected>Full Day</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
-                                    <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <label for="med-rep-name" class="block text-xs font-medium text-gray-700">Medical Rep Name</label>
+                                    <select id="med-rep-name" name="med-rep-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
                                         <option value="" disabled selected>Select DM first</option>
                                     </select>
-                                    <p id="brick-single-error" class="error-message">Please select a Brick.</p>
+                                    <p id="med-rep-name-error" class="error-message">Please select a Medical Rep.</p>
                                 </div>
-                                <div>
-                                    <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
-                                    <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                    <p id="details-single-error" class="error-message">Please provide a comment.</p>
+                                <div id="double-visit-mode" class="hidden space-y-2">
+                                    <label class="block text-xs font-medium text-gray-700">Select Report Mode</label>
+                                    <div class="flex items-center space-x-4">
+                                        <label class="flex items-center">
+                                            <input type="radio" name="double-visit-mode" value="manual" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-1 text-gray-700 text-xs">Add Manually</span>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio" name="double-visit-mode" value="visits" class="form-radio h-3 w-3 text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-1 text-gray-700 text-xs">Select from Today's Visits</span>
+                                        </label>
+                                    </div>
+                                    <p id="double-visit-mode-error" class="error-message">Please select a report mode.</p>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Event Form -->
-                        <div id="event-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-events">
-                            <h3 class="text-sm font-semibold text-gray-800">Event Details</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <!-- Manual Double Visit Form (hidden by default) -->
+                            <div id="manual-double-visit-form" class="space-y-2 hidden">
                                 <div>
-                                    <label for="event-type" class="block text-xs font-medium text-gray-700">Event Type</label>
-                                    <select id="event-type" name="event-type" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="Meeting">Meeting</option>
-                                        <option value="Event">Event</option>
-                                        <option value="Admin Work">Admin Work</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="period-event" class="block text-xs font-medium text-gray-700">Period</label>
-                                    <select id="period-event" name="period-event" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <label for="period-double" class="block text-xs font-medium text-gray-700">Period</label>
+                                    <select id="period-double" name="period-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
                                         <option value="AM">AM</option>
                                         <option value="PM">PM</option>
                                         <option value="Full Day" selected>Full Day</option>
                                     </select>
                                 </div>
+                                <div>
+                                    <label for="brick-double" class="block text-xs font-medium text-gray-700">Brick</label>
+                                    <select id="brick-double" name="brick-double" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                        <option value="" disabled selected>Select Medical Rep first</option>
+                                    </select>
+                                    <p id="brick-double-error" class="error-message">Please select a Brick.</p>
+                                </div>
+                                <div>
+                                    <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
+                                    <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                    <p id="details-double-manual-error" class="error-message">Please provide a comment.</p>
+                                </div>
                             </div>
-                            <div>
-                                <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
-                                <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                <p id="details-event-error" class="error-message">Please provide a comment.</p>
+
+                            <!-- Visits Modal Trigger (hidden by default) -->
+                            <div id="visits-modal-trigger" class="space-y-2 hidden">
+                                <div>
+                                    <label for="period-double-visits" class="block text-xs font-medium text-gray-700">Period</label>
+                                    <select id="period-double-visits" name="period-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                        <option value="Full Day" selected>Full Day</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="brick-double-visits" class="block text-xs font-medium text-gray-700">Brick</label>
+                                    <select id="brick-double-visits" name="brick-double-visits" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                        <option value="" disabled selected>Select Medical Rep first</option>
+                                    </select>
+                                </div>
+                                <button type="button" id="open-visits-modal" class="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                                    Select Today's Visits
+                                </button>
                             </div>
+                            <input type="hidden" id="selected-visits-double" name="selected-visits-double">
                         </div>
 
-                        <!-- Leave Form -->
-                        <div id="leave-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-leaves">
-                            <h3 class="text-sm font-semibold text-gray-800">Leave Details</h3>
+                        <!-- Single Visit Form -->
+                        <div id="single-visit-form" class="space-y-2 hidden">
                             <div>
-                                <label for="leave-type" class="block text-xs font-medium text-gray-700">Leave Type</label>
-                                <select id="leave-type" name="leave-type" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="Annual Leave">Annual Leave</option>
-                                    <option value="Sick Leave">Sick Leave</option>
-                                    <option value="Casual Leave">Casual Leave</option>
-                                    <option value="Official Leave">Official Leave</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="period-leave" class="block text-xs font-medium text-gray-700">Period</label>
-                                <select id="period-leave" name="period-leave" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <label for="period-single" class="block text-xs font-medium text-gray-700">Period</label>
+                                <select id="period-single" name="period-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
                                     <option value="AM">AM</option>
                                     <option value="PM">PM</option>
                                     <option value="Full Day" selected>Full Day</option>
                                 </select>
                             </div>
                             <div>
-                                <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
-                                <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                <p id="details-leave-error" class="error-message">Please provide a comment.</p>
+                                <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
+                                <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="" disabled selected>Select DM first</option>
+                                </select>
+                                <p id="brick-single-error" class="error-message">Please select a Brick.</p>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div class="flex flex-row justify-center space-x-2 md:space-x-4 mt-4 print-hidden">
-                        <button type="submit" class="flex-1 md:flex-initial md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
-                            Submit
-                        </button>
-                        <button type="button" id="reset-button" class="flex-1 md:flex-initial md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
-                            Reset
-                        </button>
-                        <button type="button" id="retrieve-button" class="flex-1 md:flex-initial md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
-                            Retrieve
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Submitted Data Table -->
-                <div id="report-details-section" class="mt-8 hidden form-section">
-                    <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4 print-hidden">
-                        <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
-                        <div class="flex space-x-2 w-full md:w-auto">
-                            <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-                        </div>
-                    </div>
-
-                    <div class="w-full overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-                        <div>
-                            <table id="reports-table" class="w-full divide-y divide-gray-200">
-                                <thead id="reports-table-head" class="bg-gray-100">
-                                </thead>
-                                <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Coaching Report Tab Content -->
-            <div id="coaching-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden form-section">
-                <div class="form-header">
-                    <div class="form-logo"><i class="fas fa-chalkboard-teacher"></i></div>
-                    <h1 class="form-title">Coaching Report</h1>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="coaching-med-rep-name" class="block text-xs font-medium text-gray-700">Medical Representative</label>
-                        <select id="coaching-med-rep-name" name="coaching-med-rep-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <option value="" disabled selected>Select DM first</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="coaching-status-filter" class="block text-xs font-medium text-gray-700">Filter by Status</label>
-                        <select id="coaching-status-filter" name="coaching-status-filter" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <option value="All">All</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Completed">Completed</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="coaching-report-table-container" class="mt-8 hidden form-section">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Double Visits This Month</h2>
-                    <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
-                        <table id="coaching-reports-table" class="min-w-full divide-y divide-gray-200">
-                            <thead id="coaching-reports-table-head" class="bg-gray-100">
-                                <!-- Headers will be populated by JS -->
-                            </thead>
-                            <tbody id="coaching-reports-table-body" class="bg-white divide-y divide-gray-200">
-                            </tbody>
-                        </table>
-                        <div id="no-coaching-reports-message" class="hidden text-center text-gray-500 p-4">No double visits to display for this representative this month.</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Monthly Details Tab Content -->
-            <div id="monthly-details-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
-                <div id="monthly-details-print-area" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 id="monthly-report-title" class="text-xl md:text-2xl font-bold text-gray-800"></h2>
-                    </div>
-
-                    <div id="analysis-content" class="space-y-6">
-                        <!-- Three Summary Boxes -->
-                        <div id="analysis-summary-boxes" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <!-- Filed Visits Box -->
-                            <div id="filed-visits-box" class="analysis-summary-box bg-blue-500 text-white p-3 rounded-md shadow-lg cursor-pointer transition hover:bg-blue-600">
-                                <h3 class="font-semibold text-lg mb-1">Filed Visits</h3>
-                                <div class="text-2xl font-bold"><span id="filed-visits-count">0</span></div>
-                                <div class="text-sm">Total Filed Days</div>
-                            </div>
-                            <!-- Events Box -->
-                            <div id="events-box" class="analysis-summary-box bg-purple-500 text-white p-3 rounded-md shadow-lg cursor-pointer transition hover:bg-purple-600">
-                                <h3 class="font-semibold text-lg mb-1">Events</h3>
-                                <div class="text-2xl font-bold"><span id="events-count">0</span></div>
-                                <div class="text-sm">Total Event Days</div>
-                            </div>
-                            <!-- Leaves Box -->
-                            <div id="leaves-box" class="analysis-summary-box bg-red-500 text-white p-3 rounded-md shadow-lg cursor-pointer transition hover:bg-red-600">
-                                <h3 class="font-semibold text-lg mb-1">Leaves</h3>
-                                <div class="text-2xl font-bold"><span id="leaves-count">0</span></div>
-                                <div class="text-sm">Total Leave Days</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Details Sections -->
-                        <div id="filed-visits-details-section" class="mt-8 hidden">
-                            <h3 id="filed-visits-details-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
-                            <div id="double-visits-details" class="space-y-2">
-                            </div>
-                            <div id="single-visits-details" class="space-y-2 mt-4">
-                            </div>
-                        </div>
-
-                        <div id="events-details-section" class="mt-8 hidden">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4">Event Details</h3>
-                            <div id="events-details" class="space-y-2">
-                            </div>
-                        </div>
-
-                        <div id="leaves-details-section" class="mt-8 hidden">
-                            <h3 class="text-lg font-bold text-gray-800 mb-4">Leave Details</h3>
-                            <div id="leaves-details" class="space-y-2">
-                            </div>
-                        </div>
-
-                        <div id="analysis-summary-section" class="hidden">
-                            <div class="w-full flex items-center justify-center">
-                                <div id="activity-chart-container" class="w-full flex items-center justify-center">
-                                    <canvas id="activity-chart"></canvas>
+                            <div>
+                                <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
+                                <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <p id="details-single-error" class="error-message">Please provide a comment.</p>
                                 </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Form -->
+                    <div id="event-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-events">
+                        <h3 class="text-sm font-semibold text-gray-800">Event Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div>
+                                <label for="event-type" class="block text-xs font-medium text-gray-700">Event Type</label>
+                                <select id="event-type" name="event-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Event">Event</option>
+                                    <option value="Admin Work">Admin Work</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="period-event" class="block text-xs font-medium text-gray-700">Period</label>
+                                <select id="period-event" name="period-event" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                    <option value="Full Day" selected>Full Day</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
+                            <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            <p id="details-event-error" class="error-message">Please provide a comment.</p>
+                        </div>
+                    </div>
+
+                    <!-- Leave Form -->
+                    <div id="leave-form" class="p-4 rounded-md shadow-inner space-y-2 hidden form-border-leaves">
+                        <h3 class="text-sm font-semibold text-gray-800">Leave Details</h3>
+                        <div>
+                            <label for="leave-type" class="block text-xs font-medium text-gray-700">Leave Type</label>
+                            <select id="leave-type" name="leave-type" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="Annual Leave">Annual Leave</option>
+                                <option value="Sick Leave">Sick Leave</option>
+                                <option value="Casual Leave">Casual Leave</option>
+                                <option value="Official Leave">Official Leave</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="period-leave" class="block text-xs font-medium text-gray-700">Period</label>
+                            <select id="period-leave" name="period-leave" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                                <option value="AM">AM</option>
+                                <option value="PM">PM</option>
+                                <option value="Full Day" selected>Full Day</option>
+                            </select>
+                        </div>
+                        <!-- New comment box for leave form -->
+                        <div>
+                            <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
+                            <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            <p id="details-leave-error" class="error-message">Please provide a comment.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 mt-4 print-hidden">
+                    <button type="submit" class="w-full md:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-xs font-medium rounded-md text-white shadow-lg transition duration-150 ease-in-out">
+                        Submit
+                    </button>
+                    <button type="button" id="reset-button" class="w-full md:w-auto px-4 py-2 border-2 border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-150 ease-in-out">
+                        Reset
+                    </button>
+                    <button type="button" id="retrieve-button" class="w-full md:w-auto px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs font-medium rounded-md shadow-sm transition duration-150 ease-in-out">
+                        Retrieve
+                    </button>
+                </div>
+            </form>
+
+            <!-- Submitted Data Table -->
+            <div id="report-details-section" class="mt-8 hidden">
+                <div class="flex flex-col md:flex-row items-center justify-between mb-4 space-y-2 md:space-y-0 md:space-x-4 print-hidden">
+                    <h2 class="text-xl font-bold text-gray-800 text-center md:text-left">Report Details</h2>
+                    <div class="flex space-x-2 w-full md:w-auto">
+                        <input type="text" id="search-box" placeholder="Search reports..." class="flex-grow w-full md:w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    </div>
+                </div>
+                <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+                    <table id="reports-table" class="min-w-full divide-y divide-gray-200">
+                        <thead id="reports-table-head" class="bg-gray-100">
+                            <!-- Headers will be dynamically generated here -->
+                        </thead>
+                        <tbody id="reports-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Submitted data will be appended here -->
+                        </tbody>
+                    </table>
+                    <div id="no-reports-message" class="hidden text-center text-gray-500 p-4">No reports to display.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Coaching Report Tab Content -->
+        <div id="coaching-report-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">Coaching Report</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="coaching-med-rep-name" class="block text-xs font-medium text-gray-700">Medical Representative</label>
+                    <select id="coaching-med-rep-name" name="coaching-med-rep-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                        <option value="" disabled selected>Select DM first</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="coaching-status-filter" class="block text-xs font-medium text-gray-700">Filter by Status</label>
+                    <select id="coaching-status-filter" name="coaching-status-filter" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                        <option value="All">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="coaching-report-table-container" class="mt-8 hidden">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Double Visits This Month</h2>
+                <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
+                    <table id="coaching-reports-table" class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brick</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider print-hidden">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coaching-reports-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Double visit data will be appended here -->
+                        </tbody>
+                    </table>
+                    <div id="no-coaching-reports-message" class="hidden text-center text-gray-500 p-4">No double visits to display for this representative this month.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Details Tab Content -->
+        <div id="monthly-details-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
+            <div id="monthly-details-print-area" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="monthly-report-title" class="text-xl md:text-3xl font-bold text-gray-800"></h2>
+                </div>
+
+                <div id="analysis-content" class="space-y-6">
+                    <!-- Three Summary Boxes -->
+                    <div id="analysis-summary-boxes" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Filed Visits Box -->
+                        <div id="filed-visits-box" class="bg-blue-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-blue-600">
+                            <h3 class="font-semibold text-lg mb-1">Filed Visits</h3>
+                            <div class="text-3xl font-bold"><span id="filed-visits-count">0</span></div>
+                            <div class="text-sm">Total Filed Days</div>
+                        </div>
+                        <!-- Events Box -->
+                        <div id="events-box" class="bg-purple-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-purple-600">
+                            <h3 class="font-semibold text-lg mb-1">Events</h3>
+                            <div class="text-3xl font-bold"><span id="events-count">0</span></div>
+                            <div class="text-sm">Total Event Days</div>
+                        </div>
+                        <!-- Leaves Box -->
+                        <div id="leaves-box" class="bg-red-500 text-white p-4 rounded-md shadow-lg cursor-pointer transition hover:bg-red-600">
+                            <h3 class="font-semibold text-lg mb-1">Leaves</h3>
+                            <div class="text-3xl font-bold"><span id="leaves-count">0</span></div>
+                            <div class="text-sm">Total Leave Days</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Details Sections -->
+                    <div id="filed-visits-details-section" class="mt-8 hidden">
+                        <h3 id="filed-visits-details-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
+                        <div id="double-visits-details" class="space-y-2">
+                            <!-- Double visits per med rep will be loaded here -->
+                        </div>
+                        <div id="single-visits-details" class="space-y-2 mt-4">
+                            <!-- Single visits will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div id="events-details-section" class="mt-8 hidden">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Event Details</h3>
+                        <div id="events-details" class="space-y-2">
+                            <!-- Events will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div id="leaves-details-section" class="mt-8 hidden">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Leave Details</h3>
+                        <div id="leaves-details" class="space-y-2">
+                            <!-- Leaves will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div id="analysis-summary-section" class="hidden">
+                        <div class="w-full h-80 flex items-center justify-center">
+                            <div id="activity-chart-container" class="w-full h-80 flex items-center justify-center">
+                                <canvas id="activity-chart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -782,6 +612,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Modal for Double Visit -->
     <div id="visit-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
@@ -791,6 +622,7 @@
                 <button id="close-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
             </div>
             <div id="modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Visits will be dynamically loaded here -->
             </div>
             <div class="flex justify-end space-x-2 border-t pt-4">
                 <button id="save-visits" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">Save</button>
@@ -807,6 +639,7 @@
                 <button id="close-row-details-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
             </div>
             <div id="row-details-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Details will be dynamically loaded here -->
             </div>
             <div class="flex justify-end border-t pt-4">
                 <button id="ok-row-details-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
@@ -822,6 +655,7 @@
                 <button id="close-dates-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
             </div>
             <div id="dates-modal-content" class="overflow-y-auto space-y-2 flex-grow mb-4 pr-2">
+                <!-- Dates will be dynamically loaded here -->
             </div>
             <div class="flex justify-end border-t pt-4">
                 <button id="ok-dates-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
@@ -838,56 +672,63 @@
             </div>
             <div id="coaching-modal-content" class="overflow-y-auto space-y-4 flex-grow mb-4 pr-2">
                 <div id="coaching-modal-header-info" class="space-y-2 mb-4 border-b pb-2">
+                    <!-- Dynamic content here -->
                 </div>
                 <form id="coaching-evaluation-form">
                     <input type="hidden" id="coaching-report-id">
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
-                            <div class="star-rating" data-field="feedback_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                    <!-- Evaluation Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="feedback_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="opening_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="asking_for_commitment_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="handling_objection_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
-                            <div class="star-rating" data-field="opening_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                        <div class="flex flex-col space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="planning_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
-                            <div class="star-rating" data-field="asking_for_commitment_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="time_management_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
-                            <div class="star-rating" data-field="handling_objection_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
-                            <div class="star-rating" data-field="planning_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
-                            <div class="star-rating" data-field="time_management_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
-                            <div class="star-rating" data-field="medical_product_knowledge_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="medical_product_knowledge_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Conclusions Box -->
                     <div class="mt-6">
                         <label for="coaching-conclusions" class="block text-sm font-medium text-gray-700">Conclusions<span class="error-star" data-for="coaching-conclusions">*</span></label>
-                        <textarea id="coaching-conclusions" name="coaching-conclusions" rows="3" class="mt-1 block w-full shadow-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 p-2"></textarea>
+                        <textarea id="coaching-conclusions" name="coaching-conclusions" rows="3" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
                     </div>
                 </form>
             </div>
@@ -907,6 +748,7 @@
                     <button id="close-coaching-view-modal" class="text-gray-400 hover:text-gray-600 print-hidden">&times;</button>
                 </div>
                 <div class="space-y-4">
+                    <!-- Report Header -->
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
                             <span class="font-semibold">Medical Rep:</span>
@@ -922,68 +764,63 @@
                         <p id="view-visit-details"></p>
                     </div>
                     
-                    <div class="space-y-3 border-t pt-4">
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Feedback</label>
-                            <div class="star-rating read-only" data-field="view_feedback_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    <!-- Evaluation Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Feedback</label>
+                                <div class="star-rating read-only" data-field="view_feedback_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Opening</label>
+                                <div class="star-rating read-only" data-field="view_opening_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Asking for commitment</label>
+                                <div class="star-rating read-only" data-field="view_asking_for_commitment_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Handling objection</label>
+                                <div class="star-rating read-only" data-field="view_handling_objection_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Opening</label>
-                            <div class="star-rating read-only" data-field="view_opening_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Planning</label>
+                                <div class="star-rating read-only" data-field="view_planning_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Asking for commitment</label>
-                            <div class="star-rating read-only" data-field="view_asking_for_commitment_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Time Management</label>
+                                <div class="star-rating read-only" data-field="view_time_management_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Handling objection</label>
-                            <div class="star-rating read-only" data-field="view_handling_objection_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Planning</label>
-                            <div class="star-rating read-only" data-field="view_planning_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Time Management</label>
-                            <div class="star-rating read-only" data-field="view_time_management_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge</label>
-                            <div class="star-rating read-only" data-field="view_medical_product_knowledge_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            <div class="flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge</label>
+                                <div class="star-rating read-only" data-field="view_medical_product_knowledge_score">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <!-- Conclusions Box -->
                     <div class="mt-4 border-t pt-4">
                         <p class="font-semibold text-sm">Conclusions:</p>
                         <p id="view-conclusions" class="text-sm p-2 bg-gray-50 rounded-md border mt-1"></p>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div id="confirm-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/3">
-            <h3 id="confirm-modal-title" class="text-lg font-semibold text-gray-800 mb-4">Confirm Deletion</h3>
-            <p id="confirm-modal-text" class="text-sm text-gray-600 mb-6"></p>
-            <div class="flex justify-end space-x-2">
-                <button id="confirm-modal-cancel" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition">Cancel</button>
-                <button id="confirm-modal-confirm" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-sm transition">Delete</button>
-            </div>
+            <!-- Print button removed from here -->
         </div>
     </div>
 
@@ -1010,23 +847,21 @@
             const SUPABASE_URL = "https://plmevfyxpngzymvzvkzn.supabase.co";
             const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c";
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const TABLE_NAME = 'healthcarepro_visits';
-            const REPORTS_TABLE = 'dm_report';
-            const COACHING_REPORTS_TABLE = 'coaching_reports';
+            const TABLE_NAME = 'healthcarepro_visits'; // Name of the Google Sheet data table
+            const REPORTS_TABLE = 'dm_report'; // Name of the new Supabase table
+            const COACHING_REPORTS_TABLE = 'coaching_reports'; // Name for coaching reports
 
             const googleSheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRcnOTUUiyczqtn1s8zhVfYGARkjx-xfT621A9AX7jw3TxmvnBbdc-BZ_EjuOk1uahqY7s5FcdFvQKm/pub?output=csv";
-            let allSheetData = [];
-            let submittedReports = [];
+            let allSheetData = []; // To store the raw data from the Google Sheet
+            let submittedReports = []; // To store all reports fetched from Supabase
             
             // Get form and modal elements
-            const mainAppDiv = document.getElementById('main-app-container');
-            const sideNav = document.querySelector('.side-navigation');
-            const toggleSidebarBtn = document.getElementById('toggle-sidebar');
-            const mainContent = document.getElementById('main-app');
+            const mainAppDiv = document.getElementById('main-app');
+            const sideNav = document.getElementById('side-nav');
+            const navToggleBtn = document.getElementById('nav-toggle-btn');
             const dmReportTabContent = document.getElementById('dm-report-tab-content');
             const monthlyDetailsTabContent = document.getElementById('monthly-details-tab-content');
             const coachingReportTabContent = document.getElementById('coaching-report-tab-content');
-            const mobileHeaderTitle = document.getElementById('mobile-header-title');
 
             const dmReportTabButton = document.getElementById('dm-report-tab');
             const monthlyDetailsTabButton = document.getElementById('monthly-details-tab');
@@ -1035,10 +870,13 @@
             const monthlyDetailsTabButtonMobile = document.getElementById('monthly-details-tab-mobile');
             const coachingReportTabButtonMobile = document.getElementById('coaching-report-tab-mobile');
             
+            const reportsTableHeader = document.getElementById('reports-table-head');
+            const reportsTableBody = document.getElementById('reports-table-body');
             const reportDetailsSection = document.getElementById('report-details-section');
+            const noReportsMessage = document.getElementById('no-reports-message');
 
             const form = document.getElementById('report-form');
-            const dmNameSelect = document.getElementById('dm-name-select');
+            const dmNameSelect = document.getElementById('dm-name');
             const liveTimeDiv = document.getElementById('live-time');
             const activityRadios = document.getElementsByName('activity-type');
             const visitsForm = document.getElementById('visits-form');
@@ -1058,10 +896,6 @@
             const brickDoubleSelect = document.getElementById('brick-double');
             const brickDoubleVisitsSelect = document.getElementById('brick-double-visits');
             const brickSingleSelect = document.getElementById('brick-single');
-            const reportsTableHeader = document.getElementById('reports-table-head');
-            const reportsTableBody = document.getElementById('reports-table-body');
-            const coachingReportsTableHead = document.getElementById('coaching-reports-table-head');
-            const noReportsMessage = document.getElementById('no-reports-message');
             const resetButton = document.getElementById('reset-button');
             const retrieveButton = document.getElementById('retrieve-button');
             const searchBox = document.getElementById('search-box');
@@ -1075,22 +909,20 @@
             const cancelVisitsBtn = document.getElementById('cancel-visits');
             const selectedVisitsInput = document.getElementById('selected-visits-double');
 
+            // New modal for full row details
             const rowDetailsModal = document.getElementById('row-details-modal');
             const closeRowDetailsModalBtn = document.getElementById('close-row-details-modal');
             const okRowDetailsModalBtn = document.getElementById('ok-row-details-modal');
             const rowDetailsContent = document.getElementById('row-details-content');
             
+            // New modal for visit dates
             const datesModal = document.getElementById('dates-modal');
             const datesModalTitle = document.getElementById('dates-modal-title');
             const datesModalContent = document.getElementById('dates-modal-content');
             const closeDatesModalBtn = document.getElementById('close-dates-modal');
             const okDatesModalBtn = document.getElementById('ok-dates-modal');
 
-            const confirmModal = document.getElementById('confirm-modal');
-            const confirmModalText = document.getElementById('confirm-modal-text');
-            const confirmModalConfirmBtn = document.getElementById('confirm-modal-confirm');
-            const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel');
-
+            // Analysis Page elements
             const monthlyDetailsPrintArea = document.getElementById('monthly-details-print-area');
             const analysisSummarySection = document.getElementById('analysis-summary-section');
             const monthlyReportTitle = document.getElementById('monthly-report-title');
@@ -1113,6 +945,7 @@
             const activityChartContainer = document.getElementById('activity-chart-container');
             const activityChartCtx = document.getElementById('activity-chart').getContext('2d');
             
+            // Coaching Report elements
             const coachingMedRepNameSelect = document.getElementById('coaching-med-rep-name');
             const coachingStatusFilter = document.getElementById('coaching-status-filter');
             const coachingReportTableContainer = document.getElementById('coaching-report-table-container');
@@ -1125,61 +958,21 @@
             const resetCoachingFormBtn = document.getElementById('reset-coaching-form');
             const starRatings = document.querySelectorAll('.star-rating');
             const coachingReportIdInput = document.getElementById('coaching-report-id');
+            const coachingBadgeSide = document.getElementById('coaching-badge-side');
+            const coachingBadgeTop = document.getElementById('coaching-badge-top');
             
+            // Coaching View Modal elements
             const coachingViewModal = document.getElementById('coaching-view-modal');
             const closeCoachingViewModalBtn = document.getElementById('close-coaching-view-modal');
             const coachingViewPrintArea = document.getElementById('coaching-view-print-area');
 
-            // --- FUNCTION DEFINITIONS ---
-
-            function updateFormVisibility() {
-                const selectedActivity = document.querySelector('input[name="activity-type"]:checked')?.value;
-                visitsForm.classList.add('hidden');
-                eventForm.classList.add('hidden');
-                leaveForm.classList.add('hidden');
-
-                if (selectedActivity === 'Visits') {
-                    visitsForm.classList.remove('hidden');
-                    updateVisitTypeVisibility();
-                } else if (selectedActivity === 'Event') {
-                    eventForm.classList.remove('hidden');
-                } else if (selectedActivity === 'Leave') {
-                    leaveForm.classList.remove('hidden');
-                }
-            }
-
-            function updateVisitTypeVisibility() {
-                const selectedVisitType = visitTypeSelect.value;
-                doubleVisitForm.classList.add('hidden');
-                singleVisitForm.classList.add('hidden');
-
-                if (selectedVisitType === 'Double Visit') {
-                    doubleVisitForm.classList.remove('hidden');
-                    manualDoubleVisitForm.classList.add('hidden');
-                    visitsModalTriggerDiv.classList.add('hidden');
-                } else if (selectedVisitType === 'Single Visit') {
-                    singleVisitForm.classList.remove('hidden');
-                }
-            }
-
-            let confirmCallback = null;
-            const showConfirmModal = (text, onConfirm) => {
-                confirmModalText.textContent = text;
-                confirmCallback = onConfirm;
-                confirmModal.classList.remove('hidden');
-            };
-            const hideConfirmModal = () => {
-                confirmModal.classList.add('hidden');
-                confirmCallback = null;
-            };
-            confirmModalCancelBtn.addEventListener('click', hideConfirmModal);
-            confirmModalConfirmBtn.addEventListener('click', () => {
-                if (confirmCallback) {
-                    confirmCallback();
-                }
-                hideConfirmModal();
+            // --- Sidebar Toggle Logic ---
+            navToggleBtn.addEventListener('click', () => {
+                sideNav.classList.toggle('collapsed');
+                mainAppDiv.classList.toggle('sidebar-collapsed');
             });
 
+            // Function to show custom message notification
             let notificationTimeout;
             const showNotification = (message, type = 'info') => {
                 const container = document.getElementById('notification-container');
@@ -1191,25 +984,25 @@
                     container.appendChild(notification);
                 }
                 
-                notification.className = 'notification';
+                // Clear previous classes and set new ones
+                notification.className = 'notification'; // Reset classes
                 notification.classList.add(type);
                 notification.textContent = message;
+                
+                // Show the notification
                 notification.classList.add('show');
                 
+                // Clear any existing timeout and set a new one
                 clearTimeout(notificationTimeout);
                 notificationTimeout = setTimeout(() => {
                     notification.classList.remove('show');
-                }, 5000);
+                }, 5000); // 5 seconds
             };
 
-            const showDatesModal = (title, items) => {
+            // New modal functions
+            const showDatesModal = (title, dates) => {
                 datesModalTitle.textContent = title;
-                datesModalContent.innerHTML = items.map(item => 
-                    `<div class="flex justify-between text-sm text-gray-700 p-2 border-b last:border-b-0">
-                        <span>${item.date}</span>
-                        <span class="font-semibold bg-gray-100 px-2 py-0.5 rounded-full text-xs">${item.period}</span>
-                    </div>`
-                ).join('');
+                datesModalContent.innerHTML = dates.map(date => `<p class="text-sm text-gray-700 p-1 border-b">${date}</p>`).join('');
                 datesModal.classList.remove('hidden');
             };
 
@@ -1223,7 +1016,7 @@
             const showRowDetailsModal = (report) => {
                 rowDetailsContent.innerHTML = '';
                 const detailsHtml = Object.entries(report).map(([key, value]) => {
-                    if (key === 'id' || key === 'dm_name') return '';
+                    if (key === 'id' || key === 'dm_name') return ''; // Skip ID and DM Name
                     let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                     if (key === 'created_at') formattedKey = 'Date & Time';
                     let formattedValue = value;
@@ -1232,7 +1025,7 @@
                     return `
                         <div class="p-2 border-b last:border-b-0">
                             <p class="font-semibold text-gray-800">${formattedKey}:</p>
-                            <p class="text-sm text-gray-600 break-words">${formattedValue}</p>
+                            <p class="text-sm text-gray-600">${formattedValue}</p>
                         </div>
                     `;
                 }).join('');
@@ -1247,6 +1040,8 @@
             closeRowDetailsModalBtn.addEventListener('click', hideRowDetailsModal);
             okRowDetailsModalBtn.addEventListener('click', hideRowDetailsModal);
 
+
+            // Function to update live Cairo time
             const updateLiveTime = () => {
                 const now = new Date();
                 const options = {
@@ -1261,20 +1056,22 @@
                 liveTimeDiv.textContent = formatter.format(now);
             };
 
+            // Initial call and set interval for live time
             updateLiveTime();
             setInterval(updateLiveTime, 1000);
             
+            // Function to populate DM dropdown after data is fetched
             const populateDmDropdown = (dmNames) => {
-                const dmSelect = dmNameSelect;
-                dmSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
                 dmNames.forEach(name => {
                     const option = document.createElement('option');
                     option.value = name;
                     option.textContent = name;
-                    dmSelect.appendChild(option);
+                    dmNameSelect.appendChild(option);
                 });
             };
 
+            // Function to fetch and parse CSV data
             const fetchData = async () => {
                 try {
                     const response = await fetch(googleSheetUrl);
@@ -1282,11 +1079,14 @@
                     const csvText = await response.text();
 
                     Papa.parse(csvText, {
-                        header: false,
+                        header: false, // Set to false to access data by index
                         dynamicTyping: true,
                         skipEmptyLines: true,
                         complete: (results) => {
+                            // Slice to remove the header row, then store the data
                             allSheetData = results.data.slice(1);
+
+                            // Map to specified column indices: B (index 1)
                             allDmNames = [...new Set(allSheetData.map(item => item[1]).filter(Boolean))];
                         }
                     });
@@ -1296,33 +1096,7 @@
                 }
             };
 
-            const handleDeleteReport = (reportId) => {
-                showConfirmModal('Are you sure you want to delete this report? This action cannot be undone.', async () => {
-                    const { error } = await supabase.from(REPORTS_TABLE).delete().eq('id', reportId);
-                    if (error) {
-                        showNotification('Failed to delete report.', 'error');
-                        console.error('Delete error:', error);
-                    } else {
-                        showNotification('Report deleted successfully.', 'success');
-                        fetchReportsFromSupabase(dmNameSelect.value);
-                    }
-                });
-            };
-
-            const handleDeleteCoachingReport = (reportId) => {
-                 showConfirmModal('Are you sure you want to delete this coaching evaluation? This action cannot be undone.', async () => {
-                    const { error } = await supabase.from(COACHING_REPORTS_TABLE).delete().eq('id', reportId);
-                     if (error) {
-                         showNotification('Failed to delete coaching report.', 'error');
-                         console.error('Delete error:', error);
-                     } else {
-                         showNotification('Coaching report deleted successfully.', 'success');
-                         fetchAndRenderCoachingReports(dmNameSelect.value, coachingMedRepNameSelect.value);
-                         updateCoachingBadge();
-                     }
-                 });
-            };
-
+            // Function to fetch all reports from Supabase and render them
             const fetchReportsFromSupabase = async (dmName = '') => {
                 let query = supabase.from(REPORTS_TABLE).select('*').order('created_at', { ascending: false });
                 if (dmName) {
@@ -1338,19 +1112,199 @@
                 submittedReports = data || [];
                 renderReports(submittedReports, dmName);
             };
-            
-            const formatHeader = (key) => {
-                return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+            // Function to delete a report
+            const deleteReport = async (reportId) => {
+                const isConfirmed = window.confirm("Are you sure you want to delete this report?");
+                if (!isConfirmed) return;
+
+                const { error } = await supabase.from(REPORTS_TABLE).delete().eq('id', reportId);
+                if (error) {
+                    showNotification('Failed to delete report.', 'error');
+                    console.error('Delete error:', error);
+                } else {
+                    showNotification('Report deleted successfully!', 'success');
+                    await fetchReportsFromSupabase(dmNameSelect.value);
+                }
             };
             
-            const formatUTCTime = (dateString) => {
-                if (!dateString) return 'N/A';
-                const date = new Date(dateString);
-                // Convert UTC time to local time in Cairo timezone without adding extra hours
-                const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Africa/Cairo' };
-                return date.toLocaleTimeString('en-US', options);
+            // Function to delete a coaching report
+            const deleteCoachingReport = async (reportId) => {
+                const isConfirmed = window.confirm("Are you sure you want to delete this coaching report?");
+                if (!isConfirmed) return;
+
+                const { error } = await supabase.from(COACHING_REPORTS_TABLE).delete().eq('dm_report_id', reportId);
+                if (error) {
+                    showNotification('Failed to delete coaching report.', 'error');
+                    console.error('Delete error:', error);
+                } else {
+                    showNotification('Coaching report deleted successfully!', 'success');
+                    await fetchAndRenderCoachingReports(dmNameSelect.value, coachingMedRepNameSelect.value);
+                }
             };
 
+            // Function to populate Med Rep and Brick dropdowns based on selected DM
+            const updateAssociatedDropdowns = (sourceDmSelect, targetMedRepSelect, targetBrickSelects = []) => {
+                const selectedDm = sourceDmSelect.value;
+                if (!selectedDm) {
+                    targetMedRepSelect.innerHTML = `<option value="" disabled selected>Select DM first</option>`;
+                    targetBrickSelects.forEach(sel => sel.innerHTML = `<option value="" disabled selected>Select DM first</option>`);
+                    return;
+                }
+
+                const filteredData = allSheetData.filter(row => row[1] === selectedDm);
+                const medRepNames = [...new Set(filteredData.map(item => item[3]).filter(Boolean))];
+                const dmBricks = [...new Set(filteredData.map(item => item[9]).filter(Boolean))];
+
+                targetMedRepSelect.innerHTML = `<option value="" disabled selected>Select Med Rep</option>`;
+                medRepNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    targetMedRepSelect.appendChild(option);
+                });
+                
+                if (targetBrickSelects.length > 0) {
+                    const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                    targetBrickSelects.forEach(sel => sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions);
+                }
+            };
+            
+            // Event listener for Med Rep dropdown to populate brick dropdowns
+            medRepNameSelect.addEventListener('change', (e) => {
+                const selectedMedRep = e.target.value;
+                const filteredBricks = allSheetData.filter(row => row[3] === selectedMedRep).map(item => item[9]).filter(Boolean);
+                const uniqueBricks = [...new Set(filteredBricks)];
+
+                const brickOptions = uniqueBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                brickDoubleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
+                brickDoubleVisitsSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
+
+                doubleVisitModeDiv.classList.remove('hidden');
+                manualDoubleVisitForm.classList.add('hidden');
+                visitsModalTriggerDiv.classList.add('hidden');
+                doubleVisitModeRadios.forEach(radio => radio.checked = false);
+            });
+
+            // Event listener for DM name dropdown
+            dmNameSelect.addEventListener('change', () => {
+                const dmName = dmNameSelect.value;
+                if (dmName) {
+                    activityRadios.forEach(radio => radio.disabled = false);
+                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
+                    updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect); // Also update coaching tab
+                    reportDetailsSection.classList.add('hidden');
+                    coachingReportTableContainer.classList.add('hidden');
+                    submittedReports = [];
+                    renderReports(submittedReports);
+                    
+                    // Reset Monthly Details Tab
+                    monthlyReportTitle.textContent = '';
+                    filedVisitsCountSpan.textContent = '0';
+                    eventsCountSpan.textContent = '0';
+                    leavesCountSpan.textContent = '0';
+                    filedVisitsDetailsSection.classList.add('hidden');
+                    eventsDetailsSection.classList.add('hidden');
+                    leavesDetailsSection.classList.add('hidden');
+                    if (myChart) {
+                        myChart.destroy();
+                        myChart = null;
+                    }
+                    analysisSummarySection.classList.add('hidden');
+
+                    // Reset Coaching Report Tab
+                    coachingMedRepNameSelect.value = '';
+                    coachingStatusFilter.value = 'All';
+                    coachingReportsTableBody.innerHTML = '';
+                    noCoachingReportsMessage.classList.add('hidden');
+
+                } else {
+                    activityRadios.forEach(radio => radio.disabled = true);
+                    updateFormVisibility();
+                    reportDetailsSection.classList.add('hidden');
+                }
+            });
+            
+            const coachingFilterChanged = async () => {
+                const dmName = dmNameSelect.value;
+                const medRepName = coachingMedRepNameSelect.value;
+                if (dmName && medRepName) {
+                    await fetchAndRenderCoachingReports(dmName, medRepName);
+                    await updatePendingCoachingBadge(dmName, medRepName);
+                }
+            };
+
+            coachingMedRepNameSelect.addEventListener('change', coachingFilterChanged);
+            coachingStatusFilter.addEventListener('change', coachingFilterChanged);
+
+
+            const updateFormVisibility = () => {
+                const selectedActivity = document.querySelector('input[name="activity-type"]:checked')?.value;
+                visitsForm.classList.add('hidden');
+                eventForm.classList.add('hidden');
+                leaveForm.classList.add('hidden');
+
+                if (selectedActivity === 'Visits') {
+                    visitsForm.classList.remove('hidden');
+                    updateVisitTypeVisibility();
+                } else if (selectedActivity === 'Event') {
+                    eventForm.classList.remove('hidden');
+                } else if (selectedActivity === 'Leave') {
+                    leaveForm.classList.remove('hidden');
+                }
+            };
+
+            const updateVisitTypeVisibility = () => {
+                const selectedVisitType = visitTypeSelect.value;
+                doubleVisitForm.classList.add('hidden');
+                singleVisitForm.classList.add('hidden');
+
+                if (selectedVisitType === 'Double Visit') {
+                    doubleVisitForm.classList.remove('hidden');
+                    manualDoubleVisitForm.classList.add('hidden');
+                    visitsModalTriggerDiv.classList.add('hidden');
+                } else if (selectedVisitType === 'Single Visit') {
+                    singleVisitForm.classList.remove('hidden');
+                }
+            };
+
+            doubleVisitModeRadios.forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    if (event.target.value === 'manual') {
+                        manualDoubleVisitForm.classList.remove('hidden');
+                        visitsModalTriggerDiv.classList.add('hidden');
+                    } else if (event.target.value === 'visits') {
+                        manualDoubleVisitForm.classList.add('hidden');
+                        visitsModalTriggerDiv.classList.remove('hidden');
+                    }
+                });
+            });
+
+            activityRadios.forEach(radio => {
+                radio.addEventListener('change', updateFormVisibility);
+            });
+            visitTypeSelect.addEventListener('change', updateVisitTypeVisibility);
+
+            visitsForm.classList.add('hidden');
+            eventForm.classList.add('hidden');
+            leaveForm.classList.add('hidden');
+
+            const formatHeader = (key) => {
+                return key.replace(/([A-Z])/g, ' $1')
+                             .replace(/^./, str => str.toUpperCase());
+            };
+            
+            // Helper function to format UTC time string to 12-hour format
+            const formatUTCTime = (dateString) => {
+                if (!dateString) return 'N/A';
+                const timePart = dateString.substring(11, 19);
+                let [hours, minutes, seconds] = timePart.split(':');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12 || 12;
+                return `${hours}:${minutes}:${seconds} ${ampm}`;
+            };
+
+            // Function to render the reports table with corrected date/time formatting
             const renderReports = (reports, dmName = '', searchTerm = '') => {
                 reportsTableHeader.innerHTML = '';
                 reportsTableBody.innerHTML = '';
@@ -1372,99 +1326,97 @@
                 noReportsMessage.classList.add('hidden');
 
                 const headers = Object.keys(filteredReports[0]).filter(key => key !== 'dm_name' && key !== 'id');
-                const allHeaders = ['activity_type', 'day_date', ...headers.filter(h => h !== 'activity_type' && h !== 'day_date')];
-                
-                if (loggedInUser?.title?.toLowerCase() === 'admin') {
+                const allHeaders = ['day_date', ...headers];
+                if (loggedInUser && loggedInUser.title === 'admin') {
                     allHeaders.push('actions');
                 }
 
                 const headerRow = document.createElement('tr');
                 headerRow.innerHTML = allHeaders.map(header => {
                     let headerText = formatHeader(header);
-                    if (header === 'day_date') headerText = 'Day & Date';
-                    if (header === 'activity_type') headerText = 'Activity Type';
-                    if (header === 'created_at') headerText = 'Time';
-                    if (header === 'med_rep') headerText = 'Med Rep';
-                    if (header === 'actions') headerText = 'Actions';
+                    if (header === 'day_date') {
+                        headerText = 'Day & Date';
+                    } else if (header === 'activity_type') {
+                        headerText = 'Activity Type';
+                    } else if (header === 'created_at') {
+                        headerText = 'Time'; // Changed to just "Time" for clarity
+                    } else if (header === 'med_rep') {
+                        headerText = 'Med Rep';
+                    } else if (header === 'comment') {
+                        headerText = 'Comment';
+                    } else if (header === 'actions') {
+                        headerText = 'Actions';
+                    }
                     return `<th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${headerText}</th>`;
                 }).join('');
                 reportsTableHeader.appendChild(headerRow);
 
                 filteredReports.forEach(report => {
                     const newRow = document.createElement('tr');
-                    newRow.className = 'hover:bg-gray-100 transition duration-150 ease-in-out border-l-4 cursor-pointer';
-                    newRow.dataset.id = report.id;
+                    newRow.className = 'hover:bg-gray-100 transition duration-150 ease-in-out border-l-4';
+                    newRow.dataset.id = report.id; // Store the report ID on the row
+                    newRow.dataset.isMobile = window.innerWidth < 768; // Add a data attribute for mobile check
 
-                    if (report.activity_type.includes('Visits')) newRow.style.borderColor = '#ECFAE5';
-                    else if (report.activity_type.includes('Event')) newRow.style.borderColor = '#E8F9FF';
-                    else if (report.activity_type.includes('Leave')) newRow.style.borderColor = '#FFE6E1';
+                    if (report.activity_type.includes('Visits')) {
+                        newRow.style.borderColor = '#ECFAE5';
+                    } else if (report.activity_type.includes('Event')) {
+                        newRow.style.borderColor = '#E8F9FF';
+                    } else if (report.activity_type.includes('Leave')) {
+                        newRow.style.borderColor = '#FFE6E1';
+                    }
 
                     allHeaders.forEach(key => {
                         const newCell = document.createElement('td');
                         newCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
 
-                        if (key === 'actions') {
-                            newCell.innerHTML = `<button class="delete-report-btn text-red-500 hover:text-red-700" data-id="${report.id}"><i class="fas fa-trash-alt"></i></button>`;
-                        } else if (key === 'day_date') {
+                        if (key === 'day_date') {
                             const date = new Date(report.created_at);
-                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Africa/Cairo' });
-                            const formattedDateWithoutYear = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Africa/Cairo' });
-                            newCell.textContent = `${dayName} - ${formattedDateWithoutYear}`;
+                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+                            const formattedDate = report.created_at.substring(0, 10);
+                            newCell.textContent = `${dayName} - ${formattedDate}`;
                         } else if (key === 'created_at') {
                             newCell.textContent = formatUTCTime(report.created_at);
                         } else if (key === 'comment') {
                             const originalComment = report[key] || 'N/A';
                             const truncatedComment = originalComment.length > 30 ? originalComment.substring(0, 30) + '...' : originalComment;
-                            newCell.innerHTML = `<span>${truncatedComment}</span> ${originalComment.length > 30 ? `<a href="#" class="view-more text-blue-500 font-semibold" data-id="${report.id}">etc</a>` : ''}`;
-                            newCell.className = 'px-3 py-2 text-gray-500';
+                            newCell.textContent = truncatedComment;
+                            newCell.className = 'px-3 py-2 text-gray-500'; 
+                        } else if (key === 'actions') {
+                            newCell.className = 'px-3 py-2 whitespace-nowrap text-right text-sm font-medium print-hidden';
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.textContent = 'Delete';
+                            deleteBtn.className = 'text-red-600 hover:text-red-900 font-bold';
+                            deleteBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                deleteReport(report.id);
+                            });
+                            newCell.appendChild(deleteBtn);
                         } else {
                             newCell.textContent = report[key] || 'N/A';
                         }
+                        
                         newRow.appendChild(newCell);
                     });
-                    
                     reportsTableBody.appendChild(newRow);
                 });
+
+                // Add event listener for the whole row on mobile
+                reportsTableBody.querySelectorAll('tr').forEach(row => {
+                    row.addEventListener('click', (event) => {
+                        // Check if the click originated from the delete button
+                        if (event.target.tagName === 'BUTTON' && event.target.textContent === 'Delete') {
+                            return;
+                        }
+                        if (window.innerWidth < 768) {
+                            const reportId = row.dataset.id;
+                            const report = submittedReports.find(r => r.id.toString() === reportId);
+                            if (report) {
+                                showRowDetailsModal(report);
+                            }
+                        }
+                    });
+                });
             };
-
-            reportsTableBody.addEventListener('click', (event) => {
-                const target = event.target;
-                const row = target.closest('tr');
-                if (!row) return;
-
-                const reportId = row.dataset.id;
-                const report = submittedReports.find(r => r.id.toString() === reportId);
-
-                if (report) {
-                    if (target.closest('.delete-report-btn')) {
-                        event.stopPropagation(); // Prevent modal from opening
-                        handleDeleteReport(report.id);
-                    } else if (target.closest('.view-more')) {
-                        event.preventDefault();
-                        event.stopPropagation(); // Prevent modal from opening twice
-                        showRowDetailsModal(report);
-                    } else {
-                        showRowDetailsModal(report);
-                    }
-                }
-            });
-
-            coachingReportsTableBody.addEventListener('click', (event) => {
-                const target = event.target;
-                const row = target.closest('tr');
-                if (!row) return;
-
-                const coachingId = target.closest('.delete-coaching-btn')?.dataset.id;
-                if (coachingId) {
-                    event.stopPropagation();
-                    handleDeleteCoachingReport(coachingId);
-                } else {
-                    const visitId = row.dataset.visitId;
-                    const status = row.querySelector('.status-badge').textContent.trim();
-                    openCoachingModal(visitId, status);
-                }
-            });
-
 
             const fetchTodaysVisits = async (medRepName) => {
                 const now = new Date();
@@ -1563,12 +1515,10 @@
 
                 showNotification('Report submitted successfully!', 'success');
                 await fetchReportsFromSupabase(dmName);
-                await updateCoachingBadge();
-                hideModal();
+
                 form.reset();
                 dmNameSelect.value = dmName;
-                updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
-                updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
+                updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
                 selectedVisitsInput.value = '';
                 updateFormVisibility();
                 activityRadios.forEach(radio => radio.disabled = false);
@@ -1586,7 +1536,7 @@
                 }
             };
             
-            // --- FORM & EVENT LISTENERS ---
+            // UPDATED submit button logic with individual field validation
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 clearErrorMessages();
@@ -1616,8 +1566,8 @@
                         }
                         const selectedMode = document.querySelector('input[name="double-visit-mode"]:checked')?.value;
                         if (!selectedMode) {
-                            showError('double-visit-mode-error', 'Please select a report mode.');
-                            isValid = false;
+                             showError('double-visit-mode-error', 'Please select a report mode.');
+                             isValid = false;
                         } else if (selectedMode === 'manual') {
                             if (!brickDoubleSelect.value) {
                                 showError('brick-double-error', 'Please select a Brick.');
@@ -1664,30 +1614,30 @@
                         isValid = false;
                     }
                     if(isValid) {
-                        newReport = {
-                            dm_name: dmName,
-                            activity_type: `Event (${document.getElementById('event-type').value})`,
-                            period: document.getElementById('period-event').value,
-                            brick: 'N/A',
-                            med_rep: 'N/A',
-                            comment: document.getElementById('details-event').value,
-                        };
+                             newReport = {
+                                 dm_name: dmName,
+                                 activity_type: `Event (${document.getElementById('event-type').value})`,
+                                 period: document.getElementById('period-event').value,
+                                 brick: 'N/A',
+                                 med_rep: 'N/A',
+                                 comment: document.getElementById('details-event').value,
+                             };
                     }
                 } else if (activityType === 'Leave') {
-                    if (!document.getElementById('details-leave').value.trim()) {
-                        showError('details-leave-error', 'Please provide a comment.');
-                        isValid = false;
-                    }
-                    if(isValid) {
-                        newReport = {
-                            dm_name: dmName,
-                            activity_type: `Leave (${leaveTypeSelect.value})`,
-                            period: document.getElementById('period-leave').value,
-                            brick: 'N/A',
-                            med_rep: 'N/A',
-                            comment: document.getElementById('details-leave').value,
-                        };
-                    }
+                     if (!document.getElementById('details-leave').value.trim()) {
+                         showError('details-leave-error', 'Please provide a comment.');
+                         isValid = false;
+                     }
+                     if(isValid) {
+                         newReport = {
+                             dm_name: dmName,
+                             activity_type: `Leave (${leaveTypeSelect.value})`,
+                             period: document.getElementById('period-leave').value,
+                             brick: 'N/A',
+                             med_rep: 'N/A',
+                             comment: document.getElementById('details-leave').value,
+                         };
+                     }
                 }
 
                 if (!isValid) {
@@ -1704,23 +1654,20 @@
 
                     showNotification('Report submitted successfully!', 'success');
                     await fetchReportsFromSupabase(dmName);
-                    if (newReport.activity_type.includes('Double Visit')) {
-                        await updateCoachingBadge();
-                    }
 
                     form.reset();
                     activityRadios.forEach(radio => radio.checked = false);
                     updateFormVisibility();
                     dmNameSelect.value = dmName;
-                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
-                    updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
+                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
                     selectedVisitsInput.value = '';
                     activityRadios.forEach(radio => radio.disabled = false);
                 }
             });
 
+            // Reset button functionality
             resetButton.addEventListener('click', () => {
-                const dmName = dmNameSelect.value;
+                const dmName = dmNameSelect.value; // Store the current DM name
                 
                 form.reset();
                 clearErrorMessages();
@@ -1728,22 +1675,24 @@
                     radio.checked = false;
                 });
 
+                // Reset conditional forms and table
                 updateFormVisibility();
                 reportDetailsSection.classList.add('hidden');
                 reportsTableBody.innerHTML = '';
                 reportsTableHeader.innerHTML = '';
                 noReportsMessage.classList.remove('hidden');
 
+                // Restore the DM selection and re-enable radios
                 dmNameSelect.value = dmName;
                 if (dmName) {
                     activityRadios.forEach(radio => radio.disabled = false);
-                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
-                    updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
+                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
                 }
                 
                 selectedVisitsInput.value = '';
             });
 
+            // Retrieve button functionality
             retrieveButton.addEventListener('click', async () => {
                 const dmName = dmNameSelect.value;
                 if (dmName) {
@@ -1755,6 +1704,7 @@
                 }
             });
 
+            // Search functionality
             searchBox.addEventListener('keyup', (event) => {
                 const dmName = dmNameSelect.value;
                 if (dmName) {
@@ -1773,48 +1723,35 @@
                 const allTabs = [reportTab, coachingTab, detailsTab];
                 const allContent = [dmReportTabContent, coachingReportTabContent, monthlyDetailsTabContent];
 
-                const tabNames = {
-                    'dm-report-tab': 'DM Report',
-                    'coaching-report-tab': 'Coaching Report',
-                    'monthly-details-tab': 'Monthly Details',
-                    'dm-report-tab-mobile': 'DM Report',
-                    'coaching-report-tab-mobile': 'Coaching Report',
-                    'monthly-details-tab-mobile': 'Monthly Details'
-                };
-
-                const switchTab = (activeIndex, tabId) => {
+                const switchTab = (activeIndex) => {
                     allTabs.forEach((tab, index) => {
                         tab.classList.toggle('active', index === activeIndex);
                     });
-                    
                     allContent.forEach((content, index) => {
                         content.classList.toggle('hidden', index !== activeIndex);
                     });
-
-                    if (window.innerWidth < 1024) {
-                        mobileHeaderTitle.textContent = tabNames[tabId];
-                    }
                 };
 
-                reportTab.addEventListener('click', () => switchTab(0, reportTabId));
+                reportTab.addEventListener('click', () => switchTab(0));
+
                 coachingTab.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
                     if (!selectedDm) {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
-                        switchTab(0, reportTabId);
+                        switchTab(0);
                         return;
                     }
-                    switchTab(1, coachingTabId);
+                    switchTab(1);
                 });
 
                 detailsTab.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
                     if (!selectedDm) {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
-                        switchTab(0, reportTabId);
+                        switchTab(0);
                         return;
                     }
-                    switchTab(2, detailsTabId);
+                    switchTab(2);
                     renderAnalysisPage();
                 });
             };
@@ -1849,9 +1786,8 @@
                 }
 
                 const now = new Date();
-                const monthName = now.toLocaleString('en-US', { month: 'long' });
-                const yearShort = now.getFullYear().toString().slice(-2);
-                monthlyReportTitle.textContent = `Month Report Details for ${monthName} ${yearShort}`;
+                const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                monthlyReportTitle.textContent = `Current Month Report Details for ${month}`;
 
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
                 const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
@@ -1872,144 +1808,196 @@
                 allMonthlyReports = monthlyReports || [];
 
                 if (allMonthlyReports.length === 0) {
-                        showNotification(`No reports found for ${selectedDm} this month.`, 'info');
-                        analysisSummarySection.classList.add('hidden');
-                        if (myChart) myChart.destroy();
-                        return;
+                     showNotification(`No reports found for ${selectedDm} this month.`, 'info');
+                     analysisSummarySection.classList.add('hidden');
+                     if (myChart) myChart.destroy();
+                     return;
                 }
                 
                 const analysis = {
-                    visits: { single: [], double: [] },
-                    events: [],
-                    leaves: []
+                    visits: { single: {}, double: {} },
+                    events: {},
+                    leaves: {}
+                };
+                
+                const activityCounts = {
+                    'Visits (Single Visit)': 0,
+                    'Visits (Double Visit)': 0,
+                    'Event (Meeting)': 0,
+                    'Event (Event)': 0,
+                    'Event (Admin Work)': 0,
+                    'Leave (Annual Leave)': 0,
+                    'Leave (Sick Leave)': 0,
+                    'Leave (Casual Leave)': 0,
+                    'Leave (Official Leave)': 0,
                 };
                 
                 allMonthlyReports.forEach(report => {
                     const activity = report.activity_type;
                     const date = report.created_at.substring(0, 10);
-                    const period = report.period || 'N/A';
 
                     if (activity.includes('Visits')) {
                         if (activity.includes('Single Visit')) {
-                            analysis.visits.single.push({ date, period });
+                            if (!analysis.visits.single[date]) {
+                                analysis.visits.single[date] = 1;
+                                activityCounts['Visits (Single Visit)']++;
+                            }
                         }
                         if (activity.includes('Double Visit')) {
-                            analysis.visits.double.push({ date, period, med_rep: report.med_rep });
+                            const medRep = report.med_rep;
+                            if (medRep && medRep !== 'N/A') {
+                                if (!analysis.visits.double[date]) {
+                                    analysis.visits.double[date] = {};
+                                }
+                                if (!analysis.visits.double[date][medRep]) {
+                                    analysis.visits.double[date][medRep] = { count: 1, dates: [date] };
+                                    activityCounts['Visits (Double Visit)']++;
+                                } else {
+                                    if (!analysis.visits.double[date][medRep].dates.includes(date)) {
+                                        analysis.visits.double[date][medRep].dates.push(date);
+                                    }
+                                }
+                            }
                         }
                     } else if (activity.includes('Event')) {
-                        const eventType = activity.match(/\(([^)]+)\)/)[1];
-                        analysis.events.push({ date, period, type: eventType });
+                        const eventType = activity.split('(')[1].replace(')', '');
+                        const fullEventType = `Event (${eventType})`;
+                        if (!analysis.events[fullEventType]) {
+                            analysis.events[fullEventType] = {};
+                        }
+                         if (!analysis.events[fullEventType][date]) {
+                            analysis.events[fullEventType][date] = 1;
+                            activityCounts[fullEventType]++;
+                        }
                     } else if (activity.includes('Leave')) {
-                        const leaveType = activity.match(/\(([^)]+)\)/)[1];
-                        analysis.leaves.push({ date, period, type: leaveType });
+                        const leaveType = activity.split('(')[1].replace(')', '');
+                        const fullLeaveType = `Leave (${leaveType})`;
+                        if (!analysis.leaves[fullLeaveType]) {
+                            analysis.leaves[fullLeaveType] = {};
+                        }
+                        if (!analysis.leaves[fullLeaveType][date]) {
+                            analysis.leaves[fullLeaveType][date] = 1;
+                            activityCounts[fullLeaveType]++;
+                        }
                     }
                 });
                 
-                const getUniqueDaysCount = (arr) => new Set(arr.map(item => item.date)).size;
-                
-                const totalFiledVisits = getUniqueDaysCount([...analysis.visits.single, ...analysis.visits.double]);
-                const totalEvents = getUniqueDaysCount(analysis.events);
-                const totalLeaves = getUniqueDaysCount(analysis.leaves);
+                const totalSingleVisits = Object.keys(analysis.visits.single).length;
+                let totalDoubleVisits = 0;
+                let totalDoubleVisitDates = {};
+                for (const date in analysis.visits.double) {
+                    for (const medRep in analysis.visits.double[date]) {
+                        totalDoubleVisits++;
+                        if(!totalDoubleVisitDates[medRep]) {
+                            totalDoubleVisitDates[medRep] = [];
+                        }
+                        if (!totalDoubleVisitDates[medRep].includes(date)) {
+                            totalDoubleVisitDates[medRep].push(date);
+                        }
+                    }
+                }
+                const totalEvents = Object.values(analysis.events).reduce((sum, dates) => sum + Object.keys(dates).length, 0);
+                const totalLeaves = Object.values(analysis.leaves).reduce((sum, dates) => sum + Object.keys(dates).length, 0);
+                const totalFiledVisits = totalSingleVisits + totalDoubleVisits;
                 
                 filedVisitsCountSpan.textContent = totalFiledVisits;
                 eventsCountSpan.textContent = totalEvents;
                 leavesCountSpan.textContent = totalLeaves;
                 
-                // --- Render Details Sections ---
-                
-                // Double Visits
+                filedVisitsBox.title = `Single Visits: ${totalSingleVisits}, Double Visits: ${totalDoubleVisits}`;
+
+                filedVisitsDetailsTitle.textContent = `Filed Visits for ${month}`;
                 doubleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Double Visits</h4>`;
-                const doubleVisitsByRep = analysis.visits.double.reduce((acc, visit) => {
-                    if (!acc[visit.med_rep]) acc[visit.med_rep] = [];
-                    acc[visit.med_rep].push({ date: visit.date, period: visit.period });
-                    return acc;
-                }, {});
+                const doubleVisitsByRep = {};
+                
+                for(const date in analysis.visits.double) {
+                    for(const medRep in analysis.visits.double[date]) {
+                        if (!doubleVisitsByRep[medRep]) {
+                            doubleVisitsByRep[medRep] = [];
+                        }
+                        doubleVisitsByRep[medRep].push(date);
+                    }
+                }
 
                 if (Object.keys(doubleVisitsByRep).length > 0) {
                     for (const medRep in doubleVisitsByRep) {
-                        const visitDetails = doubleVisitsByRep[medRep];
-                        const doubleVisitItem = document.createElement('div');
-                        doubleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                        doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${getUniqueDaysCount(visitDetails)} double visit day(s)`;
-                        doubleVisitItem.addEventListener('click', () => {
-                                showDatesModal(`Double Visits with ${medRep}`, visitDetails);
-                            });
-                        doubleVisitsDetailsDiv.appendChild(doubleVisitItem);
-                    }
+                            const uniqueDates = [...new Set(doubleVisitsByRep[medRep])];
+                            const doubleVisitItem = document.createElement('div');
+                            doubleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                            doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${uniqueDates.length} double visit(s)`;
+                            doubleVisitItem.addEventListener('click', () => {
+                                 showDatesModal(`Double Visits with ${medRep}`, uniqueDates);
+                             });
+                            doubleVisitsDetailsDiv.appendChild(doubleVisitItem);
+                        }
                 } else {
                     doubleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No double visits recorded this month.</p>`;
                 }
                 
-                // Single Visits
                 singleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Single Visits</h4>`;
-                if (analysis.visits.single.length > 0) {
-                        const singleVisitItem = document.createElement('div');
-                        singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                        singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${getUniqueDaysCount(analysis.visits.single)} day(s)`;
-                        singleVisitItem.addEventListener('click', () => {
-                            showDatesModal(`Single Visit Dates`, analysis.visits.single);
-                            });
-                        singleVisitsDetailsDiv.appendChild(singleVisitItem);
+                const singleVisitDates = Object.keys(analysis.visits.single);
+                if (singleVisitDates.length > 0) {
+                     const singleVisitItem = document.createElement('div');
+                     singleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
+                     singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${singleVisitDates.length} day(s)`;
+                     singleVisitItem.addEventListener('click', () => {
+                         showDatesModal(`Single Visit Dates`, singleVisitDates);
+                     });
+                     singleVisitsDetailsDiv.appendChild(singleVisitItem);
                 } else {
                     singleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No single visits recorded this month.</p>`;
                 }
                 
-                // Events
                 eventsDetailsDiv.innerHTML = '';
-                const eventsByType = analysis.events.reduce((acc, event) => {
-                    if (!acc[event.type]) acc[event.type] = [];
-                    acc[event.type].push({ date: event.date, period: event.period });
-                    return acc;
-                }, {});
-                if (Object.keys(eventsByType).length > 0) {
-                    for (const type in eventsByType) {
-                        const eventDetails = eventsByType[type];
+                const eventTypes = Object.keys(analysis.events);
+                if (eventTypes.length > 0) {
+                    eventTypes.forEach(eventType => {
+                        const eventDates = Object.keys(analysis.events[eventType]);
                         const eventItem = document.createElement('div');
                         eventItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                        eventItem.innerHTML = `<span class="font-bold">${type}:</span> ${getUniqueDaysCount(eventDetails)} day(s)`;
+                        eventItem.innerHTML = `<span class="font-bold">${eventType.replace('Event (', '').replace(')', '')}:</span> ${eventDates.length} day(s)`;
                         eventItem.addEventListener('click', () => {
-                            showDatesModal(`${type} Dates`, eventDetails);
+                            showDatesModal(`${eventType.replace('Event (', '').replace(')', '')} Dates`, eventDates);
                         });
                         eventsDetailsDiv.appendChild(eventItem);
-                    }
+                    });
                 } else {
                     eventsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No events recorded this month.</p>`;
                 }
                 
-                // Leaves
                 leavesDetailsDiv.innerHTML = '';
-                const leavesByType = analysis.leaves.reduce((acc, leave) => {
-                    if (!acc[leave.type]) acc[leave.type] = [];
-                    acc[leave.type].push({ date: leave.date, period: leave.period });
-                    return acc;
-                }, {});
-                if (Object.keys(leavesByType).length > 0) {
-                    for (const type in leavesByType) {
-                        const leaveDetails = leavesByType[type];
+                const leaveTypes = Object.keys(analysis.leaves);
+                if (leaveTypes.length > 0) {
+                    leaveTypes.forEach(leaveType => {
+                        const leaveDates = Object.keys(analysis.leaves[leaveType]);
                         const leaveItem = document.createElement('div');
                         leaveItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                        leaveItem.innerHTML = `<span class="font-bold">${type}:</span> ${getUniqueDaysCount(leaveDetails)} day(s)`;
+                        leaveItem.innerHTML = `<span class="font-bold">${leaveType.replace('Leave (', '').replace(')', '')}:</span> ${leaveDates.length} day(s)`;
                         leaveItem.addEventListener('click', () => {
-                            showDatesModal(`${type} Dates`, leaveDetails);
+                            showDatesModal(`${leaveType.replace('Leave (', '').replace(')', '')} Dates`, leaveDates);
                         });
                         leavesDetailsDiv.appendChild(leaveItem);
-                    }
+                    });
                 } else {
                     leavesDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No leaves recorded this month.</p>`;
                 }
 
-                // --- Chart Logic ---
-                const activityCounts = {
-                    'Single Visits': getUniqueDaysCount(analysis.visits.single),
-                    'Double Visits': getUniqueDaysCount(analysis.visits.double),
-                    ...Object.keys(eventsByType).reduce((acc, type) => ({...acc, [type]: getUniqueDaysCount(eventsByType[type])}), {}),
-                    ...Object.keys(leavesByType).reduce((acc, type) => ({...acc, [type]: getUniqueDaysCount(leavesByType[type])}), {}),
-                };
+                const chartLabels = Object.keys(activityCounts);
+                const chartData = Object.values(activityCounts);
                 
-                const filteredChartLabels = Object.keys(activityCounts).filter(key => activityCounts[key] > 0);
-                const filteredChartData = filteredChartLabels.map(key => activityCounts[key]);
+                const filteredChartData = [];
+                const filteredChartLabels = [];
+                for (let i = 0; i < chartData.length; i++) {
+                    if (chartData[i] > 0) {
+                        filteredChartData.push(chartData[i]);
+                        filteredChartLabels.push(chartLabels[i]);
+                    }
+                }
 
-                if (myChart) myChart.destroy();
+
+                if (myChart) {
+                    myChart.destroy();
+                }
 
                 myChart = new Chart(activityChartCtx, {
                     type: 'pie',
@@ -2028,19 +2016,10 @@
                     options: {
                         responsive: true,
                         plugins: {
-                            legend: { 
-                                position: 'right',
-                                labels: {
-                                    font: { size: 10 }
-                                }
-                            },
-                            title: { 
-                                display: true, 
-                                text: 'Monthly Activity Breakdown (Days)',
-                                font: { size: 14 }
-                            }
+                            legend: { position: 'right' },
+                            title: { display: true, text: 'Monthly Activity Breakdown' }
                         },
-                         maintainAspectRatio: false,
+                        maintainAspectRatio: false,
                     }
                 });
 
@@ -2048,52 +2027,43 @@
             };
 
             // --- COACHING REPORT LOGIC ---
-            const updateCoachingBadge = async () => {
-                const dmName = dmNameSelect.value;
-                const badge = document.getElementById('coaching-badge');
-                const badgeMobile = document.getElementById('coaching-badge-mobile');
+            
+            const getPendingCoachingReportsCount = async (dmName, medRepName) => {
+                const { count, error } = await supabase
+                    .from(COACHING_REPORTS_TABLE)
+                    .select('id', { count: 'exact', head: true })
+                    .eq('dm_name', dmName)
+                    .eq('med_rep_name', medRepName)
+                    .eq('status', 'Pending');
+                
+                if (error) {
+                    console.error('Error fetching pending count:', error);
+                    return 0;
+                }
+                return count;
+            };
 
-                if (!dmName) {
-                    badge.classList.add('hidden');
-                    badgeMobile.classList.add('hidden');
+            const updatePendingCoachingBadge = async (dmName, medRepName) => {
+                if (loggedInUser.title !== 'admin') {
+                    coachingBadgeSide.classList.add('hidden');
+                    coachingBadgeTop.classList.add('hidden');
                     return;
                 }
-
-                const now = new Date();
-                const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-
-                const { data: doubleVisits, error } = await supabase
-                    .from(REPORTS_TABLE).select('id').eq('dm_name', dmName)
-                    .eq('activity_type', 'Visits (Double Visit)').gte('created_at', startOfMonth);
-
-                if (error || !doubleVisits || doubleVisits.length === 0) {
-                    badge.classList.add('hidden');
-                    badgeMobile.classList.add('hidden');
-                    return;
-                }
-
-                const visitIds = doubleVisits.map(v => v.id);
-                const { data: coachingData } = await supabase
-                    .from(COACHING_REPORTS_TABLE).select('dm_report_id').in('dm_report_id', visitIds);
-                    
-                const completedIds = new Set((coachingData || []).map(item => item.dm_report_id));
-                const pendingCount = doubleVisits.filter(v => !completedIds.has(v.id)).length;
-
-                if (pendingCount > 0) {
-                    badge.textContent = pendingCount;
-                    badgeMobile.textContent = pendingCount;
-                    badge.classList.remove('hidden');
-                    badgeMobile.classList.remove('hidden');
+                const count = await getPendingCoachingReportsCount(dmName, medRepName);
+                if (count > 0) {
+                    coachingBadgeSide.textContent = count;
+                    coachingBadgeSide.classList.remove('hidden');
+                    coachingBadgeTop.textContent = count;
+                    coachingBadgeTop.classList.remove('hidden');
                 } else {
-                    badge.classList.add('hidden');
-                    badgeMobile.classList.add('hidden');
+                    coachingBadgeSide.classList.add('hidden');
+                    coachingBadgeTop.classList.add('hidden');
                 }
             };
-            
+
             const fetchAndRenderCoachingReports = async (dmName, medRepName) => {
                 coachingReportTableContainer.classList.remove('hidden');
                 coachingReportsTableBody.innerHTML = '';
-                coachingReportsTableHead.innerHTML = '';
                 
                 const now = new Date();
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
@@ -2117,19 +2087,22 @@
                     return;
                 }
                 
+                // Fetch existing coaching reports to check status
                 const visitIds = doubleVisits.map(v => v.id);
                 const { data: coachingData } = await supabase
                     .from(COACHING_REPORTS_TABLE)
-                    .select('id, dm_report_id, status')
+                    .select('dm_report_id, status')
                     .in('dm_report_id', visitIds);
 
-                const coachingStatusMap = new Map((coachingData || []).map(item => [item.dm_report_id, { status: item.status, id: item.id }]));
+                const coachingStatusMap = new Map((coachingData || []).map(item => [item.dm_report_id, item.status]));
                 
                 let reportsToRender = doubleVisits.map(visit => ({
                     ...visit,
-                    status: coachingStatusMap.get(visit.id)?.status || 'Pending',
-                    coaching_id: coachingStatusMap.get(visit.id)?.id
+                    status: coachingStatusMap.get(visit.id) || 'Pending'
                 }));
+                
+                // Sort by date in descending order
+                reportsToRender.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
                 const filterValue = coachingStatusFilter.value;
                 if (filterValue !== 'All') {
@@ -2142,19 +2115,12 @@
                 }
                 noCoachingReportsMessage.classList.add('hidden');
 
-                let headers = '<tr><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brick</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>';
-                if (loggedInUser?.title?.toLowerCase() === 'admin') {
-                    headers += '<th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>';
-                }
-                headers += '</tr>';
-                coachingReportsTableHead.innerHTML = headers;
-
                 reportsToRender.forEach(visit => {
                     const row = document.createElement('tr');
                     row.className = 'hover:bg-gray-100 cursor-pointer';
                     row.dataset.visitId = visit.id;
                     
-                    let rowHtml = `
+                    row.innerHTML = `
                         <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.created_at.substring(0, 10)}</td>
                         <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.brick}</td>
                         <td class="px-3 py-2 whitespace-normal text-gray-500">${visit.comment}</td>
@@ -2163,12 +2129,16 @@
                                 ${visit.status}
                             </span>
                         </td>
+                        <td class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium print-hidden">
+                            ${loggedInUser && loggedInUser.title === 'admin' ? `
+                                <button class="text-red-600 hover:text-red-900 font-bold" onclick="event.stopPropagation(); deleteCoachingReport(${visit.id});">
+                                    Delete
+                                </button>
+                            ` : ''}
+                        </td>
                     `;
-                    if (loggedInUser?.title?.toLowerCase() === 'admin') {
-                        rowHtml += `<td class="px-3 py-2 whitespace-nowrap">${visit.status === 'Completed' ? `<button class="delete-coaching-btn text-red-500 hover:text-red-700" data-id="${visit.coaching_id}"><i class="fas fa-trash-alt"></i></button>` : ''}</td>`;
-                    }
-                    row.innerHTML = rowHtml;
                     
+                    row.addEventListener('click', () => openCoachingModal(visit.id, visit.status));
                     coachingReportsTableBody.appendChild(row);
                 });
             };
@@ -2239,6 +2209,7 @@
                 const ratingDiv = document.querySelector(`.star-rating[data-field="${field}"]`);
                 if (!ratingDiv) return;
                 const stars = ratingDiv.querySelectorAll('.fa-star');
+                // Reset stars before setting new score
                 stars.forEach(s => s.classList.remove('selected'));
                 for (let i = 0; i < score; i++) {
                     stars[i].classList.add('selected');
@@ -2300,6 +2271,7 @@
                     status: 'Completed'
                 };
 
+                // Validation
                 for(const key in evaluationData) {
                     if (key.endsWith('_score') && evaluationData[key] == 0) {
                         document.querySelector(`.error-star[data-for="${key}"]`).style.display = 'inline';
@@ -2322,13 +2294,15 @@
                 } else {
                     showNotification('Coaching report submitted successfully.', 'success');
                     closeCoachingModal();
-                    await updateCoachingBadge();
+                    // Refresh the table to show the 'Completed' status
                     await fetchAndRenderCoachingReports(dmNameSelect.value, coachingMedRepNameSelect.value);
+                    await updatePendingCoachingBadge(dmNameSelect.value, coachingMedRepNameSelect.value);
                 }
             });
             
             window.addEventListener('message', async function(event) {
                 if (event.data && event.data.type === 'dmReportUserPermissions') {
+                    console.log('DM Report received user data:', event.data.user);
                     loggedInUser = event.data.user;
                     await initializeReportSystem(loggedInUser);
                 }
@@ -2337,10 +2311,16 @@
             async function initializeReportSystem(user) {
                 await fetchData();
                 
+                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+
                 if (user && user.title && user.title.toLowerCase() === 'admin') {
                     dmNameSelect.disabled = false;
-                    populateDmDropdown(allDmNames);
-                    document.getElementById('sidebar-title').textContent = 'Admin Portal';
+                    allDmNames.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        dmNameSelect.appendChild(option);
+                    });
                 } else if (user && user.title && user.title.toLowerCase() === 'district manager') {
                     dmNameSelect.disabled = true;
                     const option = document.createElement('option');
@@ -2348,101 +2328,16 @@
                     option.textContent = user.username;
                     option.selected = true;
                     dmNameSelect.appendChild(option);
-                    
-                    document.getElementById('sidebar-title').textContent = user.username;
-                    dmNameSelect.dispatchEvent(new Event('change'));
+
+                    activityRadios.forEach(radio => radio.disabled = false);
+                    updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
+                    updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
                 }
             }
-
-            toggleSidebarBtn.addEventListener('click', () => {
-                sideNav.classList.toggle('collapsed');
-                mainContent.classList.toggle('full-width');
-            });
-
-            // Initial state setup
+            
             dmNameSelect.disabled = true;
             activityRadios.forEach(radio => radio.disabled = true);
             updateFormVisibility();
-
-            // --- NEW/FIXED EVENT LISTENERS ---
-
-            // Function to populate Med Rep and Brick dropdowns based on selected DM
-            const updateAssociatedDropdowns = (sourceDmSelect, targetMedRepSelect, targetBrickSelects = []) => {
-                const selectedDm = sourceDmSelect.value;
-                
-                // This will enable/disable the activity radios based on DM selection
-                activityRadios.forEach(radio => radio.disabled = !selectedDm);
-
-                if (!selectedDm) {
-                    targetMedRepSelect.innerHTML = `<option value="" disabled selected>Select DM first</option>`;
-                    targetBrickSelects.forEach(sel => sel.innerHTML = `<option value="" disabled selected>Select DM first</option>`);
-                    return;
-                }
-
-                const filteredData = allSheetData.filter(row => row[1] === selectedDm);
-                const medRepNames = [...new Set(filteredData.map(item => item[3]).filter(Boolean))];
-                const dmBricks = [...new Set(filteredData.map(item => item[9]).filter(Boolean))];
-
-                targetMedRepSelect.innerHTML = `<option value="" disabled selected>Select Med Rep</option>`;
-                medRepNames.forEach(name => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    targetMedRepSelect.appendChild(option);
-                });
-                
-                if (targetBrickSelects && targetBrickSelects.length > 0) {
-                    const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                    targetBrickSelects.forEach(sel => {
-                        if(sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
-                    });
-                }
-            };
-
-            // Single, comprehensive event listener for the main DM dropdown
-            dmNameSelect.addEventListener('change', (event) => {
-                const dmName = event.target.value;
-                
-                // Update dropdowns on both DM Report and Coaching Report tabs
-                updateAssociatedDropdowns(event.target, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
-                updateAssociatedDropdowns(event.target, coachingMedRepNameSelect);
-
-                // Reset coaching tab state
-                coachingMedRepNameSelect.value = '';
-                coachingStatusFilter.value = 'All';
-                coachingReportTableContainer.classList.add('hidden');
-                coachingReportsTableBody.innerHTML = '';
-                noCoachingReportsMessage.classList.add('hidden');
-
-                // Reset report details on the first tab
-                reportDetailsSection.classList.add('hidden');
-                submittedReports = [];
-                renderReports(submittedReports, dmName);
-                
-                // Update the coaching badge
-                updateCoachingBadge();
-            });
-
-            // Add listeners for the coaching tab dropdowns
-            coachingMedRepNameSelect.addEventListener('change', () => {
-                const dmName = dmNameSelect.value;
-                const medRepName = coachingMedRepNameSelect.value;
-                if (dmName && medRepName) {
-                    fetchAndRenderCoachingReports(dmName, medRepName);
-                }
-            });
-
-            coachingStatusFilter.addEventListener('change', () => {
-                 const dmName = dmNameSelect.value;
-                 const medRepName = coachingMedRepNameSelect.value;
-                 if(dmName && medRepName) {
-                    fetchAndRenderCoachingReports(dmName, medRepName);
-                 }
-            });
-
-            activityRadios.forEach(radio => radio.addEventListener('change', updateFormVisibility));
-            visitTypeSelect.addEventListener('change', updateVisitTypeVisibility);
-
         });
     </script>
 </body>
