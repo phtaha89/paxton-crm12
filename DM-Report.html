@@ -46,9 +46,23 @@
             opacity: 0;
             pointer-events: none;
         }
-        .form-border-visits { border-left: 4px solid #ECFAE5; }
-        .form-border-events { border-left: 4px solid #E8F9FF; }
-        .form-border-leaves { border-left: 4px solid #FFE6E1; }
+        /* --- UPDATED: Increased contrast for form borders --- */
+        .form-border-visits { border-left: 4px solid #6EE7B7; } /* Brighter Green */
+        .form-border-events { border-left: 4px solid #60A5FA; } /* Brighter Blue */
+        .form-border-leaves { border-left: 4px solid #F87171; } /* Brighter Red */
+
+        /* --- NEW: Styling for comment textareas --- */
+        textarea {
+            border: 1px solid #d1d5db;
+            background-color: #f9fafb;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        textarea:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 1px;
+        }
+
 
         /* --- Notification Styles --- */
         .notification {
@@ -261,12 +275,16 @@
             #top-nav .tab-button span:not(#coaching-badge-mobile) {
                 display: none;
             }
+            /* --- UPDATED: Increased icon size on mobile --- */
             #top-nav .tab-button i {
                 margin-right: 0;
+                font-size: 1.2rem; /* Increased size */
             }
+            /* --- UPDATED: Active mobile tab is now fully colored --- */
             #top-nav .tab-button.active {
-                color: #4361ee;
-                border-bottom-color: #4361ee;
+                background-color: #4361ee; /* Blue background */
+                color: white; /* White text/icon */
+                border-bottom-color: #4361ee; /* Matching border color */
             }
         }
 
@@ -535,7 +553,7 @@
                                     </div>
                                     <div>
                                         <label for="details-double-manual" class="block text-xs font-medium text-gray-700">Comment</label>
-                                        <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                        <textarea id="details-double-manual" name="details-double-manual" rows="2" class="mt-1 block w-full shadow-sm"></textarea>
                                         <p id="details-double-manual-error" class="error-message">Please provide a comment.</p>
                                     </div>
                                 </div>
@@ -582,7 +600,7 @@
                                 </div>
                                 <div>
                                     <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
-                                    <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                    <textarea id="details-single" name="details-single" rows="2" class="mt-1 block w-full shadow-sm"></textarea>
                                     <p id="details-single-error" class="error-message">Please provide a comment.</p>
                                 </div>
                             </div>
@@ -611,7 +629,7 @@
                             </div>
                             <div>
                                 <label for="details-event" class="block text-xs font-medium text-gray-700">Comment</label>
-                                <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <textarea id="details-event" name="details-event" rows="2" class="mt-1 block w-full shadow-sm"></textarea>
                                 <p id="details-event-error" class="error-message">Please provide a comment.</p>
                             </div>
                         </div>
@@ -638,7 +656,7 @@
                             </div>
                             <div>
                                 <label for="details-leave" class="block text-xs font-medium text-gray-700">Comment</label>
-                                <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                <textarea id="details-leave" name="details-leave" rows="2" class="mt-1 block w-full shadow-sm"></textarea>
                                 <p id="details-leave-error" class="error-message">Please provide a comment.</p>
                             </div>
                         </div>
@@ -887,7 +905,7 @@
                     </div>
                     <div class="mt-6">
                         <label for="coaching-conclusions" class="block text-sm font-medium text-gray-700">Conclusions<span class="error-star" data-for="coaching-conclusions">*</span></label>
-                        <textarea id="coaching-conclusions" name="coaching-conclusions" rows="3" class="mt-1 block w-full shadow-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 p-2"></textarea>
+                        <textarea id="coaching-conclusions" name="coaching-conclusions" rows="3" class="mt-1 block w-full shadow-sm p-2"></textarea>
                     </div>
                 </form>
             </div>
@@ -1227,7 +1245,7 @@
                     let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                     if (key === 'created_at') formattedKey = 'Date & Time';
                     let formattedValue = value;
-                    if (key === 'created_at') formattedValue = new Date(value).toLocaleString();
+                    if (key === 'created_at') formattedValue = new Date(value).toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
 
                     return `
                         <div class="p-2 border-b last:border-b-0">
@@ -1343,10 +1361,18 @@
                 return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
             };
             
+            // --- UPDATED: Corrected time formatting function ---
             const formatUTCTime = (dateString) => {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
-                const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Africa/Cairo' };
+                // The toLocaleString with a specific timeZone will correctly convert from UTC
+                const options = { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit', 
+                    hour12: true, 
+                    timeZone: 'Africa/Cairo' 
+                };
                 return date.toLocaleString('en-US', options);
             };
 
@@ -1394,9 +1420,10 @@
                     newRow.className = 'hover:bg-gray-100 transition duration-150 ease-in-out border-l-4 cursor-pointer';
                     newRow.dataset.id = report.id;
 
-                    if (report.activity_type.includes('Visits')) newRow.style.borderColor = '#ECFAE5';
-                    else if (report.activity_type.includes('Event')) newRow.style.borderColor = '#E8F9FF';
-                    else if (report.activity_type.includes('Leave')) newRow.style.borderColor = '#FFE6E1';
+                    // --- UPDATED: Using brighter border colors ---
+                    if (report.activity_type.includes('Visits')) newRow.style.borderColor = '#6EE7B7';
+                    else if (report.activity_type.includes('Event')) newRow.style.borderColor = '#60A5FA';
+                    else if (report.activity_type.includes('Leave')) newRow.style.borderColor = '#F87171';
 
                     allHeaders.forEach(key => {
                         const newCell = document.createElement('td');
@@ -2441,6 +2468,21 @@
 
             activityRadios.forEach(radio => radio.addEventListener('change', updateFormVisibility));
             visitTypeSelect.addEventListener('change', updateVisitTypeVisibility);
+            
+            medRepNameSelect.addEventListener('change', (e) => {
+                const selectedMedRep = e.target.value;
+                const filteredBricks = allSheetData.filter(row => row[3] === selectedMedRep).map(item => item[9]).filter(Boolean);
+                const uniqueBricks = [...new Set(filteredBricks)];
+
+                const brickOptions = uniqueBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                brickDoubleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
+                brickDoubleVisitsSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + brickOptions;
+
+                doubleVisitModeDiv.classList.remove('hidden');
+                manualDoubleVisitForm.classList.add('hidden');
+                visitsModalTriggerDiv.classList.add('hidden');
+                doubleVisitModeRadios.forEach(radio => radio.checked = false);
+            });
 
         });
     </script>
