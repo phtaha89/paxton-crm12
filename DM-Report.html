@@ -183,6 +183,18 @@
                 width: 100%;
                 min-width: 700px; /* A minimum width to ensure table doesn't collapse too much */
             }
+             #reports-table th:nth-child(7),
+             #reports-table td:nth-child(7) {
+                 display: none; /* Hide comment column on mobile */
+             }
+             .flex-wrap > button {
+                 flex-basis: calc(33.333333% - 0.5rem);
+             }
+        }
+        @media (min-width: 769px) {
+            .flex-wrap > button {
+                flex-basis: auto;
+            }
         }
 
         /* Set min-width for the table to prevent collapsing on mobile */
@@ -223,7 +235,33 @@
             font-weight: 600;
             border-radius: 9999px;
         }
-
+         /* Coaching evaluation form style improvements */
+        #coaching-evaluation-form {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: 1fr;
+        }
+        @media (min-width: 768px) {
+            #coaching-evaluation-form {
+                grid-template-columns: 1fr 2fr;
+            }
+        }
+        #coaching-evaluation-form .grid.gap-4 {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        }
+        #coaching-evaluation-form .md\:col-span-1 {
+            grid-column: span 1;
+        }
+        #coaching-evaluation-form .md\:col-span-2 {
+            grid-column: span 2;
+        }
+        #coaching-evaluation-form .border-r {
+            border-right: 1px solid #e5e7eb;
+            padding-right: 1rem;
+        }
+        #coaching-evaluation-form .text-center {
+            text-align: center;
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex min-h-screen">
@@ -520,6 +558,12 @@
             <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">Coaching Report</h1>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
+                    <label for="coaching-dm-name-filter" class="block text-xs font-medium text-gray-700">District Manager</label>
+                    <select id="coaching-dm-name-filter" name="coaching-dm-name-filter" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
+                        <option value="">All District Managers</option>
+                    </select>
+                </div>
+                <div>
                     <label for="coaching-med-rep-name" class="block text-xs font-medium text-gray-700">Medical Representative</label>
                     <select id="coaching-med-rep-name" name="coaching-med-rep-name" class="mt-1 block w-full p-1 border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md shadow-sm">
                         <option value="" disabled selected>Select DM first</option>
@@ -684,58 +728,56 @@
                 <div id="coaching-modal-header-info" class="space-y-2 mb-4 border-b pb-2">
                     <!-- Dynamic content here -->
                 </div>
-                <form id="coaching-evaluation-form">
+                <form id="coaching-evaluation-form" class="md:grid grid-cols-3 gap-4">
                     <input type="hidden" id="coaching-report-id">
                     <!-- Evaluation Fields -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <!-- Selling Skills Column -->
-                        <div class="md:col-span-1 border-r pr-4">
-                            <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
-                                    <div class="star-rating mt-1" data-field="feedback_score">
-                                        <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                    </div>
+                    <div class="col-span-1 border-r pr-4">
+                        <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="feedback_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
-                                    <div class="star-rating mt-1" data-field="opening_score">
-                                        <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                    </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Opening<span class="error-star" data-for="opening_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="opening_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
-                                    <div class="star-rating mt-1" data-field="asking_for_commitment_score">
-                                        <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                    </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="asking_for_commitment_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
-                                    <div class="star-rating mt-1" data-field="handling_objection_score">
-                                        <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
-                                    </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="handling_objection_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
                         </div>
-                        <!-- Other Skills Columns -->
-                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div>
+                    </div>
+                    <!-- Other Skills Columns -->
+                    <div class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="planning_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
-                             <div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
                                 <div class="star-rating mt-1" data-field="time_management_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
-                             <div class="md:col-span-2 flex justify-between items-center">
-                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge</label>
-                                <div class="star-rating read-only" data-field="view_medical_product_knowledge_score">
-                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            <div class="md:col-span-2 flex justify-between items-center">
+                                <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
+                                <div class="star-rating mt-1" data-field="medical_product_knowledge_score">
+                                    <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                 </div>
                             </div>
                         </div>
@@ -970,6 +1012,7 @@
             const activityChartCtx = document.getElementById('activity-chart').getContext('2d');
             
             // Coaching Report elements
+            const coachingDmNameFilter = document.getElementById('coaching-dm-name-filter');
             const coachingMedRepNameSelect = document.getElementById('coaching-med-rep-name');
             const coachingStatusFilter = document.getElementById('coaching-status-filter');
             const coachingReportTableContainer = document.getElementById('coaching-report-table-container');
@@ -1084,8 +1127,8 @@
             
             // Function to populate DM dropdown after data is fetched
             const populateDmDropdown = (dmNames) => {
-                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
-                dmNames.forEach(name => {
+                dmNameSelect.innerHTML = `<option value="" disabled selected>Loading...</option>`;
+                allDmNames.forEach(name => {
                     const option = document.createElement('option');
                     option.value = name;
                     option.textContent = name;
@@ -1218,12 +1261,24 @@
                 }
             });
             
-            const coachingFilterChanged = () => {
-                const dmName = dmNameSelect.value;
-                const medRepName = coachingMedRepNameSelect.value;
-                if (dmName && medRepName) {
-                    fetchAndRenderCoachingReports(dmName, medRepName);
+            coachingDmNameFilter.addEventListener('change', () => {
+                const selectedDm = coachingDmNameFilter.value;
+                if(selectedDm) {
+                    updateAssociatedDropdowns(coachingDmNameFilter, coachingMedRepNameSelect);
+                    coachingMedRepNameSelect.disabled = false;
+                } else {
+                    coachingMedRepNameSelect.innerHTML = `<option value="" disabled selected>Select DM first</option>`;
+                    coachingMedRepNameSelect.disabled = true;
                 }
+                const dmName = coachingDmNameFilter.value;
+                const medRepName = coachingMedRepNameSelect.value;
+                fetchAndRenderCoachingReports(dmName, medRepName);
+            });
+
+            const coachingFilterChanged = () => {
+                const dmName = coachingDmNameFilter.value;
+                const medRepName = coachingMedRepNameSelect.value;
+                fetchAndRenderCoachingReports(dmName, medRepName);
             };
 
             coachingMedRepNameSelect.addEventListener('change', coachingFilterChanged);
@@ -1342,8 +1397,9 @@
 
                 filteredReports.forEach(report => {
                     const newRow = document.createElement('tr');
-                    newRow.className = 'hover:bg-gray-100 transition duration-150 ease-in-out border-l-4';
+                    newRow.className = 'hover:bg-gray-100 transition duration-150 ease-in-out border-l-4 cursor-pointer'; // Add cursor-pointer
                     newRow.dataset.id = report.id; // Store the report ID on the row
+                    newRow.addEventListener('click', () => showRowDetailsModal(report));
 
                     if (report.activity_type.includes('Visits')) {
                         newRow.style.borderColor = '#ECFAE5';
@@ -1366,12 +1422,9 @@
                             newCell.textContent = formatUTCTime(report.created_at);
                         } else if (key === 'comment') {
                             const originalComment = report[key] || 'N/A';
-                            const truncatedComment = originalComment.length > 30 ? originalComment.substring(0, 30) + '...' : originalComment;
-                            newCell.innerHTML = `
-                                <span>${truncatedComment}</span>
-                                ${originalComment.length > 30 ? `<a href="#" class="view-more text-blue-500 font-semibold" data-id="${report.id}">etc</a>` : ''}
-                            `;
-                            newCell.className = 'px-3 py-2 text-gray-500'; // Remove whitespace-nowrap for this cell
+                            // Truncate comment only for PC view, hide on mobile
+                            newCell.textContent = originalComment;
+                            newCell.className = 'px-3 py-2 text-gray-500 hidden md:table-cell'; // Remove whitespace-nowrap and hide on mobile
                         } else {
                             newCell.textContent = report[key] || 'N/A';
                         }
@@ -1379,18 +1432,6 @@
                         newRow.appendChild(newCell);
                     });
                     reportsTableBody.appendChild(newRow);
-                });
-
-                // Add event listener for the view more links
-                document.querySelectorAll('.view-more').forEach(link => {
-                    link.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        const reportId = event.target.dataset.id;
-                        const report = submittedReports.find(r => r.id.toString() === reportId);
-                        if (report) {
-                            showRowDetailsModal(report);
-                        }
-                    });
                 });
             };
 
@@ -1713,10 +1754,16 @@
 
                 coachingTab.addEventListener('click', () => {
                     const selectedDm = dmNameSelect.value;
-                    if (!selectedDm) {
+                    if (!selectedDm && loggedInUser && loggedInUser.title !== 'admin') {
                         showNotification('Please select a District Manager from the DM Report tab first.', 'error');
                         switchTab(0);
                         return;
+                    }
+                    if (loggedInUser && loggedInUser.title === 'admin') {
+                        // For admins, allow them to view all pending reports
+                        const currentFilterDm = coachingDmNameFilter.value;
+                        const currentFilterMedRep = coachingMedRepNameSelect.value;
+                        fetchAndRenderCoachingReports(currentFilterDm, currentFilterMedRep);
                     }
                     switchTab(1);
                 });
@@ -2006,20 +2053,17 @@
             // --- COACHING REPORT LOGIC ---
             
             const fetchAndDisplayPendingCoachingReports = async (dmName) => {
-                if (!dmName) {
-                    coachingNotificationCount.classList.add('hidden');
-                    coachingNotificationCountMobile.classList.add('hidden');
-                    return;
-                }
+                let query = supabase.from(REPORTS_TABLE).select('id').eq('activity_type', 'Visits (Double Visit)');
                 const now = new Date();
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+                query = query.gte('created_at', startOfMonth);
 
-                const { data: doubleVisits, error } = await supabase
-                    .from(REPORTS_TABLE)
-                    .select('id, created_at')
-                    .eq('dm_name', dmName)
-                    .eq('activity_type', 'Visits (Double Visit)')
-                    .gte('created_at', startOfMonth);
+                // Add DM name filter if provided
+                if (dmName) {
+                    query = query.eq('dm_name', dmName);
+                }
+
+                const { data: doubleVisits, error } = await query;
                     
                 if (error) {
                     console.error('Error fetching double visits for pending count:', error);
@@ -2061,13 +2105,21 @@
                 const now = new Date();
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
                 
-                const { data: doubleVisits, error } = await supabase
+                let query = supabase
                     .from(REPORTS_TABLE)
-                    .select('id, created_at, brick, comment')
-                    .eq('dm_name', dmName)
-                    .eq('med_rep', medRepName)
+                    .select('id, created_at, brick, comment, med_rep, dm_name')
                     .eq('activity_type', 'Visits (Double Visit)')
                     .gte('created_at', startOfMonth);
+                
+                if (dmName) {
+                    query = query.eq('dm_name', dmName);
+                }
+
+                if (medRepName) {
+                    query = query.eq('med_rep', medRepName);
+                }
+                    
+                const { data: doubleVisits, error } = await query;
                     
                 if (error) {
                     showNotification('Could not fetch double visits.', 'error');
@@ -2294,16 +2346,13 @@
             async function initializeReportSystem(user) {
                 await fetchData();
                 
-                dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
+                populateDmDropdown(allDmNames);
+                coachingDmNameFilter.innerHTML = `<option value="">All District Managers</option>` + allDmNames.map(name => `<option value="${name}">${name}</option>`).join('');
 
                 if (user && user.title && user.title.toLowerCase() === 'admin') {
                     dmNameSelect.disabled = false;
-                    allDmNames.forEach(name => {
-                        const option = document.createElement('option');
-                        option.value = name;
-                        option.textContent = name;
-                        dmNameSelect.appendChild(option);
-                    });
+                    coachingDmNameFilter.value = '';
+                    coachingMedRepNameSelect.disabled = true;
                 } else if (user && user.title && user.title.toLowerCase() === 'district manager') {
                     dmNameSelect.disabled = true;
                     const option = document.createElement('option');
@@ -2311,6 +2360,10 @@
                     option.textContent = user.username;
                     option.selected = true;
                     dmNameSelect.appendChild(option);
+
+                    coachingDmNameFilter.innerHTML = `<option value="${user.username}">${user.username}</option>`;
+                    coachingDmNameFilter.disabled = true;
+                    coachingMedRepNameSelect.disabled = false;
 
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect]);
