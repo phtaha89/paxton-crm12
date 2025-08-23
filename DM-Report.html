@@ -171,6 +171,33 @@
             .print-area { position: absolute; left: 0; top: 0; width: 100%; }
             .print-hidden { display: none !important; }
         }
+        
+        /* Fix for mobile layout stretching */
+        .overflow-x-auto {
+            -webkit-overflow-scrolling: touch; /* for smooth scrolling on iOS */
+            overflow-x: auto;
+        }
+
+        /* Set min-width for the table to prevent collapsing on mobile */
+        #reports-table th,
+        #reports-table td {
+            min-width: 100px; /* Adjust as needed */
+        }
+
+        #reports-table th:nth-child(1),
+        #reports-table td:nth-child(1) {
+            min-width: 150px;
+        }
+
+        #reports-table th:nth-child(3),
+        #reports-table td:nth-child(3) {
+            min-width: 150px;
+        }
+        
+        #reports-table th:nth-child(4),
+        #reports-table td:nth-child(4) {
+            min-width: 100px;
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex min-h-screen">
@@ -1293,15 +1320,13 @@
                         const newCell = document.createElement('td');
                         newCell.className = 'px-3 py-2 whitespace-nowrap text-gray-500';
 
-                        let cellContent = report[key] || 'N/A';
-
-                        if (key === 'day_date' && report.created_at) {
+                        if (key === 'day_date') {
                             const date = new Date(report.created_at);
                             const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
                             const formattedDate = report.created_at.substring(0, 10);
-                            cellContent = `${dayName} - ${formattedDate}`;
-                        } else if (key === 'created_at' && report.created_at) {
-                            cellContent = formatUTCTime(report.created_at);
+                            newCell.textContent = `${dayName} - ${formattedDate}`;
+                        } else if (key === 'created_at') {
+                            newCell.textContent = formatUTCTime(report.created_at);
                         } else if (key === 'comment') {
                             const originalComment = report[key] || 'N/A';
                             const truncatedComment = originalComment.length > 30 ? originalComment.substring(0, 30) + '...' : originalComment;
@@ -1310,9 +1335,8 @@
                                 ${originalComment.length > 30 ? `<a href="#" class="view-more text-blue-500 font-semibold" data-id="${report.id}">etc</a>` : ''}
                             `;
                             newCell.className = 'px-3 py-2 text-gray-500'; // Remove whitespace-nowrap for this cell
-                            
                         } else {
-                            newCell.textContent = cellContent;
+                            newCell.textContent = report[key] || 'N/A';
                         }
                         
                         newRow.appendChild(newCell);
