@@ -146,11 +146,9 @@
         .side-navigation.collapsed .tab-button > span:not(#coaching-badge) {
             display: none;
         }
-        /* MODIFICATION: CSS rule to hide title when collapsed */
         .side-navigation.collapsed #sidebar-title {
             display: none;
         }
-        /* MODIFICATION: Adjusted badge position for collapsed sidebar */
         .side-navigation.collapsed #coaching-badge {
             top: 12px;
             right: 12px;
@@ -198,7 +196,7 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 20px;
-            background-color: #f5f7fa; /* Match body background */
+            background-color: #f5f7fa;
             width: calc(100% - 240px);
             transition: width 0.3s ease;
         }
@@ -214,8 +212,7 @@
         @media (max-width: 1023px) {
             body {
                 overflow-x: hidden;
-                display: block; /* Allow normal block display */
-                background-image: none;
+                display: block;
                 background-color: #f5f7fa;
                 padding: 0;
             }
@@ -260,7 +257,8 @@
                 color: #495057;
                 border-bottom: 2px solid transparent;
             }
-            #top-nav .tab-button span {
+            /* MODIFICATION: Hide text span but not the badge span */
+            #top-nav .tab-button span:not(#coaching-badge-mobile) {
                 display: none;
             }
             #top-nav .tab-button i {
@@ -1393,7 +1391,7 @@
 
                 filteredReports.forEach(report => {
                     const newRow = document.createElement('tr');
-                    newRow.className = 'hover:bg-gray-100 transition duration-150 ease-in-out border-l-4';
+                    newRow.className = 'hover:bg-gray-100 transition duration-150 ease-in-out border-l-4 cursor-pointer';
                     newRow.dataset.id = report.id;
 
                     if (report.activity_type.includes('Visits')) newRow.style.borderColor = '#ECFAE5';
@@ -1427,6 +1425,45 @@
                     reportsTableBody.appendChild(newRow);
                 });
             };
+
+            reportsTableBody.addEventListener('click', (event) => {
+                const target = event.target;
+                const row = target.closest('tr');
+                if (!row) return;
+
+                const reportId = row.dataset.id;
+                const report = submittedReports.find(r => r.id.toString() === reportId);
+
+                if (report) {
+                    if (target.closest('.delete-report-btn')) {
+                        event.stopPropagation(); // Prevent modal from opening
+                        handleDeleteReport(report.id);
+                    } else if (target.closest('.view-more')) {
+                        event.preventDefault();
+                        event.stopPropagation(); // Prevent modal from opening twice
+                        showRowDetailsModal(report);
+                    } else {
+                        showRowDetailsModal(report);
+                    }
+                }
+            });
+
+            coachingReportsTableBody.addEventListener('click', (event) => {
+                const target = event.target;
+                const row = target.closest('tr');
+                if (!row) return;
+
+                const coachingId = target.closest('.delete-coaching-btn')?.dataset.id;
+                if (coachingId) {
+                    event.stopPropagation();
+                    handleDeleteCoachingReport(coachingId);
+                } else {
+                    const visitId = row.dataset.visitId;
+                    const status = row.querySelector('.status-badge').textContent.trim();
+                    openCoachingModal(visitId, status);
+                }
+            });
+
 
             const fetchTodaysVisits = async (medRepName) => {
                 const now = new Date();
@@ -2131,11 +2168,6 @@
                     }
                     row.innerHTML = rowHtml;
                     
-                    row.addEventListener('click', (e) => {
-                        if (!e.target.closest('.delete-coaching-btn')) {
-                            openCoachingModal(visit.id, visit.status);
-                        }
-                    });
                     coachingReportsTableBody.appendChild(row);
                 });
             };
