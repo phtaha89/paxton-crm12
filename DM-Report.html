@@ -95,6 +95,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 0.75rem 1rem;
         }
         .tab-button .icon-text {
             display: none;
@@ -116,8 +117,10 @@
             flex: 1;
             padding: 0.75rem 0;
         }
-        #top-nav .tab-button .icon-text { display: none; }
         #top-nav .tab-button .icon { font-size: 1.25rem; }
+        #top-nav .tab-button:hover .icon-text {
+             display: none;
+        }
         /* Desktop View (md breakpoint) */
         @media (min-width: 768px) {
             #top-nav { display: none; }
@@ -260,7 +263,7 @@
     <!-- Sidebar Navigation for PC -->
     <nav id="side-nav" class="bg-white shadow-lg p-4 print-hidden">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-gray-800 hidden-when-collapsed">DM System</h2>
+            <h2 class="text-xl font-bold text-gray-800">DM System</h2>
             <button id="toggle-nav-btn" class="p-2 rounded-md hover:bg-gray-200">
                 <i class="fas fa-bars"></i>
             </button>
@@ -1048,6 +1051,7 @@
             closeDatesModalBtn.addEventListener('click', hideDatesModal);
             okDatesModalBtn.addEventListener('click', hideDatesModal);
 
+            // Function to update live Cairo time
             const updateLiveTime = () => {
                 const now = new Date();
                 const options = {
@@ -1062,6 +1066,7 @@
                 liveTimeDiv.textContent = formatter.format(now);
             };
 
+            // Initial call and set interval for live time
             updateLiveTime();
             setInterval(updateLiveTime, 1000);
             
@@ -1264,12 +1269,6 @@
                 return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
             };
             
-            const formatUTCTime = (dateString) => {
-                if (!dateString) return 'N/A';
-                const date = new Date(dateString);
-                return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-            };
-
             const renderReports = (reports, dmName = '', searchTerm = '') => {
                 reportsTableHeader.innerHTML = '';
                 reportsTableBody.innerHTML = '';
@@ -1300,7 +1299,7 @@
                     else if (header === 'activity_type') { headerText = 'Activity Type'; }
                     else if (header === 'created_at') { headerText = 'Time'; }
                     else if (header === 'med_rep') { headerText = 'Med Rep'; }
-                    else if (header === 'brick') { headerText = 'Brick / Place'; }
+                    else if (header === 'brick') { headerText = 'Brick'; } // Removed 'Place' as requested
                     return `<th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${headerText}</th>`;
                 }).join('');
                 reportsTableHeader.appendChild(headerRow);
@@ -1327,10 +1326,11 @@
                         if (key === 'day_date' && report.created_at) {
                             const date = new Date(report.created_at);
                             const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
-                            const formattedDate = report.created_at.substring(0, 10);
+                            const formattedDate = date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }); // Removed year as requested
                             cellContent = `${dayName} - ${formattedDate}`;
                         } else if (key === 'created_at' && report.created_at) {
-                             cellContent = formatUTCTime(report.created_at);
+                            const date = new Date(report.created_at);
+                            cellContent = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Africa/Cairo' });
                         } else if (key === 'brick' && report.activity_type.includes('Admin Work')) {
                             // Display the correct value for the 'brick' column based on the 'Admin Work' event type.
                             cellContent = report.brick || 'N/A';
@@ -1682,13 +1682,6 @@
             
             toggleNavBtn.addEventListener('click', () => {
                 sideNav.classList.toggle('collapsed');
-                const titles = document.querySelectorAll('#side-nav .icon-text');
-                const isCollapsed = sideNav.classList.contains('collapsed');
-                if (isCollapsed) {
-                    titles.forEach(title => title.classList.add('hidden'));
-                } else {
-                    titles.forEach(title => title.classList.remove('hidden'));
-                }
             });
 
             filedVisitsBox.addEventListener('click', () => {
@@ -1718,8 +1711,9 @@
                 }
 
                 const now = new Date();
-                const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-                monthlyReportTitle.textContent = `Current Month Report Details for ${month}`;
+                const month = now.toLocaleString('en-US', { month: 'long' });
+                const year = now.getFullYear();
+                monthlyReportTitle.textContent = `Current Month Report Details for ${month} ${year}`;
 
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
                 const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
@@ -2076,7 +2070,9 @@
 
             const populateAndShowReadOnlyCoachingModal = (coachingReport, visitReport) => {
                 document.getElementById('view-med-rep-name').textContent = coachingReport.med_rep_name;
-                document.getElementById('view-visit-date').textContent = visitReport.created_at.substring(0, 10);
+                const viewDate = new Date(visitReport.created_at);
+                const viewDateFormatted = viewDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' });
+                document.getElementById('view-visit-date').textContent = viewDateFormatted;
                 document.getElementById('view-visit-details').textContent = visitReport.comment;
                 
                 displayStars('view_feedback_score', coachingReport.feedback_score);
