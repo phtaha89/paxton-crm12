@@ -6,7 +6,7 @@
     <title>District Manager Reporting System</title>
     <!-- Tailwind CSS CDN for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for star icons and other icons -->
+    <!-- Font Awesome for star icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
         tailwind.config = {
@@ -95,7 +95,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0.75rem 1rem;
         }
         .tab-button .icon-text {
             display: none;
@@ -117,9 +116,8 @@
             flex: 1;
             padding: 0.75rem 0;
         }
-        #top-nav .tab-button .icon { font-size: 1.25rem; }
         #top-nav .tab-button .icon-text { display: none; }
-
+        #top-nav .tab-button .icon { font-size: 1.25rem; }
         /* Desktop View (md breakpoint) */
         @media (min-width: 768px) {
             #top-nav { display: none; }
@@ -229,6 +227,7 @@
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
+            white-space: nowrap;
         }
         .skill-row .star-rating {
             flex-shrink: 0;
@@ -236,7 +235,6 @@
         .required-star {
             color: #EF4444;
             display: none;
-            margin-left: 0.25rem;
         }
         /* Print Styles */
         @media print {
@@ -263,7 +261,7 @@
     <!-- Sidebar Navigation for PC -->
     <nav id="side-nav" class="bg-white shadow-lg p-4 print-hidden">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-gray-800">DM System</h2>
+            <h2 class="text-xl font-bold text-gray-800 hidden-when-collapsed">DM System</h2>
             <button id="toggle-nav-btn" class="p-2 rounded-md hover:bg-gray-200">
                 <i class="fas fa-bars"></i>
             </button>
@@ -586,7 +584,6 @@
                                 <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brick</th>
                                 <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
                                 <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
                         <tbody id="coaching-reports-table-body" class="bg-white divide-y divide-gray-200">
@@ -707,21 +704,6 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal for Deletion -->
-    <div id="confirmation-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3">
-            <div class="flex justify-between items-center pb-3 border-b mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">Confirm Deletion</h3>
-                <button id="close-confirmation-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
-            </div>
-            <p id="confirmation-message" class="text-sm text-gray-700 mb-4">Are you sure you want to delete this report? This action cannot be undone.</p>
-            <div class="flex justify-end space-x-2 border-t pt-4">
-                <button id="cancel-delete" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md shadow-sm transition">Cancel</button>
-                <button id="confirm-delete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-sm transition">Delete</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Coaching Evaluation Modal -->
     <div id="coaching-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-2/3 lg:w-1/2 max-h-[90vh] flex flex-col">
@@ -736,9 +718,9 @@
                 <form id="coaching-evaluation-form">
                     <input type="hidden" id="coaching-report-id">
                     <!-- Evaluation Fields -->
-                    <div class="flex flex-col md:flex-row gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Selling Skills Column -->
-                        <div class="md:w-1/3 pr-4 md:border-r">
+                        <div class="md:col-span-1 pr-4 md:border-r">
                             <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
                             <div class="space-y-3">
                                 <div class="skill-row">
@@ -772,22 +754,22 @@
                             </div>
                         </div>
                         <!-- Other Skills Columns -->
-                        <div class="md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="skill-row">
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div class="skill-row">
                                 <label class="text-sm font-medium text-gray-700">Planning</label>
                                 <div class="star-rating" data-field="planning_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     <i class="fas fa-asterisk required-star"></i>
                                 </div>
                             </div>
-                            <div class="skill-row">
+                             <div class="skill-row">
                                 <label class="text-sm font-medium text-gray-700">Time Management</label>
                                 <div class="star-rating" data-field="time_management_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                                     <i class="fas fa-asterisk required-star"></i>
                                 </div>
                             </div>
-                            <div class="md:col-span-2 skill-row">
+                             <div class="md:col-span-2 skill-row">
                                 <label class="text-sm font-medium text-gray-700">Medical & Product Knowledge</label>
                                 <div class="star-rating" data-field="medical_product_knowledge_score">
                                     <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
@@ -836,9 +818,9 @@
                     </div>
                     
                     <!-- Evaluation Section -->
-                    <div class="flex flex-col md:flex-row gap-4 border-t pt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
                         <!-- Selling Skills Column -->
-                        <div class="md:w-1/3 pr-4 md:border-r">
+                        <div class="md:col-span-1 pr-4 md:border-r">
                             <h4 class="font-semibold mb-2 text-center">Selling Skills</h4>
                             <div class="space-y-3">
                                 <div class="skill-row">
@@ -868,7 +850,7 @@
                             </div>
                         </div>
                         <!-- Other Skills Columns -->
-                        <div class="md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                              <div class="skill-row">
                                 <label class="text-sm font-medium text-gray-700">Planning</label>
                                 <div class="star-rating read-only" data-field="view_planning_score">
@@ -917,7 +899,6 @@
         let allMonthlyReports = [];
         let myChart = null;
         let notificationTimeout;
-        let reportToDeleteId = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Supabase configuration
@@ -991,13 +972,6 @@
             const datesModalContent = document.getElementById('dates-modal-content');
             const closeDatesModalBtn = document.getElementById('close-dates-modal');
             const okDatesModalBtn = document.getElementById('ok-dates-modal');
-
-            // Deletion Confirmation Modal
-            const confirmationModal = document.getElementById('confirmation-modal');
-            const confirmationMessage = document.getElementById('confirmation-message');
-            const closeConfirmationModalBtn = document.getElementById('close-confirmation-modal');
-            const cancelDeleteBtn = document.getElementById('cancel-delete');
-            const confirmDeleteBtn = document.getElementById('confirm-delete');
 
             // Analysis Page elements
             const monthlyDetailsPrintArea = document.getElementById('monthly-details-print-area');
@@ -1074,75 +1048,7 @@
 
             closeDatesModalBtn.addEventListener('click', hideDatesModal);
             okDatesModalBtn.addEventListener('click', hideDatesModal);
-            
-            // Deletion Confirmation Modal Logic
-            const showConfirmationModal = (reportId, tableName) => {
-                reportToDeleteId = { id: reportId, table: tableName };
-                confirmationModal.classList.remove('hidden');
-            };
 
-            const hideConfirmationModal = () => {
-                confirmationModal.classList.add('hidden');
-                reportToDeleteId = null;
-            };
-
-            closeConfirmationModalBtn.addEventListener('click', hideConfirmationModal);
-            cancelDeleteBtn.addEventListener('click', hideConfirmationModal);
-
-            confirmDeleteBtn.addEventListener('click', async () => {
-                if (!reportToDeleteId) return;
-
-                let table = reportToDeleteId.table;
-                const id = reportToDeleteId.id;
-                
-                // If deleting from dm_report, also check for a corresponding coaching report
-                if (table === REPORTS_TABLE) {
-                     const { data: coachingData } = await supabase
-                        .from(COACHING_REPORTS_TABLE)
-                        .select('dm_report_id')
-                        .eq('dm_report_id', id);
-
-                    if (coachingData && coachingData.length > 0) {
-                        const { error: coachingError } = await supabase
-                            .from(COACHING_REPORTS_TABLE)
-                            .delete()
-                            .eq('dm_report_id', id);
-
-                        if (coachingError) {
-                            console.error('Error deleting related coaching report:', coachingError);
-                            showNotification('Failed to delete related coaching report.', 'error');
-                            hideConfirmationModal();
-                            return;
-                        }
-                    }
-                }
-
-                const { error } = await supabase
-                    .from(table)
-                    .delete()
-                    .eq('id', id);
-
-                if (error) {
-                    showNotification('Failed to delete report.', 'error');
-                    console.error('Deletion error:', error);
-                } else {
-                    showNotification('Report deleted successfully.', 'success');
-                    // Refresh the relevant table
-                    const dmName = dmNameSelect.value;
-                    if (dmName) {
-                        if (table === REPORTS_TABLE) {
-                            await fetchReportsFromSupabase(dmName);
-                        } else {
-                            const medRepName = coachingMedRepNameSelect.value;
-                            await fetchAndRenderCoachingReports(dmName, medRepName);
-                        }
-                    }
-                }
-                hideConfirmationModal();
-            });
-
-
-            // Function to update live Cairo time
             const updateLiveTime = () => {
                 const now = new Date();
                 const options = {
@@ -1157,7 +1063,6 @@
                 liveTimeDiv.textContent = formatter.format(now);
             };
 
-            // Initial call and set interval for live time
             updateLiveTime();
             setInterval(updateLiveTime, 1000);
             
@@ -1300,13 +1205,16 @@
                 visitsForm.classList.add('hidden');
                 eventForm.classList.add('hidden');
                 leaveForm.classList.add('hidden');
-                adminWorkPlaceDiv.classList.add('hidden'); // Hide by default
+                adminWorkPlaceDiv.classList.add('hidden');
 
                 if (selectedActivity === 'Visits') {
                     visitsForm.classList.remove('hidden');
                     updateVisitTypeVisibility();
                 } else if (selectedActivity === 'Event') {
                     eventForm.classList.remove('hidden');
+                    if (eventTypeSelect.value === 'Admin Work') {
+                        adminWorkPlaceDiv.classList.remove('hidden');
+                    }
                 } else if (selectedActivity === 'Leave') {
                     leaveForm.classList.remove('hidden');
                 }
@@ -1331,7 +1239,7 @@
                     adminWorkPlaceDiv.classList.remove('hidden');
                 } else {
                     adminWorkPlaceDiv.classList.add('hidden');
-                    adminWorkPlaceSelect.value = ''; // Reset the dropdown
+                    adminWorkPlaceSelect.value = '';
                 }
             });
 
@@ -1360,6 +1268,18 @@
                 return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
             };
             
+            const formatUTCTime = (dateString) => {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                let hours = date.getUTCHours();
+                const minutes = date.getUTCMinutes();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                const strMinutes = minutes < 10 ? '0' + minutes : minutes;
+                return `${hours}:${strMinutes} ${ampm}`;
+            };
+
             const renderReports = (reports, dmName = '', searchTerm = '') => {
                 reportsTableHeader.innerHTML = '';
                 reportsTableBody.innerHTML = '';
@@ -1381,16 +1301,16 @@
                 noReportsMessage.classList.add('hidden');
 
                 const headers = Object.keys(filteredReports[0]).filter(key => key !== 'dm_name' && key !== 'id');
-                const allHeaders = [...headers, 'action'];
+                const allHeaders = ['day_date', ...headers];
 
                 const headerRow = document.createElement('tr');
                 headerRow.innerHTML = allHeaders.map(header => {
                     let headerText = formatHeader(header);
-                    if (header === 'created_at') { headerText = 'Time'; }
+                    if (header === 'day_date') { headerText = 'Day & Date'; }
+                    else if (header === 'activity_type') { headerText = 'Activity Type'; }
+                    else if (header === 'created_at') { headerText = 'Time'; }
                     else if (header === 'med_rep') { headerText = 'Med Rep'; }
                     else if (header === 'brick') { headerText = 'Brick'; }
-                    else if (header === 'activity_type') { headerText = 'Activity Type'; }
-                    else if (header === 'action') { headerText = 'Action'; }
                     return `<th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${headerText}</th>`;
                 }).join('');
                 reportsTableHeader.appendChild(headerRow);
@@ -1414,38 +1334,25 @@
                             newCell.className = 'px-3 py-2 whitespace-normal text-gray-500';
                         }
                         let cellContent = report[key] || 'N/A';
-                        if (key === 'created_at') {
+                        if (key === 'day_date' && report.created_at) {
                             const date = new Date(report.created_at);
-                            cellContent = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Africa/Cairo' });
+                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+                            const formattedDate = date.toLocaleDateString('en-US', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+                            cellContent = `${dayName} - ${formattedDate}`;
+                        } else if (key === 'created_at' && report.created_at) {
+                             cellContent = formatUTCTime(report.created_at);
                         } else if (key === 'brick' && report.activity_type.includes('Admin Work')) {
                             cellContent = report.brick || 'N/A';
                         } else if (key === 'brick') {
                             cellContent = report.brick || 'N/A';
                         } else if (key === 'med_rep' && report.activity_type.includes('Single Visit')) {
                              cellContent = 'N/A';
-                        } else if (key === 'action') {
-                             if (loggedInUser && loggedInUser.title && loggedInUser.title.toLowerCase() === 'admin') {
-                                 newCell.innerHTML = `<button class="text-red-500 hover:text-red-700 delete-report" data-id="${report.id}" data-table="${REPORTS_TABLE}"><i class="fas fa-trash-alt"></i></button>`;
-                             } else {
-                                 newCell.textContent = '';
-                             }
-                             return;
                         }
                         
                         newCell.textContent = cellContent;
                         newRow.appendChild(newCell);
                     });
                     reportsTableBody.appendChild(newRow);
-                });
-
-                // Add event listener to the table body for the delete button
-                reportsTableBody.addEventListener('click', (event) => {
-                    const deleteButton = event.target.closest('.delete-report');
-                    if (deleteButton) {
-                        const reportId = deleteButton.dataset.id;
-                        const table = deleteButton.dataset.table;
-                        showConfirmationModal(reportId, table);
-                    }
                 });
             };
 
@@ -1784,6 +1691,13 @@
             
             toggleNavBtn.addEventListener('click', () => {
                 sideNav.classList.toggle('collapsed');
+                const titles = document.querySelectorAll('#side-nav .icon-text');
+                const isCollapsed = sideNav.classList.contains('collapsed');
+                if (isCollapsed) {
+                    titles.forEach(title => title.classList.add('hidden'));
+                } else {
+                    titles.forEach(title => title.classList.remove('hidden'));
+                }
             });
 
             filedVisitsBox.addEventListener('click', () => {
@@ -1813,9 +1727,8 @@
                 }
 
                 const now = new Date();
-                const month = now.toLocaleString('en-US', { month: 'long' });
-                const year = now.getFullYear();
-                monthlyReportTitle.textContent = `Current Month Report Details for ${month} ${year}`;
+                const month = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                monthlyReportTitle.textContent = `Current Month Report Details for ${month}`;
 
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
                 const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
@@ -2118,28 +2031,10 @@
                                 ${visit.status}
                             </span>
                         </td>
-                        <td class="px-3 py-2 whitespace-nowrap">
-                           ${loggedInUser && loggedInUser.title && loggedInUser.title.toLowerCase() === 'admin' ? 
-                           `<button class="text-red-500 hover:text-red-700 delete-report" data-id="${visit.id}" data-table="${COACHING_REPORTS_TABLE}"><i class="fas fa-trash-alt"></i></button>` : ''}
-                        </td>
                     `;
                     
-                    row.addEventListener('click', (e) => {
-                        if (!e.target.closest('.delete-report')) {
-                            openCoachingModal(visit.id, visit.status);
-                        }
-                    });
+                    row.addEventListener('click', () => openCoachingModal(visit.id, visit.status));
                     coachingReportsTableBody.appendChild(row);
-                });
-                
-                // Add event listener to the table body for the delete button
-                coachingReportsTableBody.addEventListener('click', (event) => {
-                    const deleteButton = event.target.closest('.delete-report');
-                    if (deleteButton) {
-                        const reportId = deleteButton.dataset.id;
-                        const table = deleteButton.dataset.table;
-                        showConfirmationModal(reportId, table);
-                    }
                 });
             };
             
@@ -2172,7 +2067,7 @@
                     headerInfo.innerHTML = `
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div><span class="font-semibold">Medical Rep:</span> ${visitReport.med_rep}</div>
-                            <div><span class="font-semibold">Visit Date:</span> ${new Date(visitReport.created_at).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' })}</div>
+                            <div><span class="font-semibold">Visit Date:</span> ${new Date(visitReport.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}</div>
                         </div>
                         <div class="text-sm"><p class="font-semibold">Visit Details:</p><p class="p-1 bg-gray-50 rounded">${visitReport.comment}</p></div>
                     `;
@@ -2190,9 +2085,7 @@
 
             const populateAndShowReadOnlyCoachingModal = (coachingReport, visitReport) => {
                 document.getElementById('view-med-rep-name').textContent = coachingReport.med_rep_name;
-                const viewDate = new Date(visitReport.created_at);
-                const viewDateFormatted = viewDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' });
-                document.getElementById('view-visit-date').textContent = viewDateFormatted;
+                document.getElementById('view-visit-date').textContent = new Date(visitReport.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long' });
                 document.getElementById('view-visit-details').textContent = visitReport.comment;
                 
                 displayStars('view_feedback_score', coachingReport.feedback_score);
