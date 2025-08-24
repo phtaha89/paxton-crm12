@@ -804,7 +804,7 @@
 
                         <div id="analysis-summary-section" class="hidden">
                             <div class="w-full flex items-center justify-center">
-                                <div id="activity-chart-container" class="w-full flex items-center justify-center">
+                                <div id="activity-chart-container" class="w-full max-w-[400px] aspect-square flex items-center justify-center">
                                     <canvas id="activity-chart"></canvas>
                                 </div>
                             </div>
@@ -1172,6 +1172,12 @@
             const printCoachingBtn = document.getElementById('print-coaching-btn');
             const downloadXLSXBtn = document.getElementById('download-xlsx-btn');
             
+            // --- NEW: Toggle Sidebar functionality for PC ---
+            toggleSidebarBtn.addEventListener('click', () => {
+                sideNav.classList.toggle('collapsed');
+                mainContent.classList.toggle('full-width');
+            });
+            // --- END NEW ---
 
             // --- FUNCTION DEFINITIONS ---
 
@@ -2009,7 +2015,7 @@
                         const visitDetails = doubleVisitsByRep[medRep];
                         const doubleVisitItem = document.createElement('div');
                         doubleVisitItem.className = 'cursor-pointer p-2 bg-gray-100 hover:bg-gray-200 rounded-md transition';
-                        doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${getUniqueDaysCount(visitDetails)} double visit day(s)`;
+                        doubleVisitItem.innerHTML = `<span class="font-bold">${medRep}:</span> ${getUniqueDaysCount(visitDetails)} day(s)`;
                         doubleVisitItem.addEventListener('click', () => {
                                 showDatesModal(`Double Visits with ${medRep}`, visitDetails);
                             });
@@ -2119,7 +2125,8 @@
                                 font: { size: 14 }
                             }
                         },
-                          maintainAspectRatio: false,
+                          maintainAspectRatio: true,
+                          aspectRatio: 1
                     }
                 });
 
@@ -2516,6 +2523,15 @@
                     });
                 }
             };
+            
+            const updateBricksForMedRep = (medRepName, targetBrickSelects) => {
+                const filteredData = allSheetData.filter(row => row[3] === medRepName);
+                const medRepBricks = [...new Set(filteredData.map(item => item[9]).filter(Boolean))];
+                const allMedRepBricksOptions = medRepBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                targetBrickSelects.forEach(sel => {
+                    if (sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allMedRepBricksOptions;
+                });
+            }
 
             // Single, comprehensive event listener for the main DM dropdown
             dmNameSelect.addEventListener('change', (event) => {
@@ -2542,6 +2558,7 @@
                 const selectedMedRep = event.target.value;
                 if (visitTypeSelect.value === 'Double Visit' && selectedMedRep) {
                     doubleVisitModeDiv.classList.remove('hidden');
+                    updateBricksForMedRep(selectedMedRep, [brickDoubleSelect, brickDoubleVisitsSelect]);
                 } else {
                     doubleVisitModeDiv.classList.add('hidden');
                     manualDoubleVisitForm.classList.add('hidden');
@@ -2559,6 +2576,20 @@
                         visitsModalTriggerDiv.classList.remove('hidden');
                     }
                 });
+            });
+            
+            // Single Visit Logic
+            visitTypeSelect.addEventListener('change', (event) => {
+                updateVisitTypeVisibility();
+                if(event.target.value === 'Single Visit') {
+                    const selectedDm = dmNameSelect.value;
+                    if(selectedDm) {
+                        const filteredData = allSheetData.filter(row => row[1] === selectedDm);
+                        const dmBricks = [...new Set(filteredData.map(item => item[9]).filter(Boolean))];
+                        const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                        brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                    }
+                }
             });
 
             // Admin Work Logic
@@ -2584,7 +2615,19 @@
             });
 
             activityRadios.forEach(radio => radio.addEventListener('change', updateFormVisibility));
-            visitTypeSelect.addEventListener('change', updateVisitTypeVisibility);
+            
+            document.getElementById('coaching-reports-table-body').addEventListener('click', (e) => {
+                const target = e.target;
+                if (target.matches('.view-more-coaching')) {
+                    e.preventDefault();
+                    const row = target.closest('tr');
+                    const visitId = row.dataset.visitId;
+                    const report = submittedReports.find(r => r.id === parseInt(visitId));
+                    if (report) {
+                        showRowDetailsModal(report);
+                    }
+                }
+            });
 
             // Remove dummy user initialization
             // initializeReportSystem({ username: '', title: 'admin' });
