@@ -2157,7 +2157,16 @@
             
             // Print function
             printMonthlyBtn.addEventListener('click', () => {
-                window.print();
+                const element = document.getElementById('monthly-details-print-area');
+                const dmName = dmNameSelect.value || 'Report';
+                const opt = {
+                    margin: 0.5,
+                    filename: `Monthly-Report-${dmName}-${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+                html2pdf().from(element).set(opt).save();
             });
 
             // --- COACHING REPORT LOGIC ---
@@ -2451,17 +2460,16 @@
             });
             
             printCoachingBtn.addEventListener('click', () => {
-                 const modalElement = document.getElementById('coaching-view-modal');
-                 const originalDisplay = modalElement.style.display;
-                 modalElement.style.display = 'block';
-                 
-                 const buttons = document.querySelectorAll('.print-hidden');
-                 buttons.forEach(btn => btn.style.display = 'none');
-                 
-                 window.print();
-                 
-                 buttons.forEach(btn => btn.style.display = '');
-                 modalElement.style.display = originalDisplay;
+                const element = document.getElementById('coaching-view-print-area');
+                const medRepName = document.getElementById('view-med-rep-name').textContent || 'CoachingReport';
+                const opt = {
+                    margin:       0.5,
+                    filename:     `Coaching-Report-${medRepName}-${new Date().toISOString().slice(0,10)}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+                html2pdf().from(element).set(opt).save();
             });
             
             window.addEventListener('message', async function(event) {
