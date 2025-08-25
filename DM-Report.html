@@ -833,19 +833,20 @@
                             </div>
                         </div>
 
-                        <div id="analysis-summary-section" class="hidden md:flex items-center justify-center gap-8">
-                            <div id="activity-chart-container" class="w-full md:w-1/2 max-w-[400px] aspect-square flex items-center justify-center">
-                                <canvas id="activity-chart"></canvas>
-                            </div>
-                            <div id="chart-legend-container" class="w-full md:w-1/2">
-                                <!-- Legend will be populated by JS -->
-                            </div>
-                        </div>
-                         <div id="analysis-summary-section-mobile" class="hidden md:hidden">
-                            <div class="w-full flex items-center justify-center">
-                                <div id="activity-chart-container-mobile" class="w-full max-w-[400px] aspect-square flex items-center justify-center">
-                                    <canvas id="activity-chart-mobile"></canvas>
-                                </div>
+                        <div id="analysis-summary-section" class="hidden max-md:hidden md:flex items-center justify-center gap-8">
+    <div id="activity-chart-container" class="w-full md:w-1/2 max-w-[400px] aspect-square flex items-center justify-center">
+        <canvas id="activity-chart"></canvas>
+    </div>
+    <div id="chart-legend-container" class="w-full md:w-1/2">
+        </div>
+</div>
+<div id="analysis-summary-section-mobile" class="hidden md:hidden">
+    <div class="w-full flex items-center justify-center">
+        <div id="activity-chart-container-mobile" class="w-full max-w-[400px] aspect-square flex items-center justify-center">
+            <canvas id="activity-chart-mobile"></canvas>
+        </div>
+    </div>
+</div>
                             </div>
                         </div>
                     </div>
