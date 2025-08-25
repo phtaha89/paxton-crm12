@@ -2260,8 +2260,11 @@
                         .details-table tr { page-break-inside: avoid; page-break-after: auto; }
                         .details-table th, .details-table td { border: 1px solid #ddd; padding: 6px; text-align: left; font-size: 9pt; }
                         .details-table th { background-color: #f2f2f2; }
-                        .chart-container { text-align: center; margin-top: 0.5in; page-break-inside: avoid; }
-                        .chart-container img { max-width: 450px; height: auto; }
+                        .chart-container { display: flex; align-items: center; justify-content: center; margin-top: 0.5in; page-break-inside: avoid; gap: 20px;}
+                        .chart-container img { max-width: 400px; height: auto; }
+                        .chart-legend { list-style: none; padding: 0; margin: 0; font-size: 9pt; }
+                        .chart-legend li { display: flex; align-items: center; margin-bottom: 5px; }
+                        .legend-color-box { width: 12px; height: 12px; margin-right: 8px; }
                     </style>
                 `;
 
@@ -2287,25 +2290,23 @@
                 });
                 reportHtml += `<div class="summary-container">${summaryBoxes.innerHTML}</div>`;
                 
-                // Add Details Tables (without comments)
+                // Add Details Tables (with updated columns)
                 const reportGroups = {
-                    'Visits': allMonthlyReports.filter(r => r.activity_type.includes('Visits')),
-                    'Events': allMonthlyReports.filter(r => r.activity_type.includes('Event')),
-                    'Leaves': allMonthlyReports.filter(r => r.activity_type.includes('Leave')),
+                    'Visits': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Visits')), headers: ['activity_type', 'created_at', 'period', 'brick', 'med_rep'] },
+                    'Events': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Event')), headers: ['activity_type', 'created_at', 'period', 'brick', 'comment'] },
+                    'Leaves': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Leave')), headers: ['activity_type', 'created_at', 'period', 'comment'] },
                 };
                 
                 for (const groupName in reportGroups) {
-                    const reports = reportGroups[groupName];
-                    if (reports.length > 0) {
+                    const group = reportGroups[groupName];
+                    if (group.reports.length > 0) {
                         reportHtml += `<h2>${groupName} Details</h2>`;
                         reportHtml += `<table class="details-table"><thead><tr>`;
-                        // Define headers, excluding 'comment' and other unwanted fields
-                        const headers = ['activity_type', 'created_at', 'period', 'brick', 'med_rep'];
-                        headers.forEach(h => reportHtml += `<th>${formatHeader(h)}</th>`);
+                        group.headers.forEach(h => reportHtml += `<th>${formatHeader(h)}</th>`);
                         reportHtml += `</tr></thead><tbody>`;
-                        reports.forEach(report => {
+                        group.reports.forEach(report => {
                             reportHtml += `<tr>`;
-                            headers.forEach(h => {
+                            group.headers.forEach(h => {
                                 let value = report[h] || 'N/A';
                                 if (h === 'created_at') value = new Date(report[h]).toLocaleDateString();
                                 reportHtml += `<td>${value}</td>`;
@@ -2316,13 +2317,32 @@
                     }
                 }
 
-                // Add Chart
-                if (myChart) {
+                // Add Chart and Legend
+                if (myChart && myChart.data.labels.length > 0) {
                     const chartImage = myChart.toBase64Image();
+                    const totalDays = myChart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    
+                    let legendHtml = '<ul class="chart-legend">';
+                    myChart.data.labels.forEach((label, index) => {
+                        const value = myChart.data.datasets[0].data[index];
+                        const percentage = totalDays > 0 ? ((value / totalDays) * 100).toFixed(1) : 0;
+                        const color = myChart.data.datasets[0].backgroundColor[index];
+                        legendHtml += `
+                            <li>
+                                <span class="legend-color-box" style="background-color:${color}"></span>
+                                <span>${label}: ${value} day(s) (${percentage}%)</span>
+                            </li>
+                        `;
+                    });
+                    legendHtml += '</ul>';
+
                     reportHtml += `
                         <div class="chart-container">
-                            <h2>Activity Breakdown</h2>
-                            <img src="${chartImage}" alt="Activity Chart">
+                             <div>
+                                <h2>Activity Breakdown</h2>
+                                <img src="${chartImage}" alt="Activity Chart">
+                            </div>
+                            ${legendHtml}
                         </div>
                     `;
                 }
