@@ -777,6 +777,9 @@
                     <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
                         <h2 id="monthly-report-title" class="text-xl md:text-2xl font-bold text-gray-800"></h2>
                         <div class="flex space-x-2 print-hidden">
+                             <button id="details-btn" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
+                                <i class="fas fa-info-circle mr-1"></i> Details
+                            </button>
                             <button id="download-xlsx-btn" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
                                 <i class="fas fa-file-excel mr-1"></i> XLSX
                             </button>
@@ -809,7 +812,7 @@
                             </div>
                         </div>
                         
-                        <!-- Details Sections -->
+                        <!-- Details Sections (Now hidden by default, shown in modal) -->
                         <div id="filed-visits-details-section" class="mt-8 hidden">
                             <h3 id="filed-visits-details-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
                             <div id="double-visits-details" class="space-y-2">
@@ -830,10 +833,18 @@
                             </div>
                         </div>
 
-                        <div id="analysis-summary-section" class="hidden">
+                        <div id="analysis-summary-section" class="hidden md:flex items-center justify-center gap-8">
+                            <div id="activity-chart-container" class="w-full md:w-1/2 max-w-[400px] aspect-square flex items-center justify-center">
+                                <canvas id="activity-chart"></canvas>
+                            </div>
+                            <div id="chart-legend-container" class="w-full md:w-1/2">
+                                <!-- Legend will be populated by JS -->
+                            </div>
+                        </div>
+                         <div id="analysis-summary-section-mobile" class="hidden md:hidden">
                             <div class="w-full flex items-center justify-center">
-                                <div id="activity-chart-container" class="w-full max-w-[400px] aspect-square flex items-center justify-center">
-                                    <canvas id="activity-chart"></canvas>
+                                <div id="activity-chart-container-mobile" class="w-full max-w-[400px] aspect-square flex items-center justify-center">
+                                    <canvas id="activity-chart-mobile"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -888,6 +899,23 @@
             </div>
         </div>
     </div>
+    
+    <!-- NEW: Modal for Monthly Report Details -->
+    <div id="details-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-3/4 lg:w-2/3 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b mb-4">
+                <h3 id="details-modal-title" class="text-lg font-semibold text-gray-800">Monthly Details</h3>
+                <button id="close-details-modal" class="text-gray-400 hover:text-gray-600">&times;</button>
+            </div>
+            <div id="details-modal-content" class="overflow-y-auto space-y-4 flex-grow mb-4 pr-2">
+                <!-- Content will be populated by JS -->
+            </div>
+            <div class="flex justify-end border-t pt-4">
+                <button id="ok-details-modal" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Coaching Evaluation Modal -->
     <div id="coaching-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
@@ -1065,6 +1093,7 @@
         let allDmNames = [];
         let allMonthlyReports = []; // Store the fetched monthly reports
         let myChart = null; // To store the chart instance
+        let myChartMobile = null; // To store the mobile chart instance
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Supabase configuration
@@ -1156,6 +1185,13 @@
             const datesModalContent = document.getElementById('dates-modal-content');
             const closeDatesModalBtn = document.getElementById('close-dates-modal');
             const okDatesModalBtn = document.getElementById('ok-dates-modal');
+            
+            const detailsModal = document.getElementById('details-modal');
+            const detailsModalTitle = document.getElementById('details-modal-title');
+            const detailsModalContent = document.getElementById('details-modal-content');
+            const closeDetailsModalBtn = document.getElementById('close-details-modal');
+            const okDetailsModalBtn = document.getElementById('ok-details-modal');
+
 
             const confirmModal = document.getElementById('confirm-modal');
             const confirmModalText = document.getElementById('confirm-modal-text');
@@ -1164,6 +1200,7 @@
 
             const monthlyDetailsPrintArea = document.getElementById('monthly-details-print-area');
             const analysisSummarySection = document.getElementById('analysis-summary-section');
+            const analysisSummarySectionMobile = document.getElementById('analysis-summary-section-mobile');
             const monthlyReportTitle = document.getElementById('monthly-report-title');
             
             const filedVisitsBox = document.getElementById('filed-visits-box');
@@ -1182,7 +1219,9 @@
             const leavesDetailsSection = document.getElementById('leaves-details-section');
             const leavesDetailsDiv = document.getElementById('leaves-details');
             const activityChartContainer = document.getElementById('activity-chart-container');
+            const chartLegendContainer = document.getElementById('chart-legend-container');
             const activityChartCtx = document.getElementById('activity-chart').getContext('2d');
+            const activityChartMobileCtx = document.getElementById('activity-chart-mobile').getContext('2d');
             
             const coachingMedRepNameSelect = document.getElementById('coaching-med-rep-name');
             const coachingStatusFilter = document.getElementById('coaching-status-filter');
@@ -1204,6 +1243,7 @@
             const printMonthlyBtn = document.getElementById('print-monthly-btn');
             const printCoachingBtn = document.getElementById('print-coaching-btn');
             const downloadXLSXBtn = document.getElementById('download-xlsx-btn');
+            const detailsBtn = document.getElementById('details-btn');
             
             // --- NEW: Toggle Sidebar functionality for PC ---
             toggleSidebarBtn.addEventListener('click', () => {
@@ -1335,6 +1375,55 @@
 
             closeDatesModalBtn.addEventListener('click', hideDatesModal);
             okDatesModalBtn.addEventListener('click', hideDatesModal);
+            
+            // NEW: Details Modal Functions
+            const showDetailsModal = () => {
+                const dmName = dmNameSelect.value;
+                if (!dmName || allMonthlyReports.length === 0) {
+                    showNotification('No data available to display.', 'error');
+                    return;
+                }
+                
+                let modalHtml = '';
+                const reportGroups = {
+                    'Visits': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Visits')), headers: ['activity_type', 'created_at', 'period', 'brick', 'med_rep'] },
+                    'Events': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Event')), headers: ['activity_type', 'created_at', 'period', 'brick', 'comment'] },
+                    'Leaves': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Leave')), headers: ['activity_type', 'created_at', 'period', 'comment'] },
+                };
+
+                for (const groupName in reportGroups) {
+                    const group = reportGroups[groupName];
+                    if (group.reports.length > 0) {
+                        modalHtml += `<h3 class="text-lg font-semibold text-gray-800 mt-4">${groupName} Details</h3>`;
+                        modalHtml += `<div class="overflow-x-auto"><table class="w-full text-sm text-left text-gray-500">`;
+                        modalHtml += `<thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr>`;
+                        group.headers.forEach(h => modalHtml += `<th scope="col" class="px-4 py-2">${formatHeader(h)}</th>`);
+                        modalHtml += `</tr></thead><tbody>`;
+                        group.reports.forEach(report => {
+                            modalHtml += `<tr class="bg-white border-b">`;
+                            group.headers.forEach(h => {
+                                let value = report[h] || 'N/A';
+                                if (h === 'created_at') value = new Date(report[h]).toLocaleDateString();
+                                modalHtml += `<td class="px-4 py-2">${value}</td>`;
+                            });
+                            modalHtml += `</tr>`;
+                        });
+                        modalHtml += `</tbody></table></div>`;
+                    }
+                }
+                
+                detailsModalContent.innerHTML = modalHtml;
+                detailsModal.classList.remove('hidden');
+            };
+
+            const hideDetailsModal = () => {
+                detailsModal.classList.add('hidden');
+            };
+
+            detailsBtn.addEventListener('click', showDetailsModal);
+            closeDetailsModalBtn.addEventListener('click', hideDetailsModal);
+            okDetailsModalBtn.addEventListener('click', hideDetailsModal);
+
 
             const showRowDetailsModal = (report) => {
                 rowDetailsContent.innerHTML = '';
@@ -2047,7 +2136,9 @@
                 if (allMonthlyReports.length === 0) {
                         showNotification(`No reports found for ${selectedDm} this month.`, 'info');
                         analysisSummarySection.classList.add('hidden');
+                        analysisSummarySectionMobile.classList.add('hidden');
                         if (myChart) myChart.destroy();
+                        if (myChartMobile) myChartMobile.destroy();
                         return;
                 }
                 
@@ -2176,44 +2267,61 @@
                 
                 const filteredChartLabels = Object.keys(activityCounts).filter(key => activityCounts[key] > 0);
                 const filteredChartData = filteredChartLabels.map(key => activityCounts[key]);
+                const chartColors = ['#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E', '#EF4444', '#F97316', '#EAB308', '#22C55E'];
 
                 if (myChart) myChart.destroy();
+                if (myChartMobile) myChartMobile.destroy();
 
-                myChart = new Chart(activityChartCtx, {
+                const chartConfig = {
                     type: 'pie',
                     data: {
                         labels: filteredChartLabels,
                         datasets: [{
                             label: 'Monthly Activity Report',
                             data: filteredChartData,
-                            backgroundColor: [
-                                '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E',
-                                '#EF4444', '#F97316', '#EAB308', '#22C55E',
-                            ],
+                            backgroundColor: chartColors,
                             hoverOffset: 4
                         }]
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: true,
                         plugins: {
                             legend: { 
-                                position: 'right',
-                                labels: {
-                                    font: { size: 10 }
-                                }
+                                display: false // We will create a custom legend
                             },
                             title: { 
                                 display: true, 
                                 text: 'Monthly Activity Breakdown (Days)',
                                 font: { size: 14 }
                             }
-                        },
-                          maintainAspectRatio: true,
-                          aspectRatio: 1
+                        }
                     }
+                };
+                
+                myChart = new Chart(activityChartCtx, chartConfig);
+                myChartMobile = new Chart(activityChartMobileCtx, chartConfig);
+                
+                // Create and populate custom legend
+                const totalDays = filteredChartData.reduce((a, b) => a + b, 0);
+                let legendHtml = '<ul class="space-y-2">';
+                filteredChartLabels.forEach((label, index) => {
+                    const value = filteredChartData[index];
+                    const percentage = totalDays > 0 ? ((value / totalDays) * 100).toFixed(1) : 0;
+                    const color = chartColors[index % chartColors.length];
+                    legendHtml += `
+                        <li class="flex items-center text-sm">
+                            <span class="w-4 h-4 rounded-full mr-2" style="background-color:${color}"></span>
+                            <span>${label}: <strong>${value} day(s)</strong> (${percentage}%)</span>
+                        </li>
+                    `;
                 });
+                legendHtml += '</ul>';
+                chartLegendContainer.innerHTML = legendHtml;
+
 
                 analysisSummarySection.classList.remove('hidden');
+                analysisSummarySectionMobile.classList.remove('hidden');
             };
 
             // Download XLSX function
@@ -2413,12 +2521,15 @@
                 
                 let query = supabase
                     .from(REPORTS_TABLE)
-                    .select('id, created_at, brick, comment')
+                    .select('id, created_at, brick, comment, med_rep')
                     .eq('dm_name', dmName)
-                    .eq('med_rep', medRepName)
                     .eq('activity_type', 'Visits (Double Visit)')
                     .gte('created_at', startOfMonth)
                     .order('created_at', { ascending: false });
+
+                if (medRepName) {
+                    query = query.eq('med_rep', medRepName);
+                }
 
                 const { data: doubleVisits, error } = await query;
                         
@@ -2459,7 +2570,7 @@
                 }
                 noCoachingReportsMessage.classList.add('hidden');
 
-                let headers = '<tr><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brick</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>';
+                let headers = '<tr><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brick</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Med Rep</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th><th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>';
                 if (loggedInUser?.title?.toLowerCase() === 'admin') {
                     headers += '<th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>';
                 }
@@ -2479,6 +2590,7 @@
                     let rowHtml = `
                         <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.created_at.substring(0, 10)}</td>
                         <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.brick}</td>
+                        <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.med_rep}</td>
                         <td class="px-3 py-2 comment-truncate text-gray-500">${truncatedComment} ${visit.comment.length > 50 ? `<a href="#" class="view-more-coaching text-blue-500 font-semibold">View</a>` : ''}</td>
                         <td class="px-3 py-2 whitespace-nowrap">
                             <span class="status-badge ${visit.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'} text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
@@ -2651,7 +2763,10 @@
             });
             
             printCoachingBtn.addEventListener('click', () => {
-                const element = document.getElementById('coaching-view-print-area');
+                const element = document.getElementById('coaching-view-print-area').cloneNode(true);
+                // Remove buttons from the cloned element before printing
+                element.querySelector('.print-hidden').remove();
+                
                 const medRepName = document.getElementById('view-med-rep-name').textContent || 'CoachingReport';
                 const opt = {
                     margin:       0.5,
@@ -2809,7 +2924,7 @@
             coachingMedRepNameSelect.addEventListener('change', () => {
                 const dmName = dmNameSelect.value;
                 const medRepName = coachingMedRepNameSelect.value;
-                if (dmName && medRepName) {
+                if (dmName) {
                     fetchAndRenderCoachingReports(dmName, medRepName);
                 }
             });
@@ -2817,7 +2932,7 @@
             coachingStatusFilter.addEventListener('change', () => {
                 const dmName = dmNameSelect.value;
                 const medRepName = coachingMedRepNameSelect.value;
-                if(dmName && medRepName) {
+                if(dmName) {
                     fetchAndRenderCoachingReports(dmName, medRepName);
                 }
             });
