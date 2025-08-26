@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Plan Submission</title>
-    <!-- Supabase library must be loaded here, before any code that uses it -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
         /* --- Base & Layout --- */
@@ -643,11 +642,6 @@
                         <tbody id="plan-table-body">
                         </tbody>
                     </table>
-                    <!-- New loading indicator for infinite scroll -->
-                    <div id="scroll-loading-indicator" class="hidden" style="text-align: center; padding: 1rem;">
-                        <div class="spinner"></div>
-                        <p>Loading more data...</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -666,12 +660,9 @@
         let initialHeight = 0;
         let cellHeight = 30;
         let isAppInitialized = false;
-        // New state for pagination
-        let currentOffset = 0;
-        const limit = 200; // Fetch 200 records at a time
-        let hasMoreData = true;
 
         // --- CONSTANTS ---
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRGZVMTCJ53ACJBwYVpyBpCFyDn4lYfMlbbldKbRXfnmsN14APuBIJm2jlDMGhPpYi5xXUp4z1YFkte/pub?gid=0&single=true&output=csv';
         const daysOfWeek = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
         const startHour = 9;
         const endHour = 23;
@@ -686,22 +677,21 @@
             document.getElementById('loading-overlay').classList.toggle('hidden', !show);
         }
 
-        function toggleScrollLoading(show) {
-            document.getElementById('scroll-loading-indicator').classList.toggle('hidden', !show);
-        }
-
+        // Renamed from showMessageBox to be used specifically for non-blocking notifications
         function showTemporaryMessage(message, type = 'success') {
             const notification = document.createElement('div');
             notification.className = `notification`;
             notification.textContent = message;
             document.body.appendChild(notification);
             
+            // Auto-hide the notification after 3 seconds
             setTimeout(() => {
                 notification.classList.add('hide');
                 notification.addEventListener('transitionend', () => notification.remove());
             }, 3000);
         }
 
+        // This function will now be used exclusively for blocking alert messages (errors, confirmations)
         function showMessageBox(message, title = 'Notification') {
             if (document.querySelector('.modal-box')) return;
             const modalBox = document.createElement('div');
@@ -716,6 +706,7 @@
             document.body.appendChild(modalBox);
         }
         
+        // Function to make sure the form is visible and the button state is correct
         function showForm() {
             const form = document.getElementById('form-section-container');
             const button = document.getElementById('editPlanBtn');
@@ -727,53 +718,42 @@
             }
         }
 
-        // --- DATA FETCHING & PAGINATION LOGIC ---
-        // New function to fetch data in chunks from the masterlist
-        async function fetchMasterlistData() {
-            toggleScrollLoading(true);
-            try {
-                const { data, error } = await _supabase
-                    .from('masterlist')
-                    .select('*')
-                    .range(currentOffset, currentOffset + limit - 1);
+        // --- DATA FETCHING & PARSING ---
+        function parseCSV(csv) {
+            const lines = csv.split('\n').filter(line => line.trim() !== '');
+            if (lines.length < 2) return [];
+            const headers = lines[0].split(',').map(h => h.trim());
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                const row = {};
+                headers.forEach((header, i) => {
+                    row[header] = (values[i] || '').trim();
+                });
+                return row;
+            });
+        }
 
-                if (error) throw error;
-                if (!data || data.length < limit) {
-                    hasMoreData = false;
-                }
-                
-                // Append new data instead of replacing
-                allData = allData.concat(data || []);
-                currentOffset += data.length;
-                
-                // Re-populate DMs and MRs based on the combined data
+        async function fetchData() {
+            toggleLoading(true);
+            try {
+                const response = await fetch(CSV_URL, { cache: 'reload', mode: 'cors' });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const csvText = await response.text();
+                allData = parseCSV(csvText);
                 const managerSet = new Set(allData.map(row => row['District Manager']).filter(Boolean));
                 districtManagers = Array.from(managerSet).sort();
-                filterAndPopulateDMs(loggedInUser);
-                
             } catch (error) {
-                console.error('Error fetching data from masterlist:', error);
-                showMessageBox(`Failed to load essential data. Error: ${error.message}`, 'Error');
+                console.error('Error fetching or parsing data:', error);
+                showMessageBox(`Failed to load essential data. Please check your connection and refresh.`, 'Error');
             } finally {
-                toggleScrollLoading(false);
+                toggleLoading(false);
             }
         }
-        
-        // This is the initial and main fetch function that uses the new pagination method
-        async function initialDataLoad() {
-            toggleLoading(true);
-            allData = [];
-            currentOffset = 0;
-            hasMoreData = true;
-            await fetchMasterlistData();
-            toggleLoading(false);
-        }
-
 
         // --- INITIALIZATION ---
         async function initializeApp(user) {
             loggedInUser = user;
-            await initialDataLoad();
+            await fetchData();
             filterAndPopulateDMs(user);
             setDefaultStartDate();
             updateDatesAndDaySelector();
@@ -816,14 +796,17 @@
         
         function setDefaultStartDate() {
             const today = new Date();
-            const dayOfWeek = today.getDay();
+            const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
             let startOfWeek;
 
-            if (dayOfWeek >= 4) {
+            // Check if it's Thursday or later in the week.
+            // If so, the default view should be the *next* week's plan.
+            if (dayOfWeek >= 4) { // 4 is Thursday, 5 is Friday, 6 is Saturday
                 const daysUntilNextSaturday = (6 - dayOfWeek + 7) % 7;
                 startOfWeek = new Date(today);
                 startOfWeek.setDate(today.getDate() + daysUntilNextSaturday);
             } else {
+                // Otherwise, show the current week's plan.
                 const daysSinceSaturday = (dayOfWeek < 6) ? dayOfWeek + 1 : 0;
                 startOfWeek = new Date(today);
                 startOfWeek.setDate(today.getDate() - daysSinceSaturday);
@@ -898,6 +881,7 @@
                     if (error) throw error;
                 }
                 selectedBoxes.forEach(box => box.remove());
+                // Updated: Use new temporary notification for success
                 showTemporaryMessage('Selected entries deleted successfully!');
             } catch (error) {
                 console.error('Error deleting entries:', error);
@@ -921,6 +905,7 @@
                 try {
                     const { error } = await _supabase.from('dms_weekly_plans').delete().eq('id', entryId);
                     if (error) throw error;
+                    // Updated: Use new temporary notification for success
                     showTemporaryMessage('Entry deleted successfully!');
                     planBoxElement.remove();
                 } catch (error) {
@@ -958,6 +943,7 @@
             daysOfWeek.forEach((dayName, index) => {
                 const currentDate = new Date(startDate);
                 currentDate.setUTCDate(startDate.getUTCDate() + index);
+                // Modified: Removed the weekday from the table header date string
                 const dateString = currentDate.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' });
                 const th = document.createElement('th');
                 th.innerHTML = `<div><span>${dayName}</span><br><span style="font-weight:400;">${dateString}</span></div>`;
@@ -975,7 +961,7 @@
             for (let hour = startHour; hour <= endHour; hour++) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td class="time-cell">${formatHourForDisplay(hour)}</td>` + 
-                                 daysOfWeek.map((_, dayIndex) => `<td id="day-${dayIndex}-hour-${hour}" class="table-cell-hour"></td>`).join('');
+                               daysOfWeek.map((_, dayIndex) => `<td id="day-${dayIndex}-hour-${hour}" class="table-cell-hour"></td>`).join('');
                 planTableBody.appendChild(tr);
             }
             const firstCell = planTableBody.querySelector('.table-cell-hour');
@@ -1114,6 +1100,7 @@
         }
 
         function resetFormInputs() {
+            // Reset the form fields to their default state
             document.getElementById('selectedDay').value = '';
             document.getElementById('entryTypeSelect').value = '';
             document.getElementById('visitTypeSelect').value = '';
@@ -1131,6 +1118,7 @@
             document.getElementById('leaveTimeInput').value = '';
             document.getElementById('leaveDetails').value = '';
 
+            // Hide the conditional sections of the form
             handleEntryTypeChange();
             handleVisitTypeChange();
             handleEventChange();
@@ -1254,8 +1242,10 @@
                 if (error) throw error;
                 
                 await fetchExistingPlanData(document.getElementById('startDate').value);
+                // Updated: Use new temporary notification for success
                 showTemporaryMessage('Entry added successfully.');
                 
+                // Keep the form visible and reset inputs after adding an entry
                 showForm();
                 resetFormInputs();
 
@@ -1356,8 +1346,8 @@
                     contentHtml += `<p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>`;
                     break;
                 case 'Leave':
-                    contentHtml = `<p><span class="font-semibold">Leave Type:</span> ${entryData.leaveType}</p>`;
-                    contentHtml += `<p><span class="font-semibold">Details:</span> ${entryData.details || 'N/A'}</p>`;
+                    boxClass = 'leave-box';
+                    contentHtml = `<p>${entryData.leaveType}</p>`;
                     break;
             }
             contentHtml += `<p class="plan-time">${getTimeDisplay(entryData.startHour, entryData.endHour, entryData.startTimeOption)}</p>`;
@@ -1388,7 +1378,7 @@
             setTimeout(() => {
                 if (!isAppInitialized) {
                     console.log("No user data received, initializing with default/guest view.");
-                    handleInitialization(null);
+                    handleInitialization(null); // Pass null for a non-privileged user
                 }
             }, 1500);
         });
@@ -1403,9 +1393,11 @@
         document.getElementById('districtManager').addEventListener('change', updateDatesAndDaySelector);
         document.getElementById('startDate').addEventListener('change', updateDatesAndDaySelector);
         
+        // This is the original header-controls button, which is hidden on desktop
         const headerEditBtn = document.getElementById('editPlanBtn');
         const formPanelHeader = document.querySelector('.form-panel-header');
         
+        // The edit button in the form header.
         const formEditBtn = document.createElement('button');
         formEditBtn.type = 'button';
         formEditBtn.className = 'btn btn-primary';
@@ -1415,7 +1407,8 @@
             headerEditBtn.classList.add('hidden');
             formPanelHeader.appendChild(formEditBtn);
         } else {
-            formEditBtn.classList.add('hidden');
+            // For mobile view, the original button is shown and the new one is not.
+             formEditBtn.classList.add('hidden');
         }
 
         function toggleEditPlanForm() {
@@ -1434,6 +1427,7 @@
             }
         }
 
+        // Event listeners for the buttons
         headerEditBtn.addEventListener('click', toggleEditPlanForm);
         formEditBtn.addEventListener('click', toggleEditPlanForm);
 
@@ -1524,13 +1518,7 @@
         planTableBody.addEventListener('touchend', () => clearTimeout(longPressTimer));
         planTableBody.addEventListener('touchmove', () => clearTimeout(longPressTimer));
 
-        // Event listener for infinite scroll
-        document.querySelector('.scrollable-table-container').addEventListener('scroll', () => {
-            const container = document.querySelector('.scrollable-table-container');
-            if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50 && hasMoreData) {
-                fetchMasterlistData();
-            }
-        });
+        document.querySelector('.scrollable-table-container').addEventListener('scroll', hideAllPopovers);
     </script>
 </body>
 </html>
