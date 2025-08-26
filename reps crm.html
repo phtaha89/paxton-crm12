@@ -1633,19 +1633,21 @@
 
     <script>
         // Supabase Configuration
-        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/healthcarepro_visits';
-        const SAVED_COMMENTS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/saved_comments';
-        const REQUESTS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/requests';
-        const SUPABASE_WEEKLY_PLANS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/weekly_plans';
-        const SUPABASE_VACATIONS_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co/rest/v1/vacations';
+        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const SUPABASE_API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
-        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRGZVMTCJ53ACJBwYVpyBpCFyDn4lYfMlbbldKbRXfnmsN14APuBIJm2jlDMGhPpYi5xXUp4z1YFkte/pub?gid=0&single=true&output=csv';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_API_KEY);
+        const MASTERLIST_TABLE = 'masterlist';
+        const VISITS_TABLE = 'healthcarepro_visits';
+        const SAVED_COMMENTS_TABLE = 'saved_comments';
+        const REQUESTS_TABLE = 'requests';
+        const WEEKLY_PLANS_TABLE = 'weekly_plans';
+        const VACATIONS_TABLE = 'vacations';
+
 
         // Global variables
         let currentMedRep = null;
         let loggedInUser = null;
-        let globalGoogleData = [];
-        let globalGoogleSheetDataFromParent = [];
+        let globalMasterlistData = [];
         let globalSupabaseVisits = [];
         let visitCountsForCurrentRep = {};
         let medicalRepsAreas = new Map();
@@ -1676,58 +1678,62 @@
                 setTimeout(() => { alert.style.display = 'none'; }, 5000);
             }
 
-            function parseCSV(csvText) {
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(',').map(h => h.trim());
-                return lines.slice(1).filter(line => line.trim()).map(line => {
-                    const values = line.split(',').map(v => v.trim());
-                    return headers.reduce((obj, header, index) => {
-                        obj[header] = values[index] || '';
-                        return obj;
-                    }, {});
-                });
-            }
-
-            async function fetchPaginatedData(url, apiKey, pageSize = 1000) {
+            async function fetchPaginatedData(tableName, select = '*', filter = null, orderBy = null) {
                 let allData = [];
-                let offset = 0;
+                const pageSize = 1000;
+                let from = 0;
+                let to = from + pageSize - 1;
                 let hasMore = true;
-                const separator = url.includes('?') ? '&' : '?';
+
                 while (hasMore) {
-                    const response = await fetch(`${url}${separator}select=*&offset=${offset}&limit=${pageSize}`, {
-                        headers: { 'apikey': apiKey, 'Authorization': `Bearer ${apiKey}`, 'Range': `${offset}-${offset + pageSize - 1}` }
-                    });
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error(`Supabase Fetch Error from ${url}: Status ${response.status}, Details: ${errorText}`);
-                        throw new Error(`Failed to fetch paginated data from ${url}`);
+                    let query = supabaseClient.from(tableName).select(select, { count: 'exact' });
+                    if (filter) {
+                        for (const key in filter) {
+                            if (filter[key].operator === 'eq') {
+                                query = query.eq(key, filter[key].value);
+                            } else if (filter[key].operator === 'neq') {
+                                query = query.neq(key, filter[key].value);
+                            } else if (filter[key].operator === 'in') {
+                                query = query.in(key, filter[key].value);
+                            } else if (filter[key].operator === 'gte') {
+                                query = query.gte(key, filter[key].value);
+                            }
+                        }
                     }
-                    const data = await response.json();
+                    if (orderBy) {
+                        query = query.order(orderBy.column, { ascending: orderBy.ascending });
+                    }
+                    query = query.range(from, to);
+
+                    const { data, count, error } = await query;
+
+                    if (error) {
+                        console.error(`Supabase Fetch Error from ${tableName}:`, error);
+                        throw new Error(`Failed to fetch paginated data from ${tableName}: ${error.message}`);
+                    }
+
                     allData = allData.concat(data);
                     hasMore = data.length === pageSize;
-                    offset += pageSize;
+                    from += pageSize;
+                    to = from + pageSize - 1;
                 }
+
                 return allData;
             }
 
             async function fetchAllData() {
                 try {
-                    const [googleResponse, supabaseVisitsResponse] = await Promise.all([
-                        fetch(GOOGLE_SHEET_URL),
-                        fetchPaginatedData(SUPABASE_URL, SUPABASE_API_KEY)
+                    const [masterlistResponse, supabaseVisitsResponse] = await Promise.all([
+                        fetchPaginatedData(MASTERLIST_TABLE),
+                        fetchPaginatedData(VISITS_TABLE)
                     ]);
-
-                    if (!googleResponse.ok) {
-                        throw new Error('Failed to fetch Google Sheet data');
-                    }
                     
-                    const googleText = await googleResponse.text();
-                    globalGoogleData = parseCSV(googleText);
+                    globalMasterlistData = masterlistResponse;
                     globalSupabaseVisits = supabaseVisitsResponse;
 
                     medicalRepsAreas.clear();
                     districtManagersGovernorates.clear();
-                    globalGoogleData.forEach(row => {
+                    globalMasterlistData.forEach(row => {
                         const repName = row['medical rep'] ? row['medical rep'].trim() : '';
                         const area = row['area'] ? row['area'].trim() : '';
                         const districtManager = row['District Manager'] ? row['District Manager'].trim() : 'N/A';
@@ -1792,11 +1798,6 @@
                     loggedInUser = event.data.user;
                     medRepNameElement.innerHTML = loggedInUser.username; 
                     medRepNameElementMobile.innerHTML = loggedInUser.username; 
-
-                    if (event.data.allGoogleSheetData) {
-                        globalGoogleSheetDataFromParent = event.data.allGoogleSheetData;
-                    }
-                    console.log('CRM received loggedInUser:', loggedInUser);
                     
                     loadingOverlay.style.display = 'flex';
                     await fetchAllData();
@@ -1825,12 +1826,12 @@
                         break;
                     case 'District Manager':
                         const dmName = loggedInUser.username;
-                        const associatedReps = globalGoogleData.filter(row => row['District Manager'] === dmName && row['medical rep']).map(row => row['medical rep']).filter(Boolean);
+                        const associatedReps = globalMasterlistData.filter(row => row['District Manager'] === dmName && row['medical rep']).map(row => row['medical rep']).filter(Boolean);
                         repsToDisplay = [...new Set(associatedReps)];
                         if (repsToDisplay.length === 1) defaultSelectedRep = repsToDisplay[0];
                         break;
                     case 'admin':
-                        repsToDisplay = [...new Set(globalGoogleData.map(row => row['medical rep']).filter(Boolean))];
+                        repsToDisplay = [...new Set(globalMasterlistData.map(row => row['medical rep']).filter(Boolean))];
                         break;
                     default:
                         showAlert(`Unknown user title: ${loggedInUser.title}.`, 'error');
@@ -1881,7 +1882,7 @@
                     showAlert('Please select a Medical Representative to proceed.', 'info');
                     return;
                 }
-                const repData = globalGoogleData.find(row => row['medical rep'] === selectedRepName);
+                const repData = globalMasterlistData.find(row => row['medical rep'] === selectedRepName);
                 if (repData) {
                     updateRepCard(repData);
 
@@ -2164,57 +2165,124 @@
                 async getRemainingVisits(hcpName) {
                     const currentMonthStart = this.getCurrentMonthStart();
                     const visitsThisMonth = globalSupabaseVisits.filter(visit => visit.hcp_name === hcpName && visit.medical_rep === currentMedRep.name && new Date(visit.visit_date) >= new Date(currentMonthStart) && !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event('));
-                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
+                    const hcp = globalMasterlistData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
                     const targetVisits = parseInt(hcp?.['T.V']) || 0;
                     return targetVisits - visitsThisMonth.length;
                 }
                 async storeVisitInSupabase(formData) {
-                    const hcp = globalGoogleData.find(h => h['HCPS'] === formData.hcpName && h['medical rep'] === formData.medicalRep);
+                    const hcp = globalMasterlistData.find(h => h['HCPS'] === formData.hcpName && h['medical rep'] === formData.medicalRep);
                     const currentRemaining = await this.getRemainingVisits(formData.hcpName);
-                    const visitData = { hcp_name: formData.hcpName, specialty: hcp?.['Speciality'], brick: hcp?.['Brick'], target_visits: parseInt(hcp?.['T.V']) || 0, last_visit: formData.visitDate, remaining_visits: currentRemaining - 1, medical_rep: formData.medicalRep, visit_date: formData.visitDate, comments: formData.comments, visit_place: formData.visitPlace, created_at: new Date().toISOString() };
-                    const response = await fetch(SUPABASE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(visitData) });
-                    if (!response.ok) { const errorText = await response.text(); throw new Error(`Failed to store visit: ${errorText}`); }
-                    const newVisit = await response.json();
-                    globalSupabaseVisits.push(newVisit[0]);
-                    const commentData = { hcp_name: formData.hcpName, medical_rep: formData.medicalRep, comment: formData.comments, created_at: new Date().toISOString() };
-                    const commentResponse = await fetch(SAVED_COMMENTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(commentData) });
-                    if (!commentResponse.ok) { const errorText = await commentResponse.text(); throw new Error(`Failed to save comment: ${errorText}`); }
+                    const { data, error } = await supabaseClient
+                        .from(VISITS_TABLE)
+                        .insert([{
+                            hcp_name: formData.hcpName,
+                            specialty: hcp?.['Speciality'],
+                            brick: hcp?.['Brick'],
+                            target_visits: parseInt(hcp?.['T.V']) || 0,
+                            last_visit: formData.visitDate,
+                            remaining_visits: currentRemaining - 1,
+                            medical_rep: formData.medicalRep,
+                            visit_date: formData.visitDate,
+                            comments: formData.comments,
+                            visit_place: formData.visitPlace
+                        }])
+                        .select();
+
+                    if (error) {
+                        throw new Error(`Failed to store visit: ${error.message}`);
+                    }
+                    globalSupabaseVisits.push(data[0]);
+                    
+                    const { error: commentError } = await supabaseClient
+                        .from(SAVED_COMMENTS_TABLE)
+                        .insert([{
+                            hcp_name: formData.hcpName,
+                            medical_rep: formData.medicalRep,
+                            comment: formData.comments
+                        }]);
+
+                    if (commentError) {
+                        throw new Error(`Failed to save comment: ${commentError.message}`);
+                    }
                 }
                 async storePharmacyInSupabase(formData) {
                     if (!currentMedRep) throw new Error('Medical Rep not logged in.');
-                    const visitData = { hcp_name: formData.pharmacyName, specialty: 'Pharmacy', brick: formData.brick, visit_date: formData.visitTimePharmacy, comments: formData.commentsPharmacy, medical_rep: currentMedRep.name, created_at: new Date().toISOString() };
-                    const response = await fetch(SUPABASE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(visitData) });
-                    if (!response.ok) { const errorText = await response.text(); throw new Error(`Failed to store pharmacy visit: ${errorText}`); }
-                    globalSupabaseVisits.push((await response.json())[0]);
+                    const { data, error } = await supabaseClient
+                        .from(VISITS_TABLE)
+                        .insert([{
+                            hcp_name: formData.pharmacyName,
+                            specialty: 'Pharmacy',
+                            brick: formData.brick,
+                            visit_date: formData.visitTimePharmacy,
+                            comments: formData.commentsPharmacy,
+                            medical_rep: currentMedRep.name
+                        }])
+                        .select();
+                    if (error) throw new Error(`Failed to store pharmacy visit: ${error.message}`);
+                    globalSupabaseVisits.push(data[0]);
                 }
                 async storeLeaveInSupabase(formData) {
                     if (!currentMedRep) throw new Error('Medical Rep not logged in.');
                     const specialtyWithEventActivity = `Event(${formData.eventActivity})`;
-                    const visitData = { hcp_name: formData.eventType, specialty: specialtyWithEventActivity, medical_rep: currentMedRep.name, visit_date: formData.dateEvent, comments: formData.commentsEvent, created_at: new Date().toISOString() };
-                    const visitResponse = await fetch(SUPABASE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(visitData) });
-                    if (!visitResponse.ok) { const errorText = await visitResponse.text(); throw new Error(`Failed to store leave in healthcarepro_visits: ${errorText}`); }
-                    const vacationResponse = await fetch(SUPABASE_VACATIONS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(visitData) });
-                    if (!vacationResponse.ok) { const errorText = await vacationResponse.text(); throw new Error(`Failed to store leave in vacations: ${errorText}`); }
-                    globalSupabaseVisits.push((await visitResponse.json())[0]);
+                    const { data: visitData, error: visitError } = await supabaseClient
+                        .from(VISITS_TABLE)
+                        .insert([{
+                            hcp_name: formData.eventType,
+                            specialty: specialtyWithEventActivity,
+                            medical_rep: currentMedRep.name,
+                            visit_date: formData.dateEvent,
+                            comments: formData.commentsEvent
+                        }])
+                        .select();
+                    if (visitError) throw new Error(`Failed to store leave in healthcarepro_visits: ${visitError.message}`);
+                    globalSupabaseVisits.push(visitData[0]);
+
+                    const { error: vacationError } = await supabaseClient
+                        .from(VACATIONS_TABLE)
+                        .insert([{
+                            hcp_name: formData.eventType,
+                            specialty: specialtyWithEventActivity,
+                            medical_rep: currentMedRep.name,
+                            visit_date: formData.dateEvent,
+                            comments: formData.commentsEvent
+                        }]);
+                    if (vacationError) throw new Error(`Failed to store leave in vacations: ${vacationError.message}`);
                 }
                 async storeEventInSupabase(formData) {
                     if (!currentMedRep) throw new Error('Medical Rep not logged in.');
                     const specialtyWithEventActivity = `Event(${formData.eventActivity})`;
-                    const eventData = { hcp_name: formData.eventType, specialty: specialtyWithEventActivity, medical_rep: currentMedRep.name, visit_date: formData.dateEvent, comments: formData.commentsEvent, created_at: new Date().toISOString() };
-                    const response = await fetch(SUPABASE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(eventData) });
-                    if (!response.ok) { const errorText = await response.text(); throw new Error(`Failed to store event: ${errorText}`); }
-                    globalSupabaseVisits.push((await response.json())[0]);
+                    const { data, error } = await supabaseClient
+                        .from(VISITS_TABLE)
+                        .insert([{
+                            hcp_name: formData.eventType,
+                            specialty: specialtyWithEventActivity,
+                            medical_rep: currentMedRep.name,
+                            visit_date: formData.dateEvent,
+                            comments: formData.commentsEvent
+                        }])
+                        .select();
+                    if (error) throw new Error(`Failed to store event: ${error.message}`);
+                    globalSupabaseVisits.push(data[0]);
                 }
                 async storeAmDetailsInSupabase(formData) {
                     if (!currentMedRep) throw new Error('Medical Rep not logged in.');
-                    const visitData = { hcp_name: formData.amDoctorName, specialty: `AM(${formData.associatedAccount})`, brick: formData.amBrick, visit_date: formData.visitTimeAm, comments: formData.commentsAm, medical_rep: currentMedRep.name, created_at: new Date().toISOString() };
-                    const response = await fetch(SUPABASE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Prefer': 'return=representation' }, body: JSON.stringify(visitData) });
-                    if (!response.ok) { const errorText = await response.text(); throw new Error(`Failed to store AM details: ${errorText}`); }
-                    globalSupabaseVisits.push((await response.json())[0]);
+                    const { data, error } = await supabaseClient
+                        .from(VISITS_TABLE)
+                        .insert([{
+                            hcp_name: formData.amDoctorName,
+                            specialty: `AM(${formData.associatedAccount})`,
+                            brick: formData.amBrick,
+                            visit_date: formData.visitTimeAm,
+                            comments: formData.commentsAm,
+                            medical_rep: currentMedRep.name
+                        }])
+                        .select();
+                    if (error) throw new Error(`Failed to store AM details: ${error.message}`);
+                    globalSupabaseVisits.push(data[0]);
                 }
                 updateHcpOptions(repName) {
                     this.elements.hcpSelect.innerHTML = '<option value="">Select Healthcare Professional</option>';
-                    const filteredHcps = globalGoogleData.filter(hcp => hcp['medical rep'] === repName);
+                    const filteredHcps = globalMasterlistData.filter(hcp => hcp['medical rep'] === repName);
                     const currentMonthStart = this.getCurrentMonthStart();
                     filteredHcps.forEach(hcp => {
                         const option = document.createElement('option');
@@ -2226,17 +2294,17 @@
                     });
                 }
                 updateBrickOptions(repName) {
-                    const uniqueBricks = [...new Set(globalGoogleData.filter(hcp => hcp['medical rep'] === repName).map(hcp => hcp['Brick']).filter(Boolean))];
+                    const uniqueBricks = [...new Set(globalMasterlistData.filter(hcp => hcp['medical rep'] === repName).map(hcp => hcp['Brick']).filter(Boolean))];
                     populateSelect(this.elements.brickSelect, uniqueBricks);
                 }
                 updateAmBrickOptions(repName) {
-                    const uniqueBricks = [...new Set(globalGoogleData.filter(hcp => hcp['medical rep'] === repName).map(hcp => hcp['Brick']).filter(Boolean))];
+                    const uniqueBricks = [...new Set(globalMasterlistData.filter(hcp => hcp['medical rep'] === repName).map(hcp => hcp['Brick']).filter(Boolean))];
                     populateSelect(this.elements.amBrickSelect, uniqueBricks);
                 }
                 updateAssociatedAccounts(repName) {
                     this.elements.associatedAccountSelect.innerHTML = '<option value="">Select Associated Account</option>';
-                    const filteredAccounts = globalGoogleData.filter(hcp => hcp['medical rep'] === repName && ['hospital', 'account', 'dialysis center'].includes(hcp['Speciality'].toLowerCase()));
-                    const hcpClass = globalGoogleData.find(hcp => hcp['medical rep'] === repName && hcp['HCPS'] === this.elements.hcpSelect.value)?.['Class'];
+                    const filteredAccounts = globalMasterlistData.filter(hcp => hcp['medical rep'] === repName && ['hospital', 'account', 'dialysis center'].includes(hcp['Speciality'].toLowerCase()));
+                    const hcpClass = globalMasterlistData.find(hcp => hcp['medical rep'] === repName && hcp['HCPS'] === this.elements.hcpSelect.value)?.['Class'];
                     if (hcpClass && (hcpClass.toLowerCase() === 'upa' || hcpClass.toLowerCase() === 'private')) {
                         const option = document.createElement('option'); option.value = 'AM Hospital'; option.textContent = 'AM Hospital';
                         this.elements.associatedAccountSelect.appendChild(option); this.elements.associatedAccountSelect.value = 'AM Hospital';
@@ -2254,7 +2322,7 @@
                     const selectedHcp = this.elements.hcpSelect.value;
                     if (selectedHcp) {
                         const cleanSelectedHcpName = selectedHcp.replace(' ⚠️', '').trim();
-                        const hcpData = globalGoogleData.find(h => h['HCPS'] === cleanSelectedHcpName && h['medical rep'] === currentMedRep.name);
+                        const hcpData = globalMasterlistData.find(h => h['HCPS'] === cleanSelectedHcpName && h['medical rep'] === currentMedRep.name);
                         this.updateRemainingVisits(cleanSelectedHcpName); this.updateHcpDetails(cleanSelectedHcpName); this.updateSavedComment(cleanSelectedHcpName);
                         if (hcpData && (hcpData['Class'] === 'Private' || hcpData['Class'] === 'UPA')) {
                             this.elements.visitLocationHcpSelect.innerHTML = `<option value="AM Hospital">AM Hospital</option>`;
@@ -2275,16 +2343,16 @@
                     const selectedAccount = this.elements.associatedAccountSelect.value;
                     if (selectedAccount && currentMedRep) {
                         const cleanSelectedAccountName = selectedAccount.replace(' ⚠️', '').trim();
-                        const accountData = globalGoogleData.find(row => row['HCPS'] === cleanSelectedAccountName && row['medical rep'] === currentMedRep.name);
+                        const accountData = globalMasterlistData.find(row => row['HCPS'] === cleanSelectedAccountName && row['medical rep'] === currentMedRep.name);
                         this.elements.amBrickSelect.value = accountData ? accountData['Brick'] : '';
                     } else { this.elements.amBrickSelect.value = ''; }
                 }
                 updateUnvisitedHcpCount() {
                     if (!currentMedRep) return;
-                    const googleSheetHcpsForRep = globalGoogleData.filter(hcp => hcp['medical rep'] === currentMedRep.name);
+                    const masterlistHcpsForRep = globalMasterlistData.filter(hcp => hcp['medical rep'] === currentMedRep.name);
                     const currentMonthStart = this.getCurrentMonthStart();
                     let unvisitedCount = 0;
-                    googleSheetHcpsForRep.forEach(hcp => {
+                    masterlistHcpsForRep.forEach(hcp => {
                         const hasVisited = globalSupabaseVisits.some(visit => visit.hcp_name === hcp['HCPS'] && visit.medical_rep === currentMedRep.name && new Date(visit.visit_date) >= new Date(currentMonthStart) && !visit.specialty.startsWith('AM(') && visit.specialty !== 'Pharmacy' && !visit.specialty.startsWith('Event('));
                         if (!hasVisited) unvisitedCount++;
                     });
@@ -2304,7 +2372,7 @@
                     return new Date(nowInCairo.getFullYear(), nowInCairo.getMonth(), 2).toISOString().split('T')[0];
                 }
                 async updateRemainingVisits(hcpName) {
-                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
+                    const hcp = globalMasterlistData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
                     if (hcp) {
                         const remainingVisits = await this.getRemainingVisits(hcp['HCPS']);
                         this.elements.remainingVisitsSpan.textContent = remainingVisits;
@@ -2315,23 +2383,38 @@
                     }
                 }
                 async getLastVisitDate(name) {
-                    const visits = globalSupabaseVisits.filter(visit => visit.hcp_name === name && visit.medical_rep === currentMedRep.name);
-                    visits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                    return visits.length > 0 ? visits[0].created_at : 'N/A';
+                    const { data, error } = await supabaseClient
+                        .from(VISITS_TABLE)
+                        .select('created_at')
+                        .eq('hcp_name', name)
+                        .eq('medical_rep', currentMedRep.name)
+                        .order('created_at', { ascending: false })
+                        .limit(1);
+
+                    if (error) {
+                        console.error('Error fetching last visit date:', error);
+                        return 'N/A';
+                    }
+                    return data.length > 0 ? data[0].created_at : 'N/A';
                 }
                 async updateSavedComment(hcpName) {
                     try {
-                        const response = await fetch(`${SAVED_COMMENTS_URL}?hcp_name=eq.${encodeURIComponent(hcpName)}&medical_rep=eq.${encodeURIComponent(currentMedRep.name)}&order=created_at.desc&limit=1`, { headers: { 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'apikey': SUPABASE_API_KEY, 'Content-Type': 'application/json' }});
-                        if (!response.ok) throw new Error('Failed to retrieve saved comment');
-                        const lastComment = await response.json();
-                        this.elements.savedCommentSpan.textContent = lastComment.length > 0 ? lastComment[0].comment : 'No previous comments available';
+                        const { data, error } = await supabaseClient
+                            .from(SAVED_COMMENTS_TABLE)
+                            .select('comment')
+                            .eq('hcp_name', hcpName)
+                            .eq('medical_rep', currentMedRep.name)
+                            .order('created_at', { ascending: false })
+                            .limit(1);
+                        if (error) throw new Error('Failed to retrieve saved comment');
+                        this.elements.savedCommentSpan.textContent = data.length > 0 ? data[0].comment : 'No previous comments available';
                     } catch (error) {
                         console.error('Error fetching saved comment:', error);
                         this.elements.savedCommentSpan.textContent = 'Error loading comment.';
                     }
                 }
                 updateHcpDetails(hcpName) {
-                    const hcp = globalGoogleData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
+                    const hcp = globalMasterlistData.find(h => h['HCPS'] === hcpName && h['medical rep'] === currentMedRep.name);
                     this.elements.brickHcpInput.value = hcp ? hcp['Brick'] : '';
                     this.elements.specialtyHcpInput.value = hcp ? hcp['Speciality'] : '';
                 }
@@ -2340,9 +2423,14 @@
                     this.setLoading(true); this.elements.tableBody.innerHTML = '';
                     try {
                         const currentMonthStart = this.getCurrentMonthStart();
-                        const visitsResponse = await fetchPaginatedData(`${SUPABASE_URL}?medical_rep=eq.${encodeURIComponent(currentMedRep.name)}&visit_date=gte.${currentMonthStart}`, SUPABASE_API_KEY);
-                        let visits = visitsResponse;
-                        visits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                        const { data: visits, error } = await supabaseClient
+                            .from(VISITS_TABLE)
+                            .select('*')
+                            .eq('medical_rep', currentMedRep.name)
+                            .gte('visit_date', currentMonthStart)
+                            .order('created_at', { ascending: false });
+                        if (error) throw new Error(`Failed to retrieve visits: ${error.message}`);
+                        
                         let visitsSortedAscending = [...visits].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                         let firstVisitIdsOfDay = new Set(); let currentDay = '';
                         visitsSortedAscending.forEach(visit => {
@@ -2421,7 +2509,7 @@
                     filteredVisits.forEach(visit => { visitCountsForCurrentRep[visit.hcp_name] = (visitCountsForCurrentRep[visit.hcp_name] || 0) + 1; });
                 }
                 populateBricksForRep(repName) {
-                    const uniqueBricks = [...new Set(globalGoogleData.filter(row => row['medical rep'] === repName).map(row => row['Brick']).filter(Boolean))];
+                    const uniqueBricks = [...new Set(globalMasterlistData.filter(row => row['medical rep'] === repName).map(row => row['Brick']).filter(Boolean))];
                     this.elements.bricksOptions.innerHTML = ''; selectedBricks = []; this.elements.bricksTrigger.textContent = 'Select Brick';
                     if (uniqueBricks.length === 0) { this.elements.bricksTrigger.textContent = 'No Bricks Available'; return; }
                     uniqueBricks.forEach(brick => {
@@ -2440,16 +2528,16 @@
                     const selectedRep = this.elements.dashboardMedicalRepsSelect.value, selectedOption = this.elements.visitOptionsSelect.value;
                     if (!selectedRep || !selectedOption) { this.elements.countDisplay.classList.add('hidden'); return; }
                     let count = 0, displayText = '';
-                    const filteredGoogleDataForRep = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    const filteredMasterlistDataForRep = globalMasterlistData.filter(row => row['medical rep'] === selectedRep);
                     const selectedDay = this.elements.dayFilterSelect.value;
                     if (selectedOption === 'unvisited') {
-                        count = filteredGoogleDataForRep.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
+                        count = filteredMasterlistDataForRep.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
                         displayText = `Unvisited HCPs (${selectedBricks.length > 0 ? selectedBricks.join(', ') : 'All Bricks'}) Count: `;
                     } else if (selectedOption === 'remaining') {
-                        count = filteredGoogleDataForRep.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
+                        count = filteredMasterlistDataForRep.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
                         displayText = `Remaining Visits (${selectedBricks.length > 0 ? selectedBricks.join(', ') : 'All Bricks'}) Count: `;
                     } else if (selectedOption === 'full') {
-                        count = filteredGoogleDataForRep.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
+                        count = filteredMasterlistDataForRep.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== '')).length;
                         displayText = `Full List (${selectedBricks.length > 0 ? selectedBricks.join(', ') : 'All Bricks'}) Count: `;
                     }
                     this.elements.countDisplay.textContent = `${displayText} ${count}`; this.elements.countDisplay.classList.remove('hidden');
@@ -2461,13 +2549,13 @@
                     if (!selectedOption) errorMsg += 'Please select a display option. ';
                     this.elements.errorDisplay.textContent = errorMsg; this.elements.errorDisplay.classList.toggle('hidden', !errorMsg);
                     if (errorMsg) { this.elements.hcpTable.classList.add('hidden'); this.elements.searchContainer.classList.add('hidden'); return; }
-                    const googleDataForCurrentRep = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    const masterlistDataForCurrentRep = globalMasterlistData.filter(row => row['medical rep'] === selectedRep);
                     if (selectedOption === 'unvisited') {
-                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
+                        filteredHCPsForDashboard = masterlistDataForCurrentRep.filter(row => (!visitCountsForCurrentRep[row['HCPS']] || visitCountsForCurrentRep[row['HCPS']] === 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     } else if (selectedOption === 'remaining') {
-                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
+                        filteredHCPsForDashboard = masterlistDataForCurrentRep.filter(row => (parseInt(row['T.V']) || 0) > (visitCountsForCurrentRep[row['HCPS']] || 0) && (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     } else {
-                        filteredHCPsForDashboard = googleDataForCurrentRep.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
+                        filteredHCPsForDashboard = masterlistDataForCurrentRep.filter(row => (selectedBricks.length === 0 || selectedBricks.includes(row['Brick'])) && (selectedDay === '' || row[selectedDay].trim() !== ''));
                     }
                     this.populateHCPTable(filteredHCPsForDashboard, selectedDay); this.elements.searchContainer.classList.remove('hidden');
                 }
@@ -2617,10 +2705,17 @@
                     if (valid) {
                         const requestData = { medRep, area, customerType: selectedAccountOrDoctor, customerName, date: this.elements.dateInput.value, requestTitle: this.elements.requestTitleInput.value, requestDetails: this.elements.requestDetailsTextarea.value, status: "Requested" };
                         try {
-                            const response = await fetch(REQUESTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_API_KEY, 'Authorization': `Bearer ${SUPABASE_API_KEY}` }, body: JSON.stringify(requestData) });
-                            if (response.ok) { showRequestAlert("Customer Request submitted successfully!", "success"); this.resetCustomerForm(); this.fetchTotalCustomerRequests(); }
-                            else { const errorData = await response.json(); console.error('Error submitting customer request:', errorData); showRequestAlert("Failed to submit customer request: " + errorData.message, "error"); }
-                        } catch (error) { console.error('Error:', error); showRequestAlert("An error occurred while submitting the customer request.", "error"); }
+                            const { error } = await supabaseClient
+                                .from(REQUESTS_TABLE)
+                                .insert([requestData]);
+                            if (error) { throw new Error(error.message); }
+                            showRequestAlert("Customer Request submitted successfully!", "success");
+                            this.resetCustomerForm();
+                            this.fetchTotalCustomerRequests();
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showRequestAlert("Failed to submit customer request: " + error.message, "error");
+                        }
                     } else { showRequestAlert('Please fill in all required fields for Customer Request.', 'error'); }
                 }
                 async submitPersonalRequest() {
@@ -2636,10 +2731,17 @@
                     if (valid) {
                         const requestData = { medRep: personalName, area: personalArea, customerType: "Personal", customerName: personalName, date: personalDate, requestTitle: personalRequestTitle, requestDetails: this.elements.personalRequestDetailsTextarea.value, status: "Requested" };
                         try {
-                            const response = await fetch(REQUESTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_API_KEY, 'Authorization': `Bearer ${SUPABASE_API_KEY}` }, body: JSON.stringify(requestData) });
-                            if (response.ok) { showRequestAlert("Personal Request submitted successfully!", "success"); this.resetPersonalForm(); this.fetchTotalPersonalRequests(); }
-                            else { const errorData = await response.json(); console.error('Error submitting personal request:', errorData); showRequestAlert("Failed to submit personal request: " + errorData.message, "error"); }
-                        } catch (error) { console.error('Error:', error); showRequestAlert("An error occurred while submitting the personal request.", "error"); }
+                            const { error } = await supabaseClient
+                                .from(REQUESTS_TABLE)
+                                .insert([requestData]);
+                            if (error) { throw new Error(error.message); }
+                            showRequestAlert("Personal Request submitted successfully!", "success");
+                            this.resetPersonalForm();
+                            this.fetchTotalPersonalRequests();
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showRequestAlert("Failed to submit personal request: " + error.message, "error");
+                        }
                     } else { showRequestAlert('Please fill in all required fields for Personal Request.', 'error'); }
                 }
                 resetCustomerForm() {
@@ -2661,13 +2763,17 @@
                     const medRep = this.currentRepName, requestDetailsDisplay = this.elements.customerRequestDetailsDisplayDiv;
                     requestDetailsDisplay.innerHTML = '';
                     if (!medRep) { showRequestAlert("Medical Rep information is missing.", "error"); return; }
-                    let filters = [`customerType=neq.Personal`];
+                    let filters = { customerType: { operator: 'neq', value: 'Personal' } };
                     const associatedAreas = medicalRepsAreas.get(medRep);
-                    if (associatedAreas && associatedAreas.size > 0) { filters.push(`area=in.(${Array.from(associatedAreas).join(',')})`); }
-                    else { showRequestAlert("No associated areas found.", "info"); this.elements.retrievedCustomerRequestsDiv.classList.add('hidden'); return; }
-                    const fullQueryUrl = `${REQUESTS_URL}?${filters.join('&')}&order=date.desc`;
+                    if (associatedAreas && associatedAreas.size > 0) {
+                        filters.area = { operator: 'in', value: Array.from(associatedAreas) };
+                    } else {
+                        showRequestAlert("No associated areas found.", "info");
+                        this.elements.retrievedCustomerRequestsDiv.classList.add('hidden');
+                        return;
+                    }
                     try {
-                        const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY);
+                        const data = await fetchPaginatedData(REQUESTS_TABLE, '*', filters);
                         const sortedData = data.sort((a, b) => { const dateA = new Date(a.date).getTime(), dateB = new Date(b.date).getTime(); if ((a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected") && !(b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected")) return 1; if ((b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected") && !(a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected")) return -1; return dateB - dateA; });
                         if (sortedData.length > 0) {
                             sortedData.forEach(req => {
@@ -2685,9 +2791,12 @@
                     const personalName = this.elements.personalNameSelect.value, personalRequestDetailsDisplay = this.elements.personalRequestDetailsDisplayDiv;
                     personalRequestDetailsDisplay.innerHTML = '';
                     if (!personalName) { showRequestAlert("Please select your Name to retrieve personal requests.", "error"); return; }
-                    const fullQueryUrl = `${REQUESTS_URL}?customerType=eq.Personal&medRep=eq.${personalName}&order=date.desc`;
+                    let filters = {
+                        customerType: { operator: 'eq', value: 'Personal' },
+                        medRep: { operator: 'eq', value: personalName }
+                    };
                     try {
-                        const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY);
+                        const data = await fetchPaginatedData(REQUESTS_TABLE, '*', filters, { column: 'date', ascending: false });
                         const sortedData = data.sort((a, b) => { const dateA = new Date(a.date).getTime(), dateB = new Date(b.date).getTime(); if ((a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected") && !(b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected")) return 1; if ((b.status === "Done" || b.status === "Canceled" || b.status === "Approved" || b.status === "Rejected") && !(a.status === "Done" || a.status === "Canceled" || a.status === "Approved" || a.status === "Rejected")) return -1; return dateB - dateA; });
                         if (sortedData.length > 0) {
                             sortedData.forEach(req => {
@@ -2702,22 +2811,28 @@
                     } catch (error) { console.error('Error fetching personal requests:', error); showRequestAlert("An error occurred while fetching total personal requests.", "error"); }
                 }
                 async fetchTotalCustomerRequests() {
-                    const medRep = this.currentRepName; let filters = [`customerType=neq.Personal`];
+                    const medRep = this.currentRepName;
+                    let filters = { customerType: { operator: 'neq', value: 'Personal' } };
                     if (medRep) {
                         const associatedAreas = medicalRepsAreas.get(medRep);
-                        if (associatedAreas && associatedAreas.size > 0) filters.push(`area=in.(${Array.from(associatedAreas).join(',')})`);
+                        if (associatedAreas && associatedAreas.size > 0) filters.area = { operator: 'in', value: Array.from(associatedAreas) };
                         else { this.elements.customerRequestCountSpan.innerText = '0'; return; }
                     } else { this.elements.customerRequestCountSpan.innerText = '0'; return; }
-                    const fullQueryUrl = `${REQUESTS_URL}?${filters.join('&')}`;
-                    try { const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY); this.elements.customerRequestCountSpan.innerText = data.length; }
-                    catch (error) { console.error('Error fetching total customer requests:', error); showRequestAlert("An error occurred while fetching total customer requests.", "error"); }
+                    try {
+                        const { count, error } = await supabaseClient.from(REQUESTS_TABLE).select('*', { count: 'exact' }).match(filters);
+                        if (error) throw new Error(error.message);
+                        this.elements.customerRequestCountSpan.innerText = count;
+                    } catch (error) { console.error('Error fetching total customer requests:', error); showRequestAlert("An error occurred while fetching total customer requests.", "error"); }
                 }
                 async fetchTotalPersonalRequests() {
-                    const personalName = this.elements.personalNameSelect.value; let filters = [`customerType=eq.Personal`];
-                    if (personalName) { filters.push(`medRep=eq.${personalName}`); } else { this.elements.personalRequestCountSpan.innerText = '0'; return; }
-                    const fullQueryUrl = `${REQUESTS_URL}?${filters.join('&')}`;
-                    try { const data = await fetchPaginatedData(fullQueryUrl, SUPABASE_API_KEY); this.elements.personalRequestCountSpan.innerText = data.length; }
-                    catch (error) { console.error('Error fetching total personal requests:', error); showRequestAlert("An error occurred while fetching total personal requests.", "error"); }
+                    const personalName = this.elements.personalNameSelect.value;
+                    let filters = { customerType: { operator: 'eq', value: 'Personal' } };
+                    if (personalName) { filters.medRep = { operator: 'eq', value: personalName }; } else { this.elements.personalRequestCountSpan.innerText = '0'; return; }
+                    try {
+                        const { count, error } = await supabaseClient.from(REQUESTS_TABLE).select('*', { count: 'exact' }).match(filters);
+                        if (error) throw new Error(error.message);
+                        this.elements.personalRequestCountSpan.innerText = count;
+                    } catch (error) { console.error('Error fetching total personal requests:', error); showRequestAlert("An error occurred while fetching total personal requests.", "error"); }
                 }
             }
             class WeeklyPlanManager {
@@ -2777,7 +2892,7 @@
                 }
                 handleRepChange() {
                     const selectedRep = this.elements.medicalReps.value; this.currentRepName = selectedRep;
-                    const filteredData = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    const filteredData = globalMasterlistData.filter(row => row['medical rep'] === selectedRep);
                     const area = filteredData.length > 0 ? filteredData[0]['area'] : 'Not Found';
                     this.bricks = new Set(filteredData.map(row => row['Brick']).filter(Boolean));
                     populateSelect(this.elements.bricks, [...this.bricks]); this.currentRepArea = area;
@@ -2787,7 +2902,7 @@
                 updateStatistics() {
                     const selectedRep = this.elements.medicalReps.value, selectedBrick = this.elements.bricks.value;
                     if (!selectedRep) { this.elements.statsDisplay.style.display = 'none'; return; }
-                    const filteredData = globalGoogleData.filter(row => row['medical rep'] === selectedRep);
+                    const filteredData = globalMasterlistData.filter(row => row['medical rep'] === selectedRep);
                     const unvisitedCount = filteredData.filter(row => { const visits = this.visitCounts[row['HCPS']] || 0, targetVisits = parseInt(row['T.V']) || 3, remainingVisits = targetVisits - visits; return remainingVisits === targetVisits && (selectedBrick === '' || row['Brick'] === selectedBrick); }).length;
                     this.elements.statsDisplay.textContent = `Unvisited HCPs in ${selectedBrick || 'total'}: ${unvisitedCount}`; this.elements.statsDisplay.style.display = 'block';
                 }
@@ -2801,7 +2916,7 @@
                         return;
                     }
 
-                    let filteredHCPs = globalGoogleData.filter(row => {
+                    let filteredHCPs = globalMasterlistData.filter(row => {
                         return row['medical rep'] === selectedRep &&
                                (selectedDay === '' || row[selectedDay].trim() !== '') &&
                                (selectedBrick === '' || row['Brick'] === selectedBrick) &&
@@ -2875,7 +2990,7 @@
     this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
 }
                 addToWeeklyPlan(hcpName, visitTime, day, speciality) {
-                    const hcpRow = globalGoogleData.find(row => row['HCPS'] === hcpName);
+                    const hcpRow = globalMasterlistData.find(row => row['HCPS'] === hcpName);
                     if (hcpRow) {
                         const brick = hcpRow['Brick'] || ''; const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(speciality);
                         if (isPriority) { this.weeklyPlanData[day].am.push({ name: hcpName, time: visitTime, speciality: speciality, brick: brick, isNew: true }); }
@@ -2909,7 +3024,7 @@
                         this.movedHCPs.delete(movedKey); if (!isEvent) this.addHCPToTable(removedItem); this.renderWeeklyPlan();
                     }
                 }
-                addHCPToTable(hcpData) { if (globalGoogleData.find(row => row['HCPS'] === hcpData.name)) this.applyFilter(); }
+                addHCPToTable(hcpData) { if (globalMasterlistData.find(row => row['HCPS'] === hcpData.name)) this.applyFilter(); }
                 setDefaultDates() {
                     const nowInCairo = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
                     const day = nowInCairo.getDay(); // 0=Sun, 6=Sat
@@ -2965,9 +3080,18 @@
                     });
                     if (plansToSubmit.length === 0) { this.showMessage('Weekly plan is empty. Nothing to submit.', 'error'); return; }
                     try {
-                        await fetch(`${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_API_KEY, 'Authorization': `Bearer ${SUPABASE_API_KEY}` } });
-                        const response = await fetch(SUPABASE_WEEKLY_PLANS_URL, { method: 'POST', headers: { 'apikey': SUPABASE_API_KEY, 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(plansToSubmit) });
-                        if (!response.ok) throw new Error('Failed to submit plan');
+                        await supabaseClient
+                            .from(WEEKLY_PLANS_TABLE)
+                            .delete()
+                            .eq('medical_rep_name', selectedRep)
+                            .gte('start_date', startDate)
+                            .lte('end_date', endDate);
+
+                        const { error } = await supabaseClient
+                            .from(WEEKLY_PLANS_TABLE)
+                            .insert(plansToSubmit);
+                        
+                        if (error) throw new Error(error.message);
                         this.showMessage('Weekly plan submitted successfully!', 'success'); setTimeout(() => this.reset(), 3000);
                     } catch (error) { console.error('Error submitting weekly plan:', error); this.showMessage('Error submitting weekly plan.', 'error'); }
                 }
@@ -2975,7 +3099,15 @@
                     const selectedRep = this.elements.medicalReps.value, startDate = this.elements.startDate.value, endDate = this.elements.endDate.value;
                     if (!selectedRep) { this.showMessage('Please select a Medical Representative.', 'error'); return; }
                     try {
-                        const data = await fetchPaginatedData(`${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`, SUPABASE_API_KEY);
+                        const { data, error } = await supabaseClient
+                            .from(WEEKLY_PLANS_TABLE)
+                            .select('*')
+                            .eq('medical_rep_name', selectedRep)
+                            .gte('start_date', startDate)
+                            .lte('end_date', endDate);
+
+                        if (error) throw new Error(error.message);
+
                         if (data.length === 0) { this.showMessage('No weekly plan found for the selected criteria.', 'error'); return; }
                         this.reset(); this.elements.medicalReps.value = selectedRep; this.handleRepChange();
                         this.elements.startDate.value = startDate; this.elements.endDate.value = endDate;
@@ -3041,4 +3173,3 @@
     </script>
 </body>
 </html>
-
