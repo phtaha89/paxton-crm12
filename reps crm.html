@@ -1682,10 +1682,11 @@
                 let allData = [];
                 const pageSize = 1000;
                 let from = 0;
-                let to = from + pageSize - 1;
                 let hasMore = true;
+                let to;
 
                 while (hasMore) {
+                    to = from + pageSize - 1;
                     let query = supabaseClient.from(tableName).select(select, { count: 'exact' });
                     if (filter) {
                         for (const key in filter) {
@@ -1714,8 +1715,7 @@
 
                     allData = allData.concat(data);
                     hasMore = data.length === pageSize;
-                    from += pageSize;
-                    to = from + pageSize - 1;
+                    from = to + 1;
                 }
 
                 return allData;
