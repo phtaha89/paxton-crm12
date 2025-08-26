@@ -1681,13 +1681,14 @@
             async function fetchPaginatedData(tableName, select = '*', filter = null, orderBy = null) {
                 let allData = [];
                 const pageSize = 1000;
-                let from = 0;
+                let currentPage = 0;
                 let hasMore = true;
-                let to;
 
                 while (hasMore) {
-                    to = from + pageSize - 1;
-                    let query = supabaseClient.from(tableName).select(select, { count: 'exact' });
+                    const from = currentPage * pageSize;
+                    const to = from + pageSize - 1;
+
+                    let query = supabaseClient.from(tableName).select(select);
                     if (filter) {
                         for (const key in filter) {
                             if (filter[key].operator === 'eq') {
@@ -1706,7 +1707,7 @@
                     }
                     query = query.range(from, to);
 
-                    const { data, count, error } = await query;
+                    const { data, error } = await query;
 
                     if (error) {
                         console.error(`Supabase Fetch Error from ${tableName}:`, error);
@@ -1715,7 +1716,7 @@
 
                     allData = allData.concat(data);
                     hasMore = data.length === pageSize;
-                    from = to + 1;
+                    currentPage++;
                 }
 
                 return allData;
@@ -2740,7 +2741,7 @@
                             this.fetchTotalPersonalRequests();
                         } catch (error) {
                             console.error('Error:', error);
-                            showRequestAlert("Failed to submit personal request: " + error.message, "error");
+                            showRequestAlert("An error occurred while submitting the personal request.", "error");
                         }
                     } else { showRequestAlert('Please fill in all required fields for Personal Request.', 'error'); }
                 }
