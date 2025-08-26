@@ -21,7 +21,7 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
+        
         /* Base styles */
         body {
             font-family: 'Inter', sans-serif;
@@ -57,7 +57,7 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
-
+        
         /* --- Notification Styles --- */
         .notification {
             position: fixed;
@@ -92,7 +92,7 @@
         .star-rating .fa-star.selected { color: #ffc107; }
         .star-rating:not(.read-only):hover .fa-star { color: #ffc107; }
         .star-rating:not(.read-only) .fa-star:hover ~ .fa-star { color: #e4e5e9; }
-
+        
         /* Error message & star styling */
         .error-message, .error-star {
             color: #EF4444; /* red-500 */
@@ -224,7 +224,7 @@
         .dynamic-mobile-title {
             display: none;
         }
-
+        
         /* Mobile View Fixes & Enhancements */
         @media (max-width: 1023px) {
             body {
@@ -370,7 +370,7 @@
             box-shadow: none;
             padding: 12px;
         }
-
+        
         #monthly-report-title {
             font-size: 1.25rem;
         }
@@ -428,7 +428,7 @@
                     <i class="fas fa-file-alt fa-fw"></i> <span>DM Report</span>
                 </button>
                 <button id="coaching-report-tab" class="tab-button relative">
-                    <i class="fas fa-chalkboard-teacher fa-fw"></i>
+                    <i class="fas fa-chalkboard-teacher fa-fw"></i> 
                     <span>Coaching Report</span>
                     <span id="coaching-badge" class="absolute top-3 right-3 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
                 </button>
@@ -811,7 +811,7 @@
                                 <div class="text-sm">Total Leave Days</div>
                             </div>
                         </div>
-
+                        
                         <!-- Details Sections (Now hidden by default, shown in modal) -->
                         <div id="filed-visits-details-section" class="mt-8 hidden">
                             <h3 id="filed-visits-details-title" class="text-xl font-bold text-gray-800 mb-4"></h3>
@@ -887,7 +887,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Modal for displaying visit dates -->
     <div id="dates-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-1/2 lg:w-1/3 max-h-[90vh] flex flex-col">
@@ -902,7 +902,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- NEW: Modal for Monthly Report Details -->
     <div id="details-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 md:w-3/4 lg:w-2/3 max-h-[90vh] flex flex-col">
@@ -988,7 +988,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Read-only Coaching Report View Modal -->
     <div id="coaching-view-modal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
         <div class="bg-white rounded-xl shadow-2xl w-11/12 md:w-2/3 lg:w-1/2 max-h-[90vh] flex flex-col">
@@ -1012,7 +1012,7 @@
                         <p class="font-semibold">Visit Details:</p>
                         <p id="view-visit-details"></p>
                     </div>
-
+                    
                     <div class="space-y-3 border-t pt-4">
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Feedback</label>
@@ -1097,19 +1097,20 @@
         let allMonthlyReports = []; // Store the fetched monthly reports
         let myChart = null; // To store the chart instance
         let myChartMobile = null; // To store the mobile chart instance
+        let allSupabaseData = []; // Store the fetched masterlist data
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Supabase configuration
             const SUPABASE_URL = "https://plmevfyxpngzymvzvkzn.supabase.co";
             const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c";
             const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const MASTERLIST_TABLE = 'masterlist'; // New table name
+            const TABLE_NAME = 'healthcarepro_visits';
             const REPORTS_TABLE = 'dm_report';
             const COACHING_REPORTS_TABLE = 'coaching_reports';
+            const MASTERLIST_TABLE = 'masterlist'; // New table name
 
-            let allMasterlistData = [];
             let submittedReports = [];
-
+            
             // Get form and modal elements
             const mainAppDiv = document.getElementById('main-app-container');
             const sideNav = document.querySelector('.side-navigation');
@@ -1125,7 +1126,7 @@
             const dmReportTabButtonMobile = document.getElementById('dm-report-tab-mobile');
             const monthlyDetailsTabButtonMobile = document.getElementById('monthly-details-tab-mobile');
             const coachingReportTabButtonMobile = document.getElementById('coaching-report-tab-mobile');
-
+            
             const mobileHeaderTitle = document.getElementById('mobile-header-title');
 
             const reportDetailsSection = document.getElementById('report-details-section');
@@ -1181,13 +1182,13 @@
             const closeRowDetailsModalBtn = document.getElementById('close-row-details-modal');
             const okRowDetailsModalBtn = document.getElementById('ok-row-details-modal');
             const rowDetailsContent = document.getElementById('row-details-content');
-
+            
             const datesModal = document.getElementById('dates-modal');
             const datesModalTitle = document.getElementById('dates-modal-title');
             const datesModalContent = document.getElementById('dates-modal-content');
             const closeDatesModalBtn = document.getElementById('close-dates-modal');
             const okDatesModalBtn = document.getElementById('ok-dates-modal');
-
+            
             const detailsModal = document.getElementById('details-modal');
             const detailsModalTitle = document.getElementById('details-modal-title');
             const detailsModalContent = document.getElementById('details-modal-content');
@@ -1204,14 +1205,14 @@
             const analysisSummarySection = document.getElementById('analysis-summary-section');
             const analysisSummarySectionMobile = document.getElementById('analysis-summary-section-mobile');
             const monthlyReportTitle = document.getElementById('monthly-report-title');
-
+            
             const filedVisitsBox = document.getElementById('filed-visits-box');
             const filedVisitsCountSpan = document.getElementById('filed-visits-count');
             const eventsBox = document.getElementById('events-box');
             const eventsCountSpan = document.getElementById('events-count');
             const leavesBox = document.getElementById('leaves-box');
             const leavesCountSpan = document.getElementById('leaves-count');
-
+            
             const filedVisitsDetailsSection = document.getElementById('filed-visits-details-section');
             const filedVisitsDetailsTitle = document.getElementById('filed-visits-details-title');
             const doubleVisitsDetailsDiv = document.getElementById('double-visits-details');
@@ -1224,7 +1225,7 @@
             const chartLegendContainer = document.getElementById('chart-legend-container');
             const activityChartCtx = document.getElementById('activity-chart').getContext('2d');
             const activityChartMobileCtx = document.getElementById('activity-chart-mobile').getContext('2d');
-
+            
             const coachingMedRepNameSelect = document.getElementById('coaching-med-rep-name');
             const coachingStatusFilter = document.getElementById('coaching-status-filter');
             const coachingReportTableContainer = document.getElementById('coaching-report-table-container');
@@ -1237,7 +1238,7 @@
             const resetCoachingFormBtn = document.getElementById('reset-coaching-form');
             const starRatings = document.querySelectorAll('.star-rating');
             const coachingReportIdInput = document.getElementById('coaching-report-id');
-
+            
             const coachingViewModal = document.getElementById('coaching-view-modal');
             const closeCoachingViewModalBtn = document.getElementById('close-coaching-view-modal');
             const closeCoachingViewModalBtn2 = document.getElementById('close-coaching-view-modal-2');
@@ -1246,7 +1247,7 @@
             const printCoachingBtn = document.getElementById('print-coaching-btn');
             const downloadXLSXBtn = document.getElementById('download-xlsx-btn');
             const detailsBtn = document.getElementById('details-btn');
-
+            
             // --- NEW: Toggle Sidebar functionality for PC ---
             toggleSidebarBtn.addEventListener('click', () => {
                 sideNav.classList.toggle('collapsed');
@@ -1293,7 +1294,7 @@
                     singleVisitForm.classList.remove('hidden');
                 }
             }
-
+            
             function updateEventTypeVisibility() {
                 const selectedEventType = eventTypeSelect.value;
                 const selectedDm = dmNameSelect.value;
@@ -1311,8 +1312,8 @@
                     eventBrickDiv.classList.remove('hidden');
                     // Populate bricks if DM is selected
                     if (selectedDm) {
-                         const filteredData = allMasterlistData.filter(row => row["District Manager"] === selectedDm);
-                         const dmBricks = [...new Set(filteredData.map(item => item["Brick"]).filter(Boolean))];
+                         const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
+                         const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                          const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                          eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
                     }
@@ -1342,18 +1343,18 @@
             const showNotification = (message, type = 'info') => {
                 const container = document.getElementById('notification-container');
                 let notification = container.querySelector('.notification');
-
+                
                 if (!notification) {
                     notification = document.createElement('div');
                     notification.className = 'notification';
                     container.appendChild(notification);
                 }
-
+                
                 notification.className = 'notification';
                 notification.classList.add(type);
                 notification.textContent = message;
                 notification.classList.add('show');
-
+                
                 clearTimeout(notificationTimeout);
                 notificationTimeout = setTimeout(() => {
                     notification.classList.remove('show');
@@ -1362,7 +1363,7 @@
 
             const showDatesModal = (title, items) => {
                 datesModalTitle.textContent = title;
-                datesModalContent.innerHTML = items.map(item =>
+                datesModalContent.innerHTML = items.map(item => 
                     `<div class="flex justify-between text-sm text-gray-700 p-2 border-b last:border-b-0">
                         <span>${item.date}</span>
                         <span class="font-semibold bg-gray-100 px-2 py-0.5 rounded-full text-xs">${item.period}</span>
@@ -1377,7 +1378,7 @@
 
             closeDatesModalBtn.addEventListener('click', hideDatesModal);
             okDatesModalBtn.addEventListener('click', hideDatesModal);
-
+            
             // NEW: Details Modal Functions
             const showDetailsModal = () => {
                 const dmName = dmNameSelect.value;
@@ -1385,7 +1386,7 @@
                     showNotification('No data available to display.', 'error');
                     return;
                 }
-
+                
                 let modalHtml = '';
                 const reportGroups = {
                     'Visits': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Visits')), headers: ['activity_type', 'created_at', 'period', 'brick', 'med_rep'] },
@@ -1413,7 +1414,7 @@
                         modalHtml += `</tbody></table></div>`;
                     }
                 }
-
+                
                 detailsModalContent.innerHTML = modalHtml;
                 detailsModal.classList.remove('hidden');
             };
@@ -1470,7 +1471,7 @@
 
             updateLiveTime();
             setInterval(updateLiveTime, 1000);
-
+            
             const populateDmDropdown = (dmNames) => {
                 const dmSelect = dmNameSelect;
                 dmSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
@@ -1481,37 +1482,41 @@
                     dmSelect.appendChild(option);
                 });
             };
+            
+            // Replaced the Google Sheets fetching function with a Supabase one
+            const fetchDataFromSupabase = async () => {
+                try {
+                    const limit = 1000;
+                    let offset = 0;
+                    let allData = [];
+                    let hasMore = true;
 
-            const fetchDataFromSupabase = async (tableName) => {
-                const BATCH_SIZE = 1000;
-                let data = [];
-                let offset = 0;
-                let hasMore = true;
+                    while (hasMore) {
+                        const { data, error } = await supabase
+                            .from(MASTERLIST_TABLE)
+                            .select('"District Manager", "medical rep", "Brick"')
+                            .range(offset, offset + limit - 1);
 
-                while (hasMore) {
-                    const { data: batch, error, count } = await supabase
-                        .from(tableName)
-                        .select('*', { count: 'exact' })
-                        .range(offset, offset + BATCH_SIZE - 1);
-
-                    if (error) {
-                        console.error(`Error fetching from ${tableName}:`, error);
-                        showNotification(`Failed to load data from ${tableName}.`, 'error');
-                        return null;
-                    }
-
-                    if (batch) {
-                        data = data.concat(batch);
-                        if (batch.length < BATCH_SIZE) {
-                            hasMore = false;
+                        if (error) throw error;
+                        
+                        if (data.length > 0) {
+                            allData = allData.concat(data);
+                            offset += data.length;
                         } else {
-                            offset += BATCH_SIZE;
+                            hasMore = false;
                         }
-                    } else {
-                        hasMore = false;
+
+                        if (data.length < limit) {
+                             hasMore = false;
+                        }
                     }
+
+                    allSupabaseData = allData;
+                    allDmNames = [...new Set(allSupabaseData.map(item => item['District Manager']).filter(Boolean))];
+                } catch (error) {
+                    console.error('Error fetching data from Supabase:', error);
+                    dmNameSelect.innerHTML = `<option value="" disabled selected>Failed to load data</option>`;
                 }
-                return data;
             };
 
             const handleDeleteReport = (reportId) => {
@@ -1556,11 +1561,11 @@
                 submittedReports = data || [];
                 renderReports(submittedReports, dmName);
             };
-
+            
             const formatHeader = (key) => {
                 return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
             };
-
+            
             const formatUTCTime = (dateString) => {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
@@ -1597,7 +1602,7 @@
 
                 const headers = Object.keys(filteredReports[0]).filter(key => key !== 'dm_name' && key !== 'id');
                 const allHeaders = ['activity_type', 'day_date', ...headers.filter(h => h !== 'activity_type' && h !== 'day_date')];
-
+                
                 if (loggedInUser?.title?.toLowerCase() === 'admin') {
                     allHeaders.push('actions');
                 }
@@ -1646,7 +1651,7 @@
                         }
                         newRow.appendChild(newCell);
                     });
-
+                    
                     reportsTableBody.appendChild(newRow);
                 });
             };
@@ -1677,10 +1682,10 @@
                 const target = event.target;
                 const row = target.closest('tr');
                 if (!row) return;
-
+                
                 const visitId = row.dataset.visitId;
                 const coachingId = row.dataset.coachingId;
-
+                
                 if (target.closest('.delete-coaching-btn')) {
                     event.stopPropagation();
                     if (coachingId) {
@@ -1695,13 +1700,23 @@
 
             const fetchTodaysVisits = async (medRepName) => {
                 const now = new Date();
-                const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+                const year = now.getFullYear();
+                const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                const day = now.getDate().toString().padStart(2, '0');
+                const todayString = `${year}-${month}-${day}`;
 
-                const visits = allMasterlistData.filter(row =>
-                    row["medical rep"] === medRepName && row[dayName.toLowerCase()] === "1"
-                );
+                const { data, error } = await supabase
+                    .from(TABLE_NAME)
+                    .select('hcp_name, specialty, visit_place, visit_date, comments')
+                    .eq('medical_rep', medRepName)
+                    .gte('visit_date', todayString + 'T00:00:00.000Z')
+                    .lte('visit_date', todayString + 'T23:59:59.999Z');
 
-                return visits;
+                if (error) {
+                    console.error('Error fetching data:', error);
+                    return null;
+                }
+                return data;
             };
 
             openVisitsModalBtn.addEventListener('click', async () => {
@@ -1721,16 +1736,10 @@
                         visits.forEach(visit => {
                             const visitItem = document.createElement('div');
                             visitItem.className = 'flex items-center space-x-2 p-2 border rounded-md hover:bg-gray-50 transition';
-                            const visitData = {
-                                hcp_name: visit["HCPS"],
-                                specialty: visit["Speciality"],
-                                visit_place: "N/A", // This column doesn't exist in masterlist
-                                comments: "N/A"
-                            };
                             visitItem.innerHTML = `
-                                <input type="checkbox" data-visit='${JSON.stringify(visitData)}' class="form-checkbox h-4 w-4 text-blue-600 rounded visit-checkbox">
+                                <input type="checkbox" data-visit='${JSON.stringify(visit)}' class="form-checkbox h-4 w-4 text-blue-600 rounded visit-checkbox">
                                 <label class="text-sm font-medium text-gray-700 flex-grow">
-                                    <span class="font-bold">${visit["HCPS"]}</span> - ${visit["Speciality"]}
+                                    <span class="font-bold">${visit.hcp_name}</span> - ${visit.specialty} (${visit.visit_place})
                                 </label>
                             `;
                             modalContent.appendChild(visitItem);
@@ -1790,7 +1799,7 @@
                 hideModal();
                 form.reset();
                 dmNameSelect.value = dmName;
-                updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect]);
+                updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect, eventBrickSelect]);
                 updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
                 selectedVisitsInput.value = '';
                 updateFormVisibility();
@@ -1808,7 +1817,7 @@
                     errorEl.style.display = 'block';
                 }
             };
-
+            
             // --- FORM & EVENT LISTENERS ---
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -1966,7 +1975,7 @@
 
             resetButton.addEventListener('click', () => {
                 const dmName = dmNameSelect.value;
-
+                
                 form.reset();
                 clearErrorMessages();
                 activityRadios.forEach(radio => {
@@ -1985,7 +1994,7 @@
                     updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect, eventBrickSelect]);
                     updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
                 }
-
+                
                 selectedVisitsInput.value = '';
             });
 
@@ -2031,7 +2040,7 @@
                     allTabs.forEach((tab, index) => {
                         tab.classList.toggle('active', index === activeIndex);
                     });
-
+                    
                     allContent.forEach((content, index) => {
                         content.classList.toggle('hidden', index !== activeIndex);
                     });
@@ -2069,7 +2078,7 @@
 
             setupTabListeners('dm-report-tab', 'coaching-report-tab', 'monthly-details-tab');
             setupTabListeners('dm-report-tab-mobile', 'coaching-report-tab-mobile', 'monthly-details-tab-mobile');
-
+            
             filedVisitsBox.addEventListener('click', () => {
                 eventsDetailsSection.classList.add('hidden');
                 leavesDetailsSection.classList.add('hidden');
@@ -2093,7 +2102,7 @@
                 const dailyTotals = new Map();
                 reports.forEach(report => {
                     const date = report.created_at.substring(0, 10);
-
+                    
                     if (!dailyTotals.has(date)) {
                         dailyTotals.set(date, new Set());
                     }
@@ -2128,7 +2137,7 @@
 
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
                 const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
-
+                
                 const { data: monthlyReports, error } = await supabase
                     .from(REPORTS_TABLE)
                     .select('*')
@@ -2141,7 +2150,7 @@
                     console.error('Analysis fetch error:', error);
                     return;
                 }
-
+                
                 allMonthlyReports = monthlyReports || [];
 
                 if (allMonthlyReports.length === 0) {
@@ -2152,13 +2161,13 @@
                         if (myChartMobile) myChartMobile.destroy();
                         return;
                 }
-
+                
                 const analysis = {
                     visits: { single: [], double: [] },
                     events: [],
                     leaves: []
                 };
-
+                
                 allMonthlyReports.forEach(report => {
                     const activity = report.activity_type;
                     if (activity.includes('Visits')) {
@@ -2174,17 +2183,17 @@
                         analysis.leaves.push(report);
                     }
                 });
-
+                
                 const totalFiledVisits = calculateTotalDays([...analysis.visits.single, ...analysis.visits.double]);
                 const totalEvents = calculateTotalDays(analysis.events);
                 const totalLeaves = calculateTotalDays(analysis.leaves);
-
+                
                 filedVisitsCountSpan.textContent = totalFiledVisits;
                 eventsCountSpan.textContent = totalEvents;
                 leavesCountSpan.textContent = totalLeaves;
-
+                
                 // --- Render Details Sections ---
-
+                
                 // Double Visits
                 doubleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Double Visits</h4>`;
                 const doubleVisitsByRep = analysis.visits.double.reduce((acc, visit) => {
@@ -2207,7 +2216,7 @@
                 } else {
                     doubleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No double visits recorded this month.</p>`;
                 }
-
+                
                 // Single Visits
                 singleVisitsDetailsDiv.innerHTML = `<h4 class="text-md font-semibold text-gray-700 mt-4 mb-2">Single Visits</h4>`;
                 if (analysis.visits.single.length > 0) {
@@ -2221,7 +2230,7 @@
                 } else {
                     singleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No single visits recorded this month.</p>`;
                 }
-
+                
                 // Events
                 eventsDetailsDiv.innerHTML = '';
                 const eventsByType = analysis.events.reduce((acc, event) => {
@@ -2244,7 +2253,7 @@
                 } else {
                     eventsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No events recorded this month.</p>`;
                 }
-
+                
                 // Leaves
                 leavesDetailsDiv.innerHTML = '';
                 const leavesByType = analysis.leaves.reduce((acc, leave) => {
@@ -2275,7 +2284,7 @@
                     ...Object.keys(eventsByType).reduce((acc, type) => ({...acc, [type]: calculateTotalDays(eventsByType[type])}), {}),
                     ...Object.keys(leavesByType).reduce((acc, type) => ({...acc, [type]: calculateTotalDays(leavesByType[type])}), {}),
                 };
-
+                
                 const filteredChartLabels = Object.keys(activityCounts).filter(key => activityCounts[key] > 0);
                 const filteredChartData = filteredChartLabels.map(key => activityCounts[key]);
                 const chartColors = ['#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E', '#EF4444', '#F97316', '#EAB308', '#22C55E'];
@@ -2298,21 +2307,21 @@
                         responsive: true,
                         maintainAspectRatio: true,
                         plugins: {
-                            legend: {
+                            legend: { 
                                 display: false // We will create a custom legend
                             },
-                            title: {
-                                display: true,
+                            title: { 
+                                display: true, 
                                 text: 'Monthly Activity Breakdown (Days)',
                                 font: { size: 14 }
                             }
                         }
                     }
                 };
-
+                
                 myChart = new Chart(activityChartCtx, chartConfig);
                 myChartMobile = new Chart(activityChartMobileCtx, chartConfig);
-
+                
                 // Create and populate custom legend
                 const totalDays = filteredChartData.reduce((a, b) => a + b, 0);
                 let legendHtml = '<ul class="space-y-2">';
@@ -2351,7 +2360,7 @@
                 XLSX.utils.book_append_sheet(wb, ws, "Monthly Report");
                 XLSX.writeFile(wb, filename);
             });
-
+            
             // REVAMPED Print function
             printMonthlyBtn.addEventListener('click', () => {
                 const dmName = dmNameSelect.value;
@@ -2410,14 +2419,14 @@
                     if (box.id === 'leaves-box') box.style.backgroundColor = '#EF4444';
                 });
                 reportHtml += `<div class="summary-container">${summaryBoxes.innerHTML}</div>`;
-
+                
                 // Add Details Tables (with updated columns)
                 const reportGroups = {
                     'Visits': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Visits')), headers: ['activity_type', 'created_at', 'period', 'brick', 'med_rep'] },
                     'Events': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Event')), headers: ['activity_type', 'created_at', 'period', 'brick', 'comment'] },
                     'Leaves': { reports: allMonthlyReports.filter(r => r.activity_type.includes('Leave')), headers: ['activity_type', 'created_at', 'period', 'comment'] },
                 };
-
+                
                 for (const groupName in reportGroups) {
                     const group = reportGroups[groupName];
                     if (group.reports.length > 0) {
@@ -2442,7 +2451,7 @@
                 if (myChart && myChart.data.labels.length > 0) {
                     const chartImage = myChart.toBase64Image();
                     const totalDays = myChart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-
+                    
                     let legendHtml = '<ul class="chart-legend">';
                     myChart.data.labels.forEach((label, index) => {
                         const value = myChart.data.datasets[0].data[index];
@@ -2508,8 +2517,8 @@
 
                 const visitIds = doubleVisits.map(v => v.id);
                 const { data: coachingData } = await supabase
-                    .from(COACHING_REPORTS_TABLE).select('dm_report_id').in('dm_report_id', visitIds);
-
+                    .from(COACHING_REPORTS_TABLE).select('id, dm_report_id').in('dm_report_id', visitIds);
+                    
                 const completedIds = new Set((coachingData || []).map(item => item.dm_report_id));
                 const pendingCount = doubleVisits.filter(v => !completedIds.has(v.id)).length;
 
@@ -2523,15 +2532,15 @@
                     badgeMobile.classList.add('hidden');
                 }
             };
-
+            
             const fetchAndRenderCoachingReports = async (dmName, medRepName) => {
                 coachingReportTableContainer.classList.remove('hidden');
                 coachingReportsTableBody.innerHTML = '';
                 coachingReportsTableHead.innerHTML = '';
-
+                
                 const now = new Date();
                 const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-
+                
                 let query = supabase
                     .from(REPORTS_TABLE)
                     .select('id, created_at, brick, comment, med_rep')
@@ -2545,13 +2554,13 @@
                 }
 
                 const { data: doubleVisits, error } = await query;
-
+                                
                 if (error) {
                     showNotification('Could not fetch double visits.', 'error');
                     console.error('Coaching fetch error:', error);
                     return;
                 }
-
+                
                 if (doubleVisits.length === 0) {
                     noCoachingReportsMessage.classList.remove('hidden');
                     return;
@@ -2565,7 +2574,7 @@
                     .in('dm_report_id', visitIds);
 
                 const coachingStatusMap = new Map((coachingData || []).map(item => [item.dm_report_id, { status: item.status, id: item.id }]));
-
+                
                 let reportsToRender = doubleVisits.map(visit => ({
                     ...visit,
                     status: coachingStatusMap.get(visit.id)?.status || 'Pending',
@@ -2597,9 +2606,9 @@
                     if(visit.coaching_id) {
                         row.dataset.coachingId = visit.coaching_id;
                     }
-
+                    
                     const truncatedComment = visit.comment.length > 50 ? visit.comment.substring(0, 50) + '...' : visit.comment;
-
+                    
                     let rowHtml = `
                         <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.created_at.substring(0, 10)}</td>
                         <td class="px-3 py-2 whitespace-nowrap text-gray-500">${visit.brick}</td>
@@ -2615,11 +2624,11 @@
                         rowHtml += `<td class="px-3 py-2 whitespace-nowrap">${visit.status === 'Completed' ? `<button class="delete-coaching-btn text-red-500 hover:text-red-700" data-id="${visit.coaching_id}"><i class="fas fa-trash-alt"></i></button>` : ''}</td>`;
                     }
                     row.innerHTML = rowHtml;
-
+                    
                     coachingReportsTableBody.appendChild(row);
                 });
             };
-
+            
             const openCoachingModal = async (visitId, status) => {
                 const { data: visitReport, error: visitError } = await supabase
                     .from(REPORTS_TABLE)
@@ -2668,7 +2677,7 @@
                 document.getElementById('view-med-rep-name').textContent = coachingReport.med_rep_name;
                 document.getElementById('view-visit-date').textContent = visitReport.created_at.substring(0, 10);
                 document.getElementById('view-visit-details').textContent = visitReport.comment;
-
+                
                 displayStars('view_feedback_score', coachingReport.feedback_score);
                 displayStars('view_opening_score', coachingReport.opening_score);
                 displayStars('view_asking_for_commitment_score', coachingReport.asking_for_commitment_score);
@@ -2676,7 +2685,7 @@
                 displayStars('view_planning_score', coachingReport.planning_score);
                 displayStars('view_time_management_score', coachingReport.time_management_score);
                 displayStars('view_medical_product_knowledge_score', coachingReport.medical_product_knowledge_score);
-
+                
                 document.getElementById('view-conclusions').textContent = coachingReport.conclusions || '';
 
                 coachingViewModal.classList.remove('hidden');
@@ -2691,18 +2700,18 @@
                     stars[i].classList.add('selected');
                 }
             };
-
+            
             const closeCoachingModal = () => {
                 coachingModal.classList.add('hidden');
             };
             const closeCoachingViewModal = () => {
                 coachingViewModal.classList.add('hidden');
             };
-
+            
             closeCoachingModalBtn.addEventListener('click', closeCoachingModal);
             closeCoachingViewModalBtn.addEventListener('click', closeCoachingViewModal);
             closeCoachingViewModalBtn2.addEventListener('click', closeCoachingViewModal);
-
+            
             starRatings.forEach(rating => {
                 const stars = rating.querySelectorAll('.fa-star');
                 stars.forEach(star => {
@@ -2723,12 +2732,12 @@
                 stars.forEach(star => star.classList.remove('selected'));
                 if (rating) rating.dataset.score = 0;
             }
-
+            
             resetCoachingFormBtn.addEventListener('click', () => {
                 coachingEvaluationForm.reset();
                 starRatings.forEach(resetStars);
             });
-
+            
             submitCoachingReportBtn.addEventListener('click', async () => {
                 let isValid = true;
                 document.querySelectorAll('.error-star').forEach(star => star.style.display = 'none');
@@ -2761,9 +2770,9 @@
                 }
 
                 if(!isValid) return;
-
+                
                 const { error } = await supabase.from(COACHING_REPORTS_TABLE).insert([evaluationData]);
-
+                
                 if (error) {
                     showNotification('Failed to submit coaching report.', 'error');
                     console.error('Coaching submission error:', error);
@@ -2774,12 +2783,12 @@
                     await fetchAndRenderCoachingReports(dmNameSelect.value, coachingMedRepNameSelect.value);
                 }
             });
-
+            
             printCoachingBtn.addEventListener('click', () => {
                 const element = document.getElementById('coaching-view-print-area').cloneNode(true);
                 // Remove buttons from the cloned element before printing
                 element.querySelector('.print-hidden').remove();
-
+                
                 const medRepName = document.getElementById('view-med-rep-name').textContent || 'CoachingReport';
                 const opt = {
                     margin:       0.5,
@@ -2790,7 +2799,7 @@
                 };
                 html2pdf().from(element).set(opt).save();
             });
-
+            
             window.addEventListener('message', async function(event) {
                 if (event.data && event.data.type === 'dmReportUserPermissions') {
                     loggedInUser = event.data.user;
@@ -2799,17 +2808,8 @@
             });
 
             async function initializeReportSystem(user) {
-                showNotification('Fetching masterlist data from Supabase...', 'info');
-                allMasterlistData = await fetchDataFromSupabase(MASTERLIST_TABLE);
-
-                if (allMasterlistData) {
-                    showNotification('Masterlist loaded successfully!', 'success');
-                    allDmNames = [...new Set(allMasterlistData.map(item => item["District Manager"]).filter(Boolean))];
-                } else {
-                    dmNameSelect.innerHTML = `<option value="" disabled selected>Failed to load data</option>`;
-                    return;
-                }
-
+                await fetchDataFromSupabase(); // Use the new Supabase fetch function
+                
                 dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
 
                 if (user && user.title && user.title.toLowerCase() === 'admin') {
@@ -2834,13 +2834,13 @@
                 }
                 updateCoachingBadge();
             }
-
+            
             // --- NEW/FIXED EVENT LISTENERS ---
 
             // Function to populate Med Rep and Brick dropdowns based on selected DM
             const updateAssociatedDropdowns = (sourceDmSelect, targetMedRepSelect, targetBrickSelects = []) => {
                 const selectedDm = sourceDmSelect.value;
-
+                
                 activityRadios.forEach(radio => radio.disabled = !selectedDm);
 
                 if (!selectedDm) {
@@ -2848,10 +2848,11 @@
                     targetBrickSelects.forEach(sel => sel.innerHTML = `<option value="" disabled selected>Select DM first</option>`);
                     return;
                 }
-
-                const filteredData = allMasterlistData.filter(row => row["District Manager"] === selectedDm);
-                const medRepNames = [...new Set(filteredData.map(item => item["medical rep"]).filter(Boolean))];
-                const dmBricks = [...new Set(filteredData.map(item => item["Brick"]).filter(Boolean))];
+                
+                // Filter data from the fetched Supabase masterlist
+                const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
+                const medRepNames = [...new Set(filteredData.map(item => item['medical rep']).filter(Boolean))];
+                const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
 
                 targetMedRepSelect.innerHTML = `<option value="" disabled selected>Select Med Rep</option>`;
                 medRepNames.forEach(name => {
@@ -2860,7 +2861,7 @@
                     option.textContent = name;
                     targetMedRepSelect.appendChild(option);
                 });
-
+                
                 if (targetBrickSelects && targetBrickSelects.length > 0) {
                     const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                     targetBrickSelects.forEach(sel => {
@@ -2868,10 +2869,10 @@
                     });
                 }
             };
-
+            
             const updateBricksForMedRep = (medRepName, targetBrickSelects) => {
-                const filteredData = allMasterlistData.filter(row => row["medical rep"] === medRepName);
-                const medRepBricks = [...new Set(filteredData.map(item => item["Brick"]).filter(Boolean))];
+                const filteredData = allSupabaseData.filter(row => row['medical rep'] === medRepName);
+                const medRepBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                 const allMedRepBricksOptions = medRepBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                 targetBrickSelects.forEach(sel => {
                     if (sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allMedRepBricksOptions;
@@ -2881,7 +2882,7 @@
             // Single, comprehensive event listener for the main DM dropdown
             dmNameSelect.addEventListener('change', (event) => {
                 const dmName = event.target.value;
-
+                
                 updateAssociatedDropdowns(event.target, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect, eventBrickSelect]);
                 updateAssociatedDropdowns(event.target, coachingMedRepNameSelect);
 
@@ -2894,10 +2895,10 @@
                 reportDetailsSection.classList.add('hidden');
                 submittedReports = [];
                 renderReports(submittedReports, dmName);
-
+                
                 updateCoachingBadge();
             });
-
+            
             // Double Visit Logic
             medRepNameSelect.addEventListener('change', (event) => {
                 const selectedMedRep = event.target.value;
@@ -2910,7 +2911,7 @@
                     visitsModalTriggerDiv.classList.add('hidden');
                 }
             });
-
+            
             doubleVisitModeRadios.forEach(radio => {
                 radio.addEventListener('change', (event) => {
                     if (event.target.value === 'manual') {
@@ -2922,15 +2923,15 @@
                     }
                 });
             });
-
+            
             // Single Visit Logic
             visitTypeSelect.addEventListener('change', (event) => {
                 updateVisitTypeVisibility();
                 if(event.target.value === 'Single Visit') {
                     const selectedDm = dmNameSelect.value;
                     if(selectedDm) {
-                        const filteredData = allMasterlistData.filter(row => row["District Manager"] === selectedDm);
-                        const dmBricks = [...new Set(filteredData.map(item => item["Brick"]).filter(Boolean))];
+                        const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
+                        const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                         const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                         brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
                     }
@@ -2960,7 +2961,7 @@
             });
 
             activityRadios.forEach(radio => radio.addEventListener('change', updateFormVisibility));
-
+            
             document.getElementById('coaching-reports-table-body').addEventListener('click', (e) => {
                 const target = e.target;
                 if (target.matches('.view-more-coaching')) {
@@ -2973,7 +2974,10 @@
                     }
                 }
             });
+            
+            window.parent.postMessage({ type: 'getDMReportUserPermissions' }, '*');
         });
     </script>
+
 </body>
 </html>
