@@ -7,7 +7,7 @@
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter for a modern look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Supabase CDN for database interaction -->
@@ -375,7 +375,7 @@
                             Submit Log
                         </button>
                         <button id="repViewTab" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('rep', 'view')">
-                            My Logs
+                            My Reports
                         </button>
                     </nav>
                 </div>
@@ -646,6 +646,8 @@
         const employeeFilterSelect = document.getElementById('employeeFilter');
         const statusFilterSelect = document.getElementById('statusFilter');
         const monthFilterSelect = document.getElementById('monthFilter');
+        const currentUserName = document.getElementById('currentUserName');
+        const currentUserRole = document.getElementById('currentUserRole');
 
         // New Print Modals
         const printConfirmationModal = document.getElementById('printConfirmationModal');
@@ -1202,6 +1204,27 @@
             }
         }
 
+        // New function to update status directly from the dropdown
+        async function updateStatusFromDropdown(selectElement, reportId) {
+            const newStatus = selectElement.value;
+            const { error } = await supabase
+                .from('expenses')
+                .update({ status: newStatus })
+                .eq('id', reportId);
+            
+            if (error) {
+                console.error('Error updating status:', error);
+                showMessage("Error", "Failed to update report status. Please try again.");
+                // Revert the dropdown to the old value
+                selectElement.value = selectElement.dataset.originalStatus;
+                return;
+            }
+
+            // Update the original status data attribute for the dropdown
+            selectElement.dataset.originalStatus = newStatus;
+            showMessage("Success", `Report status updated to '${newStatus}'.`);
+        }
+
         // --- Print Modals and Logic (New) ---
         function showPrintConfirmation(rowElement) {
             activeReportRow = rowElement; // Store the row element for later use
@@ -1385,8 +1408,12 @@
                 const data = rowElement.dataset;
                 const items = JSON.parse(data.items);
                 const details = JSON.parse(data.details);
-                const statusCell = rowElement.querySelector('.status-cell');
-                const status = statusCell ? statusCell.textContent.trim() : 'N/A';
+                let status = 'N/A';
+                if (rowElement.querySelector('.status-cell span')) {
+                    status = rowElement.querySelector('.status-cell span').textContent.trim();
+                } else if (rowElement.querySelector('.status-select')) {
+                    status = rowElement.querySelector('.status-select').value;
+                }
 
                 let detailsHtml = `
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 14px;">
@@ -1577,17 +1604,25 @@
             newRow.dataset.details = report.details;
             newRow.dataset.items = report.items;
             newRow.dataset.reportType = report.report_type;
+            newRow.dataset.status = report.status;
 
             let managerCell = report.role === 'Medical Rep' && details.manager ? `<td class="px-6 py-4 whitespace-nowrap">${details.manager}</td>` : `<td class="px-6 py-4 whitespace-nowrap">N/A</td>`;
             
             if (tableBody.id === 'reportsTableBody') {
+                // Admin table uses a dropdown for status
+                const statusOptions = ['Pending', 'Approved', 'Rejected'];
+                let statusSelectHtml = `
+                    <select class="status-select w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white" onchange="updateStatusFromDropdown(this, '${report.id}')" data-original-status="${report.status}">
+                        ${statusOptions.map(option => `<option value="${option}" ${report.status === option ? 'selected' : ''}>${option}</option>`).join('')}
+                    </select>`;
+
                 newRow.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${roleBadge}</td>
                     ${managerCell}
                     <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${statusSelectHtml}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
                         <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
@@ -1889,11 +1924,48 @@
             await fetchMasterlistFromSupabase();
 
             const managerCard = document.getElementById('manager-card');
-            if(managerCard) managerCard.addEventListener('click', () => showView('manager'));
             const repCard = document.getElementById('rep-card');
-            if(repCard) repCard.addEventListener('click', () => showView('medical_rep'));
             const adminCard = document.getElementById('admin-card');
-            if(adminCard) adminCard.addEventListener('click', () => showView('admin'));
+            const roleSelectionContainer = document.querySelector('#roleSelection .grid');
+
+            // Set user info on the header
+            currentUserName.textContent = loggedInUser.username;
+            currentUserRole.textContent = loggedInUser.title;
+            document.getElementById('userInfo').classList.remove('hidden');
+
+            if (loggedInUser.title === 'Medical Rep') {
+                if (managerCard) managerCard.style.display = 'none';
+                if (adminCard) adminCard.style.display = 'none';
+                if (repCard) {
+                    repCard.addEventListener('click', () => {
+                        showView('medical_rep');
+                        if (repNameSelect) {
+                            repNameSelect.value = loggedInUser.username;
+                            repNameSelect.disabled = true;
+                            // Manually trigger change to populate manager/territory
+                            repNameSelect.dispatchEvent(new Event('change'));
+                        }
+                    });
+                }
+            } else if (loggedInUser.title === 'District Manager') {
+                if (repCard) repCard.style.display = 'none';
+                if (adminCard) adminCard.style.display = 'none';
+                if (managerCard) {
+                    managerCard.addEventListener('click', () => {
+                        showView('manager');
+                        if (managerNameSelect) {
+                            managerNameSelect.value = loggedInUser.username;
+                            managerNameSelect.disabled = true;
+                            // Manually trigger change to populate manager's own reports
+                            managerNameSelect.dispatchEvent(new Event('change'));
+                        }
+                    });
+                }
+            } else if (loggedInUser.title === 'Admin / Supervisor') {
+                if (managerCard) managerCard.addEventListener('click', () => showView('manager'));
+                if (repCard) repCard.addEventListener('click', () => showView('medical_rep'));
+                if (adminCard) adminCard.addEventListener('click', () => showView('admin'));
+            }
         });
     </script>
 </body>
