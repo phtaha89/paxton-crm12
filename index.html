@@ -527,7 +527,8 @@
         .full-page-message-overlay {
             position: fixed;
             top: 0; left: 0;
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             background: rgba(29, 54, 93, 0.85);
             backdrop-filter: blur(8px);
             display: flex;
@@ -984,11 +985,6 @@
             <div class="error-state" id="errorMasterList"><div class="error-icon">⚠️</div><div class="error-title">Master List Page Not Found</div><div class="error-text">The Master List file could not be loaded.</div></div>
             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
         </div>
-        <div id="expensesView" class="full-page-view hidden">
-            <div class="loading" id="loadingExpenses"><div class="spinner"></div><div class="loading-text">Loading Expenses...</div></div>
-            <div class="error-state" id="errorExpenses"><div class="error-icon">⚠️</div><div class="error-title">Expenses Page Not Found</div><div class="error-text">The Expenses file could not be loaded.</div></div>
-            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
-        </div>
         <div id="nestedIframeView" class="full-page-view hidden">
             <div class="loading" id="loadingNestedIframe"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
             <div class="error-state" id="errorNestedIframe"><div class="error-icon">⚠️</div><div class="error-title">Page Not Found</div><div class="error-text">The requested file could not be loaded.</div></div>
@@ -1062,7 +1058,6 @@
                             { id: 'dm-report', title: 'DM Report', subtitle: 'View and generate reports for the district.', icon: '📄', viewId: 'nestedIframeView', fileName: 'DM-Report.html', isNested: true, roles: ['admin', 'District Manager'] },
                         ]
                     },
-                    { id: 'expenses', title: 'Expenses', subtitle: 'Manage medical representative expenses.', icon: '💸', viewId: 'expensesView', fileName: 'expenses.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'master-list', title: 'Master List', subtitle: 'View and manage the master data list.', icon: '📋', viewId: 'masterListView', fileName: 'master list.html', roles: ['admin', 'District Manager'] },
                     { id: 'upa-codes', title: 'UPA Codes', subtitle: 'Access UPA Codes and affairs.', icon: '🏥', viewId: 'upaCodesView', fileName: 'upa-codes.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
                     { id: 'price-list', title: 'Price List', subtitle: 'products pricing information.', icon: '💲', viewId: 'priceListView', fileName: 'price-list.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
@@ -1235,10 +1230,10 @@
             `;
 
             if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
-                     detailsHtml += `
-                         <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
-                         <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
-                 `;
+                 detailsHtml += `
+                     <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
+                     <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
+                `;
             }
 
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
@@ -1444,9 +1439,9 @@
             const prevActiveView = document.getElementById(currentActiveViewId);
 
             if (currentActiveViewId !== viewId) {
-                    if (currentActiveViewId && currentActiveViewId !== 'homeView') {
-                     lastPageHistory.push(currentActiveViewId);
-                    }
+                 if (currentActiveViewId && currentActiveViewId !== 'homeView') {
+                    lastPageHistory.push(currentActiveViewId);
+                 }
             }
             
             // Immediately hide the home view
@@ -1491,23 +1486,15 @@
                 
                 const sendDataToIframe = () => {
                     if (loggedInUser && iframe.contentWindow) {
-                        let message = { user: loggedInUser };
+                        const message = { user: loggedInUser };
                         if (page === 'dashboard') {
                             message.type = 'dashboardLogin';
                             message.username = sessionStorage.getItem('dashboardUsername');
                             message.password = sessionStorage.getItem('dashboardPassword');
                         } else if (page === 'dm-planning') {
                             message.type = 'dmPlanningUserPermissions';
-                            const dmReps = googleSheetData.filter(row => row['District Manager'] === loggedInUser.username).map(row => row['medical rep']);
-                            message.reps = dmReps;
                         } else if (page === 'dm-report') {
                             message.type = 'dmReportUserPermissions';
-                            const dmReps = googleSheetData.filter(row => row['District Manager'] === loggedInUser.username).map(row => row['medical rep']);
-                            message.reps = dmReps;
-                        } else if (page === 'expenses') {
-                            message.type = 'expensesPermissions';
-                            const dmReps = loggedInUser.title === 'District Manager' ? googleSheetData.filter(row => row['District Manager'] === loggedInUser.username).map(row => row['medical rep']) : [];
-                            message.reps = dmReps;
                         } else { 
                             message.type = 'loggedInUser';
                         }
@@ -1676,10 +1663,10 @@
                     renderMainGrid();
                 } 
                 else if (currentActiveViewId === 'dmCrmView') {
-                    const config = navConfig.home.pages.find(p => p.id === 'dm-crm');
-                    if (config) {
-                        renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
-                    }
+                     const config = navConfig.home.pages.find(p => p.id === 'dm-crm');
+                     if (config) {
+                         renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
+                     }
                 }
                 else {
                     const iframe = activeView.querySelector('iframe');
