@@ -180,12 +180,12 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Expense</h3>
                     <p class="text-gray-500 text-sm">Submit a new expense report or log</p>
                 </div>
-                <!-- Admin Panel Card -->
+                <!-- admin Panel Card -->
                 <div id="admin-panel-card" class="card card-hover bg-white rounded-lg p-8 text-center cursor-pointer border hidden">
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-user-shield text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Admin Panel</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">admin Panel</h3>
                     <p class="text-gray-500 text-sm">Review and manage all expense reports</p>
                 </div>
             </div>
@@ -214,7 +214,7 @@
                 </div>
             </div>
 
-            <!-- Admin View -->
+            <!-- admin View -->
             <div id="adminView" class="hidden">
                 <div class="flex items-center justify-between mb-6">
                     <div>
@@ -896,7 +896,7 @@
             const rejectBtn = document.getElementById('rejectBtn');
             const isFromTeamReports = rowElement.closest('#myTeamReportsTableBody') !== null;
            
-            const showApproveReject = loggedInUser && (loggedInUser.title === 'Admin' || (loggedInUser.title === 'District Manager' && isFromTeamReports));
+            const showApproveReject = loggedInUser && (loggedInUser.title === 'admin' || (loggedInUser.title === 'District Manager' && isFromTeamReports));
 
             if (showApproveReject) {
                 approveBtn.classList.remove('hidden');
@@ -962,7 +962,7 @@
             );
         }
 
-        // --- Admin/Manager status update logic ---
+        // --- admin/Manager status update logic ---
         async function updateStatus(newStatus) {
             if (activeReportRow) {
                 const reportId = activeReportRow.dataset.id;
@@ -1665,7 +1665,7 @@
             if (!user) return;
             
             // For non-admin roles, pre-fill and lock the employee dropdown.
-            if (user.title !== 'Admin') {
+            if (user.title !== 'admin') {
                 employeeNameDropdown.value = user.username;
                 employeeNameDropdown.disabled = true;
             } else {
@@ -1739,7 +1739,7 @@
                 const addCard = document.getElementById('add-expense-card');
                 const adminCard = document.getElementById('admin-panel-card');
 
-                if (loggedInUser.title === 'Admin') {
+                if (loggedInUser.title === 'admin') {
                     if (addCard) addCard.classList.remove('hidden');
                     if (adminCard) adminCard.classList.remove('hidden');
                 } else if (loggedInUser.title === 'Medical Representative' || loggedInUser.title === 'District Manager') {
