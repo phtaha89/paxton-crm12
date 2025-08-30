@@ -65,7 +65,7 @@
             ring-color: #2563eb;
             border-color: #2563eb;
         }
-       
+        
         /* Adjusted font sizes and padding for form elements */
         label, input, select, textarea, button {
             font-size: 0.9rem; /* Slightly larger font for readability */
@@ -163,7 +163,7 @@
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-user-shield text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">admin Panel</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Admin Panel</h3>
                     <p class="text-gray-500 text-sm">Review and manage all expense reports</p>
                 </div>
             </div>
@@ -264,7 +264,7 @@
             </div>
         </div>
     </div>
-   
+    
     <!-- Report Details Modal -->
     <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
@@ -436,7 +436,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-                                <select id="reportType" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" onchange="handleReportTypeChange(this)">
+                                <select id="reportType" name="reportType" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" onchange="handleReportTypeChange(this)">
                                     <option value="Trip">Trip Report</option>
                                     <option value="Others">Other Expenses</option>
                                 </select>
@@ -513,7 +513,7 @@
                                     <thead class="bg-gray-50">
                                         <tr>
                                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
                                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -557,7 +557,7 @@
                 </form>
             `;
         }
-       
+        
         function createMedicalRepForm() {
             return `
                 <form id="medicalRepExpenseForm" class="space-y-6">
@@ -646,12 +646,12 @@
                 </form>
             `;
         }
-       
+        
         function showTab(role, tabType) {
             const addContent = document.getElementById(role === 'District Manager' ? 'managerAddContent' : 'repAddContent');
             const viewContent = document.getElementById(role === 'District Manager' ? 'managerViewContent' : 'repViewContent');
             const teamContent = document.getElementById(role === 'District Manager' ? 'managerTeamContent' : null);
-           
+            
             const addTabBtn = document.getElementById(role === 'District Manager' ? 'managerAddTab' : 'repAddTab');
             const viewTabBtn = document.getElementById(role === 'District Manager' ? 'managerViewTab' : 'repViewTab');
             const teamTabBtn = document.getElementById(role === 'District Manager' ? 'managerTeamTab' : null);
@@ -688,24 +688,25 @@
             const amountInput = row.querySelector('input[name^="expenseAmount"]');
 
             if (!descriptionInput || !amountInput) return;
-           
-            const newDescriptionInput = descriptionInput.cloneNode(true);
-            descriptionInput.parentNode.replaceChild(newDescriptionInput, descriptionInput);
-           
-            newDescriptionInput.value = '';
-            amountInput.value = '';
-            newDescriptionInput.required = (selectElement.value === 'Others');
-            amountInput.readOnly = false;
-            amountInput.classList.remove('bg-gray-100');
-
+            
+            // Set required based on selection
+            if (selectElement.value === 'Others') {
+                descriptionInput.required = true;
+                descriptionInput.placeholder = 'Description (required)';
+            } else {
+                descriptionInput.required = false;
+                descriptionInput.placeholder = 'Description (optional)';
+            }
+            
+            // Handle 'Own Car Travel' specific logic
             if (selectElement.value === 'Own Car Travel') {
-                newDescriptionInput.type = 'number';
-                newDescriptionInput.placeholder = 'KM Travelled';
+                descriptionInput.type = 'number';
+                descriptionInput.placeholder = 'KM Travelled';
                 amountInput.readOnly = true;
                 amountInput.classList.add('bg-gray-100');
-               
-                newDescriptionInput.addEventListener('input', () => {
-                    const km = parseFloat(newDescriptionInput.value) || 0;
+                
+                descriptionInput.addEventListener('input', () => {
+                    const km = parseFloat(descriptionInput.value) || 0;
                     const worth = km * 1.7; // Fixed rate per KM
                     amountInput.value = worth.toFixed(2);
                     const formId = selectElement.closest('form').id;
@@ -714,36 +715,39 @@
                     updateTotal(document.getElementById(containerId), totalId);
                 });
             } else {
-                newDescriptionInput.type = 'text';
-                newDescriptionInput.placeholder = 'Description (optional)';
+                // Restore default for other types
+                descriptionInput.type = 'text';
+                amountInput.readOnly = false;
+                amountInput.classList.remove('bg-gray-100');
             }
+
             const formId = selectElement.closest('form').id;
             const containerId = formId === 'managerExpenseForm' ? 'managerExpensesContainer' : 'repExpensesContainer';
             const totalId = formId === 'managerExpenseForm' ? 'managerTotal' : 'repTotal';
             updateTotal(document.getElementById(containerId), totalId);
         }
-       
+        
         function addExpense(role) {
             const containerId = role === 'District Manager' ? 'managerExpensesContainer' : 'repExpensesContainer';
             const container = document.getElementById(containerId);
             const expenseTypesList = role === 'District Manager' ? managerExpenseTypes : repExpenseTypes;
             const newId = role === 'District Manager' ? ++managerExpenseCount : ++repExpenseCount;
-           
+            
             if (!container) return;
             const div = document.createElement('div');
             div.className = 'grid grid-cols-1 md:grid-cols-12 gap-3 border border-gray-200 p-3 rounded-lg bg-gray-50/50 expense-row';
             div.id = `expense-row-${containerId}-${newId}`;
             const optionsHtml = expenseTypesList.map(opt => `<option>${opt}</option>`).join('');
             div.innerHTML = `
-                <div class="md:col-span-4"><select name="expenseType-${newId}" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><option value="">Select Expense Type</option>${optionsHtml}</select></div>
+                <div class="md:col-span-4"><select name="expenseType-${newId}" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="handleExpenseTypeChange(this)"><option value="">Select Expense Type</option>${optionsHtml}</select></div>
                 <div class="md:col-span-5"><input type="text" name="expenseDesc-${newId}" placeholder="Description (optional)" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
                 <div class="md:col-span-2"><input type="number" name="expenseAmount-${newId}" min="0" step="0.01" required placeholder="EGP" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 expense-amount"></div>
                 <div class="md:col-span-1 flex items-center justify-center"><button type="button" onclick="removeExpenseRow('expense-row-${containerId}-${newId}', '${containerId}')" class="p-2 text-red-500 hover:bg-red-100 rounded-full transition"><i class="fas fa-trash-alt"></i></button></div>`;
             container.appendChild(div);
-           
+            
             const selectEl = div.querySelector('select');
             const amountInput = div.querySelector('.expense-amount');
-           
+            
             if (selectEl) {
                 selectEl.addEventListener('change', () => {
                     handleExpenseTypeChange(selectEl);
@@ -755,7 +759,7 @@
                 });
             }
         }
-       
+        
         function removeExpenseRow(rowId, containerId) {
             const rowElement = document.getElementById(rowId);
             if(rowElement) rowElement.remove();
@@ -781,13 +785,31 @@
             }
             setDefaultDates();
         }
-       
+        
         function getStatusBadge(status) {
             if (status === 'Approved') return `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Approved</span>`;
             if (status === 'Rejected') return `<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">Rejected</span>`;
             return `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full">Pending</span>`;
         }
-       
+        
+        // Helper function to get the formatted report type string
+        function getReportTypeDisplayString(report) {
+            const items = JSON.parse(report.items);
+            const firstItem = items.length > 0 ? items[0] : null;
+
+            if (report.role === 'District Manager' && report.report_type === 'Trip') {
+                const details = JSON.parse(report.details);
+                return `Trip Report (${details.purpose})`;
+            } else if (report.report_type === 'Others' || (report.role === 'Medical Representative' && firstItem && firstItem.type === 'Others')) {
+                const description = firstItem && firstItem.desc ? firstItem.desc : 'No description';
+                return `Other Expenses (${description})`;
+            } else if (firstItem) {
+                 return firstItem.type;
+            }
+            
+            return 'No Report Type';
+        }
+
         // --- Message Modal Logic ---
         function showMessage(title, body, customButtons = null) {
             if (!messageModalTitle || !messageModalBody || !messageModal || !messageModalActions) {
@@ -827,17 +849,18 @@
             const items = JSON.parse(data.items);
             const details = JSON.parse(data.details);
             if (!modalBody || !reportModal) return;
-           
+            
             let detailsHtml = `
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mb-4 text-base">
                     <div><strong class="font-semibold text-gray-600 block">Employee:</strong> ${data.name}</div>
                     <div><strong class="font-semibold text-gray-600 block">Role:</strong> ${data.role}</div>
                     <div><strong class="font-semibold text-gray-600 block">Date:</strong> ${data.date}</div>
                     ${data.role === 'District Manager' ? `<div><strong class="font-semibold text-gray-600 block">Report Type:</strong> ${details.reportType}</div>
-                                             ${details.reportType === 'Trip' ? `<div><strong class="font-semibold text-gray-600 block">Trip:</strong> ${details.from} to ${details.to}</div>
-                                                                         <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Purpose:</strong> ${details.purpose}</div>` : ''}` : 
+                                             ${details.reportType === 'Trip' ? `<div><strong class="font-semibold text-gray-600 block">From:</strong> ${details.from}</div>
+                                                                              <div><strong class="font-semibold text-gray-600 block">To:</strong> ${details.to}</div>
+                                                                              <div class="col-span-2"><strong class="font-semibold text-gray-600 block">Purpose:</strong> ${details.purpose}</div>` : ''}` : 
                                             `<div><strong class="font-semibold text-gray-600 block">Territory:</strong> ${details.territory}</div>
-                                             <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Direct Manager:</strong> ${details.manager}</div>`}
+                                             <div><strong class="font-semibold text-gray-600 block">Direct Manager:</strong> ${details.manager}</div>`}
                 </div>`;
 
             let itemsHtml = `
@@ -861,7 +884,7 @@
                                 <td class="p-3 text-right">${parseFloat(data.total).toFixed(2)}</td>
                             </tr>
                         </tbody></table></div>`;
-           
+            
             modalBody.innerHTML = detailsHtml + itemsHtml;
             reportModal.classList.remove('hidden');
             setTimeout(() => {
@@ -872,7 +895,7 @@
             const approveBtn = document.getElementById('approveBtn');
             const rejectBtn = document.getElementById('rejectBtn');
             const isFromTeamReports = rowElement.closest('#myTeamReportsTableBody') !== null;
-           
+            
             const showApproveReject = loggedInUser && (loggedInUser.title === 'admin' || (loggedInUser.title === 'District Manager' && isFromTeamReports));
 
             if (showApproveReject) {
@@ -893,7 +916,7 @@
                 }, 300);
             }
         }
-       
+        
         async function deleteReport(rowElement) {
             const reportId = rowElement.dataset.id;
             if (!reportId) {
@@ -920,7 +943,7 @@
                                     .eq('id', reportId);
 
                                 if (error) throw error;
-                               
+                                
                                 // Remove row from the DOM
                                 if(rowElement) rowElement.remove();
                                 // Remove from cached data as well
@@ -943,18 +966,18 @@
         async function updateStatus(newStatus) {
             if (activeReportRow) {
                 const reportId = activeReportRow.dataset.id;
-               
+                
                 const { error } = await supabase
                     .from('expenses')
                     .update({ status: newStatus })
                     .eq('id', reportId);
-                   
+                    
                 if (error) {
                     console.error('Error updating status:', error);
                     showMessage("Error", "Failed to update report status.");
                     return;
                 }
-               
+                
                 const statusCell = activeReportRow.querySelector('.status-cell');
                 if (statusCell) {
                     statusCell.innerHTML = getStatusBadge(newStatus);
@@ -1039,11 +1062,13 @@
                 let reportTableRows = '';
 
                 allRelevantReports.forEach(report => {
-                    const employeeRole = report.role;
+                    const employeeRole = getEmployeeRole(report.employee_name);
+                    const reportDetails = JSON.parse(report.details);
+                    const items = JSON.parse(report.items);
+
                     totalMonthlyExpenses += parseFloat(report.total_amount);
 
                     let expenseItemsHtml = '';
-                    const items = JSON.parse(report.items);
                     items.forEach(item => {
                         expenseItemsHtml += `
                             <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;">
@@ -1054,22 +1079,37 @@
                         `;
                     });
 
+                    let reportDetailsHtml = '';
+                    if (employeeRole === 'District Manager' && reportDetails.reportType === 'Trip') {
+                        reportDetailsHtml = `
+                            <p><strong>Report Type:</strong> Trip Report</p>
+                            <p><strong>Purpose:</strong> ${reportDetails.purpose}</p>
+                            <p><strong>From:</strong> ${reportDetails.from}</p>
+                            <p><strong>To:</strong> ${reportDetails.to}</p>
+                        `;
+                    } else if (employeeRole === 'District Manager' && reportDetails.reportType === 'Others') {
+                         reportDetailsHtml = `<p><strong>Report Type:</strong> Other Expenses</p>`;
+                    } else { // Medical Rep
+                        reportDetailsHtml = `
+                            <p><strong>Report Type:</strong> Daily Log</p>
+                            <p><strong>Territory:</strong> ${reportDetails.territory}</p>
+                            <p><strong>Direct Manager:</strong> ${reportDetails.manager}</p>
+                        `;
+                    }
+
                     reportTableRows += `
-                        <tr style="background-color: #f9fafb;">
-                            <td colspan="6" style="padding: 0.75rem; border: 1px solid #e5e7eb; font-weight: bold;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span>${report.report_date} - ${report.employee_name} (${employeeRole}) - Total: ${parseFloat(report.total_amount).toFixed(2)} EGP</span>
-                                    <span style="font-weight: normal; font-size: 0.8em;">Status: ${report.status}</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="6" style="padding: 0.75rem; border: 1px solid #e5e7eb;">
-                                <div style="padding-left: 1rem; border-left: 2px solid #3b82f6;">
-                                    ${expenseItemsHtml}
-                                </div>
-                            </td>
-                        </tr>
+                        <div style="margin-bottom: 2rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden; page-break-inside: avoid;">
+                            <div style="background-color: #f1f5f9; padding: 0.75rem 1.25rem; font-weight: bold; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                                <span>Report Date: ${report.report_date}</span>
+                                <span>Total: ${parseFloat(report.total_amount).toFixed(2)} EGP</span>
+                                <span style="font-weight: normal; font-size: 0.8em; color: #6b7280;">Status: ${report.status}</span>
+                            </div>
+                            <div style="padding: 1rem 1.25rem;">
+                                ${reportDetailsHtml}
+                                <h4 style="font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid #e5e7eb;">Expense Items:</h4>
+                                ${expenseItemsHtml}
+                            </div>
+                        </div>
                     `;
                 });
 
@@ -1079,9 +1119,6 @@
                             <title>Monthly Expense Report - ${employeeName} - ${months[parseInt(month) - 1]}</title>
                             <style>
                                 body { font-family: 'Inter', sans-serif; color: #111827; margin: 2rem; }
-                                table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
-                                th, td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; font-size: 14px; vertical-align: top; }
-                                th { background-color: #f1f5f9; font-weight: 600; color: #334155; }
                                 .header { text-align: center; margin-bottom: 2rem; }
                                 .header img { height: 4rem; margin-bottom: 1rem; border-radius: 50%; }
                                 .header h1 { font-size: 1.8rem; font-weight: 700; color: #1e3a8a; margin: 0; }
@@ -1098,13 +1135,9 @@
                             </div>
                             <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Employee: ${employeeName}</h2>
                             <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem;">Month: ${months[parseInt(month) - 1]}</h3>
-                           
-                            <table style="border: none;">
-                                <tbody>
-                                    ${reportTableRows}
-                                </tbody>
-                            </table>
-                           
+                            
+                            ${reportTableRows}
+                            
                             <div class="summary">
                                 <p>Grand Total for ${months[parseInt(month) - 1]}: EGP ${totalMonthlyExpenses.toFixed(2)}</p>
                             </div>
@@ -1154,10 +1187,11 @@
                         <p><strong>Role:</strong> ${data.role}</p>
                         <p><strong>Date:</strong> ${data.date}</p>
                         ${data.role === 'District Manager' ? `<p><strong>Report Type:</strong> ${details.reportType}</p>
-                                                     ${details.reportType === 'Trip' ? `<p><strong>Trip:</strong> ${details.from} to ${details.to}</p>
-                                                                                         <p style="grid-column: span 2;"><strong>Purpose:</strong> ${details.purpose}</p>` : ''}` : 
-                                                     `<p><strong>Territory:</strong> ${details.territory}</p>
-                                                     <p><strong>Direct Manager:</strong> ${details.manager}</p>`}
+                                                ${details.reportType === 'Trip' ? `<p><strong>From:</strong> ${details.from}</p>
+                                                                                   <p><strong>To:</strong> ${details.to}</p>
+                                                                                   <p style="grid-column: span 2;"><strong>Purpose:</strong> ${details.purpose}</p>` : ''}` : 
+                                                `<p><strong>Territory:</strong> ${details.territory}</p>
+                                                 <p><strong>Direct Manager:</strong> ${details.manager}</p>`}
                     </div>`;
 
                 let itemsHtml = `
@@ -1170,17 +1204,17 @@
                         </tr></thead><tbody>`;
                 items.forEach(item => {
                     itemsHtml += `<tr>
-                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.type}</td>
-                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.desc || 'N/A'}</td>
-                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(item.amount).toFixed(2)}</td>
-                                    </tr>`;
+                                         <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.type}</td>
+                                         <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.desc || 'N/A'}</td>
+                                         <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(item.amount).toFixed(2)}</td>
+                                     </tr>`;
                 });
                 itemsHtml += `
-                                <tr style="font-weight: bold; background-color: #f9fafb;">
-                                    <td colspan="2" style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">Total:</td>
-                                    <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(data.total).toFixed(2)}</td>
-                                </tr></tbody></table>`;
-               
+                                 <tr style="font-weight: bold; background-color: #f9fafb;">
+                                     <td colspan="2" style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">Total:</td>
+                                     <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(data.total).toFixed(2)}</td>
+                                 </tr></tbody></table>`;
+                
                 let signatureHtml = `
                     <div style="margin-top: 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; page-break-inside: avoid; font-size: 14px;">
                         <div>
@@ -1211,8 +1245,8 @@
                         <body style="padding: 2rem;">
                             <div style="text-align: center; margin-bottom: 2rem;">
                                         <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton Logo" style="height: 4rem; margin: 0 auto; border-radius: 50%;">
-                                       <h1 style="font-size: 1.5rem; font-weight: 700; color: #1e3a8a; margin: 0.5rem 0 0 0;">Expense Report</h1>
-                                       <p style="font-size: 0.9rem; color: #6b7280;">Paxton LLC</p>
+                                        <h1 style="font-size: 1.5rem; font-weight: 700; color: #1e3a8a; margin: 0.5rem 0 0 0;">Expense Report</h1>
+                                        <p style="font-size: 0.9rem; color: #6b7280;">Paxton LLC</p>
                             </div>
                             <p style="text-align: right; font-size: 14px;"><strong>Status:</strong> ${status}</p>
                             ${detailsHtml}
@@ -1232,10 +1266,10 @@
         function handleReportTypeChange(selectElement) {
             const type = selectElement.value;
             const isTrip = type === 'Trip';
-           
+            
             const tripDetailsFieldset = document.getElementById('tripDetails');
             const otherDateInputDiv = document.getElementById('otherDate');
-           
+            
             if (tripDetailsFieldset) tripDetailsFieldset.classList.toggle('hidden', !isTrip);
             const tripPurpose = document.getElementById('tripPurpose');
             if (tripPurpose) tripPurpose.required = isTrip;
@@ -1256,7 +1290,7 @@
             event.preventDefault();
             const formData = new FormData(event.target);
             const data = Object.fromEntries(formData.entries());
-           
+            
             const items = [];
             let total = 0;
             const expenseContainer = data.employeeRole === 'District Manager' ? document.getElementById('managerExpensesContainer') : document.getElementById('repExpensesContainer');
@@ -1266,17 +1300,17 @@
                 const type = row.querySelector('select').value;
                 const desc = row.querySelector('input[name^="expenseDesc"]').value;
                 const amount = parseFloat(row.querySelector('input[name^="expenseAmount"]').value) || 0;
-               
+                
                 if (type) {
                     items.push({ type: type, desc: desc, amount: amount });
                     total += amount;
                 }
             });
-           
+            
             const selectedEmployeeName = employeeNameDropdown.value;
             const employeeData = masterlistData.find(u => u['medical rep'] === selectedEmployeeName || u['District Manager'] === selectedEmployeeName);
             const employeeRole = employeeData ? (employeeData['medical rep'] === selectedEmployeeName ? 'Medical Representative' : 'District Manager') : 'N/A';
-           
+            
             let directManager = 'N/A';
             let reportTypeForDb = '';
             let reportDetails;
@@ -1294,10 +1328,12 @@
                 if (data.reportType === 'Trip') {
                     reportDetails = { reportType: 'Trip', purpose: data.tripPurpose, from: data.fromGovernorate, to: data.toGovernorate };
                 } else {
-                    reportDetails = { reportType: 'Others', date: data.otherDateInput };
+                    const otherItem = items.find(item => item.type === 'Others');
+                    const otherDescription = otherItem ? otherItem.desc : '';
+                    reportDetails = { reportType: 'Others', date: data.otherDateInput, description: otherDescription };
                 }
             }
-           
+            
             const reportData = {
                 employee_name: selectedEmployeeName,
                 role: employeeRole,
@@ -1319,17 +1355,17 @@
             showMessage("Success", `Report submitted successfully for ${selectedEmployeeName}!`);
             renderFormForEmployee();
         }
-       
+        
         function addNewReportToTable(report, tableBody) {
             if (!tableBody) return;
             const newRow = document.createElement('tr');
             newRow.className = 'hover:bg-gray-50';
-           
+            
             const employeeRole = getEmployeeRole(report.employee_name);
             const roleBadge = employeeRole === 'District Manager' ?
                 `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">District Manager</span>` :
                 `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Medical Representative</span>`;
-           
+            
             newRow.dataset.id = report.id;
             newRow.dataset.name = report.employee_name;
             newRow.dataset.role = employeeRole;
@@ -1344,17 +1380,21 @@
             if (employeeData && employeeData['District Manager']) {
                 managerCellContent = employeeData['District Manager'];
             }
-           
-            let reportTypeToDisplay = report.report_type;
-            if (!reportTypeToDisplay && report.items) {
-                const items = JSON.parse(report.items);
-                if (items.length > 0) {
-                    reportTypeToDisplay = items[0].type;
-                } else {
-                    reportTypeToDisplay = 'Daily Log';
-                }
-            } else if (!reportTypeToDisplay) {
-                reportTypeToDisplay = 'Daily Log';
+            
+            let reportTypeToDisplay = '';
+            const items = JSON.parse(report.items);
+            const firstItem = items.length > 0 ? items[0] : null;
+
+            if (report.role === 'District Manager' && report.report_type === 'Trip') {
+                const details = JSON.parse(report.details);
+                reportTypeToDisplay = `Trip Report (${details.purpose})`;
+            } else if (report.report_type === 'Others' || (report.role === 'Medical Representative' && firstItem && firstItem.type === 'Others')) {
+                const description = firstItem && firstItem.desc ? firstItem.desc : 'No description';
+                reportTypeToDisplay = `Other Expenses (${description})`;
+            } else if (firstItem) {
+                 reportTypeToDisplay = firstItem.type;
+            } else {
+                reportTypeToDisplay = 'No Expense Items';
             }
 
 
@@ -1404,13 +1444,13 @@
                             <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
                         </td>`;
             }
-           
+            
             tableBody.prepend(newRow);
         }
-       
+        
         async function retrieveMyReports(role, employeeName) {
             const myReportsTableBody = document.getElementById(role === 'District Manager' ? 'myManagerReportsTableBody' : 'myRepReportsTableBody');
-           
+            
             if (!myReportsTableBody) {
                     console.error("My reports table body not found.");
                     return;
@@ -1423,14 +1463,14 @@
                     .select('*')
                     .eq('employee_name', employeeName)
                     .order('report_date', { ascending: false });
-               
+                
                 if (error) throw error;
-               
+                
                 if (data.length === 0) {
                     myReportsTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for this user.</td></tr>`;
                     return;
                 }
-               
+                
                 data.forEach(report => addNewReportToTable(report, myReportsTableBody));
             } catch (error) {
                 console.error('Error retrieving reports:', error);
@@ -1440,13 +1480,13 @@
 
         async function retrieveMyTeamReports(managerName) {
             const myTeamReportsTableBody = document.getElementById('myTeamReportsTableBody');
-           
+            
             if (!myTeamReportsTableBody) {
                     console.error("My team reports table body not found.");
                     return;
             }
             myTeamReportsTableBody.innerHTML = '';
-           
+            
             const reps = [...new Set(masterlistData.filter(user => user['District Manager'] === managerName).map(user => user['medical rep']))];
 
             if (reps.length === 0) {
@@ -1462,24 +1502,24 @@
                     .order('report_date', { ascending: false });
 
                 if (error) throw error;
-               
+                
                 if (data.length === 0) {
                     myTeamReportsTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for your team.</td></tr>';
                     return;
                 }
-               
+                
                 data.forEach(report => addNewReportToTable(report, myTeamReportsTableBody));
             } catch (error) {
                 console.error('Error retrieving team reports:', error);
                 showMessage("Error", "Failed to retrieve your team's reports. Please try again.");
             }
         }
-       
+        
         async function retrieveAllReports() {
             try {
                 const { data, error } = await supabase.from('expenses').select('*').order('report_date', { ascending: false });
                 if (error) throw error;
-               
+                
                 allReportsData = data;
                 if (reportsTableBody) reportsTableBody.innerHTML = '';
                 filterReports();
@@ -1499,7 +1539,7 @@
             const monthFilter = monthFilterSelect.value;
 
             reportsTableBody.innerHTML = '';
-           
+            
             const filteredData = allReportsData.filter(report => {
                 const reportDate = new Date(report.report_date);
                 const reportMonth = (reportDate.getMonth() + 1).toString().padStart(2, '0');
@@ -1507,13 +1547,13 @@
                 const isEmployeeMatch = employeeFilter === 'all' || report.employee_name === employeeFilter;
                 const isStatusMatch = statusFilter === 'all' || report.status === statusFilter;
                 const isMonthMatch = monthFilter === 'all' || reportMonth === monthFilter;
-               
+                
                 return isEmployeeMatch && isStatusMatch && isMonthMatch;
             });
-           
+            
             filteredData.forEach(report => addNewReportToTable(report, reportsTableBody));
         }
-       
+        
         // --- Initialization Functions ---
         async function fetchMasterlistFromSupabase() {
             try {
@@ -1539,7 +1579,7 @@
                         hasMore = false;
                     }
                 }
-               
+                
                 masterlistData = allData;
                 populateEmployeeDropdowns();
                 populateFilters();
@@ -1582,7 +1622,7 @@
                     employeeNameDropdown.appendChild(repOption);
                 });
             });
-           
+            
             employeeNameDropdown.addEventListener('change', renderFormForEmployee);
         }
 
@@ -1596,7 +1636,7 @@
                 if (toGovernorateSelect) toGovernorateSelect.innerHTML += `<option value="${gov}">${gov}</option>`;
             });
         }
-       
+        
         function populateFilters() {
             populateEmployeeFilter();
             populateMonthFilter();
@@ -1624,7 +1664,7 @@
         function populateMonthlyReportEmployeeFilter() {
             if (!monthlyReportEmployeeSelect) return;
             monthlyReportEmployeeSelect.innerHTML = '<option value="">Select an Employee</option>';
-           
+            
             const employees = new Set();
             masterlistData.forEach(user => {
                     if (user['medical rep']) employees.add(user['medical rep']);
@@ -1686,7 +1726,7 @@
             }
 
             const employeeRole = getEmployeeRole(selectedEmployeeName);
-           
+            
             if (employeeRole === 'District Manager') {
                 formContainer.innerHTML = createManagerForm();
                 document.getElementById('managerExpenseForm').addEventListener('submit', handleFormSubmit);
@@ -1762,7 +1802,7 @@
         if(employeeFilterSelect) employeeFilterSelect.addEventListener('change', filterReports);
         if (statusFilterSelect) statusFilterSelect.addEventListener('change', filterReports);
         if (monthFilterSelect) monthFilterSelect.addEventListener('change', filterReports);
-       
+        
         document.addEventListener('DOMContentLoaded', async () => {
             await fetchMasterlistFromSupabase();
 
