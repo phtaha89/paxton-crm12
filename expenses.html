@@ -142,29 +142,7 @@
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center space-x-4">
-                    <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton Logo" class="w-10 h-10 rounded-lg shadow-md" onerror="this.onerror=null;this.src='https://placehold.co/64x64/3b82f6/FFFFFF?text=Logo';">
-                    <div>
-                        <h1 class="text-lg font-semibold text-gray-900">Paxton LLC</h1>
-                        <p class="text-sm text-gray-500">Expense Management System</p>
-                    </div>
-                </div>
-                <div id="userInfo" class="hidden items-center space-x-3">
-                    <div class="text-right">
-                        <p class="text-sm font-medium text-gray-900" id="currentUserName">John Doe</p>
-                        <p class="text-xs text-gray-500" id="currentUserRole">District Manager</p>
-                    </div>
-                    <button onclick="goBackToRoleSelection()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- The header section was removed as requested. -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Role Selection Screen -->
         <div id="roleSelection" class="max-w-4xl mx-auto">
@@ -185,7 +163,7 @@
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-user-shield text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Admin Panel</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">admin Panel</h3>
                     <p class="text-gray-500 text-sm">Review and manage all expense reports</p>
                 </div>
             </div>
@@ -390,7 +368,7 @@
         // New Print Modals
         const printConfirmationModal = document.getElementById('printConfirmationModal');
         const monthlyReportOptionsModal = document.getElementById('monthlyReportOptionsModal');
-        const monthlyReportEmployeeSelect = document.getElementById('monthlyReportEmployeeSelect');
+        const monthlyReportEmployeeSelect = document.getElementById('monthlyReportEmployeeSelect'); // Changed from ManagerSelect
         const monthlyReportMonthSelect = document.getElementById('monthlyReportMonthSelect');
 
         // --- State ---
@@ -399,7 +377,7 @@
         let activeReportRow = null; // Stores the row element for the currently selected report
         let masterlistData = []; // To store fetched user data from Supabase 'masterlist' table
         let allReportsData = []; // Cache all reports for filtering
-        let loggedInUser = null; // Stores user data received from parent frame
+        let currentUserRole = null;
 
         // --- Data Definitions ---
         const governorates = [
@@ -425,6 +403,7 @@
                 if (addExpenseView) addExpenseView.classList.remove('hidden');
                 prefillAndLockForm(loggedInUser);
             } else if (view === 'admin') {
+                currentUserRole = 'Admin';
                 if (adminView) adminView.classList.remove('hidden');
                 retrieveAllReports();
             }
@@ -433,23 +412,24 @@
         function goBackToRoleSelection() {
             if (mainContent) mainContent.classList.add('hidden');
             if (roleSelection) roleSelection.classList.remove('hidden');
+            currentUserRole = null;
         }
 
         // --- Dynamic Form Logic ---
         function createManagerForm() {
             return `
                 <form id="managerExpenseForm" class="space-y-6">
-                    <input type="hidden" name="employeeRole" value="District Manager">
+                    <input type="hidden" name="employeeRole" value="Manager">
                     <!-- Tab Navigation -->
                     <div class="border-b border-gray-200 mb-6">
                         <nav class="flex space-x-8">
-                            <button id="managerAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('District Manager', 'add')">
+                            <button id="managerAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('manager', 'add')">
                                 Submit Report
                             </button>
-                            <button id="managerViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'view')">
+                            <button id="managerViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('manager', 'view')">
                                 My Reports
                             </button>
-                            <button id="managerTeamTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'team')">
+                            <button id="managerTeamTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('manager', 'team')">
                                 Team Reports
                             </button>
                         </nav>
@@ -500,7 +480,7 @@
                         <div class="mt-6">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-medium text-gray-900">Expense Items</h3>
-                                <button type="button" onclick="addExpense('District Manager')" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                                <button type="button" onclick="addExpense('manager')" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                                     <i class="fas fa-plus mr-2"></i>Add Item
                                 </button>
                             </div>
@@ -527,7 +507,7 @@
                         <div class="bg-white card rounded-lg p-6">
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-lg font-medium text-gray-900">My Submitted Reports</h3>
-                                <button onclick="retrieveMyReports('District Manager', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
+                                <button onclick="retrieveMyReports('manager', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
                                     <i class="fas fa-sync"></i>
                                 </button>
                             </div>
@@ -584,14 +564,14 @@
         function createMedicalRepForm() {
             return `
                 <form id="medicalRepExpenseForm" class="space-y-6">
-                    <input type="hidden" name="employeeRole" value="Medical Representative">
+                    <input type="hidden" name="employeeRole" value="Medical Rep">
                     <!-- Tab Navigation -->
                     <div class="border-b border-gray-200 mb-6">
                         <nav class="flex space-x-8">
-                            <button id="repAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('Medical Representative', 'add')">
+                            <button id="repAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('medicalRep', 'add')">
                                 Submit Log
                             </button>
-                            <button id="repViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('Medical Representative', 'view')">
+                            <button id="repViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('medicalRep', 'view')">
                                 My Logs
                             </button>
                         </nav>
@@ -617,7 +597,7 @@
                         <div class="mt-6">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-medium text-gray-900">Expense Items</h3>
-                                <button type="button" onclick="addExpense('Medical Representative')" class="btn bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                                <button type="button" onclick="addExpense('medicalRep')" class="btn bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
                                     <i class="fas fa-plus mr-2"></i>Add Item
                                 </button>
                             </div>
@@ -644,7 +624,7 @@
                         <div class="bg-white card rounded-lg p-6">
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-lg font-medium text-gray-900">My Submitted Logs</h3>
-                                <button onclick="retrieveMyReports('Medical Representative', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
+                                <button onclick="retrieveMyReports('medicalRep', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
                                     <i class="fas fa-sync"></i>
                                 </button>
                             </div>
@@ -671,13 +651,13 @@
         }
        
         function showTab(role, tabType) {
-            const addContent = document.getElementById(role === 'District Manager' ? 'managerAddContent' : 'repAddContent');
-            const viewContent = document.getElementById(role === 'District Manager' ? 'managerViewContent' : 'repViewContent');
-            const teamContent = document.getElementById(role === 'District Manager' ? 'managerTeamContent' : null);
+            const addContent = document.getElementById(role === 'manager' ? 'managerAddContent' : 'repAddContent');
+            const viewContent = document.getElementById(role === 'manager' ? 'managerViewContent' : 'repViewContent');
+            const teamContent = document.getElementById(role === 'manager' ? 'managerTeamContent' : null);
            
-            const addTabBtn = document.getElementById(role === 'District Manager' ? 'managerAddTab' : 'repAddTab');
-            const viewTabBtn = document.getElementById(role === 'District Manager' ? 'managerViewTab' : 'repViewTab');
-            const teamTabBtn = document.getElementById(role === 'District Manager' ? 'managerTeamTab' : null);
+            const addTabBtn = document.getElementById(role === 'manager' ? 'managerAddTab' : 'repAddTab');
+            const viewTabBtn = document.getElementById(role === 'manager' ? 'managerViewTab' : 'repViewTab');
+            const teamTabBtn = document.getElementById(role === 'manager' ? 'managerTeamTab' : null);
 
             // Hide all content and reset all tabs
             if (addContent) addContent.classList.add('hidden');
@@ -696,7 +676,7 @@
                 if (employeeNameDropdown.value) {
                     retrieveMyReports(role, employeeNameDropdown.value);
                 }
-            } else if (tabType === 'team' && role === 'District Manager') {
+            } else if (tabType === 'team' && role === 'manager') {
                 if (teamContent) teamContent.classList.remove('hidden');
                 if (teamTabBtn) teamTabBtn.classList.add('tab-active');
                 if (employeeNameDropdown.value) {
@@ -747,10 +727,10 @@
         }
        
         function addExpense(role) {
-            const containerId = role === 'District Manager' ? 'managerExpensesContainer' : 'repExpensesContainer';
+            const containerId = role === 'manager' ? 'managerExpensesContainer' : 'repExpensesContainer';
             const container = document.getElementById(containerId);
-            const expenseTypesList = role === 'District Manager' ? managerExpenseTypes : repExpenseTypes;
-            const newId = role === 'District Manager' ? ++managerExpenseCount : ++repExpenseCount;
+            const expenseTypesList = role === 'manager' ? managerExpenseTypes : repExpenseTypes;
+            const newId = role === 'manager' ? ++managerExpenseCount : ++repExpenseCount;
            
             if (!container) return;
             const div = document.createElement('div');
@@ -797,7 +777,7 @@
             if (!form || !container) return;
             form.reset();
             container.innerHTML = '';
-            if (role === 'District Manager') {
+            if (role === 'Manager') {
                 managerExpenseCount = 0;
             } else {
                 repExpenseCount = 0;
@@ -856,7 +836,7 @@
                     <div><strong class="font-semibold text-gray-600 block">Employee:</strong> ${data.name}</div>
                     <div><strong class="font-semibold text-gray-600 block">Role:</strong> ${data.role}</div>
                     <div><strong class="font-semibold text-gray-600 block">Date:</strong> ${data.date}</div>
-                    ${data.role === 'District Manager' ? `<div><strong class="font-semibold text-gray-600 block">Report Type:</strong> ${details.reportType}</div>
+                    ${data.role === 'Manager' ? `<div><strong class="font-semibold text-gray-600 block">Report Type:</strong> ${details.reportType}</div>
                                              ${details.reportType === 'Trip' ? `<div><strong class="font-semibold text-gray-600 block">Trip:</strong> ${details.from} to ${details.to}</div>
                                                                          <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Purpose:</strong> ${details.purpose}</div>` : ''}` : 
                                             `<div><strong class="font-semibold text-gray-600 block">Territory:</strong> ${details.territory}</div>
@@ -894,9 +874,10 @@
             // Hide/show approve/reject buttons based on who can approve
             const approveBtn = document.getElementById('approveBtn');
             const rejectBtn = document.getElementById('rejectBtn');
+            const isFromAdminView = rowElement.closest('#reportsTableBody') !== null;
             const isFromTeamReports = rowElement.closest('#myTeamReportsTableBody') !== null;
            
-            const showApproveReject = loggedInUser && (loggedInUser.title === 'admin' || (loggedInUser.title === 'District Manager' && isFromTeamReports));
+            const showApproveReject = currentUserRole === 'Admin' || (currentUserRole === 'Manager' && isFromTeamReports);
 
             if (showApproveReject) {
                 approveBtn.classList.remove('hidden');
@@ -962,7 +943,7 @@
             );
         }
 
-        // --- District Manager/Manager status update logic ---
+        // --- Admin/Manager status update logic ---
         async function updateStatus(newStatus) {
             if (activeReportRow) {
                 const reportId = activeReportRow.dataset.id;
@@ -1062,7 +1043,7 @@
                 let reportTableRows = '';
 
                 allRelevantReports.forEach(report => {
-                    const employeeRole = report.role;
+                    const employeeRole = report.role === 'Manager' ? 'Manager' : 'Medical Rep';
                     totalMonthlyExpenses += parseFloat(report.total_amount);
 
                     let expenseItemsHtml = '';
@@ -1176,7 +1157,7 @@
                         <p><strong>Employee:</strong> ${data.name}</p>
                         <p><strong>Role:</strong> ${data.role}</p>
                         <p><strong>Date:</strong> ${data.date}</p>
-                        ${data.role === 'District Manager' ? `<p><strong>Report Type:</strong> ${details.reportType}</p>
+                        ${data.role === 'Manager' ? `<p><strong>Report Type:</strong> ${details.reportType}</p>
                                                      ${details.reportType === 'Trip' ? `<p><strong>Trip:</strong> ${details.from} to ${details.to}</p>
                                                                                          <p style="grid-column: span 2;"><strong>Purpose:</strong> ${details.purpose}</p>` : ''}` : 
                                                      `<p><strong>Territory:</strong> ${details.territory}</p>
@@ -1282,7 +1263,7 @@
            
             const items = [];
             let total = 0;
-            const expenseContainer = data.employeeRole === 'District Manager' ? document.getElementById('managerExpensesContainer') : document.getElementById('repExpensesContainer');
+            const expenseContainer = data.employeeRole === 'Manager' ? document.getElementById('managerExpensesContainer') : document.getElementById('repExpensesContainer');
             const expenseRows = expenseContainer.querySelectorAll('.expense-row');
 
             expenseRows.forEach((row, index) => {
@@ -1298,19 +1279,19 @@
            
             const selectedEmployeeName = employeeNameDropdown.value;
             const employeeData = masterlistData.find(u => u['medical rep'] === selectedEmployeeName || u['District Manager'] === selectedEmployeeName);
-            const employeeRole = employeeData ? (employeeData['medical rep'] === selectedEmployeeName ? 'Medical Representative' : 'District Manager') : 'N/A';
+            const employeeRole = employeeData ? (employeeData['medical rep'] === selectedEmployeeName ? 'Medical Rep' : 'Manager') : 'N/A';
            
             let directManager = 'N/A';
             let reportTypeForDb = '';
             let reportDetails;
             let reportDate;
 
-            if (employeeRole === 'Medical Representative') {
+            if (employeeRole === 'Medical Rep') {
                 directManager = employeeData['District Manager'];
-                reportTypeForDb = 'Daily Log';
+                reportTypeForDb = items.length > 0 ? items[0].type : '';
                 reportDate = data.repDate;
                 reportDetails = { territory: employeeData.area, manager: directManager };
-            } else if (employeeRole === 'District Manager') {
+            } else if (employeeRole === 'Manager') {
                 reportTypeForDb = data.reportType;
                 reportDate = data.reportType === 'Trip' ? data.travelDate : data.otherDateInput;
                 if (data.reportType === 'Trip') {
@@ -1348,9 +1329,9 @@
             newRow.className = 'hover:bg-gray-50';
            
             const details = JSON.parse(report.details);
-            const roleBadge = report.role === 'District Manager' ?
-                `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">District Manager</span>` :
-                `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Medical Representative</span>`;
+            const roleBadge = report.role === 'Manager' ?
+                `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">Manager</span>` :
+                `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Medical Rep</span>`;
            
             newRow.dataset.id = report.id;
             newRow.dataset.name = report.employee_name;
@@ -1362,7 +1343,7 @@
             newRow.dataset.reportType = report.report_type;
 
             let managerCellContent = 'N/A';
-            if (report.role === 'Medical Representative') {
+            if (report.role === 'Medical Rep' && details && details.manager) {
                 managerCellContent = details.manager;
             }
            
@@ -1417,7 +1398,7 @@
         }
        
         async function retrieveMyReports(role, employeeName) {
-            const myReportsTableBody = document.getElementById(role === 'District Manager' ? 'myManagerReportsTableBody' : 'myRepReportsTableBody');
+            const myReportsTableBody = document.getElementById(role === 'manager' ? 'myManagerReportsTableBody' : 'myRepReportsTableBody');
            
             if (!myReportsTableBody) {
                     console.error("My reports table body not found.");
@@ -1435,8 +1416,7 @@
                 if (error) throw error;
                
                 if (data.length === 0) {
-                    const colspan = role === 'District Manager' ? 5 : 5;
-                    myReportsTableBody.innerHTML = `<tr><td colspan="${colspan}" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for this user.</td></tr>`;
+                    myReportsTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for this user.</td></tr>`;
                     return;
                 }
                
@@ -1670,32 +1650,6 @@
             const repDate = document.getElementById('repDate');
             if(repDate) repDate.value = today;
         }
-        
-        function prefillAndLockForm(user) {
-            if (!user) return;
-            
-            // For non-admin roles, pre-fill and lock the employee dropdown.
-            if (user.title !== 'admin') {
-                employeeNameDropdown.value = user.username;
-                employeeNameDropdown.disabled = true;
-            } else {
-                employeeNameDropdown.disabled = false;
-            }
-
-            // Render the form based on the pre-filled value
-            renderFormForEmployee();
-
-            // Set the manager and territory for Medical Reps
-            if (user.title === 'Medical Representative') {
-                const repData = masterlistData.find(u => u['medical rep'] === user.username);
-                if (repData) {
-                    const directManager = document.getElementById('directManager');
-                    const repTerritory = document.getElementById('repTerritory');
-                    if (directManager) directManager.value = repData['District Manager'] || '';
-                    if (repTerritory) repTerritory.value = repData.area || '';
-                }
-            }
-        }
 
         function renderFormForEmployee() {
             const selectedEmployeeName = employeeNameDropdown.value;
@@ -1730,6 +1684,30 @@
             }
         }
         
+        function prefillAndLockForm(user) {
+            if (!user) return;
+            
+            if (user.title !== 'admin') {
+                employeeNameDropdown.value = user.username;
+                employeeNameDropdown.disabled = true;
+            } else {
+                employeeNameDropdown.disabled = false;
+            }
+
+            // Render the form based on the pre-filled value
+            renderFormForEmployee();
+
+            if (user.title === 'Medical Representative') {
+                const repData = masterlistData.find(u => u['medical rep'] === user.username);
+                if (repData) {
+                    const directManager = document.getElementById('directManager');
+                    const repTerritory = document.getElementById('repTerritory');
+                    if (directManager) directManager.value = repData['District Manager'] || '';
+                    if (repTerritory) repTerritory.value = repData.area || '';
+                }
+            }
+        }
+
         // --- Event Listeners and Initialization ---
         function showRoleSelection() {
             if (mainContent) mainContent.classList.add('hidden');
@@ -1741,11 +1719,6 @@
                 loggedInUser = event.data.user;
                 if (!loggedInUser) return;
                 
-                // Update header with user info
-                currentUserName.textContent = loggedInUser.username;
-                currentUserRoleEl.textContent = loggedInUser.title;
-                userInfoHeader.classList.remove('hidden');
-
                 const addCard = document.getElementById('add-expense-card');
                 const adminCard = document.getElementById('admin-panel-card');
 
