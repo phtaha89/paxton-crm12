@@ -13,7 +13,7 @@
     <!-- Supabase CDN for database interaction -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Custom styles for full-width responsive layout */
+        /* Custom styles for mobile-first responsive layout */
         :root {
             --primary-blue-light: #f8fafc;
             --primary-blue-dark: #3b82f6;
@@ -23,167 +23,246 @@
             --white: #ffffff;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --border-radius: 0.5rem;
+            --border-radius: 0.375rem;
         }
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--primary-blue-light);
             color: var(--text-color-dark);
+            font-size: 14px;
         }
-        .modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+
+        /* Mobile-first typography */
+        .text-mobile-xl { font-size: 1.125rem; }
+        .text-mobile-lg { font-size: 1rem; }
+        .text-mobile-base { font-size: 0.875rem; }
+        .text-mobile-sm { font-size: 0.75rem; }
+        .text-mobile-xs { font-size: 0.625rem; }
+
+        /* Compact spacing */
+        .p-mobile { padding: 0.75rem; }
+        .px-mobile { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-mobile { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .m-mobile { margin: 0.5rem; }
+        .mb-mobile { margin-bottom: 0.5rem; }
+        .mt-mobile { margin-top: 0.5rem; }
+
+        /* Mobile card styles */
+        .mobile-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem;
+            margin-bottom: 0.75rem;
         }
-        .modal-content {
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        /* New card styles from provided HTML */
-        .card {
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-        .card-hover {
-            transition: all 0.2s ease-in-out;
-        }
-        .card-hover:hover {
-            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-        }
-        /* New button styles from provided HTML */
-        .btn {
+
+        /* Mobile button styles */
+        .mobile-btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 0.375rem;
             transition: all 0.2s ease-in-out;
             font-weight: 500;
         }
-        .btn:hover {
-            transform: translateY(-1px);
+
+        /* Mobile input styles */
+        .mobile-input {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            width: 100%;
         }
-        /* New tab styles from provided HTML */
-        .tab-active {
-            border-bottom: 2px solid #2563eb;
-            color: #2563eb;
-        }
-        /* New input focus styles from provided HTML */
-        .input-focus:focus {
+        .mobile-input:focus {
+            outline: none;
+            ring: 2px;
             ring-color: #2563eb;
             border-color: #2563eb;
         }
-        
-        /* Adjusted font sizes and padding for form elements */
-        label, input, select, textarea, button {
-            font-size: 0.9rem; /* Slightly larger font for readability */
-        }
-        input, select, textarea {
-            padding: 0.6rem 0.85rem; /* Increased padding */
-            border-radius: 0.375rem; /* Slightly more rounded corners */
-        }
-        th, td {
-            font-size: 0.8rem; /* Slightly larger table font */
-            padding: 0.8rem 1.1rem; /* Increased padding */
-            line-height: 1.3;
-        }
-        .compact-form {
-            gap: 1rem; /* More space between form elements */
-        }
-        .compact-grid {
-            gap: 0.75rem; /* More space in grids */
-        }
-        /* Full width container */
-        .full-width-container {
-            width: 100%;
-            max-width: none;
-            padding: 1rem; /* Increased padding */
-        }
-        @media (min-width: 640px) {
-            .full-width-container {
-                padding: 1.5rem;
-            }
-        }
-        @media (min-width: 1024px) {
-            .full-width-container {
-                padding: 2rem;
-            }
-        }
-        /* Responsive table */
-        .responsive-table {
-            font-size: 0.8rem;
+
+        /* Mobile table styles */
+        .mobile-table {
+            font-size: 0.75rem;
             overflow-x: auto;
-            border-radius: var(--border-radius); /* Rounded table corners */
-            box-shadow: var(--shadow-sm); /* Subtle shadow for tables */
         }
-        .responsive-table table {
-            min-width: 100%;
+        .mobile-table th,
+        .mobile-table td {
+            padding: 0.5rem 0.75rem;
             white-space: nowrap;
         }
-        .responsive-table thead th {
-            background-color: #f1f5f9; /* Lighter header background */
-            color: #334155; /* Darker header text */
-        }
-        /* Compact cards */
-        .compact-card {
-            padding: 1.25rem; /* More padding for cards */
-            margin-bottom: 1rem; /* More margin */
+
+        /* Role selection cards - mobile optimized */
+        .role-card {
+            background: white;
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
+            padding: 1.25rem;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease-in-out;
+            margin-bottom: 1rem;
         }
-        /* Mobile-first responsive design */
-        .mobile-stack > * {
-            width: 100%;
-            margin-bottom: 0.75rem; /* More space */
+        .role-card:hover {
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
         }
+
+        /* Icon sizing for mobile */
+        .mobile-icon {
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            border-radius: 50%;
+        }
+
+        /* Modal responsive adjustments */
+        .mobile-modal {
+            margin: 1rem;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+        }
+
+        /* Grid adjustments for mobile */
+        .mobile-grid {
+            display: grid;
+            gap: 0.75rem;
+        }
+
         @media (min-width: 640px) {
-            .mobile-stack {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Slightly wider columns */
-                gap: 1rem; /* More space */
+            .mobile-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
-            .mobile-stack > * {
-                width: auto;
+            .role-card {
                 margin-bottom: 0;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .mobile-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+            }
+            .mobile-card {
+                padding: 1.25rem;
+            }
+            .mobile-btn {
+                padding: 0.625rem 1rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Responsive table scrolling */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: var(--border-radius);
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Status badge mobile sizing */
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-align: center;
+            min-width: fit-content;
+        }
+
+        /* Action buttons mobile sizing */
+        .action-btn {
+            padding: 0.375rem;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+            margin: 0 0.125rem;
+        }
+
+        /* Form layout mobile adjustments */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.375rem;
+        }
+
+        /* Header adjustments */
+        .page-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        /* Container adjustments */
+        .container-mobile {
+            padding: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .container-mobile {
+                padding: 1rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container-mobile {
+                padding: 1.5rem;
             }
         }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- The header section was removed as requested. -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="container-mobile max-w-7xl mx-auto">
         <!-- Role Selection Screen -->
-        <div id="roleSelection" class="max-w-4xl mx-auto">
-            <div class="text-center mb-12">
-                <h2 class="text-xl font-bold text-gray-900 mb-2">Expense Management System</h2>
+        <div id="roleSelection" class="max-w-2xl mx-auto">
+            <div class="text-center mb-6">
+                <h1 class="text-mobile-xl font-bold text-gray-900 mb-1">Expense Manager</h1>
+                <p class="text-mobile-sm text-gray-500">Paxton LLC</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="mobile-grid">
                 <!-- Add Expense Card -->
-                <div id="add-expense-card" class="card card-hover bg-white rounded-lg p-8 text-center cursor-pointer border">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-plus text-blue-600 text-2xl"></i>
+                <div id="add-expense-card" class="role-card">
+                    <div class="mobile-icon bg-blue-100">
+                        <i class="fas fa-plus text-blue-600 text-lg"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Expense</h3>
-                    <p class="text-gray-500 text-sm">Submit a new expense report or log</p>
+                    <h3 class="text-mobile-lg font-semibold text-gray-900 mb-1">Add Expense</h3>
+                    <p class="text-mobile-sm text-gray-500">Submit new expense</p>
                 </div>
-                <!-- admin Panel Card -->
-                <div id="admin-panel-card" class="card card-hover bg-white rounded-lg p-8 text-center cursor-pointer border hidden">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-user-shield text-purple-600 text-2xl"></i>
+                <!-- Admin Panel Card -->
+                <div id="admin-panel-card" class="role-card hidden">
+                    <div class="mobile-icon bg-purple-100">
+                        <i class="fas fa-user-shield text-purple-600 text-lg"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Admin Panel</h3>
-                    <p class="text-gray-500 text-sm">Review and manage all expense reports</p>
+                    <h3 class="text-mobile-lg font-semibold text-gray-900 mb-1">Admin Panel</h3>
+                    <p class="text-mobile-sm text-gray-500">Manage reports</p>
                 </div>
             </div>
         </div>
+
         <!-- Main Content -->
         <div id="mainContent" class="hidden">
             <!-- Add Expense View -->
             <div id="addExpenseView" class="hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900">Add New Expense</h2>
+                <div class="page-header">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-mobile-xl font-bold text-gray-900">New Expense</h2>
+                        </div>
+                        <button onclick="goBackToRoleSelection()" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200">
+                            <i class="fas fa-arrow-left mr-1"></i>Back
+                        </button>
                     </div>
-                    <button onclick="goBackToRoleSelection()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200">
-                        <i class="fas fa-arrow-left mr-2"></i>Go Back
-                    </button>
                 </div>
-                <div class="bg-white card rounded-lg p-6">
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Employee</label>
-                        <select id="employeeNameDropdown" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
+                <div class="mobile-card">
+                    <div class="form-group">
+                        <label for="employeeNameDropdown">Employee</label>
+                        <select id="employeeNameDropdown" class="mobile-input">
                             <option value="">Select Employee</option>
                         </select>
                     </div>
@@ -191,56 +270,62 @@
                     <div id="dynamicFormContainer"></div>
                 </div>
             </div>
-
-            <!-- admin View -->
+            <!-- Admin View -->
             <div id="adminView" class="hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900">Expense Reports Dashboard</h2>
-                        <p class="text-gray-500">Review, approve, and reject expense reports.</p>
+                <div class="page-header">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-mobile-xl font-bold text-gray-900">Dashboard</h2>
+                            <p class="text-mobile-sm text-gray-500">Expense reports</p>
+                        </div>
+                        <button onclick="goBackToRoleSelection()" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200">
+                            <i class="fas fa-arrow-left mr-1"></i>Back
+                        </button>
                     </div>
-                    <button onclick="goBackToRoleSelection()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200">
-                        <i class="fas fa-arrow-left mr-2"></i>Go Back
-                    </button>
                 </div>
-                <div class="bg-white card rounded-lg p-6">
-                    <!-- Filters -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Employee</label>
-                            <select id="employeeFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                                <option value="all">All Employees</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
-                            <select id="statusFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                                <option value="all">All Statuses</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Approved">Approved</option>
-                                <option value="Rejected">Rejected</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Month</label>
-                            <select id="monthFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                                <option value="all">All Months</option>
-                            </select>
+
+                <div class="mobile-card">
+                    <!-- Filters - Mobile Stack -->
+                    <div class="mb-4">
+                        <h3 class="text-mobile-lg font-medium text-gray-900 mb-3">Filters</h3>
+                        <div class="space-y-3">
+                            <div class="form-group">
+                                <label for="employeeFilter">Employee</label>
+                                <select id="employeeFilter" class="mobile-input">
+                                    <option value="all">All Employees</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="statusFilter">Status</label>
+                                <select id="statusFilter" class="mobile-input">
+                                    <option value="all">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="monthFilter">Month</label>
+                                <select id="monthFilter" class="mobile-input">
+                                    <option value="all">All Months</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
+
                     <!-- Reports Table -->
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
+                    <div class="table-container">
+                        <table class="w-full mobile-table">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manager</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (EGP)</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Date</th>
+                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Employee</th>
+                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Role</th>
+                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Report Type</th>
+                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Manager</th>
+                                    <th class="text-right text-mobile-xs font-medium text-gray-500 uppercase">Amount (EGP)</th>
+                                    <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="reportsTableBody" class="bg-white divide-y divide-gray-200">
@@ -252,90 +337,106 @@
             </div>
         </div>
     </div>
+
     <!-- Message Modal -->
     <div id="messageModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h3 id="messageModalTitle" class="text-lg font-semibold mb-3"></h3>
-            <p id="messageModalBody" class="text-gray-600 mb-6"></p>
-            <div id="messageModalActions" class="flex justify-end space-x-3">
-                <button id="modalPrimaryBtn" onclick="hideMessage()" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                    OK
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Report Details Modal -->
-    <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-semibold">Expense Report Details</h2>
-                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
+        <div class="mobile-modal bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div class="p-mobile">
+                <h3 id="messageModalTitle" class="text-mobile-lg font-semibold mb-2"></h3>
+                <p id="messageModalBody" class="text-mobile-sm text-gray-600 mb-4"></p>
+                <div id="messageModalActions" class="flex justify-end">
+                    <button id="modalPrimaryBtn" onclick="hideMessage()" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700">
+                        OK
                     </button>
                 </div>
             </div>
-            <div id="modalBody" class="p-6">
+        </div>
+    </div>
+
+    <!-- Report Details Modal -->
+    <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 hidden z-50">
+        <div class="mobile-modal bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="p-mobile border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-mobile-lg font-semibold">Expense Report Details</h2>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="modalBody" class="p-mobile">
                 <!-- Content will be injected by JS -->
             </div>
-            <div id="modalActions" class="p-6 border-t border-gray-200 flex justify-end space-x-3">
-                <button id="approveBtn" onclick="updateStatus('Approved')" class="btn bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                    Approve
-                </button>
-                <button id="rejectBtn" onclick="updateStatus('Rejected')" class="btn bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
-                    Reject
-                </button>
-                <button onclick="closeModal()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200">
-                    Close
-                </button>
+            <div id="modalActions" class="p-mobile border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                    <button id="approveBtn" onclick="updateStatus('Approved')" class="mobile-btn bg-green-600 text-white hover:bg-green-700 w-full sm:w-auto">
+                        <i class="fas fa-check mr-1"></i>Approve
+                    </button>
+                    <button id="rejectBtn" onclick="updateStatus('Rejected')" class="mobile-btn bg-red-600 text-white hover:bg-red-700 w-full sm:w-auto">
+                        <i class="fas fa-times mr-1"></i>Reject
+                    </button>
+                    <button onclick="closeModal()" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200 w-full sm:w-auto">
+                        Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-
     <!-- Print Confirmation Modal (New) -->
     <div id="printConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 text-center">
-            <h3 class="text-lg font-semibold mb-3">Print Options</h3>
-            <p class="text-gray-600 mb-6">How would you like to print this report?</p>
-            <div class="flex flex-col sm:flex-row justify-center gap-3">
-                <button onclick="printReport(activeReportRow, 'single'); hidePrintConfirmationModal();" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Print Single Report</button>
-                <button onclick="showMonthlyReportOptions(activeReportRow); hidePrintConfirmationModal();" class="btn bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200">Print Monthly Report</button>
-                <button onclick="hidePrintConfirmationModal();" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200">Cancel</button>
+        <div class="mobile-modal bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div class="p-mobile text-center">
+                <h3 class="text-mobile-lg font-semibold mb-2">Print Options</h3>
+                <p class="text-mobile-sm text-gray-600 mb-4">Choose print format</p>
+                <div class="space-y-2">
+                    <button onclick="printReport(activeReportRow, 'single'); hidePrintConfirmationModal();" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700 w-full">
+                        <i class="fas fa-print mr-1"></i>Single Report
+                    </button>
+                    <button onclick="showMonthlyReportOptions(activeReportRow); hidePrintConfirmationModal();" class="mobile-btn bg-blue-100 text-blue-700 hover:bg-blue-200 w-full">
+                        <i class="fas fa-calendar mr-1"></i>Monthly Report
+                    </button>
+                    <button onclick="hidePrintConfirmationModal();" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200 w-full">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-
     <!-- Monthly Report Options Modal (New) -->
     <div id="monthlyReportOptionsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h2 class="text-xl font-semibold">Generate Monthly Report</h2>
-                <button onclick="hideMonthlyReportOptionsModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label for="monthlyReportEmployeeSelect" class="block text-sm font-medium text-gray-700 mb-2">Select Employee</label>
-                    <select id="monthlyReportEmployeeSelect" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                        <option value="">Select an Employee</option>
-                    </select>
+        <div class="mobile-modal bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div class="p-mobile">
+                <div class="flex justify-between items-center border-b pb-2 mb-3">
+                    <h2 class="text-mobile-lg font-semibold">Monthly Report</h2>
+                    <button onclick="hideMonthlyReportOptionsModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <div>
-                    <label for="monthlyReportMonthSelect" class="block text-sm font-medium text-gray-700 mb-2">Select Month</label>
-                    <select id="monthlyReportMonthSelect" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                        <option value="">Select a Month</option>
-                    </select>
+                <div class="space-y-3">
+                    <div class="form-group">
+                        <label for="monthlyReportEmployeeSelect">Employee</label>
+                        <select id="monthlyReportEmployeeSelect" class="mobile-input">
+                            <option value="">Select Employee</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="monthlyReportMonthSelect">Month</label>
+                        <select id="monthlyReportMonthSelect" class="mobile-input">
+                            <option value="">Select Month</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="mt-6 pt-4 border-t flex justify-end space-x-3">
-                <button onclick="generateMonthlyReport();" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Generate Report</button>
-                <button onclick="hideMonthlyReportOptionsModal()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200">Cancel</button>
+                <div class="mt-4 pt-3 border-t space-y-2">
+                    <button onclick="generateMonthlyReport();" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700 w-full">
+                        <i class="fas fa-file-alt mr-1"></i>Generate
+                    </button>
+                    <button onclick="hideMonthlyReportOptionsModal()" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200 w-full">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-
     <script>
         // --- SUPABASE SETUP ---
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
@@ -415,108 +516,108 @@
         // --- Dynamic Form Logic ---
         function createManagerForm() {
             return `
-                <form id="managerExpenseForm" class="space-y-6">
+                <form id="managerExpenseForm" class="space-y-3">
                     <input type="hidden" name="employeeRole" value="District Manager">
                     <!-- Tab Navigation -->
-                    <div class="border-b border-gray-200 mb-6">
-                        <nav class="flex space-x-8">
-                            <button id="managerAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('District Manager', 'add')">
+                    <div class="border-b border-gray-200 mb-4">
+                        <nav class="flex space-x-2 text-mobile-sm">
+                            <button id="managerAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium" onclick="showTab('District Manager', 'add')">
                                 Submit Report
                             </button>
-                            <button id="managerViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'view')">
+                            <button id="managerViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'view')">
                                 My Reports
                             </button>
-                            <button id="managerTeamTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'team')">
+                            <button id="managerTeamTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'team')">
                                 Team Reports
                             </button>
                         </nav>
                     </div>
                     <!-- Add Report Tab Content -->
                     <div id="managerAddContent">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-                                <select id="reportType" name="reportType" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" onchange="handleReportTypeChange(this)">
+                        <div class="mobile-grid">
+                            <div class="form-group">
+                                <label for="reportType">Report Type</label>
+                                <select id="reportType" name="reportType" class="mobile-input" onchange="handleReportTypeChange(this)">
                                     <option value="Trip">Trip Report</option>
                                     <option value="Others">Other Expenses</option>
                                 </select>
                             </div>
                         </div>
                         <!-- Trip Details -->
-                        <div id="tripDetails" class="bg-gray-50 rounded-lg p-4 mt-6">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Trip Information</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Purpose of Trip</label>
-                                    <input type="text" id="tripPurpose" name="tripPurpose" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" placeholder="e.g., Regional Meeting" required>
+                        <div id="tripDetails" class="mobile-card mt-3">
+                            <h3 class="text-mobile-lg font-medium text-gray-900 mb-3">Trip Information</h3>
+                            <div class="mobile-grid">
+                                <div class="form-group">
+                                    <label for="tripPurpose">Purpose of Trip</label>
+                                    <input type="text" id="tripPurpose" name="tripPurpose" class="mobile-input" placeholder="e.g., Regional Meeting" required>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Date of Travel</label>
-                                    <input type="date" id="travelDate" name="travelDate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
+                                <div class="form-group">
+                                    <label for="travelDate">Date of Travel</label>
+                                    <input type="date" id="travelDate" name="travelDate" class="mobile-input" required>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">From (Governorate)</label>
-                                    <select id="fromGovernorate" name="fromGovernorate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
+                                <div class="form-group">
+                                    <label for="fromGovernorate">From (Governorate)</label>
+                                    <select id="fromGovernorate" name="fromGovernorate" class="mobile-input" required>
                                         <option value="">Select Governorate</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">To (Governorate)</label>
-                                    <select id="toGovernorate" name="toGovernorate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
+                                <div class="form-group">
+                                    <label for="toGovernorate">To (Governorate)</label>
+                                    <select id="toGovernorate" name="toGovernorate" class="mobile-input" required>
                                         <option value="">Select Governorate</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
                         <!-- Other Expenses Date -->
-                        <div id="otherDate" class="hidden mt-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Expense</label>
-                            <input type="date" id="otherDateInput" name="otherDateInput" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
+                        <div id="otherDate" class="hidden mt-3 form-group">
+                            <label for="otherDateInput">Date of Expense</label>
+                            <input type="date" id="otherDateInput" name="otherDateInput" class="mobile-input">
                         </div>
                         <!-- Expenses Section -->
-                        <div class="mt-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-medium text-gray-900">Expense Items</h3>
-                                <button type="button" onclick="addExpense('District Manager')" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                                    <i class="fas fa-plus mr-2"></i>Add Item
+                        <div class="mt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-mobile-lg font-medium text-gray-900">Expense Items</h3>
+                                <button type="button" onclick="addExpense('District Manager')" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700">
+                                    <i class="fas fa-plus mr-1"></i>Add Item
                                 </button>
                             </div>
-                            <div id="managerExpensesContainer" class="space-y-3">
+                            <div id="managerExpensesContainer" class="space-y-2">
                                 <!-- Expense items will be added here -->
                             </div>
                         </div>
                         <!-- Total -->
-                        <div class="bg-gray-50 rounded-lg p-4 mt-6">
+                        <div class="mobile-card mt-4">
                             <div class="flex justify-between items-center">
-                                <span class="text-lg font-medium text-gray-900">Total Amount:</span>
-                                <input type="text" id="managerTotal" readonly class="text-right text-xl font-bold bg-transparent border-none outline-none text-green-600">
+                                <span class="text-mobile-lg font-medium text-gray-900">Total Amount:</span>
+                                <input type="text" id="managerTotal" readonly class="text-right text-mobile-xl font-bold bg-transparent border-none outline-none text-green-600">
                             </div>
                         </div>
                         <!-- Submit Button -->
-                        <div class="flex justify-end mt-6">
-                            <button type="submit" class="btn bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700">
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700 px-4 py-2">
                                 Submit Report
                             </button>
                         </div>
                     </div>
                     <!-- View Reports Tab Content -->
                     <div id="managerViewContent" class="hidden">
-                        <div class="bg-white card rounded-lg p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-medium text-gray-900">My Submitted Reports</h3>
-                                <button onclick="retrieveMyReports('District Manager', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
+                        <div class="mobile-card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-mobile-lg font-medium text-gray-900">My Submitted Reports</h3>
+                                <button onclick="retrieveMyReports('District Manager', employeeNameDropdown.value)" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200" title="Refresh">
                                     <i class="fas fa-sync"></i>
                                 </button>
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
+                            <div class="table-container">
+                                <table class="w-full mobile-table">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Date</th>
+                                            <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Report Type</th>
+                                            <th class="text-right text-mobile-xs font-medium text-gray-500 uppercase">Amount</th>
+                                            <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Status</th>
+                                            <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="myManagerReportsTableBody" class="bg-white divide-y divide-gray-200">
@@ -528,29 +629,30 @@
                     </div>
                     <!-- Team Reports Tab Content -->
                     <div id="managerTeamContent" class="hidden">
-                        <div class="bg-white card rounded-lg p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-medium text-gray-900">Team Reports</h3>
-                                <button onclick="retrieveMyTeamReports(employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
+                        <div class="mobile-card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-mobile-lg font-medium text-gray-900">Team Reports</h3>
+                                <button onclick="retrieveMyTeamReports(employeeNameDropdown.value)" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200" title="Refresh">
                                     <i class="fas fa-sync"></i>
                                 </button>
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
+                            <div class="table-container">
+                                <table class="w-full mobile-table">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Date</th>
+                                            <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Employee</th>
+                                            <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Report Type</th>
+                                            <th class="text-right text-mobile-xs font-medium text-gray-500 uppercase">Amount</th>
+                                            <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Status</th>
+                                            <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="myTeamReportsTableBody" class="bg-white divide-y divide-gray-200">
                                         <!-- Team reports will be loaded here -->
                                     </tbody>
-                                </table>
+                                </tbody>
+                            </table>
                             </div>
                         </div>
                     </div>
@@ -560,15 +662,15 @@
         
         function createMedicalRepForm() {
             return `
-                <form id="medicalRepExpenseForm" class="space-y-6">
+                <form id="medicalRepExpenseForm" class="space-y-3">
                     <input type="hidden" name="employeeRole" value="Medical Representative">
                     <!-- Tab Navigation -->
-                    <div class="border-b border-gray-200 mb-6">
-                        <nav class="flex space-x-8">
-                            <button id="repAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('Medical Representative', 'add')">
+                    <div class="border-b border-gray-200 mb-4">
+                        <nav class="flex space-x-2 text-mobile-sm">
+                            <button id="repAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium" onclick="showTab('Medical Representative', 'add')">
                                 Submit Log
                             </button>
-                            <button id="repViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('Medical Representative', 'view')">
+                            <button id="repViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" onclick="showTab('Medical Representative', 'view')">
                                 My Logs
                             </button>
                         </nav>
@@ -576,64 +678,64 @@
                     <!-- Add Log Tab Content -->
                     <div id="repAddContent">
                         <!-- Basic Information -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                                <input type="date" id="repDate" name="repDate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
+                        <div class="mobile-grid">
+                            <div class="form-group">
+                                <label for="repDate">Date</label>
+                                <input type="date" id="repDate" name="repDate" class="mobile-input" required>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Direct Manager</label>
-                                <input type="text" id="directManager" name="directManager" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+                            <div class="form-group">
+                                <label for="directManager">Direct Manager</label>
+                                <input type="text" id="directManager" name="directManager" readonly class="mobile-input bg-gray-50">
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Territory / Area</label>
-                                <input type="text" id="repTerritory" name="repTerritory" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
+                            <div class="form-group">
+                                <label for="repTerritory">Territory / Area</label>
+                                <input type="text" id="repTerritory" name="repTerritory" readonly class="mobile-input bg-gray-50">
                             </div>
                         </div>
                         <!-- Expenses Section -->
-                        <div class="mt-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-medium text-gray-900">Expense Items</h3>
-                                <button type="button" onclick="addExpense('Medical Representative')" class="btn bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                                    <i class="fas fa-plus mr-2"></i>Add Item
+                        <div class="mt-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-mobile-lg font-medium text-gray-900">Expense Items</h3>
+                                <button type="button" onclick="addExpense('Medical Representative')" class="mobile-btn bg-green-600 text-white hover:bg-green-700">
+                                    <i class="fas fa-plus mr-1"></i>Add Item
                                 </button>
                             </div>
-                            <div id="repExpensesContainer" class="space-y-3">
+                            <div id="repExpensesContainer" class="space-y-2">
                                 <!-- Expense items will be added here -->
                             </div>
                         </div>
                         <!-- Total -->
-                        <div class="bg-gray-50 rounded-lg p-4 mt-6">
+                        <div class="mobile-card mt-4">
                             <div class="flex justify-between items-center">
-                                <span class="text-lg font-medium text-gray-900">Total Daily Expenses:</span>
-                                <input type="text" id="repTotal" readonly class="text-right text-xl font-bold bg-transparent border-none outline-none text-green-600">
+                                <span class="text-mobile-lg font-medium text-gray-900">Total Daily Expenses:</span>
+                                <input type="text" id="repTotal" readonly class="text-right text-mobile-xl font-bold bg-transparent border-none outline-none text-green-600">
                             </div>
                         </div>
                         <!-- Submit Button -->
-                        <div class="flex justify-end mt-6">
-                            <button type="submit" class="btn bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700">
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" class="mobile-btn bg-green-600 text-white hover:bg-green-700 px-4 py-2">
                                 Submit Daily Log
                             </button>
                         </div>
                     </div>
                     <!-- View Logs Tab Content -->
                     <div id="repViewContent" class="hidden">
-                        <div class="bg-white card rounded-lg p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-medium text-gray-900">My Submitted Logs</h3>
-                                <button onclick="retrieveMyReports('Medical Representative', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
+                        <div class="mobile-card">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-mobile-lg font-medium text-gray-900">My Submitted Logs</h3>
+                                <button onclick="retrieveMyReports('Medical Representative', employeeNameDropdown.value)" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200" title="Refresh">
                                     <i class="fas fa-sync"></i>
                                 </button>
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
+                            <div class="table-container">
+                                <table class="w-full mobile-table">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Date</th>
+                                            <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Report Type</th>
+                                            <th class="text-right text-mobile-xs font-medium text-gray-500 uppercase">Amount</th>
+                                            <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Status</th>
+                                            <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="myRepReportsTableBody" class="bg-white divide-y divide-gray-200">
@@ -739,9 +841,9 @@
             div.id = `expense-row-${containerId}-${newId}`;
             const optionsHtml = expenseTypesList.map(opt => `<option>${opt}</option>`).join('');
             div.innerHTML = `
-                <div class="md:col-span-4"><select name="expenseType-${newId}" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="handleExpenseTypeChange(this)"><option value="">Select Expense Type</option>${optionsHtml}</select></div>
-                <div class="md:col-span-5"><input type="text" name="expenseDesc-${newId}" placeholder="Description (optional)" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
-                <div class="md:col-span-2"><input type="number" name="expenseAmount-${newId}" min="0" step="0.01" required placeholder="EGP" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 expense-amount"></div>
+                <div class="md:col-span-4"><select name="expenseType-${newId}" required class="mobile-input" onchange="handleExpenseTypeChange(this)"><option value="">Select Expense Type</option>${optionsHtml}</select></div>
+                <div class="md:col-span-5"><input type="text" name="expenseDesc-${newId}" placeholder="Description (optional)" class="mobile-input"></div>
+                <div class="md:col-span-2"><input type="number" name="expenseAmount-${newId}" min="0" step="0.01" required placeholder="EGP" class="mobile-input expense-amount"></div>
                 <div class="md:col-span-1 flex items-center justify-center"><button type="button" onclick="removeExpenseRow('expense-row-${containerId}-${newId}', '${containerId}')" class="p-2 text-red-500 hover:bg-red-100 rounded-full transition"><i class="fas fa-trash-alt"></i></button></div>`;
             container.appendChild(div);
             
@@ -787,9 +889,9 @@
         }
         
         function getStatusBadge(status) {
-            if (status === 'Approved') return `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Approved</span>`;
-            if (status === 'Rejected') return `<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">Rejected</span>`;
-            return `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full">Pending</span>`;
+            if (status === 'Approved') return `<span class="status-badge bg-green-100 text-green-800">Approved</span>`;
+            if (status === 'Rejected') return `<span class="status-badge bg-red-100 text-red-800">Rejected</span>`;
+            return `<span class="status-badge bg-yellow-100 text-yellow-800">Pending</span>`;
         }
         
         // Helper function to get the formatted report type string
@@ -807,7 +909,7 @@
                  return firstItem.type;
             }
             
-            return 'No Report Type';
+            return 'No Expense Items';
         }
 
         // --- Message Modal Logic ---
@@ -831,7 +933,7 @@
                     messageModalActions.appendChild(buttonElement);
                 });
             } else {
-                messageModalActions.innerHTML = `<button onclick="hideMessage()" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">OK</button>`;
+                messageModalActions.innerHTML = `<button onclick="hideMessage()" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700">OK</button>`;
             }
         }
 
@@ -851,41 +953,48 @@
             if (!modalBody || !reportModal) return;
             
             let detailsHtml = `
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mb-4 text-base">
-                    <div><strong class="font-semibold text-gray-600 block">Employee:</strong> ${data.name}</div>
-                    <div><strong class="font-semibold text-gray-600 block">Role:</strong> ${data.role}</div>
-                    <div><strong class="font-semibold text-gray-600 block">Date:</strong> ${data.date}</div>
-                    ${data.role === 'District Manager' ? `<div><strong class="font-semibold text-gray-600 block">Report Type:</strong> ${details.reportType}</div>
-                                             ${details.reportType === 'Trip' ? `<div><strong class="font-semibold text-gray-600 block">From:</strong> ${details.from}</div>
-                                                                              <div><strong class="font-semibold text-gray-600 block">To:</strong> ${details.to}</div>
-                                                                              <div class="col-span-2"><strong class="font-semibold text-gray-600 block">Purpose:</strong> ${details.purpose}</div>` : ''}` : 
-                                            `<div><strong class="font-semibold text-gray-600 block">Territory:</strong> ${details.territory}</div>
-                                             <div><strong class="font-semibold text-gray-600 block">Direct Manager:</strong> ${details.manager}</div>`}
-                </div>`;
-
-            let itemsHtml = `
-                <h4 class="text-lg font-semibold text-gray-700 mb-3">Expense Items</h4>
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <table class="min-w-full text-base">
-                        <thead class="bg-gray-50"><tr class="text-left font-semibold text-gray-600">
-                            <th class="p-3">Type</th><th class="p-3">Description</th><th class="p-3 text-right">Amount (EGP)</th>
-                        </tr></thead>
-                        <tbody class="divide-y divide-gray-100">`;
+                <div class="space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-mobile-sm">
+                        <div><span class="font-bold text-gray-700">Employee:</span> <p class="text-gray-900">${data.name}</p></div>
+                        <div><span class="font-bold text-gray-700">Role:</span> <p class="text-gray-900">${data.role}</p></div>
+                        <div><span class="font-bold text-gray-700">Date:</span> <p class="text-gray-900">${data.date}</p></div>
+                        <div><span class="font-bold text-gray-700">Total:</span> <p class="text-gray-900">${parseFloat(data.total).toFixed(2)} EGP</p></div>
+                        <div><span class="font-bold text-gray-700">Status:</span> <p class="text-gray-900">${rowElement.querySelector('.status-badge').textContent}</p></div>
+                        ${data.role === 'District Manager' ? `<div class="sm:col-span-2"><span class="font-bold text-gray-700">Report Type:</span> <p class="text-gray-900">${details.reportType}</p></div>
+                                                ${details.reportType === 'Trip' ? `<div class="sm:col-span-2"><span class="font-bold text-gray-700">Purpose:</span> <p class="text-gray-900">${details.purpose}</p></div>
+                                                                                   <div><span class="font-bold text-gray-700">From:</span> <p class="text-gray-900">${details.from}</p></div>
+                                                                                   <div><span class="font-bold text-gray-700">To:</span> <p class="text-gray-900">${details.to}</p></div>` : ''}` :
+                                            `<div class="sm:col-span-2"><span class="font-bold text-gray-700">Report Type:</span> <p class="text-gray-900">${getReportTypeDisplayString(report)}</p></div>
+                                                <div><span class="font-bold text-gray-700">Territory:</span> <p class="text-gray-900">${details.territory}</p></div>
+                                                <div><span class="font-bold text-gray-700">Direct Manager:</span> <p class="text-gray-900">${details.manager}</p></div>`}
+                    </div>
+                    <h4 class="text-mobile-lg font-semibold text-gray-700 mt-4 mb-2">Expense Items</h4>
+                    <div class="table-container">
+                        <table class="w-full mobile-table">
+                            <thead class="bg-gray-50"><tr>
+                                <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Type</th>
+                                <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Description</th>
+                                <th class="text-right text-mobile-xs font-medium text-gray-500 uppercase">Amount (EGP)</th>
+                            </tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">`;
             items.forEach(item => {
-                itemsHtml += `<tr class="text-gray-700">
+                detailsHtml += `<tr class="hover:bg-gray-50">
                                 <td>${item.type}</td>
                                 <td>${item.desc || 'N/A'}</td>
-                                <td class="p-3 text-right">${parseFloat(item.amount).toFixed(2)}</td>
+                                <td class="text-right">${parseFloat(item.amount).toFixed(2)}</td>
                             </tr>`;
             });
-            itemsHtml += `
-                            <tr class="bg-gray-50 font-bold">
-                                <td colspan="2" class="p-3 text-right">Total:</td>
-                                <td class="p-3 text-right">${parseFloat(data.total).toFixed(2)}</td>
-                            </tr>
-                        </tbody></table></div>`;
+            detailsHtml += `
+                                <tr class="font-bold bg-gray-50">
+                                    <td colspan="2" class="text-right">Total:</td>
+                                    <td class="text-right">${parseFloat(data.total).toFixed(2)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>`;
             
-            modalBody.innerHTML = detailsHtml + itemsHtml;
+            modalBody.innerHTML = detailsHtml;
             reportModal.classList.remove('hidden');
             setTimeout(() => {
                 reportModal.classList.remove('opacity-0');
@@ -931,7 +1040,7 @@
                     {
                         text: "Cancel",
                         onClick: () => hideMessage(),
-                        className: "btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
+                        className: "mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200"
                     },
                     {
                         text: "Delete",
@@ -956,7 +1065,7 @@
                                 hideMessage();
                             }
                         },
-                        className: "btn bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                        className: "mobile-btn bg-red-600 text-white hover:bg-red-700"
                     }
                 ]
             );
@@ -1067,6 +1176,7 @@
                     const items = JSON.parse(report.items);
 
                     totalMonthlyExpenses += parseFloat(report.total_amount);
+                    const reportTypeDisplay = getReportTypeDisplayString(report);
 
                     let expenseItemsHtml = '';
                     items.forEach(item => {
@@ -1180,18 +1290,20 @@
                 const details = JSON.parse(data.details);
                 const statusCell = rowElement.querySelector('.status-cell');
                 const status = statusCell ? statusCell.textContent.trim() : 'N/A';
+                const reportTypeDisplay = getReportTypeDisplayString(data);
+
 
                 let detailsHtml = `
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 14px;">
                         <p><strong>Employee:</strong> ${data.name}</p>
                         <p><strong>Role:</strong> ${data.role}</p>
                         <p><strong>Date:</strong> ${data.date}</p>
-                        ${data.role === 'District Manager' ? `<p><strong>Report Type:</strong> ${details.reportType}</p>
-                                                ${details.reportType === 'Trip' ? `<p><strong>From:</strong> ${details.from}</p>
+                        <p><strong>Report Type:</strong> ${reportTypeDisplay}</p>
+                        ${data.role === 'District Manager' && details.reportType === 'Trip' ? `<p><strong>From:</strong> ${details.from}</p>
                                                                                    <p><strong>To:</strong> ${details.to}</p>
-                                                                                   <p style="grid-column: span 2;"><strong>Purpose:</strong> ${details.purpose}</p>` : ''}` : 
-                                                `<p><strong>Territory:</strong> ${details.territory}</p>
-                                                 <p><strong>Direct Manager:</strong> ${details.manager}</p>`}
+                                                                                   <p style="grid-column: span 2;"><strong>Purpose:</strong> ${details.purpose}</p>` : ''}
+                        ${data.role === 'Medical Representative' ? `<p><strong>Territory:</strong> ${details.territory}</p>
+                                                 <p><strong>Direct Manager:</strong> ${details.manager}</p>` : ''}
                     </div>`;
 
                 let itemsHtml = `
@@ -1363,8 +1475,8 @@
             
             const employeeRole = getEmployeeRole(report.employee_name);
             const roleBadge = employeeRole === 'District Manager' ?
-                `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">District Manager</span>` :
-                `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Medical Representative</span>`;
+                `<span class="status-badge bg-blue-100 text-blue-800">District Manager</span>` :
+                `<span class="status-badge bg-green-100 text-green-800">Medical Representative</span>`;
             
             newRow.dataset.id = report.id;
             newRow.dataset.name = report.employee_name;
@@ -1381,67 +1493,53 @@
                 managerCellContent = employeeData['District Manager'];
             }
             
-            let reportTypeToDisplay = '';
-            const items = JSON.parse(report.items);
-            const firstItem = items.length > 0 ? items[0] : null;
-
-            if (report.role === 'District Manager' && report.report_type === 'Trip') {
-                const details = JSON.parse(report.details);
-                reportTypeToDisplay = `Trip Report (${details.purpose})`;
-            } else if (report.report_type === 'Others' || (report.role === 'Medical Representative' && firstItem && firstItem.type === 'Others')) {
-                const description = firstItem && firstItem.desc ? firstItem.desc : 'No description';
-                reportTypeToDisplay = `Other Expenses (${description})`;
-            } else if (firstItem) {
-                 reportTypeToDisplay = firstItem.type;
-            } else {
-                reportTypeToDisplay = 'No Expense Items';
-            }
+            const reportTypeToDisplay = getReportTypeDisplayString(report);
 
 
             if (tableBody.id === 'reportsTableBody') {
                 newRow.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${roleBadge}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${managerCellContent}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
-                        <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
-                        <button onclick="deleteReport(this.closest('tr'))" class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
+                    <td class="text-mobile-sm text-gray-900">${report.report_date}</td>
+                    <td class="text-mobile-sm text-gray-900">${report.employee_name}</td>
+                    <td class="text-mobile-sm text-gray-500">${roleBadge}</td>
+                    <td class="text-mobile-sm text-gray-500">${reportTypeToDisplay}</td>
+                    <td class="text-mobile-sm text-gray-500 hidden sm:table-cell">${managerCellContent}</td>
+                    <td class="text-right text-mobile-sm text-gray-900">${parseFloat(report.total_amount).toFixed(2)}</td>
+                    <td class="text-center status-cell">${getStatusBadge(report.status)}</td>
+                    <td class="text-center">
+                        <button onclick="showReportDetails(this.closest('tr'))" class="action-btn bg-blue-100 text-blue-600 hover:bg-blue-200"><i class="fas fa-eye"></i></button>
+                        <button onclick="showPrintConfirmation(this.closest('tr'))" class="action-btn bg-green-100 text-green-600 hover:bg-green-200"><i class="fas fa-print"></i></button>
+                        <button onclick="deleteReport(this.closest('tr'))" class="action-btn bg-red-100 text-red-600 hover:bg-red-200"><i class="fas fa-trash-alt"></i></button>
                     </td>`;
             } else if (tableBody.id === 'myManagerReportsTableBody') {
                 newRow.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
-                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
+                        <td class="text-mobile-sm text-gray-900">${report.report_date}</td>
+                        <td class="text-mobile-sm text-gray-500">${reportTypeToDisplay}</td>
+                        <td class="text-right text-mobile-sm text-gray-900">${parseFloat(report.total_amount).toFixed(2)}</td>
+                        <td class="text-center status-cell">${getStatusBadge(report.status)}</td>
+                        <td class="text-center">
+                            <button onclick="showReportDetails(this.closest('tr'))" class="action-btn bg-blue-100 text-blue-600 hover:bg-blue-200"><i class="fas fa-eye"></i></button>
+                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="action-btn bg-green-100 text-green-600 hover:bg-green-200"><i class="fas fa-print"></i></button>
                         </td>`;
             } else if (tableBody.id === 'myRepReportsTableBody') {
                 newRow.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
-                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
+                        <td class="text-mobile-sm text-gray-900">${report.report_date}</td>
+                        <td class="text-mobile-sm text-gray-500">${reportTypeToDisplay}</td>
+                        <td class="text-right text-mobile-sm text-gray-900">${parseFloat(report.total_amount).toFixed(2)}</td>
+                        <td class="text-center status-cell">${getStatusBadge(report.status)}</td>
+                        <td class="text-center">
+                            <button onclick="showReportDetails(this.closest('tr'))" class="action-btn bg-blue-100 text-blue-600 hover:bg-blue-200"><i class="fas fa-eye"></i></button>
+                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="action-btn bg-green-100 text-green-600 hover:bg-green-200"><i class="fas fa-print"></i></button>
                         </td>`;
             } else if (tableBody.id === 'myTeamReportsTableBody') {
                 newRow.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
-                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
+                        <td class="text-mobile-sm text-gray-900">${report.report_date}</td>
+                        <td class="text-mobile-sm text-gray-900">${report.employee_name}</td>
+                        <td class="text-mobile-sm text-gray-500">${reportTypeToDisplay}</td>
+                        <td class="text-right text-mobile-sm text-gray-900">${parseFloat(report.total_amount).toFixed(2)}</td>
+                        <td class="text-center status-cell">${getStatusBadge(report.status)}</td>
+                        <td class="text-center">
+                            <button onclick="showReportDetails(this.closest('tr'))" class="action-btn bg-blue-100 text-blue-600 hover:bg-blue-200"><i class="fas fa-eye"></i></button>
+                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="action-btn bg-green-100 text-green-600 hover:bg-green-200"><i class="fas fa-print"></i></button>
                         </td>`;
             }
             
@@ -1467,7 +1565,7 @@
                 if (error) throw error;
                 
                 if (data.length === 0) {
-                    myReportsTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for this user.</td></tr>`;
+                    myReportsTableBody.innerHTML = `<tr><td colspan="5" class="p-2 text-center text-gray-500">No reports found for this user.</td></tr>`;
                     return;
                 }
                 
@@ -1490,7 +1588,7 @@
             const reps = [...new Set(masterlistData.filter(user => user['District Manager'] === managerName).map(user => user['medical rep']))];
 
             if (reps.length === 0) {
-                    myTeamReportsTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No team members found.</td></tr>';
+                    myTeamReportsTableBody.innerHTML = '<tr><td colspan="6" class="p-2 text-center text-gray-500">No team members found.</td></tr>';
                     return;
             }
 
@@ -1504,7 +1602,7 @@
                 if (error) throw error;
                 
                 if (data.length === 0) {
-                    myTeamReportsTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for your team.</td></tr>';
+                    myTeamReportsTableBody.innerHTML = '<tr><td colspan="6" class="p-2 text-center text-gray-500">No reports found for your team.</td></tr>';
                     return;
                 }
                 
