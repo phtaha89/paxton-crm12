@@ -13,34 +13,157 @@
     <!-- Supabase CDN for database interaction -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Custom styles for full-width responsive layout */
+        :root {
+            --primary-blue-light: #f8fafc;
+            --primary-blue-dark: #3b82f6;
+            --primary-blue-darker: #2563eb;
+            --text-color-dark: #1f2937;
+            --text-color-light: #64748b;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --border-radius: 0.5rem;
+        }
         body {
             font-family: 'Inter', sans-serif;
+            background-color: var(--primary-blue-light);
+            color: var(--text-color-dark);
+        }
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        /* New card styles from provided HTML */
+        .card {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        .card-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        .card-hover:hover {
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        /* New button styles from provided HTML */
+        .btn {
+            transition: all 0.2s ease-in-out;
+            font-weight: 500;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        /* New tab styles from provided HTML */
+        .tab-active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+        }
+        /* New input focus styles from provided HTML */
+        .input-focus:focus {
+            ring-color: #2563eb;
+            border-color: #2563eb;
+        }
+       
+        /* Adjusted font sizes and padding for form elements */
+        label, input, select, textarea, button {
+            font-size: 0.9rem; /* Slightly larger font for readability */
+        }
+        input, select, textarea {
+            padding: 0.6rem 0.85rem; /* Increased padding */
+            border-radius: 0.375rem; /* Slightly more rounded corners */
+        }
+        th, td {
+            font-size: 0.8rem; /* Slightly larger table font */
+            padding: 0.8rem 1.1rem; /* Increased padding */
+            line-height: 1.3;
+        }
+        .compact-form {
+            gap: 1rem; /* More space between form elements */
+        }
+        .compact-grid {
+            gap: 0.75rem; /* More space in grids */
+        }
+        /* Full width container */
+        .full-width-container {
+            width: 100%;
+            max-width: none;
+            padding: 1rem; /* Increased padding */
+        }
+        @media (min-width: 640px) {
+            .full-width-container {
+                padding: 1.5rem;
+            }
+        }
+        @media (min-width: 1024px) {
+            .full-width-container {
+                padding: 2rem;
+            }
+        }
+        /* Responsive table */
+        .responsive-table {
+            font-size: 0.8rem;
+            overflow-x: auto;
+            border-radius: var(--border-radius); /* Rounded table corners */
+            box-shadow: var(--shadow-sm); /* Subtle shadow for tables */
+        }
+        .responsive-table table {
+            min-width: 100%;
+            white-space: nowrap;
+        }
+        .responsive-table thead th {
+            background-color: #f1f5f9; /* Lighter header background */
+            color: #334155; /* Darker header text */
+        }
+        /* Compact cards */
+        .compact-card {
+            padding: 1.25rem; /* More padding for cards */
+            margin-bottom: 1rem; /* More margin */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+        }
+        /* Mobile-first responsive design */
+        .mobile-stack > * {
+            width: 100%;
+            margin-bottom: 0.75rem; /* More space */
+        }
+        @media (min-width: 640px) {
+            .mobile-stack {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Slightly wider columns */
+                gap: 1rem; /* More space */
+            }
+            .mobile-stack > * {
+                width: auto;
+                margin-bottom: 0;
+            }
         }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <!-- Main container with responsive padding -->
+    <!-- The header section was removed as requested. -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Role Selection Screen -->
         <div id="roleSelection" class="max-w-4xl mx-auto">
             <div class="text-center mb-12">
-                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Expense Management System</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-2">Expense Management System</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Add Expense Card -->
-                <div id="add-expense-card" class="bg-white rounded-xl p-8 text-center cursor-pointer shadow hover:shadow-lg transition-all duration-200 ease-in-out">
+                <div id="add-expense-card" class="card card-hover bg-white rounded-lg p-8 text-center cursor-pointer border">
                     <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-plus text-blue-600 text-2xl"></i>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Expense</h3>
                     <p class="text-gray-500 text-sm">Submit a new expense report or log</p>
                 </div>
-                <!-- Admin Panel Card -->
-                <div id="admin-panel-card" class="bg-white rounded-xl p-8 text-center cursor-pointer shadow hover:shadow-lg transition-all duration-200 ease-in-out hidden">
+                <!-- admin Panel Card -->
+                <div id="admin-panel-card" class="card card-hover bg-white rounded-lg p-8 text-center cursor-pointer border hidden">
                     <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fas fa-user-shield text-purple-600 text-2xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Admin Panel</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">admin Panel</h3>
                     <p class="text-gray-500 text-sm">Review and manage all expense reports</p>
                 </div>
             </div>
@@ -51,16 +174,16 @@
             <div id="addExpenseView" class="hidden">
                 <div class="flex items-center justify-between mb-6">
                     <div>
-                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Add New Expense</h2>
+                        <h2 class="text-xl font-bold text-gray-900">Add New Expense</h2>
                     </div>
-                    <button onclick="goBackToRoleSelection()" class="flex items-center btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-all duration-200 ease-in-out">
+                    <button onclick="goBackToRoleSelection()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200">
                         <i class="fas fa-arrow-left mr-2"></i>Go Back
                     </button>
                 </div>
-                <div class="bg-white rounded-xl shadow p-4 sm:p-6">
+                <div class="bg-white card rounded-lg p-6">
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Select Employee</label>
-                        <select id="employeeNameDropdown" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
+                        <select id="employeeNameDropdown" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
                             <option value="">Select Employee</option>
                         </select>
                     </div>
@@ -69,29 +192,29 @@
                 </div>
             </div>
 
-            <!-- Admin View -->
+            <!-- admin View -->
             <div id="adminView" class="hidden">
                 <div class="flex items-center justify-between mb-6">
                     <div>
-                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Expense Reports Dashboard</h2>
-                        <p class="text-gray-500 text-sm sm:text-base">Review, approve, and reject expense reports.</p>
+                        <h2 class="text-xl font-bold text-gray-900">Expense Reports Dashboard</h2>
+                        <p class="text-gray-500">Review, approve, and reject expense reports.</p>
                     </div>
-                    <button onclick="goBackToRoleSelection()" class="flex items-center btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-all duration-200 ease-in-out">
+                    <button onclick="goBackToRoleSelection()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200">
                         <i class="fas fa-arrow-left mr-2"></i>Go Back
                     </button>
                 </div>
-                <div class="bg-white rounded-xl shadow p-4 sm:p-6">
+                <div class="bg-white card rounded-lg p-6">
                     <!-- Filters -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Employee</label>
-                            <select id="employeeFilter" class="w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <select id="employeeFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
                                 <option value="all">All Employees</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
-                            <select id="statusFilter" class="w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <select id="statusFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
                                 <option value="all">All Statuses</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Approved">Approved</option>
@@ -100,24 +223,24 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Month</label>
-                            <select id="monthFilter" class="w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <select id="monthFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
                                 <option value="all">All Months</option>
                             </select>
                         </div>
                     </div>
                     <!-- Reports Table -->
-                    <div class="overflow-x-auto rounded-lg shadow-sm">
-                        <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                    <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manager</th>
-                                    <th class="px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (EGP)</th>
-                                    <th class="px-3 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-3 sm:px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manager</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (EGP)</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="reportsTableBody" class="bg-white divide-y divide-gray-200">
@@ -141,7 +264,7 @@
             </div>
         </div>
     </div>
-    
+   
     <!-- Report Details Modal -->
     <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
@@ -153,7 +276,7 @@
                     </button>
                 </div>
             </div>
-            <div id="modalBody" class="p-4 sm:p-6">
+            <div id="modalBody" class="p-6">
                 <!-- Content will be injected by JS -->
             </div>
             <div id="modalActions" class="p-6 border-t border-gray-200 flex justify-end space-x-3">
@@ -195,13 +318,13 @@
             <div class="space-y-4">
                 <div>
                     <label for="monthlyReportEmployeeSelect" class="block text-sm font-medium text-gray-700 mb-2">Select Employee</label>
-                    <select id="monthlyReportEmployeeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <select id="monthlyReportEmployeeSelect" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
                         <option value="">Select an Employee</option>
                     </select>
                 </div>
                 <div>
                     <label for="monthlyReportMonthSelect" class="block text-sm font-medium text-gray-700 mb-2">Select Month</label>
-                    <select id="monthlyReportMonthSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <select id="monthlyReportMonthSelect" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
                         <option value="">Select a Month</option>
                     </select>
                 </div>
@@ -242,16 +365,16 @@
         // New Print Modals
         const printConfirmationModal = document.getElementById('printConfirmationModal');
         const monthlyReportOptionsModal = document.getElementById('monthlyReportOptionsModal');
-        const monthlyReportEmployeeSelect = document.getElementById('monthlyReportEmployeeSelect');
+        const monthlyReportEmployeeSelect = document.getElementById('monthlyReportEmployeeSelect'); // Changed from ManagerSelect
         const monthlyReportMonthSelect = document.getElementById('monthlyReportMonthSelect');
 
         // --- State ---
         let managerExpenseCount = 0;
         let repExpenseCount = 0;
-        let activeReportRow = null;
-        let masterlistData = [];
-        let allReportsData = [];
-        let loggedInUser = null;
+        let activeReportRow = null; // Stores the row element for the currently selected report
+        let masterlistData = []; // To store fetched user data from Supabase 'masterlist' table
+        let allReportsData = []; // Cache all reports for filtering
+        let loggedInUser = null; // Stores user data received from parent frame
 
         // --- Data Definitions ---
         const governorates = [
@@ -261,6 +384,8 @@
             "Qalyubia", "Qena", "Red Sea", "Sharqia", "Sohag", "South Sinai", "Suez"
         ];
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        // Manager and rep now use different expense types as requested
         const repExpenseTypes = ['Own Car Travel', 'Public Transportation', 'Accommodations', 'Meal', 'Toll', 'Parking', 'Others'];
         const managerExpenseTypes = ['Own Car Travel', 'Public Transportation', 'Accommodations', 'Meal', 'Toll', 'Parking', 'Team meeting', 'Others'];
 
@@ -294,24 +419,24 @@
                     <input type="hidden" name="employeeRole" value="District Manager">
                     <!-- Tab Navigation -->
                     <div class="border-b border-gray-200 mb-6">
-                        <nav class="flex space-x-4 sm:space-x-8">
-                            <button id="managerAddTab" type="button" class="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600 transition-colors duration-200" onclick="showTab('District Manager', 'add')">
+                        <nav class="flex space-x-8">
+                            <button id="managerAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('District Manager', 'add')">
                                 Submit Report
                             </button>
-                            <button id="managerViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('District Manager', 'view')">
+                            <button id="managerViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'view')">
                                 My Reports
                             </button>
-                            <button id="managerTeamTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('District Manager', 'team')">
+                            <button id="managerTeamTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'team')">
                                 Team Reports
                             </button>
                         </nav>
                     </div>
                     <!-- Add Report Tab Content -->
                     <div id="managerAddContent">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-                                <select id="reportType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" onchange="handleReportTypeChange(this)">
+                                <select id="reportType" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" onchange="handleReportTypeChange(this)">
                                     <option value="Trip">Trip Report</option>
                                     <option value="Others">Other Expenses</option>
                                 </select>
@@ -323,21 +448,21 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Purpose of Trip</label>
-                                    <input type="text" id="tripPurpose" name="tripPurpose" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="e.g., Regional Meeting" required>
+                                    <input type="text" id="tripPurpose" name="tripPurpose" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" placeholder="e.g., Regional Meeting" required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Date of Travel</label>
-                                    <input type="date" id="travelDate" name="travelDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                                    <input type="date" id="travelDate" name="travelDate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">From (Governorate)</label>
-                                    <select id="fromGovernorate" name="fromGovernorate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                                    <select id="fromGovernorate" name="fromGovernorate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
                                         <option value="">Select Governorate</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">To (Governorate)</label>
-                                    <select id="toGovernorate" name="toGovernorate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                                    <select id="toGovernorate" name="toGovernorate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
                                         <option value="">Select Governorate</option>
                                     </select>
                                 </div>
@@ -346,13 +471,13 @@
                         <!-- Other Expenses Date -->
                         <div id="otherDate" class="hidden mt-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Date of Expense</label>
-                            <input type="date" id="otherDateInput" name="otherDateInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <input type="date" id="otherDateInput" name="otherDateInput" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
                         </div>
                         <!-- Expenses Section -->
                         <div class="mt-6">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-medium text-gray-900">Expense Items</h3>
-                                <button type="button" onclick="addExpense('District Manager')" class="flex items-center btn bg-blue-600 text-white text-sm px-4 py-2 rounded-md hover:bg-blue-700">
+                                <button type="button" onclick="addExpense('District Manager')" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
                                     <i class="fas fa-plus mr-2"></i>Add Item
                                 </button>
                             </div>
@@ -364,34 +489,34 @@
                         <div class="bg-gray-50 rounded-lg p-4 mt-6">
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-medium text-gray-900">Total Amount:</span>
-                                <input type="text" id="managerTotal" readonly class="text-right text-xl font-bold bg-transparent border-none outline-none text-green-600 w-1/2">
+                                <input type="text" id="managerTotal" readonly class="text-right text-xl font-bold bg-transparent border-none outline-none text-green-600">
                             </div>
                         </div>
                         <!-- Submit Button -->
                         <div class="flex justify-end mt-6">
-                            <button type="submit" class="btn bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-blue-700">
+                            <button type="submit" class="btn bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700">
                                 Submit Report
                             </button>
                         </div>
                     </div>
                     <!-- View Reports Tab Content -->
                     <div id="managerViewContent" class="hidden">
-                        <div class="bg-white rounded-lg p-4 sm:p-6">
+                        <div class="bg-white card rounded-lg p-6">
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-lg font-medium text-gray-900">My Submitted Reports</h3>
-                                <button onclick="retrieveMyReports('District Manager', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-all duration-200" title="Refresh">
+                                <button onclick="retrieveMyReports('District Manager', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
                                     <i class="fas fa-sync"></i>
                                 </button>
                             </div>
-                            <div class="overflow-x-auto rounded-lg shadow-sm">
-                                <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-3 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-3 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                            <th class="px-3 sm:px-6 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-3 sm:px-6 py-3 text-center font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-3 sm:px-6 py-3 text-center font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="myManagerReportsTableBody" class="bg-white divide-y divide-gray-200">
@@ -403,23 +528,23 @@
                     </div>
                     <!-- Team Reports Tab Content -->
                     <div id="managerTeamContent" class="hidden">
-                        <div class="bg-white rounded-lg p-4 sm:p-6">
+                        <div class="bg-white card rounded-lg p-6">
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-lg font-medium text-gray-900">Team Reports</h3>
-                                <button onclick="retrieveMyTeamReports(employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-all duration-200" title="Refresh">
+                                <button onclick="retrieveMyTeamReports(employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
                                     <i class="fas fa-sync"></i>
                                 </button>
                             </div>
-                            <div class="overflow-x-auto rounded-lg shadow-sm">
-                                <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-3 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-3 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                                            <th class="px-3 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                            <th class="px-3 sm:px-6 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-3 sm:px-6 py-3 text-center font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-3 sm:px-6 py-3 text-center font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="myTeamReportsTableBody" class="bg-white divide-y divide-gray-200">
@@ -432,18 +557,18 @@
                 </form>
             `;
         }
-
+       
         function createMedicalRepForm() {
             return `
                 <form id="medicalRepExpenseForm" class="space-y-6">
                     <input type="hidden" name="employeeRole" value="Medical Representative">
                     <!-- Tab Navigation -->
                     <div class="border-b border-gray-200 mb-6">
-                        <nav class="flex space-x-4 sm:space-x-8">
-                            <button id="repAddTab" type="button" class="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 border-blue-600 transition-colors duration-200" onclick="showTab('Medical Representative', 'add')">
+                        <nav class="flex space-x-8">
+                            <button id="repAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('Medical Representative', 'add')">
                                 Submit Log
                             </button>
-                            <button id="repViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors duration-200" onclick="showTab('Medical Representative', 'view')">
+                            <button id="repViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('Medical Representative', 'view')">
                                 My Logs
                             </button>
                         </nav>
@@ -451,10 +576,10 @@
                     <!-- Add Log Tab Content -->
                     <div id="repAddContent">
                         <!-- Basic Information -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                                <input type="date" id="repDate" name="repDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                                <input type="date" id="repDate" name="repDate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Direct Manager</label>
@@ -469,7 +594,7 @@
                         <div class="mt-6">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-medium text-gray-900">Expense Items</h3>
-                                <button type="button" onclick="addExpense('Medical Representative')" class="flex items-center btn bg-green-600 text-white text-sm px-4 py-2 rounded-md hover:bg-green-700">
+                                <button type="button" onclick="addExpense('Medical Representative')" class="btn bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
                                     <i class="fas fa-plus mr-2"></i>Add Item
                                 </button>
                             </div>
@@ -481,34 +606,34 @@
                         <div class="bg-gray-50 rounded-lg p-4 mt-6">
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-medium text-gray-900">Total Daily Expenses:</span>
-                                <input type="text" id="repTotal" readonly class="text-right text-xl font-bold bg-transparent border-none outline-none text-green-600 w-1/2">
+                                <input type="text" id="repTotal" readonly class="text-right text-xl font-bold bg-transparent border-none outline-none text-green-600">
                             </div>
                         </div>
                         <!-- Submit Button -->
                         <div class="flex justify-end mt-6">
-                            <button type="submit" class="btn bg-green-600 text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-green-700">
+                            <button type="submit" class="btn bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700">
                                 Submit Daily Log
                             </button>
                         </div>
                     </div>
                     <!-- View Logs Tab Content -->
                     <div id="repViewContent" class="hidden">
-                        <div class="bg-white rounded-lg p-4 sm:p-6">
+                        <div class="bg-white card rounded-lg p-6">
                             <div class="flex justify-between items-center mb-6">
                                 <h3 class="text-lg font-medium text-gray-900">My Submitted Logs</h3>
-                                <button onclick="retrieveMyReports('Medical Representative', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200 transition-all duration-200" title="Refresh">
+                                <button onclick="retrieveMyReports('Medical Representative', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
                                     <i class="fas fa-sync"></i>
                                 </button>
                             </div>
-                            <div class="overflow-x-auto rounded-lg shadow-sm">
-                                <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-3 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-3 sm:px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                            <th class="px-3 sm:px-6 py-3 text-right font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-3 sm:px-6 py-3 text-center font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-3 sm:px-6 py-3 text-center font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
+                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="myRepReportsTableBody" class="bg-white divide-y divide-gray-200">
@@ -521,50 +646,36 @@
                 </form>
             `;
         }
-        
+       
         function showTab(role, tabType) {
             const addContent = document.getElementById(role === 'District Manager' ? 'managerAddContent' : 'repAddContent');
             const viewContent = document.getElementById(role === 'District Manager' ? 'managerViewContent' : 'repViewContent');
             const teamContent = document.getElementById(role === 'District Manager' ? 'managerTeamContent' : null);
-            
+           
             const addTabBtn = document.getElementById(role === 'District Manager' ? 'managerAddTab' : 'repAddTab');
             const viewTabBtn = document.getElementById(role === 'District Manager' ? 'managerViewTab' : 'repViewTab');
             const teamTabBtn = document.getElementById(role === 'District Manager' ? 'managerTeamTab' : null);
 
-            // Hide all content
+            // Hide all content and reset all tabs
             if (addContent) addContent.classList.add('hidden');
             if (viewContent) viewContent.classList.add('hidden');
             if (teamContent) teamContent.classList.add('hidden');
-            
-            // Remove active state from all tabs
-            const allTabs = [addTabBtn, viewTabBtn, teamTabBtn].filter(Boolean);
-            allTabs.forEach(tab => {
-                tab.classList.remove('text-blue-600', 'border-blue-600');
-                tab.classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
-            });
+            if (addTabBtn) addTabBtn.classList.remove('tab-active');
+            if (viewTabBtn) viewTabBtn.classList.remove('tab-active');
+            if (teamTabBtn) teamTabBtn.classList.remove('tab-active');
 
-            // Show and set active state for the selected tab
             if (tabType === 'add') {
                 if (addContent) addContent.classList.remove('hidden');
-                if (addTabBtn) {
-                    addTabBtn.classList.add('text-blue-600', 'border-blue-600');
-                    addTabBtn.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
-                }
+                if (addTabBtn) addTabBtn.classList.add('tab-active');
             } else if (tabType === 'view') {
                 if (viewContent) viewContent.classList.remove('hidden');
-                if (viewTabBtn) {
-                    viewTabBtn.classList.add('text-blue-600', 'border-blue-600');
-                    viewTabBtn.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
-                }
+                if (viewTabBtn) viewTabBtn.classList.add('tab-active');
                 if (employeeNameDropdown.value) {
                     retrieveMyReports(role, employeeNameDropdown.value);
                 }
             } else if (tabType === 'team' && role === 'District Manager') {
                 if (teamContent) teamContent.classList.remove('hidden');
-                if (teamTabBtn) {
-                    teamTabBtn.classList.add('text-blue-600', 'border-blue-600');
-                    teamTabBtn.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
-                }
+                if (teamTabBtn) teamTabBtn.classList.add('tab-active');
                 if (employeeNameDropdown.value) {
                     retrieveMyTeamReports(employeeNameDropdown.value);
                 }
@@ -577,10 +688,10 @@
             const amountInput = row.querySelector('input[name^="expenseAmount"]');
 
             if (!descriptionInput || !amountInput) return;
-            
+           
             const newDescriptionInput = descriptionInput.cloneNode(true);
             descriptionInput.parentNode.replaceChild(newDescriptionInput, descriptionInput);
-            
+           
             newDescriptionInput.value = '';
             amountInput.value = '';
             newDescriptionInput.required = (selectElement.value === 'Others');
@@ -592,10 +703,10 @@
                 newDescriptionInput.placeholder = 'KM Travelled';
                 amountInput.readOnly = true;
                 amountInput.classList.add('bg-gray-100');
-                
+               
                 newDescriptionInput.addEventListener('input', () => {
                     const km = parseFloat(newDescriptionInput.value) || 0;
-                    const worth = km * 1.7;
+                    const worth = km * 1.7; // Fixed rate per KM
                     amountInput.value = worth.toFixed(2);
                     const formId = selectElement.closest('form').id;
                     const containerId = formId === 'managerExpenseForm' ? 'managerExpensesContainer' : 'repExpensesContainer';
@@ -611,28 +722,28 @@
             const totalId = formId === 'managerExpenseForm' ? 'managerTotal' : 'repTotal';
             updateTotal(document.getElementById(containerId), totalId);
         }
-        
+       
         function addExpense(role) {
             const containerId = role === 'District Manager' ? 'managerExpensesContainer' : 'repExpensesContainer';
             const container = document.getElementById(containerId);
             const expenseTypesList = role === 'District Manager' ? managerExpenseTypes : repExpenseTypes;
             const newId = role === 'District Manager' ? ++managerExpenseCount : ++repExpenseCount;
-            
+           
             if (!container) return;
             const div = document.createElement('div');
-            div.className = 'grid grid-cols-1 md:grid-cols-12 gap-3 p-3 rounded-lg bg-gray-50/50 expense-row';
+            div.className = 'grid grid-cols-1 md:grid-cols-12 gap-3 border border-gray-200 p-3 rounded-lg bg-gray-50/50 expense-row';
             div.id = `expense-row-${containerId}-${newId}`;
             const optionsHtml = expenseTypesList.map(opt => `<option>${opt}</option>`).join('');
             div.innerHTML = `
-                <div class="col-span-12 sm:col-span-4"><select name="expenseType-${newId}" required class="block w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><option value="">Select Expense Type</option>${optionsHtml}</select></div>
-                <div class="col-span-12 sm:col-span-5"><input type="text" name="expenseDesc-${newId}" placeholder="Description (optional)" class="block w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
-                <div class="col-span-10 sm:col-span-2"><input type="number" name="expenseAmount-${newId}" min="0" step="0.01" required placeholder="EGP" class="block w-full text-sm px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 expense-amount"></div>
-                <div class="col-span-2 sm:col-span-1 flex items-center justify-center"><button type="button" onclick="removeExpenseRow('expense-row-${containerId}-${newId}', '${containerId}')" class="p-2 text-red-500 hover:bg-red-100 rounded-full transition"><i class="fas fa-trash-alt"></i></button></div>`;
+                <div class="md:col-span-4"><select name="expenseType-${newId}" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><option value="">Select Expense Type</option>${optionsHtml}</select></div>
+                <div class="md:col-span-5"><input type="text" name="expenseDesc-${newId}" placeholder="Description (optional)" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
+                <div class="md:col-span-2"><input type="number" name="expenseAmount-${newId}" min="0" step="0.01" required placeholder="EGP" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 expense-amount"></div>
+                <div class="md:col-span-1 flex items-center justify-center"><button type="button" onclick="removeExpenseRow('expense-row-${containerId}-${newId}', '${containerId}')" class="p-2 text-red-500 hover:bg-red-100 rounded-full transition"><i class="fas fa-trash-alt"></i></button></div>`;
             container.appendChild(div);
-            
+           
             const selectEl = div.querySelector('select');
             const amountInput = div.querySelector('.expense-amount');
-            
+           
             if (selectEl) {
                 selectEl.addEventListener('change', () => {
                     handleExpenseTypeChange(selectEl);
@@ -644,7 +755,7 @@
                 });
             }
         }
-        
+       
         function removeExpenseRow(rowId, containerId) {
             const rowElement = document.getElementById(rowId);
             if(rowElement) rowElement.remove();
@@ -670,13 +781,13 @@
             }
             setDefaultDates();
         }
-        
+       
         function getStatusBadge(status) {
             if (status === 'Approved') return `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Approved</span>`;
             if (status === 'Rejected') return `<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">Rejected</span>`;
             return `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full">Pending</span>`;
         }
-        
+       
         // --- Message Modal Logic ---
         function showMessage(title, body, customButtons = null) {
             if (!messageModalTitle || !messageModalBody || !messageModal || !messageModalActions) {
@@ -716,23 +827,23 @@
             const items = JSON.parse(data.items);
             const details = JSON.parse(data.details);
             if (!modalBody || !reportModal) return;
-            
+           
             let detailsHtml = `
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mb-4 text-sm sm:text-base">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mb-4 text-base">
                     <div><strong class="font-semibold text-gray-600 block">Employee:</strong> ${data.name}</div>
                     <div><strong class="font-semibold text-gray-600 block">Role:</strong> ${data.role}</div>
                     <div><strong class="font-semibold text-gray-600 block">Date:</strong> ${data.date}</div>
                     ${data.role === 'District Manager' ? `<div><strong class="font-semibold text-gray-600 block">Report Type:</strong> ${details.reportType}</div>
-                                                        ${details.reportType === 'Trip' ? `<div><strong class="font-semibold text-gray-600 block">Trip:</strong> ${details.from} to ${details.to}</div>
-                                                                                                <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Purpose:</strong> ${details.purpose}</div>` : ''}` : 
-                                                        `<div><strong class="font-semibold text-gray-600 block">Territory:</strong> ${details.territory}</div>
-                                                         <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Direct Manager:</strong> ${details.manager}</div>`}
+                                             ${details.reportType === 'Trip' ? `<div><strong class="font-semibold text-gray-600 block">Trip:</strong> ${details.from} to ${details.to}</div>
+                                                                         <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Purpose:</strong> ${details.purpose}</div>` : ''}` : 
+                                            `<div><strong class="font-semibold text-gray-600 block">Territory:</strong> ${details.territory}</div>
+                                             <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Direct Manager:</strong> ${details.manager}</div>`}
                 </div>`;
 
             let itemsHtml = `
                 <h4 class="text-lg font-semibold text-gray-700 mb-3">Expense Items</h4>
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <table class="min-w-full text-xs sm:text-sm">
+                    <table class="min-w-full text-base">
                         <thead class="bg-gray-50"><tr class="text-left font-semibold text-gray-600">
                             <th class="p-3">Type</th><th class="p-3">Description</th><th class="p-3 text-right">Amount (EGP)</th>
                         </tr></thead>
@@ -745,12 +856,12 @@
                             </tr>`;
             });
             itemsHtml += `
-                        <tr class="bg-gray-50 font-bold">
-                            <td colspan="2" class="p-3 text-right">Total:</td>
-                            <td class="p-3 text-right">${parseFloat(data.total).toFixed(2)}</td>
-                        </tr>
-                    </tbody></table></div>`;
-            
+                            <tr class="bg-gray-50 font-bold">
+                                <td colspan="2" class="p-3 text-right">Total:</td>
+                                <td class="p-3 text-right">${parseFloat(data.total).toFixed(2)}</td>
+                            </tr>
+                        </tbody></table></div>`;
+           
             modalBody.innerHTML = detailsHtml + itemsHtml;
             reportModal.classList.remove('hidden');
             setTimeout(() => {
@@ -761,7 +872,7 @@
             const approveBtn = document.getElementById('approveBtn');
             const rejectBtn = document.getElementById('rejectBtn');
             const isFromTeamReports = rowElement.closest('#myTeamReportsTableBody') !== null;
-            
+           
             const showApproveReject = loggedInUser && (loggedInUser.title === 'admin' || (loggedInUser.title === 'District Manager' && isFromTeamReports));
 
             if (showApproveReject) {
@@ -782,7 +893,7 @@
                 }, 300);
             }
         }
-        
+       
         async function deleteReport(rowElement) {
             const reportId = rowElement.dataset.id;
             if (!reportId) {
@@ -809,7 +920,7 @@
                                     .eq('id', reportId);
 
                                 if (error) throw error;
-                                
+                               
                                 // Remove row from the DOM
                                 if(rowElement) rowElement.remove();
                                 // Remove from cached data as well
@@ -828,22 +939,22 @@
             );
         }
 
-        // --- Admin/Manager status update logic ---
+        // --- admin/Manager status update logic ---
         async function updateStatus(newStatus) {
             if (activeReportRow) {
                 const reportId = activeReportRow.dataset.id;
-                
+               
                 const { error } = await supabase
                     .from('expenses')
                     .update({ status: newStatus })
                     .eq('id', reportId);
-                    
+                   
                 if (error) {
                     console.error('Error updating status:', error);
                     showMessage("Error", "Failed to update report status.");
                     return;
                 }
-                
+               
                 const statusCell = activeReportRow.querySelector('.status-cell');
                 if (statusCell) {
                     statusCell.innerHTML = getStatusBadge(newStatus);
@@ -855,7 +966,7 @@
 
         // --- Print Modals and Logic (New) ---
         function showPrintConfirmation(rowElement) {
-            activeReportRow = rowElement;
+            activeReportRow = rowElement; // Store the row element for later use
             if (printConfirmationModal) {
                 printConfirmationModal.classList.remove('hidden');
                 setTimeout(() => { printConfirmationModal.classList.remove('opacity-0'); }, 10);
@@ -870,6 +981,7 @@
         }
 
         function showMonthlyReportOptions(rowElement) {
+            // Pre-fill employee and month if possible from the clicked report
             if (rowElement && monthlyReportMonthSelect && monthlyReportEmployeeSelect) {
                 const reportDate = new Date(rowElement.dataset.date);
                 const reportMonth = (reportDate.getMonth() + 1).toString().padStart(2, '0');
@@ -934,9 +1046,9 @@
                     const items = JSON.parse(report.items);
                     items.forEach(item => {
                         expenseItemsHtml += `
-                            <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: 14px;">
+                            <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;">
                                 <span style="font-weight: 500;">${item.type}:</span>
-                                <span style="flex-grow: 1; margin: 0 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.desc || 'N/A'}</span>
+                                <span style="flex-grow: 1; margin: 0 0.5rem;">${item.desc || 'N/A'}</span>
                                 <span style="font-weight: 600;">${parseFloat(item.amount).toFixed(2)} EGP</span>
                             </div>
                         `;
@@ -986,13 +1098,13 @@
                             </div>
                             <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Employee: ${employeeName}</h2>
                             <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem;">Month: ${months[parseInt(month) - 1]}</h3>
-                            
+                           
                             <table style="border: none;">
                                 <tbody>
                                     ${reportTableRows}
                                 </tbody>
                             </table>
-                            
+                           
                             <div class="summary">
                                 <p>Grand Total for ${months[parseInt(month) - 1]}: EGP ${totalMonthlyExpenses.toFixed(2)}</p>
                             </div>
@@ -1042,10 +1154,10 @@
                         <p><strong>Role:</strong> ${data.role}</p>
                         <p><strong>Date:</strong> ${data.date}</p>
                         ${data.role === 'District Manager' ? `<p><strong>Report Type:</strong> ${details.reportType}</p>
-                                                            ${details.reportType === 'Trip' ? `<p><strong>Trip:</strong> ${details.from} to ${details.to}</p>
-                                                                                                <p style="grid-column: span 2;"><strong>Purpose:</strong> ${details.purpose}</p>` : ''}` : 
-                                                            `<p><strong>Territory:</strong> ${details.territory}</p>
-                                                            <p><strong>Direct Manager:</strong> ${details.manager}</p>`}
+                                                     ${details.reportType === 'Trip' ? `<p><strong>Trip:</strong> ${details.from} to ${details.to}</p>
+                                                                                         <p style="grid-column: span 2;"><strong>Purpose:</strong> ${details.purpose}</p>` : ''}` : 
+                                                     `<p><strong>Territory:</strong> ${details.territory}</p>
+                                                     <p><strong>Direct Manager:</strong> ${details.manager}</p>`}
                     </div>`;
 
                 let itemsHtml = `
@@ -1058,17 +1170,17 @@
                         </tr></thead><tbody>`;
                 items.forEach(item => {
                     itemsHtml += `<tr>
-                                    <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.type}</td>
-                                    <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.desc || 'N/A'}</td>
-                                    <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(item.amount).toFixed(2)}</td>
-                                </tr>`;
+                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.type}</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.desc || 'N/A'}</td>
+                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(item.amount).toFixed(2)}</td>
+                                    </tr>`;
                 });
                 itemsHtml += `
-                            <tr style="font-weight: bold; background-color: #f9fafb;">
-                                <td colspan="2" style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">Total:</td>
-                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(data.total).toFixed(2)}</td>
-                            </tr></tbody></table>`;
-                
+                                <tr style="font-weight: bold; background-color: #f9fafb;">
+                                    <td colspan="2" style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">Total:</td>
+                                    <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(data.total).toFixed(2)}</td>
+                                </tr></tbody></table>`;
+               
                 let signatureHtml = `
                     <div style="margin-top: 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; page-break-inside: avoid; font-size: 14px;">
                         <div>
@@ -1098,9 +1210,9 @@
                         </head>
                         <body style="padding: 2rem;">
                             <div style="text-align: center; margin-bottom: 2rem;">
-                                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton Logo" style="height: 4rem; margin: 0 auto; border-radius: 50%;">
-                                <h1 style="font-size: 1.5rem; font-weight: 700; color: #1e3a8a; margin: 0.5rem 0 0 0;">Expense Report</h1>
-                                <p style="font-size: 0.9rem; color: #6b7280;">Paxton LLC</p>
+                                        <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton Logo" style="height: 4rem; margin: 0 auto; border-radius: 50%;">
+                                       <h1 style="font-size: 1.5rem; font-weight: 700; color: #1e3a8a; margin: 0.5rem 0 0 0;">Expense Report</h1>
+                                       <p style="font-size: 0.9rem; color: #6b7280;">Paxton LLC</p>
                             </div>
                             <p style="text-align: right; font-size: 14px;"><strong>Status:</strong> ${status}</p>
                             ${detailsHtml}
@@ -1120,10 +1232,10 @@
         function handleReportTypeChange(selectElement) {
             const type = selectElement.value;
             const isTrip = type === 'Trip';
-            
+           
             const tripDetailsFieldset = document.getElementById('tripDetails');
             const otherDateInputDiv = document.getElementById('otherDate');
-            
+           
             if (tripDetailsFieldset) tripDetailsFieldset.classList.toggle('hidden', !isTrip);
             const tripPurpose = document.getElementById('tripPurpose');
             if (tripPurpose) tripPurpose.required = isTrip;
@@ -1144,7 +1256,7 @@
             event.preventDefault();
             const formData = new FormData(event.target);
             const data = Object.fromEntries(formData.entries());
-            
+           
             const items = [];
             let total = 0;
             const expenseContainer = data.employeeRole === 'District Manager' ? document.getElementById('managerExpensesContainer') : document.getElementById('repExpensesContainer');
@@ -1154,17 +1266,17 @@
                 const type = row.querySelector('select').value;
                 const desc = row.querySelector('input[name^="expenseDesc"]').value;
                 const amount = parseFloat(row.querySelector('input[name^="expenseAmount"]').value) || 0;
-                
+               
                 if (type) {
                     items.push({ type: type, desc: desc, amount: amount });
                     total += amount;
                 }
             });
-            
+           
             const selectedEmployeeName = employeeNameDropdown.value;
             const employeeData = masterlistData.find(u => u['medical rep'] === selectedEmployeeName || u['District Manager'] === selectedEmployeeName);
             const employeeRole = employeeData ? (employeeData['medical rep'] === selectedEmployeeName ? 'Medical Representative' : 'District Manager') : 'N/A';
-            
+           
             let directManager = 'N/A';
             let reportTypeForDb = '';
             let reportDetails;
@@ -1172,6 +1284,7 @@
 
             if (employeeRole === 'Medical Representative') {
                 directManager = employeeData['District Manager'];
+                // Set the report_type to the first expense item's type for medical reps
                 reportTypeForDb = items.length > 0 ? items[0].type : '';
                 reportDate = data.repDate;
                 reportDetails = { territory: employeeData.area, manager: directManager };
@@ -1184,7 +1297,7 @@
                     reportDetails = { reportType: 'Others', date: data.otherDateInput };
                 }
             }
-            
+           
             const reportData = {
                 employee_name: selectedEmployeeName,
                 role: employeeRole,
@@ -1206,17 +1319,17 @@
             showMessage("Success", `Report submitted successfully for ${selectedEmployeeName}!`);
             renderFormForEmployee();
         }
-        
+       
         function addNewReportToTable(report, tableBody) {
             if (!tableBody) return;
             const newRow = document.createElement('tr');
-            newRow.className = 'hover:bg-gray-50 text-gray-700 transition-all duration-200';
-            
+            newRow.className = 'hover:bg-gray-50';
+           
             const employeeRole = getEmployeeRole(report.employee_name);
             const roleBadge = employeeRole === 'District Manager' ?
                 `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">District Manager</span>` :
                 `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Medical Representative</span>`;
-            
+           
             newRow.dataset.id = report.id;
             newRow.dataset.name = report.employee_name;
             newRow.dataset.role = employeeRole;
@@ -1231,7 +1344,7 @@
             if (employeeData && employeeData['District Manager']) {
                 managerCellContent = employeeData['District Manager'];
             }
-            
+           
             let reportTypeToDisplay = report.report_type;
             if (!reportTypeToDisplay && report.items) {
                 const items = JSON.parse(report.items);
@@ -1247,57 +1360,57 @@
 
             if (tableBody.id === 'reportsTableBody') {
                 newRow.innerHTML = `
-                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
-                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${roleBadge}</td>
-                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${managerCellContent}</td>
-                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                    <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${roleBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${managerCellContent}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
                         <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
                         <button onclick="deleteReport(this.closest('tr'))" class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
                     </td>`;
             } else if (tableBody.id === 'myManagerReportsTableBody') {
                 newRow.innerHTML = `
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
                             <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
                         </td>`;
             } else if (tableBody.id === 'myRepReportsTableBody') {
                 newRow.innerHTML = `
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
                             <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
                         </td>`;
             } else if (tableBody.id === 'myTeamReportsTableBody') {
                 newRow.innerHTML = `
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
                             <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
                         </td>`;
             }
-            
+           
             tableBody.prepend(newRow);
         }
-        
+       
         async function retrieveMyReports(role, employeeName) {
             const myReportsTableBody = document.getElementById(role === 'District Manager' ? 'myManagerReportsTableBody' : 'myRepReportsTableBody');
-            
+           
             if (!myReportsTableBody) {
                     console.error("My reports table body not found.");
                     return;
@@ -1310,14 +1423,14 @@
                     .select('*')
                     .eq('employee_name', employeeName)
                     .order('report_date', { ascending: false });
-                
+               
                 if (error) throw error;
-                
+               
                 if (data.length === 0) {
                     myReportsTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for this user.</td></tr>`;
                     return;
                 }
-                
+               
                 data.forEach(report => addNewReportToTable(report, myReportsTableBody));
             } catch (error) {
                 console.error('Error retrieving reports:', error);
@@ -1327,13 +1440,13 @@
 
         async function retrieveMyTeamReports(managerName) {
             const myTeamReportsTableBody = document.getElementById('myTeamReportsTableBody');
-            
+           
             if (!myTeamReportsTableBody) {
                     console.error("My team reports table body not found.");
                     return;
             }
             myTeamReportsTableBody.innerHTML = '';
-            
+           
             const reps = [...new Set(masterlistData.filter(user => user['District Manager'] === managerName).map(user => user['medical rep']))];
 
             if (reps.length === 0) {
@@ -1349,24 +1462,24 @@
                     .order('report_date', { ascending: false });
 
                 if (error) throw error;
-                
+               
                 if (data.length === 0) {
                     myTeamReportsTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for your team.</td></tr>';
                     return;
                 }
-                
+               
                 data.forEach(report => addNewReportToTable(report, myTeamReportsTableBody));
             } catch (error) {
                 console.error('Error retrieving team reports:', error);
                 showMessage("Error", "Failed to retrieve your team's reports. Please try again.");
             }
         }
-        
+       
         async function retrieveAllReports() {
             try {
                 const { data, error } = await supabase.from('expenses').select('*').order('report_date', { ascending: false });
                 if (error) throw error;
-                
+               
                 allReportsData = data;
                 if (reportsTableBody) reportsTableBody.innerHTML = '';
                 filterReports();
@@ -1386,7 +1499,7 @@
             const monthFilter = monthFilterSelect.value;
 
             reportsTableBody.innerHTML = '';
-            
+           
             const filteredData = allReportsData.filter(report => {
                 const reportDate = new Date(report.report_date);
                 const reportMonth = (reportDate.getMonth() + 1).toString().padStart(2, '0');
@@ -1394,13 +1507,13 @@
                 const isEmployeeMatch = employeeFilter === 'all' || report.employee_name === employeeFilter;
                 const isStatusMatch = statusFilter === 'all' || report.status === statusFilter;
                 const isMonthMatch = monthFilter === 'all' || reportMonth === monthFilter;
-                
+               
                 return isEmployeeMatch && isStatusMatch && isMonthMatch;
             });
-            
+           
             filteredData.forEach(report => addNewReportToTable(report, reportsTableBody));
         }
-        
+       
         // --- Initialization Functions ---
         async function fetchMasterlistFromSupabase() {
             try {
@@ -1426,7 +1539,7 @@
                         hasMore = false;
                     }
                 }
-                
+               
                 masterlistData = allData;
                 populateEmployeeDropdowns();
                 populateFilters();
@@ -1469,7 +1582,7 @@
                     employeeNameDropdown.appendChild(repOption);
                 });
             });
-            
+           
             employeeNameDropdown.addEventListener('change', renderFormForEmployee);
         }
 
@@ -1483,7 +1596,7 @@
                 if (toGovernorateSelect) toGovernorateSelect.innerHTML += `<option value="${gov}">${gov}</option>`;
             });
         }
-        
+       
         function populateFilters() {
             populateEmployeeFilter();
             populateMonthFilter();
@@ -1511,11 +1624,11 @@
         function populateMonthlyReportEmployeeFilter() {
             if (!monthlyReportEmployeeSelect) return;
             monthlyReportEmployeeSelect.innerHTML = '<option value="">Select an Employee</option>';
-            
+           
             const employees = new Set();
             masterlistData.forEach(user => {
-                if (user['medical rep']) employees.add(user['medical rep']);
-                if (user['District Manager']) employees.add(user['District Manager']);
+                    if (user['medical rep']) employees.add(user['medical rep']);
+                    if (user['District Manager']) employees.add(user['District Manager']);
             });
             const sortedEmployees = Array.from(employees).sort();
 
@@ -1531,15 +1644,15 @@
             if (monthFilterSelect) {
                 monthFilterSelect.innerHTML = '<option value="all">All Months</option>';
                 months.forEach((month, index) => {
-                    const monthValue = (index + 1).toString().padStart(2, '0');
+                    const monthValue = (index + 1).toString().padStart(2, '0'); // "01", "02", etc.
                     monthFilterSelect.innerHTML += `<option value="${monthValue}">${month}</option>`;
                 });
             }
 
             if (monthlyReportMonthSelect) {
-                monthlyReportMonthSelect.innerHTML = '<option value="">Select a Month</option>';
+                monthlyReportMonthSelect.innerHTML = '<option value="">Select a Month</option>'; // For monthly report modal
                 months.forEach((month, index) => {
-                    const monthValue = (index + 1).toString().padStart(2, '0');
+                    const monthValue = (index + 1).toString().padStart(2, '0'); // "01", "02", etc.
                     monthlyReportMonthSelect.innerHTML += `<option value="${monthValue}">${month}</option>`;
                 });
                 const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
@@ -1573,7 +1686,7 @@
             }
 
             const employeeRole = getEmployeeRole(selectedEmployeeName);
-            
+           
             if (employeeRole === 'District Manager') {
                 formContainer.innerHTML = createManagerForm();
                 document.getElementById('managerExpenseForm').addEventListener('submit', handleFormSubmit);
@@ -1599,6 +1712,8 @@
             } else {
                 employeeNameDropdown.disabled = false;
             }
+
+            // Render the form based on the pre-filled value
             renderFormForEmployee();
 
             if (user.title === 'Medical Representative') {
@@ -1633,11 +1748,13 @@
                     if (addCard) addCard.classList.remove('hidden');
                     if (adminCard) adminCard.classList.add('hidden');
                 } else {
+                    // Fallback for unexpected roles
                     if (addCard) addCard.classList.add('hidden');
                     if (adminCard) addCard.classList.add('hidden');
                     console.error("Unknown user role:", loggedInUser.title);
                 }
                 
+                // Show the role selection screen for all users on initial load
                 showRoleSelection();
             }
         });
@@ -1645,7 +1762,7 @@
         if(employeeFilterSelect) employeeFilterSelect.addEventListener('change', filterReports);
         if (statusFilterSelect) statusFilterSelect.addEventListener('change', filterReports);
         if (monthFilterSelect) monthFilterSelect.addEventListener('change', filterReports);
-        
+       
         document.addEventListener('DOMContentLoaded', async () => {
             await fetchMasterlistFromSupabase();
 
