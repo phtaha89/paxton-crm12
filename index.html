@@ -3,1760 +3,1709 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paxton LLC Expenses Manager</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter for a modern look -->
+    <title>Paxton LLC CRM</title>
+    <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Supabase CDN for database interaction -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Custom styles for full-width responsive layout */
+        /* CSS Variables for easier theme management and consistency - Adapted from dashboard */
         :root {
-            --primary-blue-light: #f8fafc;
-            --primary-blue-dark: #3b82f6;
-            --primary-blue-darker: #2563eb;
-            --text-color-dark: #1f2937;
+            --primary-dark: #2563eb;
+            --primary-light: #93c5fd;
+            --background-gradient-start: #1a365d;
+            --background-gradient-end: #3182ce;
+            --text-color-dark: #1e293b;
             --text-color-light: #64748b;
+            --card-bg: #ffffff;
             --white: #ffffff;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --border-radius: 0.5rem;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --border-radius: 12px;
+            --transition-duration-fast: 0.2s;
+            --transition-duration-normal: 0.3s;
+            --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        /* Base styles for all elements */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body and HTML for full height layout */
+        html, body {
+            height: 100%;
+            overflow: hidden; /* Prevent body scrolling */
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--primary-blue-light);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
             color: var(--text-color-dark);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex; /* Use flexbox for the body */
+            flex-direction: column; /* Stack children vertically */
         }
-        .modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+
+        /* Main container for the application, taking full available width and height */
+        /* FIX: Changed to a flex container to manage layout and footer positioning */
+        .container {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Full viewport height */
+            overflow: hidden; /* Prevent container from scrolling */
         }
-        .modal-content {
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        /* New card styles from provided HTML */
-        .card {
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-        .card-hover {
-            transition: all 0.2s ease-in-out;
-        }
-        .card-hover:hover {
-            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-        }
-        /* New button styles from provided HTML */
-        .btn {
-            transition: all 0.2s ease-in-out;
-            font-weight: 500;
-        }
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-        /* New tab styles from provided HTML */
-        .tab-active {
-            border-bottom: 2px solid #2563eb;
-            color: #2563eb;
-        }
-        /* New input focus styles from provided HTML */
-        .input-focus:focus {
-            ring-color: #2563eb;
-            border-color: #2563eb;
+
+        /* Header styling with flexbox for alignment */
+        /* FIX: Header is now a non-growing flex item. No more jumping on scroll. */
+        /* ENHANCEMENT: Added backdrop-filter for a modern, glassy effect */
+        .header {
+            background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            backdrop-filter: blur(10px); /* Glassy blur effect */
+            -webkit-backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+            position: relative;
+            z-index: 100;
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
        
-        /* Adjusted font sizes and padding for form elements */
-        label, input, select, textarea, button {
-            font-size: 0.9rem; /* Slightly larger font for readability */
-        }
-        input, select, textarea {
-            padding: 0.6rem 0.85rem; /* Increased padding */
-            border-radius: 0.375rem; /* Slightly more rounded corners */
-        }
-        th, td {
-            font-size: 0.8rem; /* Slightly larger table font */
-            padding: 0.8rem 1.1rem; /* Increased padding */
-            line-height: 1.3;
-        }
-        .compact-form {
-            gap: 1rem; /* More space between form elements */
-        }
-        .compact-grid {
-            gap: 0.75rem; /* More space in grids */
-        }
-        /* Full width container */
-        .full-width-container {
+        /* Inner wrapper for header content to constrain its width */
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: nowrap;
             width: 100%;
-            max-width: none;
-            padding: 1rem; /* Increased padding */
+            max-width: 1500px;
+            margin: 0 auto;
         }
-        @media (min-width: 640px) {
-            .full-width-container {
-                padding: 1.5rem;
-            }
+
+        /* User Card Styling */
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
+            order: 2;
+            width: fit-content;
+            max-width: 180px;
         }
-        @media (min-width: 1024px) {
-            .full-width-container {
-                padding: 2rem;
-            }
+
+        .user-card-icon { font-size: 1.4rem; }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
         }
-        /* Responsive table */
-        .responsive-table {
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-color-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-title {
             font-size: 0.8rem;
-            overflow-x: auto;
-            border-radius: var(--border-radius); /* Rounded table corners */
-            box-shadow: var(--shadow-sm); /* Subtle shadow for tables */
+            color: var(--text-color-light);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .responsive-table table {
-            min-width: 100%;
+
+        /* Button group in header */
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            order: 1;
+        }
+
+        /* Button base styling */
+        .header-button {
+            padding: 7px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border: none;
+            /* FIX: Using a more modern easing function for smoother animations */
+            transition: all var(--transition-duration-fast) var(--transition-easing);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             white-space: nowrap;
         }
-        .responsive-table thead th {
-            background-color: #f1f5f9; /* Lighter header background */
-            color: #334155; /* Darker header text */
+
+        .header-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        /* Compact cards */
-        .compact-card {
-            padding: 1.25rem; /* More padding for cards */
-            margin-bottom: 1rem; /* More margin */
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
+
+        /* Specific button colors */
+        .back-button {
+            background: var(--primary-light);
+            color: var(--background-gradient-start);
         }
-        /* Mobile-first responsive design */
-        .mobile-stack > * {
+        .back-button:hover { background: #a0cffc; }
+       
+        .refresh-button {
+            background: #60a5fa;
+            color: var(--white);
+            padding: 7px 10px;
+        }
+        .refresh-button:hover { background: var(--primary-dark); }
+
+        .logout-button {
+            background: #ef4444;
+            color: var(--white);
+            width: 90px;
+            justify-content: center;
+        }
+        .logout-button:hover { background: #dc2626; }
+
+        /* Utility class to hide elements */
+        .hidden { display: none !important; }
+
+        /* Banner styling */
+        .banner {
+            background: linear-gradient(135deg, var(--background-gradient-start), var(--background-gradient-end));
+            color: white;
+            padding: 8px 20px;
+            margin: 10px auto;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 18px;
+            max-width: 1500px;
+            width: 98%;
+        }
+
+        .banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="1" fill="white" opacity="0.1"/><circle cx="10" cy="90" r="1" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            z-index: 0;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .company-logo {
+            max-width: 65px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .banner-text-content {
+            flex-grow: 1;
+            text-align: left;
+            z-index: 1;
+        }
+
+        .banner h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .banner .subtitle {
+            font-size: 0.8rem;
+            opacity: 0.98;
+            font-weight: 400;
+        }
+       
+        /* Home view container */
+        /* FIX: Changed flex properties to ensure content scrolls while footer stays visible */
+        .home-view {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Allows this view to fill available space */
+            overflow: hidden; /* Contains scrolling within this element */
+        }
+
+        /* Home view grid for navigation cards */
+        /* FIX: This grid is now the primary scrolling area on the home page */
+        .home-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 18px;
+            padding: 12px;
+            flex-grow: 1;
+            align-content: start;
+            overflow-y: auto; /* Enable scrolling for the grid only */
+            max-width: 1500px;
             width: 100%;
-            margin-bottom: 0.75rem; /* More space */
+            margin-left: auto;
+            margin-right: auto;
         }
-        @media (min-width: 640px) {
-            .mobile-stack {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Slightly wider columns */
-                gap: 1rem; /* More space */
-            }
-            .mobile-stack > * {
-                width: auto;
-                margin-bottom: 0;
-            }
+
+        /* Styling for each navigation card */
+        .main-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            text-align: center;
+            /* FIX: Using a smoother, more modern easing function */
+            transition: all var(--transition-duration-normal) var(--transition-easing);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 120px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+       
+        .main-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+            border-color: var(--primary-light);
+        }
+
+        /* Disabled card styling */
+        .main-card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #f1f5f9;
+            box-shadow: var(--shadow-sm);
+            border-color: #cbd5e1;
+        }
+        .main-card.disabled:hover {
+            transform: none;
+            box-shadow: var(--shadow-sm);
+            border-color: #cbd5e1;
+        }
+
+        .main-card-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: var(--background-gradient-end);
+            line-height: 1;
+        }
+        .main-card.disabled .main-card-icon { color: var(--text-color-light); }
+
+        .main-card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color-dark);
+            margin-bottom: 3px;
+        }
+        .main-card.disabled .main-card-title { color: var(--text-color-light); }
+
+        .main-card-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-color-light);
+            line-height: 1.4;
+        }
+       
+        /* Full page view container */
+        /* ENHANCEMENT: Made transitions smoother and faster for a better feel */
+        .full-page-view {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            /* FIX: Updated transition for a smoother, faster feel */
+            transition: opacity var(--transition-duration-fast) var(--transition-easing), transform var(--transition-duration-fast) var(--transition-easing);
+            transform: translateY(10px);
+            opacity: 0;
+        }
+
+        .full-page-view.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: flex;
+        }
+       
+        /* Iframe container within full page view */
+        .iframe-container-fpv {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: var(--card-bg);
+        }
+
+        .full-page-view iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: var(--card-bg);
+        }
+
+        /* Error state styling */
+        .error-state, .loading {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 10;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-radius: var(--border-radius);
+        }
+
+        .error-state.show, .loading.show { display: flex; }
+
+        .error-icon { font-size: 2.5rem; margin-bottom: 15px; color: #ef4444; }
+        .error-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; }
+        .error-text { color: var(--text-color-light); font-size: 0.95rem; }
+
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid var(--background-gradient-end);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        .loading-text { color: var(--text-color-light); font-weight: 500; font-size: 0.95rem; }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Status indicator in banner */
+        .status-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        /* Login Page Styles */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            width: 100%;
+            max-width: 360px;
+            animation: fadeInFromCenter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+
+        .login-box .login-logo {
+            max-width: 60px;
+            margin-bottom: 15px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        @keyframes fadeInFromCenter {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .login-box h2 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-color-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .login-box .input-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .login-box label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color-light);
+            font-size: 0.825rem;
+        }
+
+        .login-box input[type="text"],
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 18px;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .login-box input[type="text"]:focus,
+        .login-box input[type="password"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 18px;
+            background-color: #3b82f6;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .login-box button:hover { background-color: var(--primary-dark); }
+
+        .login-box .error-message {
+            color: #ef4444;
+            margin-top: 1rem;
+            height: 1rem;
+            font-size: 0.825rem;
+            display: none;
+        }
+
+        /* Full-page Blurred Message Overlay */
+        .full-page-message-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(29, 54, 93, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-duration-normal) ease, visibility var(--transition-duration-normal) ease;
+            z-index: 2000;
+        }
+
+        .full-page-message-overlay.show { opacity: 1; visibility: visible; }
+
+        .full-page-message-overlay p {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--white);
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Footer Styling */
+        /* FIX: Footer is now a non-growing flex item, always visible at the bottom. */
+        .footer {
+            display: none; /* Hidden by default, shown via JS */
+            padding: 8px 15px;
+            text-align: center;
+            font-size: 0.75rem;
+            background: #f1f5f9;
+            border-top: 1px solid var(--border-color);
+            font-weight: bold;
+            color: var(--background-gradient-end);
+            flex-shrink: 0; /* Prevent footer from shrinking */
+        }
+        /* FIX: Ensure the footer is displayed correctly when it should be visible on mobile */
+        .footer.show { display: block; }
+       
+        /* New Professional Intro Animation Styles */
+        .intro-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--background-gradient-start) 0%, var(--background-gradient-end) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            opacity: 1;
+            transition: opacity 0.5s ease-out 2.5s;
+        }
+
+        .intro-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-content {
+            text-align: center;
+            position: relative;
+            opacity: 0;
+            animation: fadeInContent 1s ease-out forwards;
+        }
+
+        @keyframes fadeInContent { to { opacity: 1; } }
+
+        .logo-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
+        }
+
+        .intro-logo {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .loading-circle {
+            position: absolute;
+            top: -10px; left: -10px;
+            width: 170px; height: 170px;
+            border: 5px solid transparent;
+            border-top-color: var(--primary-light);
+            border-right-color: var(--primary-light);
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+        }
+       
+        .intro-text {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+       
+        /* Mobile Menu (Side Menu) Styles */
+        .mobile-menu-button { display: none; background: var(--background-gradient-end); color: var(--white); padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 1.2rem; transition: background 0.3s ease; order: 0; }
+        .mobile-menu-button:hover { background: var(--primary-dark); }
+        .side-menu-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
+        .side-menu-overlay.show { display: block; opacity: 1; }
+        .side-menu { position: fixed; top: 0; left: -280px; width: 250px; height: 100%; background: var(--card-bg); box-shadow: 2px 0 10px rgba(0,0,0,0.2); z-index: 1001; transition: left 0.3s ease; padding: 20px; display: flex; flex-direction: column; }
+        .side-menu.show { left: 0; }
+        .side-menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+        .side-menu-header h3 { font-size: 1.1rem; color: var(--background-gradient-end); }
+        .close-menu-button { background: none; border: none; font-size: 1.5rem; color: var(--text-color-dark); cursor: pointer; }
+        .side-menu-nav { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-right: 5px; }
+        .side-menu-card { display: flex; align-items: center; gap: 10px; padding: 10px 15px; background: #f1f5f9; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; color: var(--text-color-dark); }
+        .side-menu-card:hover { background: #e2e8f0; transform: translateX(3px); }
+        .side-menu-card-icon { font-size: 1.2rem; color: var(--background-gradient-end); opacity: 0.8; }
+        .side-menu-card-title { font-size: 0.9rem; font-weight: 500; }
+        .side-menu-logout { margin-top: auto; padding-top: 15px; border-top: 1px solid #eee; }
+        .side-menu-logout-button { width: 100%; padding: 10px 15px; background: #ef4444; color: var(--white); border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .side-menu-logout-button:hover { background: #dc2626; }
+        .side-menu-group { display: flex; flex-direction: column; }
+        .side-menu-group-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 10px 15px; background: #f1f5f9; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); transition: background 0.2s ease, transform 0.2s ease; margin-bottom: 10px; }
+        .side-menu-group-toggle:hover { background: #e2e8f0; transform: translateX(3px); }
+        .side-menu-group-toggle .arrow { transition: transform 0.2s ease; }
+        .side-menu-group-toggle.open .arrow { transform: rotate(90deg); }
+        .side-menu-sub-items { display: none; flex-direction: column; gap: 5px; padding-left: 20px; margin-bottom: 10px; }
+        .side-menu-sub-items.show { display: flex; }
+        .side-menu-sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 15px; background: var(--white); border-radius: var(--border-radius); cursor: pointer; transition: background 0.2s ease; box-shadow: var(--shadow-sm); }
+        .side-menu-sub-item:hover { background: #f1f5f9; }
+       
+        /* Notification Bell */
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-bell .fa-bell {
+            font-size: 1.4rem;
+            color: var(--text-color-dark);
+        }
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notification-count.updated {
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.4); }
+            60% { transform: scale(0.9); }
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 101;
+        }
+        .notification-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .notification-item:hover { background-color: #f1f5f9; }
+        .notification-item:last-child { border-bottom: none; }
+        .notification-title {
+            font-weight: 600;
+            color: var(--text-color-dark);
+        }
+        .notification-rep {
+            font-size: 0.8rem;
+            color: var(--text-color-light);
+        }
+        .notification-date {
+            font-size: 0.7rem;
+            color: var(--text-color-light);
+            margin-top: 4px;
+        }
+
+        /* Request Modal Styles */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition-duration-normal) ease, visibility var(--transition-duration-normal) ease;
+        }
+        .custom-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .custom-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform var(--transition-duration-normal) ease, opacity var(--transition-duration-normal) ease;
+        }
+        .custom-modal-overlay.show .custom-modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color-dark);
+        }
+        .close-modal-button {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-color-light);
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-body {
+            font-size: 0.9rem;
+            color: var(--text-color-dark);
+            line-height: 1.6;
+        }
+        .modal-body .detail-pair { margin-bottom: 12px; }
+        .modal-body .detail-pair strong {
+            color: var(--text-color-dark);
+            display: block;
+            font-weight: 600;
+            margin-bottom: 3px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+        .modal-body .detail-pair span { color: var(--text-color-light); }
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-footer label {
+            font-weight: 600;
+            color: var(--text-color-dark);
+        }
+        .modal-footer select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            flex-grow: 1;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .container { padding: 10px; }
+            .header { padding: 6px 15px; }
+            .user-card { padding: 6px 12px; gap: 10px; max-width: 180px; }
+            .user-card-icon { font-size: 1.3rem; }
+            .user-name { font-size: 0.9rem; }
+            .user-title { font-size: 0.75rem; }
+            .header-button { padding: 7px 12px; font-size: 0.85rem; }
+            .logout-button { width: 90px; }
+            .banner { padding: 10px 20px; gap: 15px; }
+            .banner h1 { font-size: 1.8rem; }
+            .banner .subtitle { font-size: 0.85rem; }
+            .company-logo { max-width: 60px; }
+            .home-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+            .main-card { min-height: 120px; padding: 15px; }
+            .main-card-icon { font-size: 2rem; }
+            .main-card-title { font-size: 1.1rem; }
+            .full-page-view { height: calc(100vh - 90px); }
+            .full-page-message-overlay p { font-size: 1.5rem; padding: 15px; }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 8px; height: 100vh; }
+            .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
+            .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
+            .user-name { font-size: 0.7rem; }
+            .user-title { font-size: 0.6rem; }
+            .header-buttons { width: auto; justify-content: flex-start; order: 1; flex-grow: 1; }
+            .header-button { flex-grow: 0; padding: 5px 7px; font-size: 0.7rem; }
+            .logout-button { width: 70px; display: none; }
+            .banner { padding: 6px 12px; gap: 8px; }
+            .company-logo { max-width: 40px; }
+            .banner h1 { font-size: 1.2rem; }
+            .banner .subtitle { font-size: 0.65rem; }
+            .home-grid { grid-template-columns: 1fr; gap: 12px; }
+            .main-card { min-height: 80px; padding: 12px; flex-direction: row; justify-content: flex-start; text-align: left; gap: 15px; }
+            .main-card-icon { font-size: 1.8rem; margin-bottom: 0; flex-shrink: 0; }
+            .main-card-title { font-size: 1rem; margin-bottom: 0; }
+            .main-card-subtitle { font-size: 0.7rem; display: none; }
+            .full-page-view { height: 100%; }
+            .login-box { padding: 20px; margin: 0 10px; max-width: 280px; }
+            .login-box .login-logo { max-width: 50px; }
+            .login-box h2 { font-size: 1.2rem; margin-bottom: 15px; }
+            .login-box input[type="text"], .login-box input[type="password"] { padding: 8px 10px; font-size: 0.85rem; }
+            .login-box button { padding: 9px 15px; font-size: 0.9rem; }
+            .full-page-message-overlay p { font-size: 1.2rem; padding: 10px; }
+            .main-card-text-content { display: flex; flex-direction: column; flex-grow: 1; }
+            .mobile-menu-button { display: block; }
+            .footer.show { display: block; }
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <!-- The header section was removed as requested. -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Role Selection Screen -->
-        <div id="roleSelection" class="max-w-4xl mx-auto">
-            <div class="text-center mb-12">
-                <h2 class="text-xl font-bold text-gray-900 mb-2">Expense Management System</h2>
+<body>
+    <!-- New Professional Intro Animation Overlay -->
+    <div id="introOverlay" class="intro-overlay">
+        <div class="intro-content">
+            <div class="logo-container">
+                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="intro-logo" onerror="this.onerror=null;this.src='https://placehold.co/150x150/FFFFFF/1a365d?text=Paxton';">
+                <div class="loading-circle"></div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Add Expense Card -->
-                <div id="add-expense-card" class="card card-hover bg-white rounded-lg p-8 text-center cursor-pointer border">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-plus text-blue-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Expense</h3>
-                    <p class="text-gray-500 text-sm">Submit a new expense report or log</p>
-                </div>
-                <!-- admin Panel Card -->
-                <div id="admin-panel-card" class="card card-hover bg-white rounded-lg p-8 text-center cursor-pointer border hidden">
-                    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-user-shield text-purple-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">admin Panel</h3>
-                    <p class="text-gray-500 text-sm">Review and manage all expense reports</p>
-                </div>
-            </div>
-        </div>
-        <!-- Main Content -->
-        <div id="mainContent" class="hidden">
-            <!-- Add Expense View -->
-            <div id="addExpenseView" class="hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900">Add New Expense</h2>
-                    </div>
-                    <button onclick="goBackToRoleSelection()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200">
-                        <i class="fas fa-arrow-left mr-2"></i>Go Back
-                    </button>
-                </div>
-                <div class="bg-white card rounded-lg p-6">
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Employee</label>
-                        <select id="employeeNameDropdown" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                            <option value="">Select Employee</option>
-                        </select>
-                    </div>
-                    <!-- Dynamic Forms will be injected here -->
-                    <div id="dynamicFormContainer"></div>
-                </div>
-            </div>
-
-            <!-- admin View -->
-            <div id="adminView" class="hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900">Expense Reports Dashboard</h2>
-                        <p class="text-gray-500">Review, approve, and reject expense reports.</p>
-                    </div>
-                    <button onclick="goBackToRoleSelection()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200">
-                        <i class="fas fa-arrow-left mr-2"></i>Go Back
-                    </button>
-                </div>
-                <div class="bg-white card rounded-lg p-6">
-                    <!-- Filters -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Employee</label>
-                            <select id="employeeFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                                <option value="all">All Employees</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
-                            <select id="statusFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                                <option value="all">All Statuses</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Approved">Approved</option>
-                                <option value="Rejected">Rejected</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Month</label>
-                            <select id="monthFilter" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                                <option value="all">All Months</option>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- Reports Table -->
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manager</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (EGP)</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reportsTableBody" class="bg-white divide-y divide-gray-200">
-                                <!-- All reports will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            <p class="intro-text">Paxton CRM</p>
         </div>
     </div>
-    <!-- Message Modal -->
-    <div id="messageModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h3 id="messageModalTitle" class="text-lg font-semibold mb-3"></h3>
-            <p id="messageModalBody" class="text-gray-600 mb-6"></p>
-            <div id="messageModalActions" class="flex justify-end space-x-3">
-                <button id="modalPrimaryBtn" onclick="hideMessage()" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                    OK
-                </button>
+
+    <!-- Full-page Blurred Message Overlay (for login/logout messages) -->
+    <div id="fullPageMessageOverlay" class="full-page-message-overlay">
+        <p id="fullPageOverlayMessage"></p>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container hidden">
+        <div class="login-box">
+            <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="login-logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/3498db/FFFFFF?text=Logo';">
+            <h2>PAXTON LLC CRM</h2>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter your username">
             </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your password">
+            </div>
+            <button id="loginButton">Login</button>
+            <div id="loginError" class="error-message">Invalid username or password.</div>
+        </div>
+    </div>
+
+    <!-- Main Application Content (hidden until login) -->
+    <div id="appContent" class="container hidden">
+        <div class="header">
+            <div class="header-inner">
+                <button id="mobileMenuButton" class="mobile-menu-button"><i class="fas fa-bars"></i></button>
+                <div class="header-buttons">
+                    <button id="logoutButton" class="header-button logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    <button id="backButton" class="header-button back-button hidden"><i class="fas fa-arrow-left"></i> Back</button>
+                    <button id="refreshButton" class="header-button refresh-button hidden"><i class="fas fa-sync-alt"></i></button>
+                    <div class="notification-bell hidden" id="notificationBell">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count" id="notificationCount">0</span>
+                        <div class="notification-dropdown hidden" id="notificationDropdown">
+                            <!-- Notification items will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+                <div id="userCard" class="user-card hidden">
+                    <i class="fas fa-user-circle user-card-icon"></i>
+                    <div class="user-info">
+                        <span id="userCardName" class="user-name"></span>
+                        <span id="userCardTitle" class="user-title"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home View: This section will display the main navigation cards -->
+        <div id="homeView" class="home-view">
+            <div class="banner">
+                <div class="status-indicator"></div>
+                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="company-logo" onerror="this.onerror=null;this.src='https://placehold.co/70x70/3498db/FFFFFF?text=Logo';">
+                <div class="banner-text-content">
+                    <h1>PAXTON LLC CRM</h1>
+                    <div class="subtitle">Medical Team Affairs</div>
+                </div>
+            </div>
+            <div class="home-grid">
+                <!-- Cards will be dynamically inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Full Page Views -->
+        <div id="crmView" class="full-page-view hidden">
+            <div class="loading" id="loadingCrm"><div class="spinner"></div><div class="loading-text">Loading CRM...</div></div>
+            <div class="error-state" id="errorCrm"><div class="error-icon">⚠️</div><div class="error-title">CRM Page Not Found</div><div class="error-text">The CRM file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+        <div id="dashboardView" class="full-page-view hidden">
+            <div class="loading" id="loadingDashboard"><div class="spinner"></div><div class="loading-text">Loading Dashboard...</div></div>
+            <div class="error-state" id="errorDashboard"><div class="error-icon">⚠️</div><div class="error-title">Dashboard Page Not Found</div><div class="error-text">The Dashboard file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+        <div id="dmCrmView" class="full-page-view hidden">
+            <div class="loading" id="loadingDmCrm"><div class="spinner"></div><div class="loading-text">Loading DM CRM...</div></div>
+            <div class="error-state" id="errorDmCrm"><div class="error-icon">⚠️</div><div class="error-title">DM CRM Page Not Found</div><div class="error-text">The DM CRM page could not be loaded.</div></div>
+            <div class="home-grid" id="dmCrmSubGrid"></div>
+        </div>
+        <div id="upaCodesView" class="full-page-view hidden">
+            <div class="loading" id="loadingUpaCodes"><div class="spinner"></div><div class="loading-text">Loading UPA Codes...</div></div>
+            <div class="error-state" id="errorUpaCodes"><div class="error-icon">⚠️</div><div class="error-title">UPA Codes Page Not Found</div><div class="error-text">The UPA Codes file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+        <div id="priceListView" class="full-page-view hidden">
+            <div class="loading" id="loadingPriceList"><div class="spinner"></div><div class="loading-text">Loading Price List...</div></div>
+            <div class="error-state" id="errorPriceList"><div class="error-icon">⚠️</div><div class="error-title">Price List Page Not Found</div><div class="error-text">The Price List file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+        <div id="productsKnowledgeView" class="full-page-view hidden">
+            <div class="loading" id="loadingProductsKnowledge"><div class="spinner"></div><div class="loading-text">Loading Products Knowledge...</div></div>
+            <div class="error-state" id="errorProductsKnowledge"><div class="error-icon">⚠️</div><div class="error-title">Products Knowledge Page Not Found</div><div class="error-text">The Products Knowledge file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+        <div id="adminView" class="full-page-view hidden">
+            <div class="loading" id="loadingAdmin"><div class="spinner"></div><div class="loading-text">Loading Admin...</div></div>
+            <div class="error-state" id="errorAdmin"><div class="error-icon">⚠️</div><div class="error-title">Admin Page Not Found</div><div class="error-text">The Admin file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+        <div id="masterListView" class="full-page-view hidden">
+            <div class="loading" id="loadingMasterList"><div class="spinner"></div><div class="loading-text">Loading Master List...</div></div>
+            <div class="error-state" id="errorMasterList"><div class="error-icon">⚠️</div><div class="error-title">Master List Page Not Found</div><div class="error-text">The Master List file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+        <!-- START: Added 'expensesView' container for the new page -->
+        <div id="expensesView" class="full-page-view hidden">
+            <div class="loading" id="loadingExpenses"><div class="spinner"></div><div class="loading-text">Loading Expenses...</div></div>
+            <div class="error-state" id="errorExpenses"><div class="error-icon">⚠️</div><div class="error-title">Expenses Page Not Found</div><div class="error-text">The Expenses file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+        <!-- END: Added 'expensesView' container for the new page -->
+        <div id="nestedIframeView" class="full-page-view hidden">
+            <div class="loading" id="loadingNestedIframe"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
+            <div class="error-state" id="errorNestedIframe"><div class="error-icon">⚠️</div><div class="error-title">Page Not Found</div><div class="error-text">The requested file could not be loaded.</div></div>
+            <div class="iframe-container-fpv"><iframe src=""></iframe></div>
+        </div>
+    </div>
+    <footer class="footer">Developed by DrTahaDesigns</footer>
+
+    <!-- Side Menu -->
+    <div id="sideMenuOverlay" class="side-menu-overlay"></div>
+    <div id="sideMenu" class="side-menu">
+        <div class="side-menu-header">
+            <h3>Navigation</h3>
+            <button id="closeMenuButton" class="close-menu-button"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="side-menu-nav"><!-- Cards will be dynamically inserted here --></nav>
+        <div class="side-menu-logout">
+            <button id="sideMenuLogoutButton" class="side-menu-logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </div>
    
-    <!-- Report Details Modal -->
-    <div id="reportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-screen overflow-y-auto">
-            <div class="p-6 border-b border-gray-200">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-xl font-semibold">Expense Report Details</h2>
-                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                        <i class="fas fa-times text-xl"></i>
-                    </button>
-                </div>
+    <!-- Request Details Modal -->
+    <div id="requestModal" class="custom-modal-overlay">
+        <div class="custom-modal-content">
+            <div class="modal-header">
+                <h2 id="modalRequestTitle">Request Details</h2>
+                <button id="modalCloseButton" class="close-modal-button">&times;</button>
             </div>
-            <div id="modalBody" class="p-6">
-                <!-- Content will be injected by JS -->
+            <div id="modalRequestDetails" class="modal-body">
+                <!-- Request details will be populated here -->
             </div>
-            <div id="modalActions" class="p-6 border-t border-gray-200 flex justify-end space-x-3">
-                <button id="approveBtn" onclick="updateStatus('Approved')" class="btn bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                    Approve
-                </button>
-                <button id="rejectBtn" onclick="updateStatus('Rejected')" class="btn bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
-                    Reject
-                </button>
-                <button onclick="closeModal()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200">
-                    Close
-                </button>
+            <div class="modal-footer">
+                <label for="modalStatusSelect">Status:</label>
+                <select id="modalStatusSelect">
+                    <!-- Status options will be populated here -->
+                </select>
             </div>
         </div>
     </div>
 
-    <!-- Print Confirmation Modal (New) -->
-    <div id="printConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 text-center">
-            <h3 class="text-lg font-semibold mb-3">Print Options</h3>
-            <p class="text-gray-600 mb-6">How would you like to print this report?</p>
-            <div class="flex flex-col sm:flex-row justify-center gap-3">
-                <button onclick="printReport(activeReportRow, 'single'); hidePrintConfirmationModal();" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Print Single Report</button>
-                <button onclick="showMonthlyReportOptions(activeReportRow); hidePrintConfirmationModal();" class="btn bg-blue-100 text-blue-700 px-4 py-2 rounded-md hover:bg-blue-200">Print Monthly Report</button>
-                <button onclick="hidePrintConfirmationModal();" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Monthly Report Options Modal (New) -->
-    <div id="monthlyReportOptionsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h2 class="text-xl font-semibold">Generate Monthly Report</h2>
-                <button onclick="hideMonthlyReportOptionsModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label for="monthlyReportEmployeeSelect" class="block text-sm font-medium text-gray-700 mb-2">Select Employee</label>
-                    <select id="monthlyReportEmployeeSelect" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                        <option value="">Select an Employee</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="monthlyReportMonthSelect" class="block text-sm font-medium text-gray-700 mb-2">Select Month</label>
-                    <select id="monthlyReportMonthSelect" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                        <option value="">Select a Month</option>
-                    </select>
-                </div>
-            </div>
-            <div class="mt-6 pt-4 border-t flex justify-end space-x-3">
-                <button onclick="generateMonthlyReport();" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Generate Report</button>
-                <button onclick="hideMonthlyReportOptionsModal()" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200">Cancel</button>
-            </div>
-        </div>
-    </div>
 
     <script>
-        // --- SUPABASE SETUP ---
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // --- DOM Elements ---
-        const roleSelection = document.getElementById('roleSelection');
-        const mainContent = document.getElementById('mainContent');
-        const addExpenseView = document.getElementById('addExpenseView');
-        const adminView = document.getElementById('adminView');
-        const dynamicFormContainer = document.getElementById('dynamicFormContainer');
-        const reportsTableBody = document.getElementById('reportsTableBody');
-        const reportModal = document.getElementById('reportModal');
-        const modalBody = document.getElementById('modalBody');
-        const employeeNameDropdown = document.getElementById('employeeNameDropdown');
-        const repTerritoryInput = document.getElementById('repTerritory');
-        const directManagerInput = document.getElementById('directManager');
-        const messageModal = document.getElementById('messageModal');
-        const messageModalTitle = document.getElementById('messageModalTitle');
-        const messageModalBody = document.getElementById('messageModalBody');
-        const messageModalActions = document.getElementById('messageModalActions');
-        const employeeFilterSelect = document.getElementById('employeeFilter');
-        const statusFilterSelect = document.getElementById('statusFilter');
-        const monthFilterSelect = document.getElementById('monthFilter');
-
-        // New Print Modals
-        const printConfirmationModal = document.getElementById('printConfirmationModal');
-        const monthlyReportOptionsModal = document.getElementById('monthlyReportOptionsModal');
-        const monthlyReportEmployeeSelect = document.getElementById('monthlyReportEmployeeSelect'); // Changed from ManagerSelect
-        const monthlyReportMonthSelect = document.getElementById('monthlyReportMonthSelect');
-
-        // --- State ---
-        let managerExpenseCount = 0;
-        let repExpenseCount = 0;
-        let activeReportRow = null; // Stores the row element for the currently selected report
-        let masterlistData = []; // To store fetched user data from Supabase 'masterlist' table
-        let allReportsData = []; // Cache all reports for filtering
-        let loggedInUser = null; // Stores user data received from parent frame
-
-        // --- Data Definitions ---
-        const governorates = [
-            "Alexandria", "Aswan", "Asyut", "Beheira", "Beni Suef", "Cairo", "Dakahlia",
-            "Damietta", "Faiyum", "Gharbia", "Giza", "Ismailia", "Kafr El Sheikh", "Luxor",
-            "Matrouh", "Minya", "Monufia", "New Valley", "North Sinai", "Port Said",
-            "Qalyubia", "Qena", "Red Sea", "Sharqia", "Sohag", "South Sinai", "Suez"
-        ];
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-        // Manager and rep now use different expense types as requested
-        const repExpenseTypes = ['Own Car Travel', 'Public Transportation', 'Accommodations', 'Meal', 'Toll', 'Parking', 'Others'];
-        const managerExpenseTypes = ['Own Car Travel', 'Public Transportation', 'Accommodations', 'Meal', 'Toll', 'Parking', 'Team meeting', 'Others'];
-
-        // --- UI Logic ---
-        function showView(view) {
-            if (roleSelection) roleSelection.classList.add('hidden');
-            if (mainContent) mainContent.classList.remove('hidden');
-            if (addExpenseView) addExpenseView.classList.add('hidden');
-            if (adminView) adminView.classList.add('hidden');
-
-            if (view === 'addExpense') {
-                if (addExpenseView) addExpenseView.classList.remove('hidden');
-                prefillAndLockForm(loggedInUser);
-            } else if (view === 'admin') {
-                currentUserRole = 'admin';
-                if (adminView) adminView.classList.remove('hidden');
-                retrieveAllReports();
-            }
-        }
-
-        function goBackToRoleSelection() {
-            if (mainContent) mainContent.classList.add('hidden');
-            if (roleSelection) roleSelection.classList.remove('hidden');
-            currentUserRole = null;
-        }
-
-        // --- Dynamic Form Logic ---
-        function createManagerForm() {
-            return `
-                <form id="managerExpenseForm" class="space-y-6">
-                    <input type="hidden" name="employeeRole" value="District Manager">
-                    <!-- Tab Navigation -->
-                    <div class="border-b border-gray-200 mb-6">
-                        <nav class="flex space-x-8">
-                            <button id="managerAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('District Manager', 'add')">
-                                Submit Report
-                            </button>
-                            <button id="managerViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'view')">
-                                My Reports
-                            </button>
-                            <button id="managerTeamTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('District Manager', 'team')">
-                                Team Reports
-                            </button>
-                        </nav>
-                    </div>
-                    <!-- Add Report Tab Content -->
-                    <div id="managerAddContent">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Report Type</label>
-                                <select id="reportType" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" onchange="handleReportTypeChange(this)">
-                                    <option value="Trip">Trip Report</option>
-                                    <option value="Others">Other Expenses</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!-- Trip Details -->
-                        <div id="tripDetails" class="bg-gray-50 rounded-lg p-4 mt-6">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Trip Information</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Purpose of Trip</label>
-                                    <input type="text" id="tripPurpose" name="tripPurpose" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" placeholder="e.g., Regional Meeting" required>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Date of Travel</label>
-                                    <input type="date" id="travelDate" name="travelDate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">From (Governorate)</label>
-                                    <select id="fromGovernorate" name="fromGovernorate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
-                                        <option value="">Select Governorate</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">To (Governorate)</label>
-                                    <select id="toGovernorate" name="toGovernorate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
-                                        <option value="">Select Governorate</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Other Expenses Date -->
-                        <div id="otherDate" class="hidden mt-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Date of Expense</label>
-                            <input type="date" id="otherDateInput" name="otherDateInput" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2">
-                        </div>
-                        <!-- Expenses Section -->
-                        <div class="mt-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-medium text-gray-900">Expense Items</h3>
-                                <button type="button" onclick="addExpense('District Manager')" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                                    <i class="fas fa-plus mr-2"></i>Add Item
-                                </button>
-                            </div>
-                            <div id="managerExpensesContainer" class="space-y-3">
-                                <!-- Expense items will be added here -->
-                            </div>
-                        </div>
-                        <!-- Total -->
-                        <div class="bg-gray-50 rounded-lg p-4 mt-6">
-                            <div class="flex justify-between items-center">
-                                <span class="text-lg font-medium text-gray-900">Total Amount:</span>
-                                <input type="text" id="managerTotal" readonly class="text-right text-xl font-bold bg-transparent border-none outline-none text-green-600">
-                            </div>
-                        </div>
-                        <!-- Submit Button -->
-                        <div class="flex justify-end mt-6">
-                            <button type="submit" class="btn bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700">
-                                Submit Report
-                            </button>
-                        </div>
-                    </div>
-                    <!-- View Reports Tab Content -->
-                    <div id="managerViewContent" class="hidden">
-                        <div class="bg-white card rounded-lg p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-medium text-gray-900">My Submitted Reports</h3>
-                                <button onclick="retrieveMyReports('District Manager', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
-                                    <i class="fas fa-sync"></i>
-                                </button>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="myManagerReportsTableBody" class="bg-white divide-y divide-gray-200">
-                                        <!-- Reports will be loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Team Reports Tab Content -->
-                    <div id="managerTeamContent" class="hidden">
-                        <div class="bg-white card rounded-lg p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-medium text-gray-900">Team Reports</h3>
-                                <button onclick="retrieveMyTeamReports(employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
-                                    <i class="fas fa-sync"></i>
-                                </button>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="myTeamReportsTableBody" class="bg-white divide-y divide-gray-200">
-                                        <!-- Team reports will be loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            `;
-        }
        
-        function createMedicalRepForm() {
-            return `
-                <form id="medicalRepExpenseForm" class="space-y-6">
-                    <input type="hidden" name="employeeRole" value="Medical Representative">
-                    <!-- Tab Navigation -->
-                    <div class="border-b border-gray-200 mb-6">
-                        <nav class="flex space-x-8">
-                            <button id="repAddTab" type="button" class="tab-active py-2 px-1 border-b-2 font-medium text-sm" onclick="showTab('Medical Representative', 'add')">
-                                Submit Log
-                            </button>
-                            <button id="repViewTab" type="button" class="py-2 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700" onclick="showTab('Medical Representative', 'view')">
-                                My Logs
-                            </button>
-                        </nav>
-                    </div>
-                    <!-- Add Log Tab Content -->
-                    <div id="repAddContent">
-                        <!-- Basic Information -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
-                                <input type="date" id="repDate" name="repDate" class="input-focus w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Direct Manager</label>
-                                <input type="text" id="directManager" name="directManager" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Territory / Area</label>
-                                <input type="text" id="repTerritory" name="repTerritory" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                            </div>
-                        </div>
-                        <!-- Expenses Section -->
-                        <div class="mt-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-medium text-gray-900">Expense Items</h3>
-                                <button type="button" onclick="addExpense('Medical Representative')" class="btn bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                                    <i class="fas fa-plus mr-2"></i>Add Item
-                                </button>
-                            </div>
-                            <div id="repExpensesContainer" class="space-y-3">
-                                <!-- Expense items will be added here -->
-                            </div>
-                        </div>
-                        <!-- Total -->
-                        <div class="bg-gray-50 rounded-lg p-4 mt-6">
-                            <div class="flex justify-between items-center">
-                                <span class="text-lg font-medium text-gray-900">Total Daily Expenses:</span>
-                                <input type="text" id="repTotal" readonly class="text-right text-xl font-bold bg-transparent border-none outline-none text-green-600">
-                            </div>
-                        </div>
-                        <!-- Submit Button -->
-                        <div class="flex justify-end mt-6">
-                            <button type="submit" class="btn bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700">
-                                Submit Daily Log
-                            </button>
-                        </div>
-                    </div>
-                    <!-- View Logs Tab Content -->
-                    <div id="repViewContent" class="hidden">
-                        <div class="bg-white card rounded-lg p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-lg font-medium text-gray-900">My Submitted Logs</h3>
-                                <button onclick="retrieveMyReports('Medical Representative', employeeNameDropdown.value)" class="btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200" title="Refresh">
-                                    <i class="fas fa-sync"></i>
-                                </button>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Report Type</th>
-                                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="myRepReportsTableBody" class="bg-white divide-y divide-gray-200">
-                                        <!-- Reports will be loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            `;
-        }
-       
-        function showTab(role, tabType) {
-            const addContent = document.getElementById(role === 'District Manager' ? 'managerAddContent' : 'repAddContent');
-            const viewContent = document.getElementById(role === 'District Manager' ? 'managerViewContent' : 'repViewContent');
-            const teamContent = document.getElementById(role === 'District Manager' ? 'managerTeamContent' : null);
-           
-            const addTabBtn = document.getElementById(role === 'District Manager' ? 'managerAddTab' : 'repAddTab');
-            const viewTabBtn = document.getElementById(role === 'District Manager' ? 'managerViewTab' : 'repViewTab');
-            const teamTabBtn = document.getElementById(role === 'District Manager' ? 'managerTeamTab' : null);
+        let currentActiveViewId = null;
+        let loggedInUser = null;
+        let googleSheetData = [];
+        let lastPageHistory = [];
+        let notificationChannel = null;
 
-            // Hide all content and reset all tabs
-            if (addContent) addContent.classList.add('hidden');
-            if (viewContent) viewContent.classList.add('hidden');
-            if (teamContent) teamContent.classList.add('hidden');
-            if (addTabBtn) addTabBtn.classList.remove('tab-active');
-            if (viewTabBtn) viewTabBtn.classList.remove('tab-active');
-            if (teamTabBtn) teamTabBtn.classList.remove('tab-active');
+        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRGZVMTCJ53ACJBwYVpyBpCFyDn4lYfMlbbldKbRXfnmsN14APuBIJm2jlDMGhPpYi5xXUp4z1YFkte/pub?gid=0&single=true&output=csv';
 
-            if (tabType === 'add') {
-                if (addContent) addContent.classList.remove('hidden');
-                if (addTabBtn) addTabBtn.classList.add('tab-active');
-            } else if (tabType === 'view') {
-                if (viewContent) viewContent.classList.remove('hidden');
-                if (viewTabBtn) viewTabBtn.classList.add('tab-active');
-                if (employeeNameDropdown.value) {
-                    retrieveMyReports(role, employeeNameDropdown.value);
-                }
-            } else if (tabType === 'team' && role === 'District Manager') {
-                if (teamContent) teamContent.classList.remove('hidden');
-                if (teamTabBtn) teamTabBtn.classList.add('tab-active');
-                if (employeeNameDropdown.value) {
-                    retrieveMyTeamReports(employeeNameDropdown.value);
-                }
-            }
-        }
-
-        function handleExpenseTypeChange(selectElement) {
-            const row = selectElement.closest('.expense-row');
-            const descriptionInput = row.querySelector('input[name^="expenseDesc"]');
-            const amountInput = row.querySelector('input[name^="expenseAmount"]');
-
-            if (!descriptionInput || !amountInput) return;
-           
-            const newDescriptionInput = descriptionInput.cloneNode(true);
-            descriptionInput.parentNode.replaceChild(newDescriptionInput, descriptionInput);
-           
-            newDescriptionInput.value = '';
-            amountInput.value = '';
-            newDescriptionInput.required = (selectElement.value === 'Others');
-            amountInput.readOnly = false;
-            amountInput.classList.remove('bg-gray-100');
-
-            if (selectElement.value === 'Own Car Travel') {
-                newDescriptionInput.type = 'number';
-                newDescriptionInput.placeholder = 'KM Travelled';
-                amountInput.readOnly = true;
-                amountInput.classList.add('bg-gray-100');
-               
-                newDescriptionInput.addEventListener('input', () => {
-                    const km = parseFloat(newDescriptionInput.value) || 0;
-                    const worth = km * 1.7; // Fixed rate per KM
-                    amountInput.value = worth.toFixed(2);
-                    const formId = selectElement.closest('form').id;
-                    const containerId = formId === 'managerExpenseForm' ? 'managerExpensesContainer' : 'repExpensesContainer';
-                    const totalId = formId === 'managerExpenseForm' ? 'managerTotal' : 'repTotal';
-                    updateTotal(document.getElementById(containerId), totalId);
-                });
-            } else {
-                newDescriptionInput.type = 'text';
-                newDescriptionInput.placeholder = 'Description (optional)';
-            }
-            const formId = selectElement.closest('form').id;
-            const containerId = formId === 'managerExpenseForm' ? 'managerExpensesContainer' : 'repExpensesContainer';
-            const totalId = formId === 'managerExpenseForm' ? 'managerTotal' : 'repTotal';
-            updateTotal(document.getElementById(containerId), totalId);
-        }
-       
-        function addExpense(role) {
-            const containerId = role === 'District Manager' ? 'managerExpensesContainer' : 'repExpensesContainer';
-            const container = document.getElementById(containerId);
-            const expenseTypesList = role === 'District Manager' ? managerExpenseTypes : repExpenseTypes;
-            const newId = role === 'District Manager' ? ++managerExpenseCount : ++repExpenseCount;
-           
-            if (!container) return;
-            const div = document.createElement('div');
-            div.className = 'grid grid-cols-1 md:grid-cols-12 gap-3 border border-gray-200 p-3 rounded-lg bg-gray-50/50 expense-row';
-            div.id = `expense-row-${containerId}-${newId}`;
-            const optionsHtml = expenseTypesList.map(opt => `<option>${opt}</option>`).join('');
-            div.innerHTML = `
-                <div class="md:col-span-4"><select name="expenseType-${newId}" required class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><option value="">Select Expense Type</option>${optionsHtml}</select></div>
-                <div class="md:col-span-5"><input type="text" name="expenseDesc-${newId}" placeholder="Description (optional)" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></div>
-                <div class="md:col-span-2"><input type="number" name="expenseAmount-${newId}" min="0" step="0.01" required placeholder="EGP" class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 expense-amount"></div>
-                <div class="md:col-span-1 flex items-center justify-center"><button type="button" onclick="removeExpenseRow('expense-row-${containerId}-${newId}', '${containerId}')" class="p-2 text-red-500 hover:bg-red-100 rounded-full transition"><i class="fas fa-trash-alt"></i></button></div>`;
-            container.appendChild(div);
-           
-            const selectEl = div.querySelector('select');
-            const amountInput = div.querySelector('.expense-amount');
-           
-            if (selectEl) {
-                selectEl.addEventListener('change', () => {
-                    handleExpenseTypeChange(selectEl);
-                });
-            }
-            if (amountInput) {
-                amountInput.addEventListener('input', () => {
-                    updateTotal(container, container.id === 'managerExpensesContainer' ? 'managerTotal' : 'repTotal');
-                });
-            }
-        }
-       
-        function removeExpenseRow(rowId, containerId) {
-            const rowElement = document.getElementById(rowId);
-            if(rowElement) rowElement.remove();
-            const container = document.getElementById(containerId);
-            if (container) updateTotal(container, containerId === 'managerExpensesContainer' ? 'managerTotal' : 'repTotal');
-        }
-
-        function updateTotal(container, totalElId) {
-            const amounts = container.querySelectorAll('.expense-amount');
-            const total = Array.from(amounts).reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
-            const totalElement = document.getElementById(totalElId);
-            if (totalElement) totalElement.value = `EGP ${total.toFixed(2)}`;
-        }
-
-        function resetForm(form, container, role) {
-            if (!form || !container) return;
-            form.reset();
-            container.innerHTML = '';
-            if (role === 'District Manager') {
-                managerExpenseCount = 0;
-            } else {
-                repExpenseCount = 0;
-            }
-            setDefaultDates();
-        }
-       
-        function getStatusBadge(status) {
-            if (status === 'Approved') return `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Approved</span>`;
-            if (status === 'Rejected') return `<span class="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">Rejected</span>`;
-            return `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full">Pending</span>`;
-        }
-       
-        // --- Message Modal Logic ---
-        function showMessage(title, body, customButtons = null) {
-            if (!messageModalTitle || !messageModalBody || !messageModal || !messageModalActions) {
-                console.error("Message modal elements not found.");
-                return;
-            }
-            messageModalTitle.textContent = title;
-            messageModalBody.textContent = body;
-            messageModal.classList.remove('hidden');
-            setTimeout(() => { messageModal.classList.remove('opacity-0'); }, 10);
-
-            messageModalActions.innerHTML = '';
-            if (customButtons) {
-                customButtons.forEach(btn => {
-                    const buttonElement = document.createElement('button');
-                    buttonElement.textContent = btn.text;
-                    buttonElement.onclick = btn.onClick;
-                    buttonElement.className = btn.className;
-                    messageModalActions.appendChild(buttonElement);
-                });
-            } else {
-                messageModalActions.innerHTML = `<button onclick="hideMessage()" class="btn bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">OK</button>`;
-            }
-        }
-
-        function hideMessage() {
-            if (messageModal) {
-                messageModal.classList.add('opacity-0');
-                setTimeout(() => { messageModal.classList.add('hidden'); }, 300);
-            }
-        }
-
-        // --- Report Details Modal Logic ---
-        function showReportDetails(rowElement) {
-            activeReportRow = rowElement;
-            const data = rowElement.dataset;
-            const items = JSON.parse(data.items);
-            const details = JSON.parse(data.details);
-            if (!modalBody || !reportModal) return;
-           
-            let detailsHtml = `
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 mb-4 text-base">
-                    <div><strong class="font-semibold text-gray-600 block">Employee:</strong> ${data.name}</div>
-                    <div><strong class="font-semibold text-gray-600 block">Role:</strong> ${data.role}</div>
-                    <div><strong class="font-semibold text-gray-600 block">Date:</strong> ${data.date}</div>
-                    ${data.role === 'District Manager' ? `<div><strong class="font-semibold text-gray-600 block">Report Type:</strong> ${details.reportType}</div>
-                                             ${details.reportType === 'Trip' ? `<div><strong class="font-semibold text-gray-600 block">Trip:</strong> ${details.from} to ${details.to}</div>
-                                                                         <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Purpose:</strong> ${details.purpose}</div>` : ''}` : 
-                                            `<div><strong class="font-semibold text-gray-600 block">Territory:</strong> ${details.territory}</div>
-                                             <div class="col-span-2 sm:col-span-1"><strong class="font-semibold text-gray-600 block">Direct Manager:</strong> ${details.manager}</div>`}
-                </div>`;
-
-            let itemsHtml = `
-                <h4 class="text-lg font-semibold text-gray-700 mb-3">Expense Items</h4>
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
-                    <table class="min-w-full text-base">
-                        <thead class="bg-gray-50"><tr class="text-left font-semibold text-gray-600">
-                            <th class="p-3">Type</th><th class="p-3">Description</th><th class="p-3 text-right">Amount (EGP)</th>
-                        </tr></thead>
-                        <tbody class="divide-y divide-gray-100">`;
-            items.forEach(item => {
-                itemsHtml += `<tr class="text-gray-700">
-                                <td>${item.type}</td>
-                                <td>${item.desc || 'N/A'}</td>
-                                <td class="p-3 text-right">${parseFloat(item.amount).toFixed(2)}</td>
-                            </tr>`;
-            });
-            itemsHtml += `
-                            <tr class="bg-gray-50 font-bold">
-                                <td colspan="2" class="p-3 text-right">Total:</td>
-                                <td class="p-3 text-right">${parseFloat(data.total).toFixed(2)}</td>
-                            </tr>
-                        </tbody></table></div>`;
-           
-            modalBody.innerHTML = detailsHtml + itemsHtml;
-            reportModal.classList.remove('hidden');
-            setTimeout(() => {
-                reportModal.classList.remove('opacity-0');
-            }, 10);
-
-            // Hide/show approve/reject buttons based on who can approve
-            const approveBtn = document.getElementById('approveBtn');
-            const rejectBtn = document.getElementById('rejectBtn');
-            const isFromTeamReports = rowElement.closest('#myTeamReportsTableBody') !== null;
-           
-            const showApproveReject = loggedInUser && (loggedInUser.title === 'admin' || (loggedInUser.title === 'District Manager' && isFromTeamReports));
-
-            if (showApproveReject) {
-                approveBtn.classList.remove('hidden');
-                rejectBtn.classList.remove('hidden');
-            } else {
-                approveBtn.classList.add('hidden');
-                rejectBtn.classList.add('hidden');
-            }
-        }
-
-        function closeModal() {
-            if (reportModal) {
-                reportModal.classList.add('opacity-0');
-                setTimeout(() => {
-                    reportModal.classList.add('hidden');
-                    activeReportRow = null;
-                }, 300);
-            }
-        }
-       
-        async function deleteReport(rowElement) {
-            const reportId = rowElement.dataset.id;
-            if (!reportId) {
-                showMessage("Error", "Could not find report ID to delete.");
-                return;
-            }
-
-            showMessage(
-                "Confirm Deletion",
-                "Are you sure you want to delete this report? This action cannot be undone.",
-                [
-                    {
-                        text: "Cancel",
-                        onClick: () => hideMessage(),
-                        className: "btn bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
+        const navConfig = {
+            'home': {
+                pages: [
+                    { id: 'crm', title: 'CRM', subtitle: 'Hcps related affairs.', icon: '📊', viewId: 'crmView', fileName: 'reps crm.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
+                    { id: 'dashboard', title: 'Dashboard', subtitle: 'View key performance indicators and analytics.', icon: '📈', viewId: 'dashboardView', fileName: 'final dashboard.html', roles: ['admin', 'District Manager'] },
+                    { id: 'expenses', title: 'Expenses', subtitle: 'Manage and track team expenses.', icon: '💰', viewId: 'expensesView', fileName: 'expenses.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
+                    { 
+                        id: 'dm-crm', 
+                        title: 'DM CRM', 
+                        subtitle: 'District Manager related affairs.', 
+                        icon: '👔', 
+                        viewId: 'dmCrmView', 
+                        fileName: null, 
+                        isGroup: true,
+                        roles: ['admin', 'District Manager'],
+                        subPages: [
+                            { id: 'dm-planning', title: 'DM Planning', subtitle: 'Plan and schedule district manager activities.', icon: '📅', viewId: 'nestedIframeView', fileName: 'DM-Plan.html', isNested: true, roles: ['admin', 'District Manager'] },
+                            { id: 'dm-report', title: 'DM Report', subtitle: 'View and generate reports for the district.', icon: '📄', viewId: 'nestedIframeView', fileName: 'DM-Report.html', isNested: true, roles: ['admin', 'District Manager'] },
+                        ]
                     },
-                    {
-                        text: "Delete",
-                        onClick: async () => {
-                            try {
-                                const { error } = await supabase
-                                    .from('expenses')
-                                    .delete()
-                                    .eq('id', reportId);
-
-                                if (error) throw error;
-                               
-                                // Remove row from the DOM
-                                if(rowElement) rowElement.remove();
-                                // Remove from cached data as well
-                                allReportsData = allReportsData.filter(report => report.id != reportId);
-                                showMessage("Success", "Report deleted successfully.");
-                            } catch (error) {
-                                console.error('Error deleting report:', error);
-                                showMessage("Error", "Failed to delete report. Please try again.");
-                            } finally {
-                                hideMessage();
-                            }
-                        },
-                        className: "btn bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                    }
+                    { id: 'master-list', title: 'Master List', subtitle: 'View and manage the master data list.', icon: '📋', viewId: 'masterListView', fileName: 'master list.html', roles: ['admin', 'District Manager'] },
+                    { id: 'upa-codes', title: 'UPA Codes', subtitle: 'Access UPA Codes and affairs.', icon: '🏥', viewId: 'upaCodesView', fileName: 'upa-codes.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
+                    { id: 'price-list', title: 'Price List', subtitle: 'products pricing information.', icon: '💲', viewId: 'priceListView', fileName: 'price-list.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
+                    { id: 'products-knowledge', title: 'Products Knowledge', subtitle: 'Detailed information about our products.', icon: '📚', viewId: 'productsKnowledgeView', fileName: 'Products knowledge.html', roles: ['admin', 'District Manager', 'Medical Representative'] },
+                    { id: 'admin', title: 'Admin Panel', subtitle: 'Manage users and system settings.', icon: '⚙️', viewId: 'adminView', fileName: 'admin users.html', roles: ['admin'] },
                 ]
-            );
-        }
+            }
+        };
 
-        // --- admin/Manager status update logic ---
-        async function updateStatus(newStatus) {
-            if (activeReportRow) {
-                const reportId = activeReportRow.dataset.id;
-               
-                const { error } = await supabase
-                    .from('expenses')
-                    .update({ status: newStatus })
-                    .eq('id', reportId);
-                   
-                if (error) {
-                    console.error('Error updating status:', error);
-                    showMessage("Error", "Failed to update report status.");
-                    return;
-                }
-               
-                const statusCell = activeReportRow.querySelector('.status-cell');
-                if (statusCell) {
-                    statusCell.innerHTML = getStatusBadge(newStatus);
-                }
-                closeModal();
-                showMessage("Success", `Report status updated to '${newStatus}'.`);
+        async function fetchGoogleSheetData() {
+            try {
+                // FIX: Add a cache-busting query parameter to ensure fresh data is fetched
+                const response = await fetch(`${GOOGLE_SHEET_URL}&_=${new Date().getTime()}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const csvText = await response.text();
+                googleSheetData = parseCSV(csvText);
+            } catch (error) {
+                console.error('Error fetching or parsing Google Sheet data:', error);
             }
         }
+       
+        function parseCSV(csvText) {
+            const rows = csvText.split('\n').filter(row => row.trim() !== '');
+            if (rows.length === 0) return [];
+            const headers = rows[0].split(',').map(header => header.trim());
+            const data = [];
 
-        // --- Print Modals and Logic (New) ---
-        function showPrintConfirmation(rowElement) {
-            activeReportRow = rowElement; // Store the row element for later use
-            if (printConfirmationModal) {
-                printConfirmationModal.classList.remove('hidden');
-                setTimeout(() => { printConfirmationModal.classList.remove('opacity-0'); }, 10);
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i].split(',');
+                const rowObject = {};
+                headers.forEach((header, index) => {
+                    rowObject[header] = row[index] ? row[index].trim() : '';
+                });
+                data.push(rowObject);
             }
+            return data;
         }
 
-        function hidePrintConfirmationModal() {
-            if (printConfirmationModal) {
-                printConfirmationModal.classList.add('opacity-0');
-                setTimeout(() => { printConfirmationModal.classList.add('hidden'); }, 300);
+        function updateAndShowUserCard() {
+            const userCard = document.getElementById('userCard');
+            if (loggedInUser) {
+                document.getElementById('userCardName').textContent = loggedInUser.username;
+                document.getElementById('userCardTitle').textContent = loggedInUser.title;
+                userCard.classList.remove('hidden');
+                fetchNotifications(); // Initial fetch
+            } else {
+                userCard.classList.add('hidden');
+                document.getElementById('notificationBell').classList.add('hidden');
             }
         }
+       
+        async function fetchNotifications() {
+            const notificationBell = document.getElementById('notificationBell');
+            const notificationCount = document.getElementById('notificationCount');
+            const notificationDropdown = document.getElementById('notificationDropdown');
 
-        function showMonthlyReportOptions(rowElement) {
-            // Pre-fill employee and month if possible from the clicked report
-            if (rowElement && monthlyReportMonthSelect && monthlyReportEmployeeSelect) {
-                const reportDate = new Date(rowElement.dataset.date);
-                const reportMonth = (reportDate.getMonth() + 1).toString().padStart(2, '0');
-                monthlyReportMonthSelect.value = reportMonth;
+            if (!loggedInUser) return;
 
-                const employeeName = rowElement.dataset.name;
-                monthlyReportEmployeeSelect.value = employeeName;
-            }
-
-            if (monthlyReportOptionsModal) {
-                monthlyReportOptionsModal.classList.remove('hidden');
-                setTimeout(() => { monthlyReportOptionsModal.classList.remove('opacity-0'); }, 10);
-            }
-        }
-
-        function hideMonthlyReportOptionsModal() {
-            if (monthlyReportOptionsModal) {
-                monthlyReportOptionsModal.classList.add('opacity-0');
-                setTimeout(() => { monthlyReportOptionsModal.classList.add('hidden'); }, 300);
-            }
-        }
-
-        async function generateMonthlyReport() {
-            const employeeName = monthlyReportEmployeeSelect.value;
-            const month = monthlyReportMonthSelect.value;
-
-            if (!employeeName || !month) {
-                showMessage("Missing Information", "Please select both an employee and a month to generate the monthly report.");
+            if (loggedInUser.title === 'Medical Representative') {
+                notificationBell.classList.add('hidden');
                 return;
             }
 
-            hideMonthlyReportOptionsModal();
-            showMessage("Generating Report", "Please wait while we prepare your monthly report...", null);
-
-            try {
-                const { data: reports, error } = await supabase
-                    .from('expenses')
-                    .select('*')
-                    .eq('employee_name', employeeName)
-                    .order('report_date', { ascending: true });
-
-                if (error) throw error;
-
-                const allRelevantReports = reports.filter(report => {
-                    const reportDate = new Date(report.report_date);
-                    return (reportDate.getMonth() + 1).toString().padStart(2, '0') === month;
-                }).sort((a, b) => new Date(a.report_date) - new Date(b.report_date));
-
-                if (allRelevantReports.length === 0) {
-                    showMessage("No Reports Found", `No reports found for ${employeeName} for ${months[parseInt(month) - 1]}.`);
+            let query = supabase.from('requests').select('*').eq('status', 'Requested');
+           
+            if (loggedInUser.title === 'District Manager') {
+                const dmReps = googleSheetData
+                    .filter(row => row['District Manager'] === loggedInUser.username)
+                    .map(row => row['medical rep']);
+               
+                if (dmReps.length > 0) {
+                    query = query.in('medRep', dmReps);
+                } else {
+                    notificationBell.classList.add('hidden');
                     return;
                 }
+            }
+           
+            // FIX: Order by date descending to get the newest notifications first
+            const { data, error } = await query.order('date', { ascending: false });
 
-                let totalMonthlyExpenses = 0;
-                let reportTableRows = '';
+            if (error) {
+                console.error('Error fetching notifications:', error);
+                return;
+            }
 
-                allRelevantReports.forEach(report => {
-                    const employeeRole = report.role;
-                    totalMonthlyExpenses += parseFloat(report.total_amount);
+            if (data.length > 0) {
+                const currentCount = parseInt(notificationCount.textContent, 10);
+                notificationCount.textContent = data.length;
+                notificationBell.classList.remove('hidden');
 
-                    let expenseItemsHtml = '';
-                    const items = JSON.parse(report.items);
-                    items.forEach(item => {
-                        expenseItemsHtml += `
-                            <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;">
-                                <span style="font-weight: 500;">${item.type}:</span>
-                                <span style="flex-grow: 1; margin: 0 0.5rem;">${item.desc || 'N/A'}</span>
-                                <span style="font-weight: 600;">${parseFloat(item.amount).toFixed(2)} EGP</span>
-                            </div>
-                        `;
+                if (data.length > currentCount) {
+                    notificationCount.classList.add('updated');
+                    setTimeout(() => {
+                        notificationCount.classList.remove('updated');
+                    }, 600);
+                }
+
+                notificationDropdown.innerHTML = '';
+                data.forEach(req => {
+                    const item = document.createElement('div');
+                    item.className = 'notification-item';
+                    item.dataset.requestId = req.id;
+                    const requestDate = new Date(req.date).toLocaleDateString('en-GB', {
+                        day: '2-digit', month: 'short', year: 'numeric'
                     });
 
-                    reportTableRows += `
-                        <tr style="background-color: #f9fafb;">
-                            <td colspan="6" style="padding: 0.75rem; border: 1px solid #e5e7eb; font-weight: bold;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span>${report.report_date} - ${report.employee_name} (${employeeRole}) - Total: ${parseFloat(report.total_amount).toFixed(2)} EGP</span>
-                                    <span style="font-weight: normal; font-size: 0.8em;">Status: ${report.status}</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="6" style="padding: 0.75rem; border: 1px solid #e5e7eb;">
-                                <div style="padding-left: 1rem; border-left: 2px solid #3b82f6;">
-                                    ${expenseItemsHtml}
-                                </div>
-                            </td>
-                        </tr>
+                    item.innerHTML = `
+                        <div class="notification-title">${req.requestTitle}</div>
+                        <div class="notification-rep">By: ${req.medRep}</div>
+                        <div class="notification-date">${requestDate}</div>
                     `;
+                    item.addEventListener('click', () => showRequestModal(req.id));
+                    // FIX: Use appendChild, as the data is already sorted correctly from the query.
+                    // This ensures the list renders in the correct chronological order (newest on top).
+                    notificationDropdown.appendChild(item);
                 });
 
-                const monthlyReportHtml = `
-                    <html>
-                        <head>
-                            <title>Monthly Expense Report - ${employeeName} - ${months[parseInt(month) - 1]}</title>
-                            <style>
-                                body { font-family: 'Inter', sans-serif; color: #111827; margin: 2rem; }
-                                table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
-                                th, td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; font-size: 14px; vertical-align: top; }
-                                th { background-color: #f1f5f9; font-weight: 600; color: #334155; }
-                                .header { text-align: center; margin-bottom: 2rem; }
-                                .header img { height: 4rem; margin-bottom: 1rem; border-radius: 50%; }
-                                .header h1 { font-size: 1.8rem; font-weight: 700; color: #1e3a8a; margin: 0; }
-                                .header p { font-size: 1rem; color: #6b7280; margin: 0.5rem 0 0 0; }
-                                .summary { margin-top: 2rem; text-align: right; font-size: 16px; font-weight: bold; }
-                                @media print { .no-print { display: none; } }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="header">
-                                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton Logo">
-                                <h1>Monthly Expense Report</h1>
-                                <p>Paxton LLC</p>
-                            </div>
-                            <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Employee: ${employeeName}</h2>
-                            <h3 style="font-size: 1.2rem; margin-bottom: 1.5rem;">Month: ${months[parseInt(month) - 1]}</h3>
-                           
-                            <table style="border: none;">
-                                <tbody>
-                                    ${reportTableRows}
-                                </tbody>
-                            </table>
-                           
-                            <div class="summary">
-                                <p>Grand Total for ${months[parseInt(month) - 1]}: EGP ${totalMonthlyExpenses.toFixed(2)}</p>
-                            </div>
-                            <div style="margin-top: 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; page-break-inside: avoid; font-size: 14px;">
-                                <div>
-                                    <div style="border-top: 1px solid #374151; padding-top: 0.5rem;">
-                                        <p style="margin: 0;"><strong>Direct Manager</strong></p>
-                                        <p style="margin: 0; font-size: 0.75rem;">Signature & Date</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div style="border-top: 1px solid #374151; padding-top: 0.5rem;">
-                                        <p style="margin: 0;"><strong>Commercial Director</strong></p>
-                                        <p style="margin: 0; font-size: 0.75rem;">Signature & Date</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="no-print" style="text-align: center; margin-top: 2rem;">
-                                <button onclick="window.print()" style="background-color: #3b82f6; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 1rem;">Print Report</button>
-                            </div>
-                        </body>
-                    </html>
-                `;
-
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(monthlyReportHtml);
-                printWindow.document.close();
-                printWindow.focus();
-                hideMessage();
-            } catch (error) {
-                console.error('Error generating monthly report:', error);
-                showMessage("Error", "Failed to generate monthly report. Please try again.");
-            }
-        }
-
-        function printReport(rowElement, printType) {
-            if (printType === 'single') {
-                const data = rowElement.dataset;
-                const items = JSON.parse(data.items);
-                const details = JSON.parse(data.details);
-                const statusCell = rowElement.querySelector('.status-cell');
-                const status = statusCell ? statusCell.textContent.trim() : 'N/A';
-
-                let detailsHtml = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; font-size: 14px;">
-                        <p><strong>Employee:</strong> ${data.name}</p>
-                        <p><strong>Role:</strong> ${data.role}</p>
-                        <p><strong>Date:</strong> ${data.date}</p>
-                        ${data.role === 'District Manager' ? `<p><strong>Report Type:</strong> ${details.reportType}</p>
-                                                     ${details.reportType === 'Trip' ? `<p><strong>Trip:</strong> ${details.from} to ${details.to}</p>
-                                                                                         <p style="grid-column: span 2;"><strong>Purpose:</strong> ${details.purpose}</p>` : ''}` : 
-                                                     `<p><strong>Territory:</strong> ${details.territory}</p>
-                                                     <p><strong>Direct Manager:</strong> ${details.manager}</p>`}
-                    </div>`;
-
-                let itemsHtml = `
-                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Expense Items</h3>
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <thead><tr style="text-align: left; background-color: #f9fafb;">
-                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb;">Type</th>
-                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb;">Description</th>
-                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">Amount (EGP)</th>
-                        </tr></thead><tbody>`;
-                items.forEach(item => {
-                    itemsHtml += `<tr>
-                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.type}</td>
-                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${item.desc || 'N/A'}</td>
-                                        <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(item.amount).toFixed(2)}</td>
-                                    </tr>`;
-                });
-                itemsHtml += `
-                                <tr style="font-weight: bold; background-color: #f9fafb;">
-                                    <td colspan="2" style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">Total:</td>
-                                    <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: right;">${parseFloat(data.total).toFixed(2)}</td>
-                                </tr></tbody></table>`;
-               
-                let signatureHtml = `
-                    <div style="margin-top: 4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; page-break-inside: avoid; font-size: 14px;">
-                        <div>
-                            <div style="border-top: 1px solid #374151; padding-top: 0.5rem;">
-                                <p style="margin: 0;"><strong>Direct Manager</strong></p>
-                                <p style="margin: 0; font-size: 0.75rem;">Signature & Date</p>
-                            </div>
-                        </div>
-                        <div>
-                            <div style="border-top: 1px solid #374151; padding-top: 0.5rem;">
-                                <p style="margin: 0;"><strong>Commercial Director</strong></p>
-                                <p style="margin: 0; font-size: 0.75rem;">Signature & Date</p>
-                            </div>
-                        </div>
-                    </div>`;
-
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>Expense Report - ${data.name}</title>
-                            <style>
-                                body { font-family: 'Inter', sans-serif; color: #111827; }
-                                table, th, td { border: 1px solid #e5e7eb; }
-                                @media print { .no-print { display: none; } }
-                            </style>
-                        </head>
-                        <body style="padding: 2rem;">
-                            <div style="text-align: center; margin-bottom: 2rem;">
-                                        <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton Logo" style="height: 4rem; margin: 0 auto; border-radius: 50%;">
-                                       <h1 style="font-size: 1.5rem; font-weight: 700; color: #1e3a8a; margin: 0.5rem 0 0 0;">Expense Report</h1>
-                                       <p style="font-size: 0.9rem; color: #6b7280;">Paxton LLC</p>
-                            </div>
-                            <p style="text-align: right; font-size: 14px;"><strong>Status:</strong> ${status}</p>
-                            ${detailsHtml}
-                            ${itemsHtml}
-                            ${signatureHtml}
-                            <div class="no-print" style="text-align: center; margin-top: 2rem;">
-                                <button onclick="window.print()">Print Report</button>
-                            </div>
-                        </body>
-                    </html>
-                `);
-                printWindow.document.close();
-                printWindow.focus();
-            }
-        }
-
-        function handleReportTypeChange(selectElement) {
-            const type = selectElement.value;
-            const isTrip = type === 'Trip';
-           
-            const tripDetailsFieldset = document.getElementById('tripDetails');
-            const otherDateInputDiv = document.getElementById('otherDate');
-           
-            if (tripDetailsFieldset) tripDetailsFieldset.classList.toggle('hidden', !isTrip);
-            const tripPurpose = document.getElementById('tripPurpose');
-            if (tripPurpose) tripPurpose.required = isTrip;
-            const travelDate = document.getElementById('travelDate');
-            if (travelDate) travelDate.required = isTrip;
-            const fromGovernorate = document.getElementById('fromGovernorate');
-            if (fromGovernorate) fromGovernorate.required = isTrip;
-            const toGovernorate = document.getElementById('toGovernorate');
-            if (toGovernorate) toGovernorate.required = isTrip;
-
-            if (otherDateInputDiv) otherDateInputDiv.classList.toggle('hidden', isTrip);
-            const otherDateInput = document.getElementById('otherDateInput');
-            if (otherDateInput) otherDateInput.required = !isTrip;
-            setDefaultDates();
-        }
-
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
-           
-            const items = [];
-            let total = 0;
-            const expenseContainer = data.employeeRole === 'District Manager' ? document.getElementById('managerExpensesContainer') : document.getElementById('repExpensesContainer');
-            const expenseRows = expenseContainer.querySelectorAll('.expense-row');
-
-            expenseRows.forEach((row, index) => {
-                const type = row.querySelector('select').value;
-                const desc = row.querySelector('input[name^="expenseDesc"]').value;
-                const amount = parseFloat(row.querySelector('input[name^="expenseAmount"]').value) || 0;
-               
-                if (type) {
-                    items.push({ type: type, desc: desc, amount: amount });
-                    total += amount;
-                }
-            });
-           
-            const selectedEmployeeName = employeeNameDropdown.value;
-            const employeeData = masterlistData.find(u => u['medical rep'] === selectedEmployeeName || u['District Manager'] === selectedEmployeeName);
-            const employeeRole = employeeData ? (employeeData['medical rep'] === selectedEmployeeName ? 'Medical Representative' : 'District Manager') : 'N/A';
-           
-            let directManager = 'N/A';
-            let reportTypeForDb = '';
-            let reportDetails;
-            let reportDate;
-
-            if (employeeRole === 'Medical Representative') {
-                directManager = employeeData['District Manager'];
-                // Set the report_type to the first expense item's type for medical reps
-                reportTypeForDb = items.length > 0 ? items[0].type : '';
-                reportDate = data.repDate;
-                reportDetails = { territory: employeeData.area, manager: directManager };
-            } else if (employeeRole === 'District Manager') {
-                reportTypeForDb = data.reportType;
-                reportDate = data.reportType === 'Trip' ? data.travelDate : data.otherDateInput;
-                if (data.reportType === 'Trip') {
-                    reportDetails = { reportType: 'Trip', purpose: data.tripPurpose, from: data.fromGovernorate, to: data.toGovernorate };
-                } else {
-                    reportDetails = { reportType: 'Others', date: data.otherDateInput };
-                }
-            }
-           
-            const reportData = {
-                employee_name: selectedEmployeeName,
-                role: employeeRole,
-                report_date: reportDate,
-                total_amount: total.toFixed(2),
-                status: 'Pending',
-                report_type: reportTypeForDb,
-                details: JSON.stringify(reportDetails),
-                items: JSON.stringify(items)
-            };
-
-            const { data: insertedData, error } = await supabase.from('expenses').insert([reportData]).select();
-            if (error) {
-                console.error('Error submitting report:', error);
-                showMessage("Error", "Failed to submit report. Please try again.");
-                return;
-            }
-
-            showMessage("Success", `Report submitted successfully for ${selectedEmployeeName}!`);
-            renderFormForEmployee();
-        }
-       
-        function addNewReportToTable(report, tableBody) {
-            if (!tableBody) return;
-            const newRow = document.createElement('tr');
-            newRow.className = 'hover:bg-gray-50';
-           
-            const details = JSON.parse(report.details);
-            const roleBadge = report.role === 'District Manager' ?
-                `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">District Manager</span>` :
-                `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Medical Representative</span>`;
-           
-            newRow.dataset.id = report.id;
-            newRow.dataset.name = report.employee_name;
-            newRow.dataset.role = report.role;
-            newRow.dataset.date = report.report_date;
-            newRow.dataset.total = report.total_amount;
-            newRow.dataset.details = report.details;
-            newRow.dataset.items = report.items;
-            newRow.dataset.reportType = report.report_type;
-
-            let managerCellContent = 'N/A';
-            if (report.role === 'Medical Representative') {
-                managerCellContent = details.manager;
-            }
-           
-            let reportTypeToDisplay = report.report_type;
-            if (!reportTypeToDisplay && report.items) {
-                const items = JSON.parse(report.items);
-                if (items.length > 0) {
-                    reportTypeToDisplay = items[0].type;
-                } else {
-                    reportTypeToDisplay = 'Daily Log';
-                }
-            } else if (!reportTypeToDisplay) {
-                reportTypeToDisplay = 'Daily Log';
-            }
-
-
-            if (tableBody.id === 'reportsTableBody') {
-                newRow.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${roleBadge}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${managerCellContent}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
-                        <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
-                        <button onclick="deleteReport(this.closest('tr'))" class="text-red-600 hover:text-red-900 mx-1"><i class="fas fa-trash-alt"></i></button>
-                    </td>`;
-            } else if (tableBody.id === 'myManagerReportsTableBody') {
-                newRow.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
-                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
-                        </td>`;
-            } else if (tableBody.id === 'myRepReportsTableBody') {
-                newRow.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
-                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
-                        </td>`;
-            } else if (tableBody.id === 'myTeamReportsTableBody') {
-                newRow.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap">${report.report_date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${report.employee_name}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${reportTypeToDisplay}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">${parseFloat(report.total_amount).toFixed(2)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-center status-cell">${getStatusBadge(report.status)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button onclick="showReportDetails(this.closest('tr'))" class="text-blue-600 hover:text-blue-900 mx-1"><i class="fas fa-eye"></i></button>
-                            <button onclick="showPrintConfirmation(this.closest('tr'))" class="text-green-600 hover:text-green-900 mx-1"><i class="fas fa-print"></i></button>
-                        </td>`;
-            }
-           
-            tableBody.prepend(newRow);
-        }
-       
-        async function retrieveMyReports(role, employeeName) {
-            const myReportsTableBody = document.getElementById(role === 'District Manager' ? 'myManagerReportsTableBody' : 'myRepReportsTableBody');
-           
-            if (!myReportsTableBody) {
-                    console.error("My reports table body not found.");
-                    return;
-            }
-            myReportsTableBody.innerHTML = '';
-
-            try {
-                const { data, error } = await supabase
-                    .from('expenses')
-                    .select('*')
-                    .eq('employee_name', employeeName)
-                    .order('report_date', { ascending: false });
-               
-                if (error) throw error;
-               
-                if (data.length === 0) {
-                    myReportsTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for this user.</td></tr>`;
-                    return;
-                }
-               
-                data.forEach(report => addNewReportToTable(report, myReportsTableBody));
-            } catch (error) {
-                console.error('Error retrieving reports:', error);
-                showMessage("Error", "Failed to retrieve your reports. Please try again.");
-            }
-        }
-
-        async function retrieveMyTeamReports(managerName) {
-            const myTeamReportsTableBody = document.getElementById('myTeamReportsTableBody');
-           
-            if (!myTeamReportsTableBody) {
-                    console.error("My team reports table body not found.");
-                    return;
-            }
-            myTeamReportsTableBody.innerHTML = '';
-           
-            const reps = [...new Set(masterlistData.filter(user => user['District Manager'] === managerName).map(user => user['medical rep']))];
-
-            if (reps.length === 0) {
-                    myTeamReportsTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No team members found.</td></tr>';
-                    return;
-            }
-
-            try {
-                const { data, error } = await supabase
-                    .from('expenses')
-                    .select('*')
-                    .in('employee_name', reps)
-                    .order('report_date', { ascending: false });
-
-                if (error) throw error;
-               
-                if (data.length === 0) {
-                    myTeamReportsTableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reports found for your team.</td></tr>';
-                    return;
-                }
-               
-                data.forEach(report => addNewReportToTable(report, myTeamReportsTableBody));
-            } catch (error) {
-                console.error('Error retrieving team reports:', error);
-                showMessage("Error", "Failed to retrieve your team's reports. Please try again.");
-            }
-        }
-       
-        async function retrieveAllReports() {
-            try {
-                const { data, error } = await supabase.from('expenses').select('*').order('report_date', { ascending: false });
-                if (error) throw error;
-               
-                allReportsData = data;
-                if (reportsTableBody) reportsTableBody.innerHTML = '';
-                filterReports();
-            } catch (error) {
-                console.error('Error retrieving all reports:', error);
-                showMessage("Error", "Failed to retrieve reports. Please try again.");
-            }
-        }
-
-        function filterReports() {
-            if (!reportsTableBody) {
-                console.error("Reports table body not found.");
-                return;
-            }
-            const employeeFilter = employeeFilterSelect.value;
-            const statusFilter = statusFilterSelect.value;
-            const monthFilter = monthFilterSelect.value;
-
-            reportsTableBody.innerHTML = '';
-           
-            const filteredData = allReportsData.filter(report => {
-                const reportDate = new Date(report.report_date);
-                const reportMonth = (reportDate.getMonth() + 1).toString().padStart(2, '0');
-
-                const isEmployeeMatch = employeeFilter === 'all' || report.employee_name === employeeFilter;
-                const isStatusMatch = statusFilter === 'all' || report.status === statusFilter;
-                const isMonthMatch = monthFilter === 'all' || reportMonth === monthFilter;
-               
-                return isEmployeeMatch && isStatusMatch && isMonthMatch;
-            });
-           
-            filteredData.forEach(report => addNewReportToTable(report, reportsTableBody));
-        }
-       
-        // --- Initialization Functions ---
-        async function fetchMasterlistFromSupabase() {
-            try {
-                const CHUNK_SIZE = 1000;
-                let offset = 0;
-                let allData = [];
-                let hasMore = true;
-
-                while (hasMore) {
-                    const { data, error } = await supabase
-                        .from('masterlist')
-                        .select('*')
-                        .range(offset, offset + CHUNK_SIZE - 1);
-
-                    if (error) {
-                        throw error;
-                    }
-
-                    if (data && data.length > 0) {
-                        allData = allData.concat(data);
-                        offset += CHUNK_SIZE;
-                    } else {
-                        hasMore = false;
-                    }
-                }
-               
-                masterlistData = allData;
-                populateEmployeeDropdowns();
-                populateFilters();
-                setDefaultDates();
-            } catch (error) {
-                console.error("Error fetching masterlist:", error);
-                showMessage("Error", "Could not load employee data. Please try again later.");
-            }
-        }
-
-        function populateEmployeeDropdowns() {
-            if (!employeeNameDropdown) return;
-            employeeNameDropdown.innerHTML = '<option value="">Select Employee</option>';
-
-            const managers = [...new Set(masterlistData.filter(u => u['District Manager']).map(u => u['District Manager']))].sort();
-            managers.forEach(manager => {
-                const managerOption = document.createElement('option');
-                managerOption.value = manager;
-                managerOption.textContent = manager;
-                managerOption.style.fontWeight = 'bold';
-                employeeNameDropdown.appendChild(managerOption);
-
-                const reps = [...new Set(masterlistData.filter(u => u['District Manager'] === manager && u['medical rep']).map(u => u['medical rep']))].sort();
-                reps.forEach(rep => {
-                    const repOption = document.createElement('option');
-                    repOption.value = rep;
-                    repOption.textContent = `  ↳ ${rep}`;
-                    employeeNameDropdown.appendChild(repOption);
-                });
-            });
-           
-            employeeNameDropdown.addEventListener('change', renderFormForEmployee);
-        }
-
-        function populateGovernorates() {
-            const fromGovernorateSelect = document.getElementById('fromGovernorate');
-            const toGovernorateSelect = document.getElementById('toGovernorate');
-            if (fromGovernorateSelect) fromGovernorateSelect.innerHTML = '<option value="">Select a Governorate</option>';
-            if (toGovernorateSelect) toGovernorateSelect.innerHTML = '<option value="">Select a Governorate</option>';
-            governorates.sort().forEach(gov => {
-                if (fromGovernorateSelect) fromGovernorateSelect.innerHTML += `<option value="${gov}">${gov}</option>`;
-                if (toGovernorateSelect) toGovernorateSelect.innerHTML += `<option value="${gov}">${gov}</option>`;
-            });
-        }
-       
-        function populateFilters() {
-            populateEmployeeFilter();
-            populateMonthFilter();
-            populateMonthlyReportEmployeeFilter();
-        }
-
-        function populateEmployeeFilter() {
-            if (!employeeFilterSelect) return;
-            employeeFilterSelect.innerHTML = '<option value="all">All Employees</option>';
-
-            const allEmployees = new Set();
-            masterlistData.forEach(user => {
-                if (user['medical rep']) allEmployees.add(user['medical rep']);
-                if (user['District Manager']) allEmployees.add(user['District Manager']);
-            });
-            
-            Array.from(allEmployees).sort().forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                employeeFilterSelect.appendChild(option);
-            });
-        }
-
-        function populateMonthlyReportEmployeeFilter() {
-            if (!monthlyReportEmployeeSelect) return;
-            monthlyReportEmployeeSelect.innerHTML = '<option value="">Select an Employee</option>';
-           
-            const employees = new Set();
-            masterlistData.forEach(user => {
-                    if (user['medical rep']) employees.add(user['medical rep']);
-                    if (user['District Manager']) employees.add(user['District Manager']);
-            });
-            const sortedEmployees = Array.from(employees).sort();
-
-            sortedEmployees.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                monthlyReportEmployeeSelect.appendChild(option);
-            });
-        }
-
-        function populateMonthFilter() {
-            if (monthFilterSelect) {
-                monthFilterSelect.innerHTML = '<option value="all">All Months</option>';
-                months.forEach((month, index) => {
-                    const monthValue = (index + 1).toString().padStart(2, '0'); // "01", "02", etc.
-                    monthFilterSelect.innerHTML += `<option value="${monthValue}">${month}</option>`;
-                });
-            }
-
-            if (monthlyReportMonthSelect) {
-                monthlyReportMonthSelect.innerHTML = '<option value="">Select a Month</option>'; // For monthly report modal
-                months.forEach((month, index) => {
-                    const monthValue = (index + 1).toString().padStart(2, '0'); // "01", "02", etc.
-                    monthlyReportMonthSelect.innerHTML += `<option value="${monthValue}">${month}</option>`;
-                });
-                const currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
-                monthlyReportMonthSelect.value = currentMonth;
-            }
-        }
-
-        function setDefaultDates() {
-            const today = new Date().toISOString().split('T')[0];
-            const travelDate = document.getElementById('travelDate');
-            if(travelDate) travelDate.value = today;
-            const otherDateInput = document.getElementById('otherDateInput');
-            if(otherDateInput) otherDateInput.value = today;
-            const repDate = document.getElementById('repDate');
-            if(repDate) repDate.value = today;
-        }
-
-        function renderFormForEmployee() {
-            const selectedEmployeeName = employeeNameDropdown.value;
-            const formContainer = dynamicFormContainer;
-            if (!selectedEmployeeName) {
-                formContainer.innerHTML = '';
-                return;
-            }
-
-            const employeeData = masterlistData.find(u => u['medical rep'] === selectedEmployeeName || u['District Manager'] === selectedEmployeeName);
-            
-            if (!employeeData) {
-                formContainer.innerHTML = '<p class="text-red-500">Employee data not found.</p>';
-                return;
-            }
-
-            const employeeRole = employeeData['medical rep'] === selectedEmployeeName ? 'Medical Representative' : 'District Manager';
-           
-            if (employeeRole === 'District Manager') {
-                formContainer.innerHTML = createManagerForm();
-                document.getElementById('managerExpenseForm').addEventListener('submit', handleFormSubmit);
-                populateGovernorates();
-                setDefaultDates();
-                addExpense('District Manager');
-            } else { // Medical Representative
-                formContainer.innerHTML = createMedicalRepForm();
-                document.getElementById('medicalRepExpenseForm').addEventListener('submit', handleFormSubmit);
-                document.getElementById('repTerritory').value = employeeData.area || '';
-                document.getElementById('directManager').value = employeeData['District Manager'] || '';
-                setDefaultDates();
-                addExpense('Medical Representative');
-            }
-        }
-        
-        function prefillAndLockForm(user) {
-            if (!user) return;
-            
-            if (user.title !== 'admin') {
-                employeeNameDropdown.value = user.username;
-                employeeNameDropdown.disabled = true;
             } else {
-                employeeNameDropdown.disabled = false;
-            }
-
-            // Render the form based on the pre-filled value
-            renderFormForEmployee();
-
-            if (user.title === 'Medical Representative') {
-                const repData = masterlistData.find(u => u['medical rep'] === user.username);
-                if (repData) {
-                    const directManager = document.getElementById('directManager');
-                    const repTerritory = document.getElementById('repTerritory');
-                    if (directManager) directManager.value = repData['District Manager'] || '';
-                    if (repTerritory) repTerritory.value = repData.area || '';
-                }
+                notificationBell.classList.add('hidden');
             }
         }
 
-        // --- Event Listeners and Initialization ---
-        function showRoleSelection() {
-            if (mainContent) mainContent.classList.add('hidden');
-            if (roleSelection) roleSelection.classList.remove('hidden');
-        }
-
-        window.addEventListener('message', event => {
-            if (event.data.type === 'loggedInUser') {
-                loggedInUser = event.data.user;
-                if (!loggedInUser) return;
-                
-                const addCard = document.getElementById('add-expense-card');
-                const adminCard = document.getElementById('admin-panel-card');
-
-                if (loggedInUser.title === 'admin') {
-                    if (addCard) addCard.classList.remove('hidden');
-                    if (adminCard) adminCard.classList.remove('hidden');
-                } else if (loggedInUser.title === 'Medical Representative' || loggedInUser.title === 'District Manager') {
-                    if (addCard) addCard.classList.remove('hidden');
-                    if (adminCard) adminCard.classList.add('hidden');
-                } else {
-                    // Fallback for unexpected roles
-                    if (addCard) addCard.classList.add('hidden');
-                    if (adminCard) adminCard.classList.add('hidden');
-                    console.error("Unknown user role:", loggedInUser.title);
-                }
-                
-                // Show the role selection screen for all users on initial load
-                showRoleSelection();
+        function subscribeToNotifications() {
+            // FIX: This function sets up the real-time listener. When any change
+            // (insert, update, delete) happens in the 'requests' table, Supabase
+            // sends a message. The code then waits 500ms and re-fetches all
+            // notifications to ensure the UI is perfectly in sync. This is how
+            // new notifications appear without needing a page refresh.
+            if (notificationChannel) {
+                supabase.removeChannel(notificationChannel);
+                notificationChannel = null;
             }
-        });
-        
-        if(employeeFilterSelect) employeeFilterSelect.addEventListener('change', filterReports);
-        if (statusFilterSelect) statusFilterSelect.addEventListener('change', filterReports);
-        if (monthFilterSelect) monthFilterSelect.addEventListener('change', filterReports);
+
+            notificationChannel = supabase.channel('public:requests')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
+                    console.log('Real-time change received!', payload);
+                    setTimeout(fetchNotifications, 500); // Re-fetch data on any change
+                })
+                .subscribe((status, err) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Successfully subscribed to real-time notifications!');
+                    }
+                    if (status === 'CHANNEL_ERROR') {
+                        console.error('Subscription error:', err);
+                    }
+                });
+        }
        
-        document.addEventListener('DOMContentLoaded', async () => {
-            await fetchMasterlistFromSupabase();
+        async function showRequestModal(requestId) {
+            const { data, error } = await supabase.from('requests').select('*').eq('id', requestId).single();
 
-            const addExpenseCard = document.getElementById('add-expense-card');
-            if(addExpenseCard) addExpenseCard.addEventListener('click', () => showView('addExpense'));
-            const adminPanelCard = document.getElementById('admin-panel-card');
-            if(adminPanelCard) adminPanelCard.addEventListener('click', () => showView('admin'));
+            if (error) {
+                console.error('Error fetching request details:', error);
+                showBlurredMessage('Could not load request details.', 1500);
+                return;
+            }
+
+            const modal = document.getElementById('requestModal');
+            const modalTitle = document.getElementById('modalRequestTitle');
+            const modalDetails = document.getElementById('modalRequestDetails');
+            const modalStatusSelect = document.getElementById('modalStatusSelect');
+
+            modalTitle.textContent = data.requestTitle;
+
+            let detailsHtml = `
+                <div class="detail-pair"><strong>Medical Rep:</strong> <span>${data.medRep || 'N/A'}</span></div>
+                <div class="detail-pair"><strong>Area:</strong> <span>${data.area || 'N/A'}</span></div>
+                <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.date).toLocaleDateString()}</span></div>
+            `;
+
+            if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
+                 detailsHtml += `
+                     <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
+                     <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
+                 `;
+            }
+
+            detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
+            modalDetails.innerHTML = detailsHtml;
+
+            let statusOptions = '';
+            if (data.customerType && data.customerType.toLowerCase() === 'personal') {
+                statusOptions = `
+                    <option value="Requested">Requested</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                `;
+            } else {
+                statusOptions = `
+                    <option value="Requested">Requested</option>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Postponed">Postponed</option>
+                    <option value="Done">Done</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Approved">Approved</option>
+                `;
+            }
+            modalStatusSelect.innerHTML = statusOptions;
+            modalStatusSelect.value = data.status;
+
+            modalStatusSelect.onchange = null;
+            modalStatusSelect.onchange = () => updateRequestStatus(requestId, modalStatusSelect.value);
+
+            modal.classList.add('show');
+        }
+
+        async function updateRequestStatus(requestId, newStatus) {
+            const { error } = await supabase.from('requests').update({ status: newStatus }).eq('id', requestId);
+
+            if (error) {
+                console.error('Error updating status:', error);
+                showBlurredMessage('Failed to update status.', 1500);
+            } else {
+                showBlurredMessage('Status updated successfully!', 1500);
+                closeRequestModal();
+                // No need to call fetchNotifications() here, the real-time subscription will trigger it automatically.
+            }
+        }
+
+        function closeRequestModal() {
+            document.getElementById('requestModal').classList.remove('show');
+        }
+
+
+        function showBlurredMessage(message, duration, callback = null) {
+            const overlay = document.getElementById('fullPageMessageOverlay');
+            document.getElementById('fullPageOverlayMessage').textContent = message;
+            overlay.classList.add('show');
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                if (callback) setTimeout(callback, 300);
+            }, duration);
+        }
+
+        function showLoginPage() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('appContent').classList.add('hidden');
+            document.querySelector('.footer').classList.remove('show');
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+           
+            if (notificationChannel) {
+                supabase.removeChannel(notificationChannel);
+                notificationChannel = null;
+                console.log('Unsubscribed from notifications.');
+            }
+
+            loggedInUser = null;
+            currentActiveViewId = null;
+            updateAndShowUserCard();
+            closeSideMenu();
+            lastPageHistory = [];
+        }
+
+        function showAppContent() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('appContent').classList.remove('hidden');
+            applyUserPermissions();
+            updateAndShowUserCard();
+            populateSideMenu();
+            subscribeToNotifications();
+        }
+
+        function applyUserPermissions() {
+            renderMainGrid();
+            populateSideMenu();
+        }
+
+        function renderMainGrid() {
+            const homeGrid = document.querySelector('#homeView .home-grid');
+            const pages = navConfig.home.pages;
+            homeGrid.innerHTML = '';
+            const userRole = loggedInUser ? loggedInUser.title : null;
+            pages.forEach(page => {
+                if (page.roles.includes(userRole)) {
+                    const card = document.createElement('div');
+                    card.className = `main-card ${page.isPlaceholder ? 'disabled' : ''}`;
+                    card.dataset.page = page.id;
+                    card.innerHTML = `
+                        <div class="main-card-icon">${page.icon}</div>
+                        <div class="main-card-text-content">
+                            <div class="main-card-title">${page.title}</div>
+                            <div class="main-card-subtitle">${page.subtitle}</div>
+                        </div>`;
+                    homeGrid.appendChild(card);
+                }
+            });
+            document.querySelectorAll('.main-card:not(.disabled)').forEach(card => {
+                card.addEventListener('click', () => loadPage(card.dataset.page));
+            });
+        }
+       
+        async function handleLogin() {
+            const usernameInput = document.getElementById('username').value.trim();
+            const passwordInput = document.getElementById('password').value.trim();
+            const loginError = document.getElementById('loginError');
+            loginError.style.display = 'none';
+            if (!usernameInput || !passwordInput) {
+                loginError.textContent = 'Please enter both username and password.';
+                loginError.style.display = 'block';
+                return;
+            }
+            try {
+                const { data, error } = await supabase.from('users').select('username, title, password').eq('username', usernameInput).limit(1);
+                const supabaseUser = (data && data.length > 0) ? data[0] : null;
+                if (error || !supabaseUser || supabaseUser.password.trim() !== passwordInput) {
+                    loginError.textContent = 'Invalid username or password.';
+                    loginError.style.display = 'block';
+                    return;
+                }
+                loggedInUser = { username: supabaseUser.username, title: supabaseUser.title };
+                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                sessionStorage.setItem('dashboardUsername', usernameInput);
+                sessionStorage.setItem('dashboardPassword', passwordInput);
+                showBlurredMessage(`Welcome ${loggedInUser.username}!`, 1500, showAppContent);
+            } catch (err) {
+                loginError.textContent = 'An unexpected error occurred. Please try again.';
+                loginError.style.display = 'block';
+            }
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            showBlurredMessage('See you soon!', 1500, showLoginPage);
+        }
+
+        function showHome() {
+            // FIX: This function now manages the transition smoothly.
+            const homeView = document.getElementById('homeView');
+            const prevActiveView = document.getElementById(currentActiveViewId);
+
+            document.querySelector('.footer').classList.add('show');
+            document.getElementById('backButton').classList.add('hidden');
+            document.getElementById('refreshButton').classList.remove('hidden');
+            document.getElementById('logoutButton').classList.remove('hidden');
+
+            if (prevActiveView && prevActiveView !== homeView) {
+                prevActiveView.classList.remove('active');
+                // Use a short delay to allow the CSS transition to play before hiding
+                setTimeout(() => {
+                    prevActiveView.classList.add('hidden');
+                    const iframe = prevActiveView.querySelector('iframe');
+                    if (iframe) iframe.src = 'about:blank';
+                    homeView.classList.remove('hidden');
+                    // Use a very short delay to re-apply the "active" class and start the entrance animation
+                    setTimeout(() => {
+                        homeView.classList.add('active');
+                        // Ensure the transition is reset before re-applying the class
+                        homeView.classList.remove('active');
+                        homeView.classList.add('active');
+                    }, 10);
+                }, 200); // This delay should match or be slightly less than the CSS transition
+            } else {
+                homeView.classList.remove('hidden');
+                homeView.classList.add('active');
+            }
+
+            currentActiveViewId = 'homeView';
+            localStorage.setItem('currentPage', 'home');
+            lastPageHistory = [];
+            closeSideMenu();
+        }
+
+        function loadPage(page) {
+            if (!page || page === 'null') { showHome(); return; }
+            const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
+            const config = allPages.find(p => p.id === page);
+            if (!config || (config.roles && !config.roles.includes(loggedInUser.title))) {
+                showBlurredMessage('You do not have permission to view this page.', 2000);
+                return;
+            }
+            const { viewId, fileName, isNested } = config;
+
+            const targetView = document.getElementById(viewId);
+            const prevActiveView = document.getElementById(currentActiveViewId);
+
+            if (currentActiveViewId !== viewId) {
+                 if (currentActiveViewId && currentActiveViewId !== 'homeView') {
+                     lastPageHistory.push(currentActiveViewId);
+                 }
+            }
+           
+            // Immediately hide the home view
+            document.getElementById('homeView').classList.add('hidden');
+            document.querySelector('.footer').classList.remove('show');
+            document.getElementById('backButton').classList.remove('hidden');
+            document.getElementById('refreshButton').classList.remove('hidden');
+            document.getElementById('logoutButton').classList.add('hidden');
+
+            // Hide the previously active view with a transition
+            if (prevActiveView && prevActiveView !== targetView) {
+                prevActiveView.classList.remove('active');
+                setTimeout(() => {
+                    prevActiveView.classList.add('hidden');
+                    const prevIframe = prevActiveView.querySelector('iframe');
+                    if (prevIframe) prevIframe.src = 'about:blank';
+                }, 200);
+            }
+
+            // Show the target view after a slight delay for a smooth transition effect
+            setTimeout(() => {
+                targetView.classList.remove('hidden');
+                setTimeout(() => targetView.classList.add('active'), 10);
+            }, 50);
+
+            currentActiveViewId = viewId;
+            localStorage.setItem('currentPage', page);
+
+            if (page === 'dm-crm') {
+                renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
+                targetView.querySelector('.loading').classList.remove('show');
+            } else {
+                const loadingOverlay = targetView.querySelector('.loading');
+                const errorState = targetView.querySelector('.error-state');
+                const iframe = targetView.querySelector('iframe');
+               
+                loadingOverlay.classList.add('show');
+                errorState.classList.remove('show');
+               
+                // FIX: Add a timestamp to the URL to bypass browser cache on every load.
+                iframe.src = `${fileName}?t=${new Date().getTime()}`;
+               
+                const sendDataToIframe = () => {
+                    if (loggedInUser && iframe.contentWindow) {
+                        const message = { user: loggedInUser };
+                        if (page === 'dashboard') {
+                            message.type = 'dashboardLogin';
+                            message.username = sessionStorage.getItem('dashboardUsername');
+                            message.password = sessionStorage.getItem('dashboardPassword');
+                        } else if (page === 'dm-planning') {
+                            message.type = 'dmPlanningUserPermissions';
+                        } else if (page === 'dm-report') {
+                            message.type = 'dmReportUserPermissions';
+                        } else { 
+                            message.type = 'loggedInUser';
+                        }
+                        iframe.contentWindow.postMessage(message, '*');
+                    }
+                };
+               
+                iframe.onload = () => {
+                    loadingOverlay.classList.remove('show');
+                    sendDataToIframe();
+                };
+                iframe.onerror = () => {
+                    loadingOverlay.classList.remove('show');
+                    errorState.classList.add('show');
+                };
+            }
+            closeSideMenu();
+        }
+
+        function renderSubCards(container, pages) {
+            container.innerHTML = '';
+            const userRole = loggedInUser ? loggedInUser.title : null;
+            pages.forEach(page => {
+                if (page.roles.includes(userRole)) {
+                    const card = document.createElement('div');
+                    card.className = `main-card ${page.isPlaceholder ? 'disabled' : ''}`;
+                    card.dataset.page = page.id;
+                    card.innerHTML = `
+                        <div class="main-card-icon">${page.icon}</div>
+                        <div class="main-card-text-content">
+                            <div class="main-card-title">${page.title}</div>
+                            <div class="main-card-subtitle">${page.subtitle}</div>
+                        </div>`;
+                    container.appendChild(card);
+                }
+            });
+            container.querySelectorAll('.main-card:not(.disabled)').forEach(card => {
+                card.addEventListener('click', () => loadPage(card.dataset.page));
+            });
+        }
+
+        function openSideMenu() {
+            document.getElementById('sideMenuOverlay').classList.add('show');
+            document.getElementById('sideMenu').classList.add('show');
+        }
+
+        function closeSideMenu() {
+            document.getElementById('sideMenuOverlay').classList.remove('show');
+            document.getElementById('sideMenu').classList.remove('show');
+        }
+
+        function populateSideMenu() {
+            const sideMenuNav = document.querySelector('.side-menu-nav');
+            sideMenuNav.innerHTML = '';
+            const userRole = loggedInUser ? loggedInUser.title : null;
+            navConfig.home.pages.forEach(page => {
+                if (page.roles.includes(userRole) && !page.isPlaceholder) {
+                    if (page.isGroup) {
+                        const groupContainer = document.createElement('div');
+                        groupContainer.className = 'side-menu-group';
+                        const groupToggle = document.createElement('div');
+                        groupToggle.className = 'side-menu-group-toggle';
+                        groupToggle.innerHTML = `<div style="display: flex; align-items: center; gap: 10px;"><div class="side-menu-card-icon">${page.icon}</div><div class="side-menu-card-title">${page.title}</div></div><i class="fas fa-chevron-right arrow"></i>`;
+                        groupContainer.appendChild(groupToggle);
+                        const subItemsContainer = document.createElement('div');
+                        subItemsContainer.className = 'side-menu-sub-items';
+                        page.subPages.forEach(subPage => {
+                            if (subPage.roles.includes(userRole)) {
+                                const subItem = document.createElement('div');
+                                subItem.className = 'side-menu-sub-item';
+                                subItem.dataset.page = subPage.id;
+                                subItem.innerHTML = `<div class="side-menu-card-icon">${subPage.icon}</div><div class="side-menu-card-title">${subPage.title}</div>`;
+                                subItemsContainer.appendChild(subItem);
+                            }
+                        });
+                        groupContainer.appendChild(subItemsContainer);
+                        sideMenuNav.appendChild(groupContainer);
+                        groupToggle.addEventListener('click', () => {
+                            groupToggle.classList.toggle('open');
+                            subItemsContainer.classList.toggle('show');
+                        });
+                        subItemsContainer.querySelectorAll('.side-menu-sub-item').forEach(subItem => {
+                            subItem.addEventListener('click', () => loadPage(subItem.dataset.page));
+                        });
+                    } else {
+                        const sideMenuCard = document.createElement('div');
+                        sideMenuCard.className = `side-menu-card ${page.isPlaceholder ? 'disabled' : ''}`;
+                        sideMenuCard.dataset.page = page.id;
+                        sideMenuCard.innerHTML = `<div class="side-menu-card-icon">${page.icon}</div><div class="side-menu-card-title">${page.title}</div>`;
+                        sideMenuNav.appendChild(sideMenuCard);
+                        if (!page.isPlaceholder) {
+                            sideMenuCard.addEventListener('click', () => loadPage(sideMenuCard.dataset.page));
+                        }
+                    }
+                }
+            });
+        }
+       
+        document.addEventListener('DOMContentLoaded', async function() {
+            const introOverlay = document.getElementById('introOverlay');
+            setTimeout(() => {
+                introOverlay.classList.add('fade-out');
+                setTimeout(() => introOverlay.remove(), 500);
+            }, 3000);
+
+            await fetchGoogleSheetData();
+            const storedUser = localStorage.getItem('loggedInUser');
+            const lastPage = localStorage.getItem('currentPage');
+
+            setTimeout(() => {
+                if (storedUser) {
+                    loggedInUser = JSON.parse(storedUser);
+                    showAppContent();
+                    if (lastPage && lastPage !== 'home' && lastPage !== 'null') {
+                        const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
+                        const targetPage = allPages.find(p => p.id === lastPage);
+                        if (targetPage && (targetPage.roles.includes(loggedInUser.title) || loggedInUser.title === 'admin')) {
+                            if (targetPage.isNested) {
+                                loadPage('dm-crm');
+                                setTimeout(() => loadPage(lastPage), 500);
+                            } else {
+                                loadPage(lastPage);
+                            }
+                        } else {
+                            showHome();
+                        }
+                    } else {
+                        showHome();
+                    }
+                } else {
+                    showLoginPage();
+                }
+            }, 3500);
+
+            document.getElementById('loginButton').addEventListener('click', handleLogin);
+            document.getElementById('logoutButton').addEventListener('click', handleLogout);
+            document.getElementById('sideMenuLogoutButton').addEventListener('click', handleLogout);
+            document.getElementById('backButton').addEventListener('click', () => {
+                if (currentActiveViewId === 'dmCrmView') {
+                    showHome();
+                } else if (currentActiveViewId === 'nestedIframeView') {
+                    loadPage('dm-crm');
+                } else if (lastPageHistory.length > 0) {
+                    const lastPage = lastPageHistory.pop();
+                    loadPage(lastPage);
+                } else {
+                    showHome();
+                }
+            });
+            document.getElementById('mobileMenuButton').addEventListener('click', openSideMenu);
+            document.getElementById('closeMenuButton').addEventListener('click', closeSideMenu);
+            document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
+           
+            document.getElementById('refreshButton').addEventListener('click', async () => {
+                // FIX: Refresh logic now re-fetches all necessary data and forces a cache-less reload.
+                showBlurredMessage('Refreshing...', 1000);
+                await fetchGoogleSheetData(); // Re-fetch sheet data for user mapping
+                fetchNotifications(); // Re-fetch notifications
+
+                if (!currentActiveViewId) return;
+
+                const activeView = document.getElementById(currentActiveViewId);
+                if (!activeView) return;
+
+                if (currentActiveViewId === 'homeView') {
+                    renderMainGrid();
+                } 
+                else if (currentActiveViewId === 'dmCrmView') {
+                    const config = navConfig.home.pages.find(p => p.id === 'dm-crm');
+                    if (config) {
+                        renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
+                    }
+                }
+                else {
+                    const iframe = activeView.querySelector('iframe');
+                    if (iframe && iframe.contentWindow) {
+                        const loadingOverlay = activeView.querySelector('.loading');
+                        if (loadingOverlay) loadingOverlay.classList.add('show');
+                        // Force a reload by changing the src to a new unique URL
+                        const currentSrc = iframe.src.split('?')[0];
+                        iframe.src = `${currentSrc}?t=${new Date().getTime()}`;
+                    }
+                }
+            });
+
+            const notificationBell = document.getElementById('notificationBell');
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            notificationBell.addEventListener('click', (event) => {
+                event.stopPropagation();
+                notificationDropdown.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!notificationBell.contains(event.target)) {
+                    notificationDropdown.classList.add('hidden');
+                }
+            });
+           
+            document.getElementById('modalCloseButton').addEventListener('click', closeRequestModal);
+            document.getElementById('requestModal').addEventListener('click', (event) => {
+                if (event.target.id === 'requestModal') {
+                    closeRequestModal();
+                }
+            });
         });
     </script>
 </body>
