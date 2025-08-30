@@ -1325,14 +1325,14 @@
             const newRow = document.createElement('tr');
             newRow.className = 'hover:bg-gray-50';
            
-            const details = JSON.parse(report.details);
-            const roleBadge = report.role === 'District Manager' ?
+            const employeeRole = getEmployeeRole(report.employee_name);
+            const roleBadge = employeeRole === 'District Manager' ?
                 `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">District Manager</span>` :
                 `<span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">Medical Representative</span>`;
            
             newRow.dataset.id = report.id;
             newRow.dataset.name = report.employee_name;
-            newRow.dataset.role = report.role;
+            newRow.dataset.role = employeeRole;
             newRow.dataset.date = report.report_date;
             newRow.dataset.total = report.total_amount;
             newRow.dataset.details = report.details;
@@ -1340,8 +1340,9 @@
             newRow.dataset.reportType = report.report_type;
 
             let managerCellContent = 'N/A';
-            if (report.role === 'Medical Representative') {
-                managerCellContent = details.manager;
+            const employeeData = masterlistData.find(u => u['medical rep'] === report.employee_name || u['District Manager'] === report.employee_name);
+            if (employeeData && employeeData['District Manager']) {
+                managerCellContent = employeeData['District Manager'];
             }
            
             let reportTypeToDisplay = report.report_type;
@@ -1549,6 +1550,18 @@
             }
         }
 
+        function getEmployeeRole(employeeName) {
+            const employeeData = masterlistData.find(u => u['medical rep'] === employeeName || u['District Manager'] === employeeName);
+            if (employeeData) {
+                if (employeeData['District Manager'] === employeeName) {
+                    return 'District Manager';
+                } else if (employeeData['medical rep'] === employeeName) {
+                    return 'Medical Representative';
+                }
+            }
+            return 'N/A';
+        }
+
         function populateEmployeeDropdowns() {
             if (!employeeNameDropdown) return;
             employeeNameDropdown.innerHTML = '<option value="">Select Employee</option>';
@@ -1672,7 +1685,7 @@
                 return;
             }
 
-            const employeeRole = employeeData['medical rep'] === selectedEmployeeName ? 'Medical Representative' : 'District Manager';
+            const employeeRole = getEmployeeRole(selectedEmployeeName);
            
             if (employeeRole === 'District Manager') {
                 formContainer.innerHTML = createManagerForm();
@@ -1737,7 +1750,7 @@
                 } else {
                     // Fallback for unexpected roles
                     if (addCard) addCard.classList.add('hidden');
-                    if (adminCard) adminCard.classList.add('hidden');
+                    if (adminCard) addCard.classList.add('hidden');
                     console.error("Unknown user role:", loggedInUser.title);
                 }
                 
