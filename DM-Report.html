@@ -739,7 +739,7 @@
                     <div class="form-logo"><i class="fas fa-chalkboard-teacher"></i></div>
                     <h1 class="form-title">Coaching Report</h1>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="coaching-med-rep-name" class="block text-xs font-medium text-gray-700">Medical Representative</label>
                         <select id="coaching-med-rep-name" name="coaching-med-rep-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
@@ -754,10 +754,17 @@
                             <option value="Completed">Completed</option>
                         </select>
                     </div>
+                     <!-- NEW: Month Dropdown for Coaching Report -->
+                    <div>
+                        <label for="coaching-month-filter" class="block text-xs font-medium text-gray-700">Month</label>
+                        <select id="coaching-month-filter" name="coaching-month-filter" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" disabled>
+                            <option value="" disabled selected>Select DM first</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="coaching-report-table-container" class="mt-8 hidden form-section">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Double Visits This Month</h2>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Double Visits</h2>
                     <div class="overflow-x-auto bg-gray-50 p-2 rounded-md shadow-inner">
                         <table id="coaching-reports-table" class="min-w-full divide-y divide-gray-200">
                             <thead id="coaching-reports-table-head" class="bg-gray-100">
@@ -776,14 +783,20 @@
                 <div id="monthly-details-print-area" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
                     <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
                         <h2 id="monthly-report-title" class="text-xl md:text-2xl font-bold text-gray-800"></h2>
-                        <div class="flex space-x-2 print-hidden">
-                             <button id="details-btn" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
-                                 <i class="fas fa-info-circle mr-1"></i> Details
-                             </button>
-                            <button id="download-xlsx-btn" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
+                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 print-hidden w-full sm:w-auto">
+                            <!-- NEW: Month Dropdown for Monthly Details -->
+                            <div>
+                                <select id="monthly-details-month-filter" class="w-full sm:w-auto p-1 border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" disabled>
+                                    <option value="" disabled selected>Select DM first</option>
+                                </select>
+                            </div>
+                            <button id="details-btn" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center justify-center">
+                                <i class="fas fa-info-circle mr-1"></i> Details
+                            </button>
+                            <button id="download-xlsx-btn" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center justify-center">
                                 <i class="fas fa-file-excel mr-1"></i> XLSX
                             </button>
-                            <button id="print-monthly-btn" class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
+                            <button id="print-monthly-btn" class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center justify-center">
                                 <i class="fas fa-print mr-1"></i> Print
                             </button>
                         </div>
@@ -850,7 +863,6 @@
 							<div id="chart-legend-container-mobile" class="w-full mt-4">
 							</div>
 						</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1108,7 +1120,7 @@
             const REPORTS_TABLE = 'dm_report';
             const COACHING_REPORTS_TABLE = 'coaching_reports';
             const MASTERLIST_TABLE = 'masterlist'; // New table name
-
+            let initialLoad = true;
             let submittedReports = [];
             
             // Get form and modal elements
@@ -1248,6 +1260,10 @@
             const downloadXLSXBtn = document.getElementById('download-xlsx-btn');
             const detailsBtn = document.getElementById('details-btn');
             
+            // NEW: Month filter dropdowns
+            const coachingMonthFilter = document.getElementById('coaching-month-filter');
+            const monthlyDetailsMonthFilter = document.getElementById('monthly-details-month-filter');
+
             // --- NEW: Toggle Sidebar functionality for PC ---
             toggleSidebarBtn.addEventListener('click', () => {
                 sideNav.classList.toggle('collapsed');
@@ -1312,10 +1328,10 @@
                     eventBrickDiv.classList.remove('hidden');
                     // Populate bricks if DM is selected
                     if (selectedDm) {
-                         const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
-                         const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
-                         const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                         eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                        const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
+                        const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
+                        const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                        eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
                     }
                 }
             }
@@ -1382,8 +1398,9 @@
             // NEW: Details Modal Functions
             const showDetailsModal = () => {
                 const dmName = dmNameSelect.value;
-                if (!dmName || allMonthlyReports.length === 0) {
-                    showNotification('No data available to display.', 'error');
+                const selectedMonth = monthlyDetailsMonthFilter.value;
+                if (!dmName || allMonthlyReports.length === 0 || !selectedMonth) {
+                    showNotification('No data available to display for the selected month.', 'error');
                     return;
                 }
                 
@@ -1518,6 +1535,59 @@
                     dmNameSelect.innerHTML = `<option value="" disabled selected>Failed to load data</option>`;
                 }
             };
+             
+            // NEW: Fetch all reports for a DM to determine available months
+            const fetchAllDmReports = async (dmName) => {
+                const { data, error } = await supabase
+                    .from(REPORTS_TABLE)
+                    .select('created_at')
+                    .eq('dm_name', dmName)
+                    .order('created_at', { ascending: true });
+
+                if (error) {
+                    console.error('Error fetching all DM reports:', error);
+                    return null;
+                }
+                return data;
+            };
+
+            // NEW: Populate month dropdowns
+            const populateMonthDropdowns = async (dmName) => {
+                const reports = await fetchAllDmReports(dmName);
+                if (!reports || reports.length === 0) {
+                    coachingMonthFilter.innerHTML = `<option value="" disabled selected>No reports available</option>`;
+                    monthlyDetailsMonthFilter.innerHTML = `<option value="" disabled selected>No reports available</option>`;
+                    coachingMonthFilter.disabled = true;
+                    monthlyDetailsMonthFilter.disabled = true;
+                    return;
+                }
+                
+                const earliestDate = new Date(reports[0].created_at);
+                const today = new Date();
+                const months = [];
+                let currentDate = new Date(Date.UTC(earliestDate.getUTCFullYear(), earliestDate.getUTCMonth(), 1));
+
+                while (currentDate <= today) {
+                    const monthYear = `${currentDate.toLocaleString('en-US', { month: 'long' })} ${currentDate.getUTCFullYear()}`;
+                    const value = `${currentDate.getUTCFullYear()}-${(currentDate.getUTCMonth() + 1).toString().padStart(2, '0')}`;
+                    months.push({ text: monthYear, value: value });
+                    currentDate.setUTCMonth(currentDate.getUTCMonth() + 1);
+                }
+                
+                const monthOptionsHtml = months.map(m => `<option value="${m.value}">${m.text}</option>`).join('');
+
+                coachingMonthFilter.innerHTML = monthOptionsHtml;
+                monthlyDetailsMonthFilter.innerHTML = monthOptionsHtml;
+                
+                coachingMonthFilter.disabled = false;
+                monthlyDetailsMonthFilter.disabled = false;
+
+                // Set current month as default
+                const currentMonthValue = `${today.getUTCFullYear()}-${(today.getUTCMonth() + 1).toString().padStart(2, '0')}`;
+                coachingMonthFilter.value = currentMonthValue;
+                monthlyDetailsMonthFilter.value = currentMonthValue;
+            };
+
 
             const handleDeleteReport = (reportId) => {
                 showConfirmModal('Are you sure you want to delete this report? This action cannot be undone.', async () => {
@@ -2123,27 +2193,35 @@
             };
 
 
-            const renderAnalysisPage = async () => {
+            const renderAnalysisPage = async (selectedMonth = null) => {
                 const selectedDm = dmNameSelect.value;
                 if (!selectedDm) {
                     showNotification('Please select a District Manager to analyze the reports.', 'error');
                     return;
                 }
 
-                const now = new Date();
-                const monthName = now.toLocaleString('en-US', { month: 'long' });
-                const yearShort = now.getFullYear().toString();
-                monthlyReportTitle.textContent = `Month Report Details for ${monthName} ${yearShort}`;
+                let startDate, endDate;
+                let monthTitle = 'This Month';
+                if (selectedMonth) {
+                    const [year, month] = selectedMonth.split('-');
+                    startDate = new Date(Date.UTC(year, month - 1, 1)).toISOString();
+                    endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)).toISOString();
+                    monthTitle = new Date(year, month - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                } else {
+                    const now = new Date();
+                    startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+                    endDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
+                    monthTitle = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                }
 
-                const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-                const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
-                
+                monthlyReportTitle.textContent = `Month Report Details for ${monthTitle}`;
+
                 const { data: monthlyReports, error } = await supabase
                     .from(REPORTS_TABLE)
                     .select('*')
                     .eq('dm_name', selectedDm)
-                    .gte('created_at', startOfMonth)
-                    .lte('created_at', endOfMonth);
+                    .gte('created_at', startDate)
+                    .lte('created_at', endDate);
 
                 if (error) {
                     showNotification('Failed to fetch data for analysis.', 'error');
@@ -2154,7 +2232,7 @@
                 allMonthlyReports = monthlyReports || [];
 
                 if (allMonthlyReports.length === 0) {
-                        showNotification(`No reports found for ${selectedDm} this month.`, 'info');
+                        showNotification(`No reports found for ${selectedDm} in ${monthTitle}.`, 'info');
                         analysisSummarySection.classList.add('hidden');
                         analysisSummarySectionMobile.classList.add('hidden');
                         if (myChart) myChart.destroy();
@@ -2481,11 +2559,11 @@
 
                 // 3. Generate PDF from the constructed element
                 const opt = {
-                    margin: 0.5,
-                    filename: `Monthly-Report-${dmName}-${new Date().toISOString().slice(0,10)}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
+                    margin:      0.5,
+                    filename:    `Monthly-Report-${dmName}-${new Date().toISOString().slice(0,10)}.pdf`,
+                    image:       { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
                 html2pdf().from(reportElement).set(opt).save();
             });
@@ -2533,20 +2611,29 @@
                 }
             };
             
-            const fetchAndRenderCoachingReports = async (dmName, medRepName) => {
+            const fetchAndRenderCoachingReports = async (dmName, medRepName, selectedMonth = null) => {
                 coachingReportTableContainer.classList.remove('hidden');
                 coachingReportsTableBody.innerHTML = '';
                 coachingReportsTableHead.innerHTML = '';
                 
-                const now = new Date();
-                const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+                let startDate, endDate;
+                if (selectedMonth) {
+                    const [year, month] = selectedMonth.split('-');
+                    startDate = new Date(Date.UTC(year, month - 1, 1)).toISOString();
+                    endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)).toISOString();
+                } else {
+                    const now = new Date();
+                    startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+                    endDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
+                }
                 
                 let query = supabase
                     .from(REPORTS_TABLE)
                     .select('id, created_at, brick, comment, med_rep')
                     .eq('dm_name', dmName)
                     .eq('activity_type', 'Visits (Double Visit)')
-                    .gte('created_at', startOfMonth)
+                    .gte('created_at', startDate)
+                    .lte('created_at', endDate)
                     .order('created_at', { ascending: false });
 
                 if (medRepName) {
@@ -2554,7 +2641,7 @@
                 }
 
                 const { data: doubleVisits, error } = await query;
-                                
+                
                 if (error) {
                     showNotification('Could not fetch double visits.', 'error');
                     console.error('Coaching fetch error:', error);
@@ -2880,11 +2967,12 @@
             }
 
             // Single, comprehensive event listener for the main DM dropdown
-            dmNameSelect.addEventListener('change', (event) => {
+            dmNameSelect.addEventListener('change', async (event) => {
                 const dmName = event.target.value;
                 
                 updateAssociatedDropdowns(event.target, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect, eventBrickSelect]);
                 updateAssociatedDropdowns(event.target, coachingMedRepNameSelect);
+                await populateMonthDropdowns(dmName);
 
                 coachingMedRepNameSelect.value = '';
                 coachingStatusFilter.value = 'All';
@@ -2947,17 +3035,32 @@
             coachingMedRepNameSelect.addEventListener('change', () => {
                 const dmName = dmNameSelect.value;
                 const medRepName = coachingMedRepNameSelect.value;
+                const selectedMonth = coachingMonthFilter.value;
                 if (dmName) {
-                    fetchAndRenderCoachingReports(dmName, medRepName);
+                    fetchAndRenderCoachingReports(dmName, medRepName, selectedMonth);
+                }
+            });
+            coachingMonthFilter.addEventListener('change', () => {
+                const dmName = dmNameSelect.value;
+                const medRepName = coachingMedRepNameSelect.value;
+                const selectedMonth = coachingMonthFilter.value;
+                if (dmName) {
+                    fetchAndRenderCoachingReports(dmName, medRepName, selectedMonth);
                 }
             });
 
             coachingStatusFilter.addEventListener('change', () => {
                 const dmName = dmNameSelect.value;
                 const medRepName = coachingMedRepNameSelect.value;
+                const selectedMonth = coachingMonthFilter.value;
                 if(dmName) {
-                    fetchAndRenderCoachingReports(dmName, medRepName);
+                    fetchAndRenderCoachingReports(dmName, medRepName, selectedMonth);
                 }
+            });
+            
+            monthlyDetailsMonthFilter.addEventListener('change', () => {
+                const selectedMonth = monthlyDetailsMonthFilter.value;
+                renderAnalysisPage(selectedMonth);
             });
 
             activityRadios.forEach(radio => radio.addEventListener('change', updateFormVisibility));
