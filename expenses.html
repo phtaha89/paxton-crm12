@@ -1232,16 +1232,11 @@
                     const status = report.status;
                     const reportDetails = JSON.parse(report.details);
 
-                    let expenseDetailsHtml = '';
+                    let tripDetailsHtml = '';
                     if (report.role === 'District Manager' && reportDetails.reportType === 'Trip') {
-                        expenseDetailsHtml += `
-                            <p><strong>Purpose:</strong> ${reportDetails.purpose}</p>
-                            <p><strong>Trip:</strong> ${reportDetails.from} to ${reportDetails.to}</p>
-                        `;
-                    } else if (report.role === 'Medical Representative') {
-                        expenseDetailsHtml += `
-                            <p><strong>Territory:</strong> ${reportDetails.territory}</p>
-                            <p><strong>Direct Manager:</strong> ${reportDetails.manager}</p>
+                        tripDetailsHtml += `
+                            <p style="margin:0.25rem 0;"><strong>Purpose:</strong> ${reportDetails.purpose}</p>
+                            <p style="margin:0.25rem 0;"><strong>Trip:</strong> ${reportDetails.from} to ${reportDetails.to}</p>
                         `;
                     }
 
@@ -1255,15 +1250,16 @@
 
                     reportTableRows += `
                         <tr class="border-b border-gray-200">
-                            <td class="py-2 align-top font-bold">${report.report_date}</td>
-                            <td class="py-2 align-top">${reportTypeDisplay}</td>
-                            <td class="py-2 align-top">
-                                <table class="w-full text-xs">
+                            <td class="py-1 px-2 align-top font-bold">${report.report_date}</td>
+                            <td class="py-1 px-2 align-top">${reportTypeDisplay}</td>
+                            <td class="py-1 px-2 align-top">
+                                ${tripDetailsHtml}
+                                <table style="width:100%; font-size: 0.7rem;">
                                     ${expenseItemsHtml}
                                 </table>
                             </td>
-                            <td class="py-2 text-right align-top">${parseFloat(report.total_amount).toFixed(2)}</td>
-                            <td class="py-2 text-center align-top">${status}</td>
+                            <td class="py-1 px-2 text-right align-top">${parseFloat(report.total_amount).toFixed(2)}</td>
+                            <td class="py-1 px-2 text-center align-top">${status}</td>
                         </tr>
                     `;
                 });
@@ -1274,20 +1270,21 @@
                             <title>Monthly Expense Report - ${employeeName} - ${months[selectedMonth - 1]}</title>
                             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
                             <style>
-                                body { font-family: 'Inter', sans-serif; color: #111827; margin: 1rem; font-size: 12px; }
-                                .header { text-align: center; margin-bottom: 1.5rem; }
-                                .header img { height: 3rem; margin-bottom: 0.5rem; border-radius: 50%; }
-                                .header h1 { font-size: 1.5rem; font-weight: 700; color: #1e3a8a; margin: 0; }
-                                .header p { font-size: 0.9rem; color: #6b7280; margin: 0.25rem 0 0 0; }
-                                .report-details { margin-bottom: 1rem; }
-                                .report-details h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+                                body { font-family: 'Inter', sans-serif; color: #111827; margin: 0.5rem; font-size: 11px; }
+                                .header { text-align: center; margin-bottom: 1rem; }
+                                .header img { height: 2.5rem; margin-bottom: 0.25rem; border-radius: 50%; }
+                                .header h1 { font-size: 1.2rem; font-weight: 700; color: #1e3a8a; margin: 0; }
+                                .header p { font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0 0; }
+                                .report-details { margin-bottom: 0.75rem; }
+                                .report-details h2 { font-size: 1rem; margin-bottom: 0.25rem; }
+                                .report-details p { font-size: 0.75rem; }
                                 .report-table { width: 100%; border-collapse: collapse; }
-                                .report-table th, .report-table td { padding: 0.5rem; border: 1px solid #e5e7eb; }
+                                .report-table th, .report-table td { padding: 0.2rem; border: 1px solid #e5e7eb; }
                                 .report-table th { background-color: #f1f5f9; text-align: left; }
                                 .report-table tr:nth-child(even) { background-color: #f9fafb; }
-                                .summary { margin-top: 1rem; text-align: right; font-size: 14px; font-weight: 600; }
-                                .signatures { margin-top: 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; font-size: 12px; }
-                                .signatures div { border-top: 1px solid #374151; padding-top: 0.5rem; }
+                                .summary { margin-top: 0.75rem; text-align: right; font-size: 12px; font-weight: 600; }
+                                .signatures { margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; font-size: 11px; }
+                                .signatures div { border-top: 1px solid #374151; padding-top: 0.25rem; }
                                 @media print { .no-print { display: none; } }
                             </style>
                         </head>
