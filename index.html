@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
+    <!-- Favicon: Added the Paxton LLC logo as the favicon -->
+    <link rel="icon" href="https://i.ibb.co/ZRmVjNch/logo.jpg" type="image/jpeg">
     <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
@@ -78,7 +80,7 @@
             z-index: 100;
             flex-shrink: 0; /* Prevent header from shrinking */
         }
-       
+        
         /* Inner wrapper for header content to constrain its width */
         .header-inner {
             display: flex;
@@ -168,7 +170,7 @@
             color: var(--background-gradient-start);
         }
         .back-button:hover { background: #a0cffc; }
-       
+        
         .refresh-button {
             background: #60a5fa;
             color: var(--white);
@@ -243,7 +245,7 @@
             opacity: 0.98;
             font-weight: 400;
         }
-       
+        
         /* Home view container */
         /* FIX: Changed flex properties to ensure content scrolls while footer stays visible */
         .home-view {
@@ -288,7 +290,7 @@
             overflow: hidden;
             border: 1px solid var(--border-color);
         }
-       
+        
         .main-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
@@ -330,7 +332,7 @@
             color: var(--text-color-light);
             line-height: 1.4;
         }
-       
+        
         /* Full page view container */
         /* ENHANCEMENT: Made transitions smoother and faster for a better feel */
         .full-page-view {
@@ -350,7 +352,7 @@
             transform: translateY(0);
             display: flex;
         }
-       
+        
         /* Iframe container within full page view */
         .iframe-container-fpv {
             flex-grow: 1;
@@ -447,9 +449,23 @@
             text-align: center;
             width: 100%;
             max-width: 360px;
-            animation: fadeInFromCenter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* Updated animation to use zoomInFade */
+            animation: zoomInFade 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
         }
+        
+        /* New Zooming Animation for Intro and Login */
+        @keyframes zoomInFade {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
 
         .login-box .login-logo {
             max-width: 60px;
@@ -458,10 +474,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        @keyframes fadeInFromCenter {
-            from { opacity: 0; transform: scale(0.5); }
-            to { opacity: 1; transform: scale(1); }
-        }
 
         .login-box h2 {
             font-size: 1.05rem;
@@ -565,7 +577,7 @@
         }
         /* FIX: Ensure the footer is displayed correctly when it should be visible on mobile */
         .footer.show { display: block; }
-       
+        
         /* New Professional Intro Animation Styles */
         .intro-overlay {
             position: fixed;
@@ -577,7 +589,8 @@
             align-items: center;
             z-index: 3000;
             opacity: 1;
-            transition: opacity 0.5s ease-out 2.5s;
+            /* Updated transition delay to match the new animation duration */
+            transition: opacity 0.5s ease-out 1.5s; 
         }
 
         .intro-overlay.fade-out {
@@ -588,11 +601,10 @@
         .intro-content {
             text-align: center;
             position: relative;
-            opacity: 0;
-            animation: fadeInContent 1s ease-out forwards;
+            /* Apply the new zooming animation */
+            animation: zoomInFade 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        @keyframes fadeInContent { to { opacity: 1; } }
 
         .logo-container {
             position: relative;
@@ -619,7 +631,7 @@
             border-radius: 50%;
             animation: spin 1.5s linear infinite;
         }
-       
+        
         .intro-text {
             color: white;
             font-size: 1.5rem;
@@ -627,7 +639,7 @@
             letter-spacing: 1px;
             text-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-       
+        
         /* Mobile Menu (Side Menu) Styles */
         .mobile-menu-button { display: none; background: var(--background-gradient-end); color: var(--white); padding: 8px 12px; border-radius: 8px; border: none; cursor: pointer; font-size: 1.2rem; transition: background 0.3s ease; order: 0; }
         .mobile-menu-button:hover { background: var(--primary-dark); }
@@ -655,7 +667,7 @@
         .side-menu-sub-items.show { display: flex; }
         .side-menu-sub-item { display: flex; align-items: center; gap: 10px; padding: 8px 15px; background: var(--white); border-radius: var(--border-radius); cursor: pointer; transition: background 0.2s ease; box-shadow: var(--shadow-sm); }
         .side-menu-sub-item:hover { background: #f1f5f9; }
-       
+        
         /* Notification Bell */
         .notification-bell {
             position: relative;
@@ -1011,7 +1023,7 @@
             <button id="sideMenuLogoutButton" class="side-menu-logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </div>
-   
+    
     <!-- Request Details Modal -->
     <div id="requestModal" class="custom-modal-overlay">
         <div class="custom-modal-content">
@@ -1036,7 +1048,7 @@
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-       
+        
         let currentActiveViewId = null;
         let loggedInUser = null;
         let googleSheetData = [];
@@ -1085,7 +1097,7 @@
                 console.error('Error fetching or parsing Google Sheet data:', error);
             }
         }
-       
+        
         function parseCSV(csvText) {
             const rows = csvText.split('\n').filter(row => row.trim() !== '');
             if (rows.length === 0) return [];
@@ -1115,7 +1127,7 @@
                 document.getElementById('notificationBell').classList.add('hidden');
             }
         }
-       
+        
         async function fetchNotifications() {
             const notificationBell = document.getElementById('notificationBell');
             const notificationCount = document.getElementById('notificationCount');
@@ -1129,12 +1141,12 @@
             }
 
             let query = supabase.from('requests').select('*').eq('status', 'Requested');
-           
+            
             if (loggedInUser.title === 'District Manager') {
                 const dmReps = googleSheetData
                     .filter(row => row['District Manager'] === loggedInUser.username)
                     .map(row => row['medical rep']);
-               
+                
                 if (dmReps.length > 0) {
                     query = query.in('medRep', dmReps);
                 } else {
@@ -1142,7 +1154,7 @@
                     return;
                 }
             }
-           
+            
             // FIX: Order by date descending to get the newest notifications first
             const { data, error } = await query.order('date', { ascending: false });
 
@@ -1213,7 +1225,7 @@
                     }
                 });
         }
-       
+        
         async function showRequestModal(requestId) {
             const { data, error } = await supabase.from('requests').select('*').eq('id', requestId).single();
 
@@ -1237,10 +1249,10 @@
             `;
 
             if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
-                 detailsHtml += `
-                     <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
-                     <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
-                 `;
+                    detailsHtml += `
+                        <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
+                        <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
+                    `;
             }
 
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
@@ -1308,7 +1320,7 @@
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
-           
+            
             if (notificationChannel) {
                 supabase.removeChannel(notificationChannel);
                 notificationChannel = null;
@@ -1359,7 +1371,7 @@
                 card.addEventListener('click', () => loadPage(card.dataset.page));
             });
         }
-       
+        
         async function handleLogin() {
             const usernameInput = document.getElementById('username').value.trim();
             const passwordInput = document.getElementById('password').value.trim();
@@ -1446,11 +1458,11 @@
             const prevActiveView = document.getElementById(currentActiveViewId);
 
             if (currentActiveViewId !== viewId) {
-                 if (currentActiveViewId && currentActiveViewId !== 'homeView') {
-                     lastPageHistory.push(currentActiveViewId);
-                 }
+                    if (currentActiveViewId && currentActiveViewId !== 'homeView') {
+                        lastPageHistory.push(currentActiveViewId);
+                    }
             }
-           
+            
             // Immediately hide the home view
             document.getElementById('homeView').classList.add('hidden');
             document.querySelector('.footer').classList.remove('show');
@@ -1484,13 +1496,13 @@
                 const loadingOverlay = targetView.querySelector('.loading');
                 const errorState = targetView.querySelector('.error-state');
                 const iframe = targetView.querySelector('iframe');
-               
+                
                 loadingOverlay.classList.add('show');
                 errorState.classList.remove('show');
-               
+                
                 // FIX: Add a timestamp to the URL to bypass browser cache on every load.
                 iframe.src = `${fileName}?t=${new Date().getTime()}`;
-               
+                
                 const sendDataToIframe = () => {
                     if (loggedInUser && iframe.contentWindow) {
                         const message = { user: loggedInUser };
@@ -1508,7 +1520,7 @@
                         iframe.contentWindow.postMessage(message, '*');
                     }
                 };
-               
+                
                 iframe.onload = () => {
                     loadingOverlay.classList.remove('show');
                     sendDataToIframe();
@@ -1599,18 +1611,20 @@
                 }
             });
         }
-       
+        
         document.addEventListener('DOMContentLoaded', async function() {
             const introOverlay = document.getElementById('introOverlay');
+            // FIX: Updated the intro fade-out delay to match the new animation duration
             setTimeout(() => {
                 introOverlay.classList.add('fade-out');
                 setTimeout(() => introOverlay.remove(), 500);
-            }, 3000);
+            }, 1500);
 
             await fetchGoogleSheetData();
             const storedUser = localStorage.getItem('loggedInUser');
             const lastPage = localStorage.getItem('currentPage');
 
+            // FIX: Delay the display of the main content to allow the intro animation to finish
             setTimeout(() => {
                 if (storedUser) {
                     loggedInUser = JSON.parse(storedUser);
@@ -1634,7 +1648,7 @@
                 } else {
                     showLoginPage();
                 }
-            }, 3500);
+            }, 2000);
 
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
@@ -1654,7 +1668,7 @@
             document.getElementById('mobileMenuButton').addEventListener('click', openSideMenu);
             document.getElementById('closeMenuButton').addEventListener('click', closeSideMenu);
             document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
-           
+            
             document.getElementById('refreshButton').addEventListener('click', async () => {
                 // FIX: Refresh logic now re-fetches all necessary data and forces a cache-less reload.
                 showBlurredMessage('Refreshing...', 1000);
@@ -1699,7 +1713,7 @@
                     notificationDropdown.classList.add('hidden');
                 }
             });
-           
+            
             document.getElementById('modalCloseButton').addEventListener('click', closeRequestModal);
             document.getElementById('requestModal').addEventListener('click', (event) => {
                 if (event.target.id === 'requestModal') {
