@@ -601,15 +601,8 @@
                                     <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
                                     <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                         <option value="" disabled selected>Select DM first</option>
-                                        <option value="Other">Other</option>
                                     </select>
                                     <p id="brick-single-error" class="error-message">Please select a Brick.</p>
-                                </div>
-                                <!-- NEW: Other Brick Input Field for Single Visits -->
-                                <div id="single-other-brick-input-div" class="hidden">
-                                    <label for="single-other-brick-input" class="block text-xs font-medium text-gray-700">Other Brick</label>
-                                    <input type="text" id="single-other-brick-input" name="single-other-brick-input" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter new brick name">
-                                    <p id="single-other-brick-error" class="error-message">Please enter a brick name.</p>
                                 </div>
                                 <div>
                                     <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
@@ -656,17 +649,9 @@
                                 <label for="event-brick-select" class="block text-xs font-medium text-gray-700">Brick</label>
                                 <select id="event-brick-select" name="event-brick-select" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                     <option value="" disabled selected>Select DM first</option>
-                                    <option value="Other">Other</option>
                                 </select>
                                 <p id="event-brick-error" class="error-message">Please select a brick for the event.</p>
                             </div>
-                            <!-- NEW: Other Brick Input Field -->
-                            <div id="other-brick-input-div" class="hidden">
-                                <label for="other-brick-input" class="block text-xs font-medium text-gray-700">Other Brick</label>
-                                <input type="text" id="other-brick-input" name="other-brick-input" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter new brick name">
-                                <p id="other-brick-error" class="error-message">Please enter a brick name.</p>
-                            </div>
-
                             <div id="admin-work-type-div" class="hidden">
                                 <label for="admin-work-type" class="block text-xs font-medium text-gray-700">Admin Work Type</label>
                                 <select id="admin-work-type" name="admin-work-type" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
@@ -975,31 +960,31 @@
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Asking for commitment<span class="error-star" data-for="asking_for_commitment_score">*</span></label>
                             <div class="star-rating" data-field="asking_for_commitment_score">
-                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Handling objection<span class="error-star" data-for="handling_objection_score">*</span></label>
                             <div class="star-rating" data-field="handling_objection_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Planning<span class="error-star" data-for="planning_score">*</span></label>
                             <div class="star-rating" data-field="planning_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Time Management<span class="error-star" data-for="time_management_score">*</span></label>
                             <div class="star-rating" data-field="time_management_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Medical & Product Knowledge<span class="error-star" data-for="medical_product_knowledge_score">*</span></label>
                             <div class="star-rating" data-field="medical_product_knowledge_score">
-                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                <i class="fas fa-star" data-value="1"></i><i class="fas fa-star" data-value="2"></i><i class="fas fa-star" data-value="3"></i><i class="fas fa-star" data-value="4"></i><i class="fas fa-star" data-value="5"></i>
                             </div>
                         </div>
                     </div>
@@ -1195,11 +1180,6 @@
             const meetingPlaceSelect = document.getElementById('meeting-place-select');
             const eventBrickDiv = document.getElementById('event-brick-div');
             const eventBrickSelect = document.getElementById('event-brick-select');
-            const otherBrickInputDiv = document.getElementById('other-brick-input-div');
-            const otherBrickInput = document.getElementById('other-brick-input');
-            // NEW: Single Visit Other Brick elements
-            const singleOtherBrickInputDiv = document.getElementById('single-other-brick-input-div');
-            const singleOtherBrickInput = document.getElementById('single-other-brick-input');
 
 
             // Modal elements
@@ -1339,8 +1319,6 @@
                 adminWorkTypeDiv.classList.add('hidden');
                 meetingPlaceDiv.classList.add('hidden');
                 eventBrickDiv.classList.add('hidden');
-                otherBrickInputDiv.classList.add('hidden');
-
 
                 if (selectedEventType === 'Admin Work') {
                     adminWorkTypeDiv.classList.remove('hidden');
@@ -1353,7 +1331,7 @@
                         const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
                         const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                         const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                        eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>${allDmBricksOptions}<option value="Other">Other</option>`;
+                        eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
                     }
                 }
             }
@@ -1963,18 +1941,10 @@
                             }
                         }
                     } else if (visitType === 'Single Visit') {
-                        let singleBrickValue = brickSingleSelect.value;
-                        if (singleBrickValue === 'Other') {
-                            singleBrickValue = singleOtherBrickInput.value.trim();
-                            if (!singleBrickValue) {
-                                showError('single-other-brick-error', 'Please enter a brick name.');
-                                isValid = false;
-                            }
-                        } else if (!singleBrickValue) {
+                        if (!brickSingleSelect.value) {
                             showError('brick-single-error', 'Please select a Brick.');
                             isValid = false;
                         }
-
                         if (!document.getElementById('details-single').value.trim()) {
                             showError('details-single-error', 'Please provide a comment.');
                             isValid = false;
@@ -1984,7 +1954,7 @@
                                 dm_name: dmName,
                                 activity_type: `Visits (Single Visit)`,
                                 period: document.getElementById('period-single').value,
-                                brick: singleBrickValue,
+                                brick: brickSingleSelect.value,
                                 med_rep: 'N/A',
                                 comment: document.getElementById('details-single').value,
                             };
@@ -2006,18 +1976,10 @@
                             isValid = false;
                         }
                     } else if (eventType === 'Event') {
-                        if (eventBrickSelect.value === 'Other') {
-                            brickValue = otherBrickInput.value.trim();
-                            if (!brickValue) {
-                                showError('other-brick-error', 'Please enter a brick name.');
-                                isValid = false;
-                            }
-                        } else {
-                            brickValue = eventBrickSelect.value;
-                            if (!brickValue) {
-                                showError('event-brick-error', 'Please select a brick for the event.');
-                                isValid = false;
-                            }
+                        brickValue = eventBrickSelect.value;
+                         if (!brickValue) {
+                            showError('event-brick-error', 'Please select a brick for the event.');
+                            isValid = false;
                         }
                     }
 
@@ -2095,8 +2057,6 @@
                 reportsTableBody.innerHTML = '';
                 reportsTableHeader.innerHTML = '';
                 noReportsMessage.classList.remove('hidden');
-                otherBrickInputDiv.classList.add('hidden');
-                singleOtherBrickInputDiv.classList.add('hidden');
 
                 dmNameSelect.value = dmName;
                 if (dmName) {
@@ -2635,7 +2595,69 @@
 
                 const visitIds = doubleVisits.map(v => v.id);
                 const { data: coachingData } = await supabase
-                    .from(COACHING_REPORTS_TABLE).select('id, dm_report_id, status')
+                    .from(COACHING_REPORTS_TABLE).select('id, dm_report_id').in('dm_report_id', visitIds);
+                    
+                const completedIds = new Set((coachingData || []).map(item => item.dm_report_id));
+                const pendingCount = doubleVisits.filter(v => !completedIds.has(v.id)).length;
+
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount;
+                    badgeMobile.textContent = pendingCount;
+                    badge.classList.remove('hidden');
+                    badgeMobile.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                    badgeMobile.classList.add('hidden');
+                }
+            };
+            
+            const fetchAndRenderCoachingReports = async (dmName, medRepName, selectedMonth = null) => {
+                coachingReportTableContainer.classList.remove('hidden');
+                coachingReportsTableBody.innerHTML = '';
+                coachingReportsTableHead.innerHTML = '';
+                
+                let startDate, endDate;
+                if (selectedMonth) {
+                    const [year, month] = selectedMonth.split('-');
+                    startDate = new Date(Date.UTC(year, month - 1, 1)).toISOString();
+                    endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)).toISOString();
+                } else {
+                    const now = new Date();
+                    startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+                    endDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
+                }
+                
+                let query = supabase
+                    .from(REPORTS_TABLE)
+                    .select('id, created_at, brick, comment, med_rep')
+                    .eq('dm_name', dmName)
+                    .eq('activity_type', 'Visits (Double Visit)')
+                    .gte('created_at', startDate)
+                    .lte('created_at', endDate)
+                    .order('created_at', { ascending: false });
+
+                if (medRepName) {
+                    query = query.eq('med_rep', medRepName);
+                }
+
+                const { data: doubleVisits, error } = await query;
+                
+                if (error) {
+                    showNotification('Could not fetch double visits.', 'error');
+                    console.error('Coaching fetch error:', error);
+                    return;
+                }
+                
+                if (doubleVisits.length === 0) {
+                    noCoachingReportsMessage.classList.remove('hidden');
+                    return;
+                }
+                noCoachingReportsMessage.classList.add('hidden');
+
+                const visitIds = doubleVisits.map(v => v.id);
+                const { data: coachingData } = await supabase
+                    .from(COACHING_REPORTS_TABLE)
+                    .select('id, dm_report_id, status')
                     .in('dm_report_id', visitIds);
 
                 const coachingStatusMap = new Map((coachingData || []).map(item => [item.dm_report_id, { status: item.status, id: item.id }]));
@@ -2748,7 +2770,7 @@
                 displayStars('view_asking_for_commitment_score', coachingReport.asking_for_commitment_score);
                 displayStars('view_handling_objection_score', coachingReport.handling_objection_score);
                 displayStars('view_planning_score', coachingReport.planning_score);
-                displayStars('view_time_management_score', coachingReport.time_management_knowledge_score);
+                displayStars('view_time_management_score', coachingReport.time_management_score);
                 displayStars('view_medical_product_knowledge_score', coachingReport.medical_product_knowledge_score);
                 
                 document.getElementById('view-conclusions').textContent = coachingReport.conclusions || '';
@@ -2931,11 +2953,7 @@
                 if (targetBrickSelects && targetBrickSelects.length > 0) {
                     const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                     targetBrickSelects.forEach(sel => {
-                        if(sel.id === 'brick-single') {
-                            sel.innerHTML = `<option value="" disabled selected>Select Brick</option>${allDmBricksOptions}<option value="Other">Other</option>`;
-                        } else {
-                            sel.innerHTML = `<option value="" disabled selected>Select Brick</option>${allDmBricksOptions}`;
-                        }
+                        if(sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
                     });
                 }
             };
@@ -2945,7 +2963,7 @@
                 const medRepBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                 const allMedRepBricksOptions = medRepBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                 targetBrickSelects.forEach(sel => {
-                    if (sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>${allMedRepBricksOptions}<option value="Other">Other</option>`;
+                    if (sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allMedRepBricksOptions;
                 });
             }
 
@@ -2954,7 +2972,7 @@
                 const dmName = event.target.value;
                 
                 updateAssociatedDropdowns(event.target, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect, eventBrickSelect]);
-                updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
+                updateAssociatedDropdowns(event.target, coachingMedRepNameSelect);
                 await populateMonthDropdowns(dmName);
 
                 coachingMedRepNameSelect.value = '';
@@ -3004,34 +3022,14 @@
                         const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
                         const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                         const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                        brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>${allDmBricksOptions}<option value="Other">Other</option>`;
+                        brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
                     }
-                }
-            });
-            
-            // Handle "Other" brick input for Single Visit form
-            brickSingleSelect.addEventListener('change', (event) => {
-                if (event.target.value === 'Other') {
-                    singleOtherBrickInputDiv.classList.remove('hidden');
-                    singleOtherBrickInput.value = '';
-                } else {
-                    singleOtherBrickInputDiv.classList.add('hidden');
                 }
             });
 
             // Event Form Logic
             eventTypeSelect.addEventListener('change', (event) => {
                 updateEventTypeVisibility();
-            });
-
-            // Handle "Other" brick input for event form
-            eventBrickSelect.addEventListener('change', (event) => {
-                if (event.target.value === 'Other') {
-                    otherBrickInputDiv.classList.remove('hidden');
-                    otherBrickInput.value = '';
-                } else {
-                    otherBrickInputDiv.classList.add('hidden');
-                }
             });
 
             // Add listeners for the coaching tab dropdowns
