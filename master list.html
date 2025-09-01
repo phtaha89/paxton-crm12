@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- SheetJS (xlsx.js) for XLSX file generation -->
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <!-- Supabase CDN for the client library. This was the missing link. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * {
@@ -671,23 +673,26 @@
 
 
     <script>
-        // URL for the Google Sheet CSV export
-        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRGZVMTCJ53ACJBwYVpyBpCFyDn4lYfMlbbldKbRXfnmsN14APuBIJm2jlDMGhPpYi5xXUp4z1YFkte/pub?gid=0&single=true&output=csv';
-        // URL for the Google Sheet to edit
-        const EDIT_LIST_URL = 'https://docs.google.com/spreadsheets/d/1OgGkYPQQAVQ3609p1r6yRMgbGuHGavcZyqCC9HZ064Q/edit?gid=0#gid=0';
-        
-        let hcpData = []; // This will store the fetched and parsed data (full list)
-        let filteredData = []; // This will store the currently filtered data (what's displayed in the table)
-        let baseDataForUser = []; // This will store the data relevant to the logged-in user (all for admin, DM's HCPs for DM)
-        let loggedInUser = null; // To store the user data received from the parent window
+        // Supabase configuration
+        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+
+        // Correct Supabase client initialization
+        // We need to import the library first (see <head> section), then initialize it.
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let hcpData = [];
+        let filteredData = [];
+        let baseDataForUser = [];
+        let loggedInUser = null;
+        let isFetching = false;
 
         const loadingOverlay = document.getElementById('loadingOverlay');
         const districtFilterSelect = document.getElementById('districtFilter');
-        const repFilterSelect = document.getElementById('repFilter'); // Get reference to rep filter
-        const brickFilterSelect = document.getElementById('brickFilter'); // Get reference to brick filter
-        const specialtyFilterSelect = document.getElementById('specialtyFilter'); // Get reference to specialty filter
+        const repFilterSelect = document.getElementById('repFilter');
+        const brickFilterSelect = document.getElementById('brickFilter');
+        const specialtyFilterSelect = document.getElementById('specialtyFilter');
         const editListButton = document.getElementById('editListBtn');
-
 
         /**
          * Shows the loading overlay.
@@ -704,109 +709,75 @@
             loadingOverlay.style.opacity = '0';
             setTimeout(() => {
                 loadingOverlay.style.display = 'none';
-            }, 300); // Match CSS transition duration
+            }, 300);
         }
 
         /**
-         * Fetches CSV data from the provided URL and parses it.
-         * @returns {Promise<Array<Object>>} A promise that resolves with the parsed HCP data.
+         * Fetches all data from a Supabase table using multiple requests to avoid limits.
+         * @param {string} tableName The name of the table to fetch from.
+         * @param {number} batchSize The number of records to fetch per request.
+         * @returns {Promise<Array<Object>>} A promise that resolves with the fetched data.
          */
-        async function fetchAndParseCSV() {
+        async function fetchAllSupabaseData(tableName, batchSize = 1000) {
+            let allData = [];
+            let offset = 0;
+            let hasMore = true;
+
             showLoading();
-            try {
-                const response = await fetch(GOOGLE_SHEET_URL);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            while (hasMore) {
+                try {
+                    const { data, error, count } = await supabase
+                        .from(tableName)
+                        .select('*', { count: 'exact' })
+                        .range(offset, offset + batchSize - 1);
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    if (data) {
+                        allData = allData.concat(data);
+                        console.log(`Fetched ${data.length} records, total so far: ${allData.length}`);
+                        if (data.length < batchSize) {
+                            hasMore = false;
+                        } else {
+                            offset += batchSize;
+                        }
+                    } else {
+                        hasMore = false;
+                    }
+
+                } catch (error) {
+                    console.error("Error fetching data from Supabase:", error.message);
+                    hasMore = false;
+                    // In a real app, you might want to display a user-friendly error
+                    alert('An error occurred while fetching data. Please try again later.');
                 }
-                const csvText = await response.text();
-                return parseCSV(csvText);
-            } catch (error) {
-                console.error("Error fetching or parsing CSV:", error);
-                // In a real application, you might display a user-friendly error message
-                return []; // Return empty array on error
-            } finally {
-                hideLoading();
             }
+            hideLoading();
+            return allData;
         }
 
         /**
-         * Parses a CSV string into an array of JavaScript objects.
-         * Assumes the first row is the header.
-         * @param {string} csvString The CSV data as a string.
-         * @returns {Array<Object>} An array of objects, where each object represents a row.
+         * Prepares the fetched data by applying consistent naming conventions.
+         * @param {Array<Object>} data The raw data fetched from Supabase.
+         * @returns {Array<Object>} The formatted data.
          */
-        function parseCSV(csvString) {
-            const lines = csvString.trim().split('\n');
-            if (lines.length === 0) return [];
-
-            // Regex to split by comma, but not if inside double quotes.
-            // This regex: /,(?=(?:(?:[^"]*"){2})*[^"]*$)/
-            // Splits by comma (,)
-            // Only if that comma is followed by an even number of double quotes (")
-            // This ensures commas inside quotes are ignored.
-            const splitRegex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
-
-            const headerLine = lines[0];
-            const headers = headerLine.split(splitRegex).map(header => {
-                // Trim whitespace and remove surrounding quotes if present
-                let cleanHeader = header.trim().replace(/^"|"$/g, '');
-                // Replace non-alphanumeric with space, then split by space
-                const parts = cleanHeader.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/);
-                if (parts.length === 0) return '';
-
-                // Special handling for specific column names to ensure correct camelCase for internal use
-                const originalHeader = cleanHeader; // Use original cleaned header for direct comparison
-                
-                if (originalHeader.toUpperCase() === 'DISTRICT MANAGER') return 'districtManager';
-                if (originalHeader.toUpperCase() === 'GOVERNORATE') return 'governorate';
-                if (originalHeader.toUpperCase() === 'MEDICAL REP') return 'medicalRep';
-                if (originalHeader.toUpperCase() === 'AREA') return 'area';
-                if (originalHeader.toUpperCase() === 'HCPS') return 'hcps';
-                if (originalHeader.toUpperCase() === 'SPECIALITY') return 'specialty'; // Corrected spelling to match sheet
-                if (originalHeader.toUpperCase() === 'CLASS') return 'class';
-                if (originalHeader.toUpperCase() === 'T.V') return 'tv';
-                if (originalHeader.toUpperCase() === 'BRICK') return 'brick';
-                if (originalHeader.toUpperCase() === 'ACCOUNT') return 'account';
-                if (originalHeader.toUpperCase() === 'ADDRESS') return 'address';
-                if (originalHeader.toUpperCase() === 'MOBILE') return 'mobile';
-                // M to S for Available Days
-                if (originalHeader.toUpperCase() === 'SUNDAY') return 'sunday';
-                if (originalHeader.toUpperCase() === 'MONDAY') return 'monday';
-                if (originalHeader.toUpperCase() === 'TUESDAY') return 'tuesday';
-                if (originalHeader.toUpperCase() === 'WEDNESDAY') return 'wednesday';
-                if (originalHeader.toUpperCase() === 'THURSDAY') return 'thursday';
-                if (originalHeader.toUpperCase() === 'FRIDAY') return 'friday';
-                if (originalHeader.toUpperCase() === 'SATURDAY') return 'saturday';
-                // Default camelCase conversion for other headers not explicitly listed
-                return parts.map((part, index) => {
-                    if (index === 0) {
-                        return part.toLowerCase();
+        function prepareData(data) {
+            return data.map(item => {
+                const newItem = {};
+                for (const key in item) {
+                    // Normalize the key to camelCase.
+                    const normalizedKey = key.toLowerCase().replace(/[^a-zA-Z0-9]+(.)?/g, (match, chr) => chr ? chr.toUpperCase() : '').replace(/^./, (match) => match.toLowerCase());
+                    // Special case for 'speciality' as it's spelled with an 'i' in the database
+                    if (normalizedKey === 'speciality') {
+                        newItem[normalizedKey] = item[key];
+                    } else {
+                        newItem[normalizedKey] = item[key];
                     }
-                    return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
-                }).join('');
-            });
-
-            const data = [];
-
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue; // Skip empty lines
-
-                const values = line.split(splitRegex).map(value => 
-                    value.trim().replace(/^"|"$/g, '') // Trim and remove surrounding quotes
-                );
-
-                if (values.length !== headers.length) {
-                    console.warn(`Skipping malformed row: ${line} (expected ${headers.length} columns, got ${values.length})`);
-                    continue;
                 }
-                const rowObject = {};
-                headers.forEach((header, index) => {
-                    rowObject[header] = values[index];
-                });
-                data.push(rowObject);
-            }
-            return data;
+                return newItem;
+            });
         }
 
         /**
@@ -817,8 +788,7 @@
         function calculateDuplicatedCount(data) {
             const normalizedNames = {};
             data.forEach(hcp => {
-                // Normalize name: lowercase and remove all spaces
-                const normalized = (hcp.hcps || '').toLowerCase().replace(/\s/g, ''); 
+                const normalized = (hcp.hcps || '').toLowerCase().replace(/\s/g, '');
                 normalizedNames[normalized] = (normalizedNames[normalized] || 0) + 1;
             });
 
@@ -842,25 +812,21 @@
             document.getElementById('brickFilter').value = '';
             document.getElementById('searchInput').value = '';
 
-            // If a District Manager is logged in, re-apply their filter
             if (loggedInUser && loggedInUser.title === 'District Manager' && loggedInUser.username) {
                 document.getElementById('districtFilter').value = loggedInUser.username;
-                document.getElementById('districtFilter').disabled = true; // Keep it disabled
+                document.getElementById('districtFilter').disabled = true;
             } else {
-                document.getElementById('districtFilter').disabled = false; // Enable for Admin/other roles
+                document.getElementById('districtFilter').disabled = false;
             }
-            filterData(); // Re-filter the data after clearing/resetting filters
-            populateFilters(); // Re-populate all filters based on the new base data
+            filterData();
+            populateFilters();
         }
 
         /**
          * Displays only duplicated HCPs in the table, sorted by normalized name.
          */
         function showDuplicatedHCPs() {
-            // Do NOT clear filters here. We want to find duplicates within the *current* filteredData.
-
             const normalizedNameCounts = {};
-            // Use the current filteredData to calculate duplicates
             filteredData.forEach(hcp => {
                 const normalized = (hcp.hcps || '').toLowerCase().replace(/\s/g, '');
                 normalizedNameCounts[normalized] = (normalizedNameCounts[normalized] || 0) + 1;
@@ -870,13 +836,11 @@
                 name => normalizedNameCounts[name] > 1
             );
 
-            // Filter the current filteredData to show only the duplicated ones
             filteredData = filteredData.filter(hcp => {
                 const normalized = (hcp.hcps || '').toLowerCase().replace(/\s/g, '');
                 return duplicatedNormalizedNames.includes(normalized);
             });
 
-            // Sort the filtered data by normalized HCP name for sequential display
             filteredData.sort((a, b) => {
                 const normalizedA = (a.hcps || '').toLowerCase().replace(/\s/g, '');
                 const normalizedB = (b.hcps || '').toLowerCase().replace(/\s/g, '');
@@ -886,7 +850,7 @@
             });
 
             renderTable();
-            updateStats(); // Update stats based on the newly refined filteredData
+            updateStats();
         }
 
         /**
@@ -894,34 +858,30 @@
          * Now accepts an optional initialUser for filtering.
          */
         async function initializeApp(initialUser = null) {
-            hcpData = await fetchAndParseCSV();
-            console.log('Total HCPs fetched from Google Sheet:', hcpData.length); // Debugging line
-            
-            // Determine the base data for the user
+            hcpData = await fetchAllSupabaseData('masterlist');
+            hcpData = prepareData(hcpData);
+            console.log('Total HCPs fetched from Supabase:', hcpData.length);
+
             if (initialUser && initialUser.title === 'District Manager' && initialUser.username) {
-                baseDataForUser = hcpData.filter(hcp => 
+                baseDataForUser = hcpData.filter(hcp =>
                     hcp.districtManager && hcp.districtManager.toLowerCase() === initialUser.username.toLowerCase()
                 );
-                // Pre-select and disable the District Manager filter for DMs
                 populateSelect('districtFilter', [...new Set(hcpData.map(hcp => hcp.districtManager).filter(Boolean))].sort());
                 districtFilterSelect.value = initialUser.username;
                 districtFilterSelect.disabled = true;
             } else {
-                // If admin or no specific filter, base data is all data
-                baseDataForUser = [...hcpData]; 
-                districtFilterSelect.disabled = false; // Ensure it's enabled for admin/other roles
+                baseDataForUser = [...hcpData];
+                districtFilterSelect.disabled = false;
                 populateSelect('districtFilter', [...new Set(hcpData.map(hcp => hcp.districtManager).filter(Boolean))].sort());
             }
 
-            // Initially, filteredData is the same as baseDataForUser
             filteredData = [...baseDataForUser];
 
-            // Populate all filters based on the baseDataForUser or current filteredData
-            populateFilters(); 
+            populateFilters();
             renderTable();
             updateStats();
             setupEventListeners();
-            toggleEditListButtonVisibility(); // Call this initially
+            toggleEditListButtonVisibility();
         }
 
         /**
@@ -931,31 +891,28 @@
          */
         function populateFilters() {
             const currentDistrictManager = districtFilterSelect.value;
-            const currentMedicalRep = repFilterSelect.value; 
+            const currentMedicalRep = repFilterSelect.value;
             const currentBrick = brickFilterSelect.value;
 
-            // --- Populate Medical Rep filter ---
             let dataForRepFilter = baseDataForUser;
             if (currentDistrictManager) {
                 dataForRepFilter = dataForRepFilter.filter(hcp => hcp.districtManager === currentDistrictManager);
             }
             populateSelect('repFilter', [...new Set(dataForRepFilter.map(hcp => hcp.medicalRep).filter(Boolean))].sort());
 
-            // --- Populate Brick filter ---
-            let dataForBrickFilter = dataForRepFilter; // Start with data filtered by DM
+            let dataForBrickFilter = dataForRepFilter;
             if (currentMedicalRep) {
                 dataForBrickFilter = dataForBrickFilter.filter(hcp => hcp.medicalRep === currentMedicalRep);
             }
             populateSelect('brickFilter', [...new Set(dataForBrickFilter.map(hcp => hcp.brick).filter(Boolean))].sort());
 
-            // --- Populate Specialty filter ---
-            let dataForSpecialtyFilter = dataForBrickFilter; // Start with data filtered by DM and MR
+            let dataForSpecialtyFilter = dataForBrickFilter;
             if (currentBrick) {
                 dataForSpecialtyFilter = dataForSpecialtyFilter.filter(hcp => hcp.brick === currentBrick);
             }
-            populateSelect('specialtyFilter', [...new Set(dataForSpecialtyFilter.map(hcp => hcp.specialty).filter(Boolean))].sort());
+            // Use the correct `speciality` key from the normalized data
+            populateSelect('specialtyFilter', [...new Set(dataForSpecialtyFilter.map(hcp => hcp.speciality).filter(Boolean))].sort());
         }
-
 
         /**
          * Populates a select element with options.
@@ -964,7 +921,7 @@
          */
         function populateSelect(selectId, options) {
             const select = document.getElementById(selectId);
-            const currentValue = select.value; // Store the current value
+            const currentValue = select.value;
             let allOptionText = '';
 
             switch (selectId) {
@@ -981,13 +938,13 @@
                     allOptionText = 'All Bricks';
                     break;
                 default:
-                    allOptionText = 'All Options'; // Fallback
+                    allOptionText = 'All Options';
                     break;
             }
 
-            select.innerHTML = `<option value="">${allOptionText}</option>`; 
+            select.innerHTML = `<option value="">${allOptionText}</option>`;
             options.forEach(option => {
-                if (option) { // Only add non-empty options
+                if (option) {
                     const optionElement = document.createElement('option');
                     optionElement.value = option;
                     optionElement.textContent = option;
@@ -995,11 +952,10 @@
                 }
             });
 
-            // Attempt to restore the previously selected value if it's still an option
             if (Array.from(select.options).some(option => option.value === currentValue)) {
                 select.value = currentValue;
             } else {
-                select.value = ''; // Reset to "All" if the previous selection is no longer valid
+                select.value = '';
             }
         }
 
@@ -1012,20 +968,19 @@
             
             if (filteredData.length === 0) {
                 tbody.innerHTML = '';
-                noResults.style.display = 'flex'; // Use flex for centering content
+                noResults.style.display = 'flex';
                 return;
             }
 
             noResults.style.display = 'none';
-            // Pass the index of the HCP in the filteredData array to showHCPDetails
             tbody.innerHTML = filteredData.map((hcp, index) => `
                 <tr>
                     <td>
                         ${hcp.hcps ? `<a href="#" class="hcp-name" onclick="showHCPDetails(${index})">${hcp.hcps}</a>` : 'N/A'}
                     </td>
-                    <td><span class="specialty-badge">${hcp.specialty || 'N/A'}</span></td>
-                    <td>${hcp.account || 'N/A'}</td> 
-                    <td><span class="area-badge">${hcp.brick || 'N/A'}</span></td> <!-- Display Brick data here -->
+                    <td><span class="specialty-badge">${hcp.speciality || 'N/A'}</span></td>
+                    <td>${hcp.account || 'N/A'}</td>
+                    <td><span class="area-badge">${hcp.brick || 'N/A'}</span></td>
                     <td>${hcp.medicalRep || 'N/A'}</td>
                     <td>${hcp.districtManager || 'N/A'}</td>
                 </tr>
@@ -1039,26 +994,23 @@
             const totalHCPsSpan = document.getElementById('totalHCPs');
             const totalHCPsLabel = document.getElementById('totalHCPsLabel');
             
-            // "Filtered Results" reflects the currently displayed data
             document.getElementById('filteredHCPs').textContent = filteredData.length;
             
             const duplicatedHCPsCount = calculateDuplicatedCount(filteredData);
             const duplicatedHCPsSpan = document.getElementById('duplicatedHCPs');
             duplicatedHCPsSpan.textContent = duplicatedHCPsCount;
             
-            // Add/remove 'red' class based on whether there are duplicates
             if (duplicatedHCPsCount > 0) {
                 duplicatedHCPsSpan.classList.add('red');
             } else {
                 duplicatedHCPsSpan.classList.remove('red');
             }
 
-            // Update Total HCPs and its label based on user role
             if (loggedInUser && loggedInUser.title === 'District Manager') {
                 totalHCPsSpan.textContent = baseDataForUser.length;
                 totalHCPsLabel.textContent = 'Total HCPs (Your Team)';
             } else {
-                totalHCPsSpan.textContent = hcpData.length; // This is the overall total from the sheet
+                totalHCPsSpan.textContent = hcpData.length;
                 totalHCPsLabel.textContent = 'Total HCPs';
             }
         }
@@ -1074,33 +1026,28 @@
             const brickFilter = document.getElementById('brickFilter').value;
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
-            // Start filtering from the base data relevant to the logged-in user
             let currentFilteredData = baseDataForUser.filter(hcp => {
-                // The district filter is handled by the initial baseDataForUser for DMs,
-                // otherwise it's an active filter for Admins.
                 const matchesDistrict = (loggedInUser && loggedInUser.title === 'District Manager')
-                                        ? true // Already filtered by DM's name in baseDataForUser
-                                        : (!districtFilter || hcp.districtManager === districtFilter);
+                                             ? true
+                                             : (!districtFilter || hcp.districtManager === districtFilter);
 
                 const matchesRep = !repFilter || hcp.medicalRep === repFilter;
-                const matchesSpecialty = !specialtyFilter || hcp.specialty === specialtyFilter;
+                // Corrected key to `speciality`
+                const matchesSpecialty = !specialtyFilter || hcp.speciality === specialtyFilter;
                 const matchesBrick = !brickFilter || hcp.brick === brickFilter;
                 
-                // Search across all string values in the HCP object
-                const matchesSearch = !searchTerm || Object.values(hcp).some(value => 
+                const matchesSearch = !searchTerm || Object.values(hcp).some(value =>
                     String(value).toLowerCase().includes(searchTerm)
                 );
 
                 return matchesDistrict && matchesRep && matchesSpecialty && matchesBrick && matchesSearch;
             });
 
-            filteredData = currentFilteredData; // Update the global filteredData
+            filteredData = currentFilteredData;
             renderTable();
             updateStats();
-            // Re-populate the other filters based on the new filteredData
-            // This needs to be called after filterData to ensure dependent dropdowns update correctly
-            populateFilters(); 
-            toggleEditListButtonVisibility(); // Call this after filtering
+            populateFilters();
+            toggleEditListButtonVisibility();
         }
 
         /**
@@ -1113,7 +1060,7 @@
          */
         function formatPhoneNumberForCall(mobileNumber) {
             if (!mobileNumber) return '';
-            let cleanedNumber = mobileNumber.replace(/\D/g, ''); // Remove all non-digit characters
+            let cleanedNumber = mobileNumber.replace(/\D/g, '');
 
             if (cleanedNumber.startsWith('0')) {
                 return '+2' + cleanedNumber.substring(1);
@@ -1127,9 +1074,9 @@
          * @param {number} hcpIndex The index of the HCP in the filteredData array.
          */
         function showHCPDetails(hcpIndex) {
-            const hcp = filteredData[hcpIndex]; // Get HCP directly from filteredData by index
+            const hcp = filteredData[hcpIndex];
             if (!hcp) {
-                console.error("HCP not found at index:", hcpIndex); 
+                console.error("HCP not found at index:", hcpIndex);
                 return;
             }
 
@@ -1138,7 +1085,6 @@
             const detailsContainer = document.getElementById('hcpDetails');
             const formattedMobile = formatPhoneNumberForCall(hcp.mobile);
 
-            // Generate HTML for available days
             const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             let availableDaysHtml = '';
             let hasAvailableDays = false;
@@ -1158,7 +1104,6 @@
                 availableDaysHtml = `<p class="text-gray-600">No specific available days recorded.</p>`;
             }
 
-
             detailsContainer.innerHTML = `
                 <div class="detail-section">
                     <h3><i class="fas fa-user-md"></i> Personal Information</h3>
@@ -1168,7 +1113,7 @@
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Specialty</span>
-                        <span class="detail-value specialty" id="hcp-specialty">${hcp.specialty || 'N/A'}</span>
+                        <span class="detail-value specialty" id="hcp-specialty">${hcp.speciality || 'N/A'}</span>
                     </div>
                 </div>
                 
@@ -1200,7 +1145,6 @@
                     </div>
                 </div>
 
-                <!-- New section for Available Days -->
                 <div class="detail-section full-width">
                     <h3><i class="fas fa-calendar-alt"></i> Available Days</h3>
                     <div id="hcp-available-days">
@@ -1234,8 +1178,8 @@
                 </div>
             `;
 
-            document.getElementById('hcpModal').style.display = 'flex'; // Use flex to center
-            document.body.style.overflow = 'hidden'; // Prevent scrolling on body
+            document.getElementById('hcpModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
 
         /**
@@ -1244,7 +1188,6 @@
         function printTable() {
             const printWindow = window.open('', '_blank');
             printWindow.document.write('<html><head><title>HCP Data Print</title>');
-            // Copy relevant styles for printing
             printWindow.document.write('<style>');
             printWindow.document.write(`
                 body { font-family: 'Inter', sans-serif; margin: 20px; }
@@ -1264,7 +1207,6 @@
             printWindow.document.write('</head><body>');
             printWindow.document.write('<h1>Healthcare Professional Data</h1>');
             
-            // Print the currently rendered table (which reflects filtered data)
             const tableHtml = document.getElementById('hcpTable').outerHTML;
             printWindow.document.write(tableHtml);
             
@@ -1282,32 +1224,28 @@
                 return;
             }
 
-            // Define the order of headers for the XLSX file
             const headers = [
-                'District Manager', 'Governorate', 'Medical Rep', 'Brick', 'HCPs', 
+                'District Manager', 'Governorate', 'Medical Rep', 'Brick', 'HCPs',
                 'Speciality', 'Class', 'T.V', 'Account', 'Address', 'Mobile',
-                'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
+                'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'
             ];
             const headerKeys = [
-                'districtManager', 'governorate', 'medicalRep', 'brick', 'hcps', 
-                'specialty', 'class', 'tv', 'account', 'address', 'mobile',
-                'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'
+                'districtManager', 'governorate', 'medicalRep', 'brick', 'hcps',
+                'speciality', 'class', 'tv', 'account', 'address', 'mobile',
+                'saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday'
             ];
 
-            // Map filteredData to an array of arrays, ensuring correct header order
-            const exportData = [headers]; // First row is headers
+            const exportData = [headers];
             filteredData.forEach(row => {
                 const rowValues = headerKeys.map(key => row[key] || '');
                 exportData.push(rowValues);
             });
 
-            // Create a new workbook and add a worksheet
             const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(exportData); // Use aoa_to_sheet for array of arrays
+            const ws = XLSX.utils.aoa_to_sheet(exportData);
 
             XLSX.utils.book_append_sheet(wb, ws, "HCP Data");
 
-            // Write the workbook to an XLSX file
             XLSX.writeFile(wb, "filtered_hcp_data.xlsx");
         }
 
@@ -1316,14 +1254,12 @@
          * The button is visible only when "All District Managers" is selected in the district filter.
          */
         function toggleEditListButtonVisibility() {
-            // The button should be visible if no specific DM is selected AND the user is an admin.
-            // If a DM is logged in, their filter is disabled and pre-selected, so the button should be hidden.
             if (loggedInUser && loggedInUser.title === 'District Manager') {
                 editListButton.style.display = 'none';
-            } else if (districtFilterSelect.value === '') { // '' corresponds to "All District Managers"
-                editListButton.style.display = 'flex'; // Show the button for admin when "All DMs" is selected
+            } else if (districtFilterSelect.value === '') {
+                editListButton.style.display = 'flex';
             } else {
-                editListButton.style.display = 'none'; // Hide the button if a specific DM is selected by an an admin
+                editListButton.style.display = 'none';
             }
         }
 
@@ -1331,91 +1267,74 @@
          * Sets up all event listeners for filters, search, and modal interactions.
          */
         function setupEventListeners() {
-            // Filter event listeners
             districtFilterSelect.addEventListener('change', () => {
-                // When District Manager changes, reset Medical Rep, Brick, and Specialty filters to 'All'
-                repFilterSelect.value = ''; 
+                repFilterSelect.value = '';
                 brickFilterSelect.value = '';
                 specialtyFilterSelect.value = '';
-                filterData(); // This will call populateFilters internally
+                filterData();
             });
 
-            repFilterSelect.addEventListener('change', () => { 
-                // When Medical Rep changes, reset Brick and Specialty filters to 'All'
-                brickFilterSelect.value = ''; 
+            repFilterSelect.addEventListener('change', () => {
+                brickFilterSelect.value = '';
                 specialtyFilterSelect.value = '';
-                filterData(); // This will call populateFilters internally
+                filterData();
             });
 
             brickFilterSelect.addEventListener('change', () => {
-                // When Brick changes, reset Specialty filter to 'All'
-                specialtyFilterSelect.value = ''; 
-                filterData(); // This will call populateFilters internally
+                specialtyFilterSelect.value = '';
+                filterData();
             });
 
-            specialtyFilterSelect.addEventListener('change', filterData); // Changed to specialtyFilterSelect
+            specialtyFilterSelect.addEventListener('change', filterData);
             document.getElementById('searchInput').addEventListener('input', filterData);
 
-            // Add event listener for duplicated HCPs stat
             document.getElementById('duplicatedHCPsStat').addEventListener('click', showDuplicatedHCPs);
-            // Add event listener for total HCPs stat to reset filters
             document.getElementById('totalHCPsStat').addEventListener('click', clearFilters);
 
-
-            // Add event listeners for new buttons
             document.getElementById('printBtn').addEventListener('click', printTable);
-            document.getElementById('exportBtn').addEventListener('click', exportToXLSX); 
-            // Add event listener for the new "Edit List" button
+            document.getElementById('exportBtn').addEventListener('click', exportToXLSX);
+
             editListButton.addEventListener('click', () => {
-                window.open(EDIT_LIST_URL, '_blank'); // Open the Google Sheet in a new tab
-            });
+    window.open('Edit_List.html', '_blank');
+});
 
 
-            // Modal event listeners
             const modal = document.getElementById('hcpModal');
             const closeBtn = document.querySelector('.close');
 
             closeBtn.onclick = function() {
                 modal.style.display = 'none';
-                document.body.style.overflow = ''; // Restore scrolling on body
+                document.body.style.overflow = '';
             }
 
-            // Close modal when clicking outside of it
             window.onclick = function(event) {
                 if (event.target === modal) {
                     modal.style.display = 'none';
-                    document.body.style.overflow = ''; // Restore scrolling on body
+                    document.body.style.overflow = '';
                 }
             }
 
-            // Escape key to close modal
             document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape' && modal.style.display === 'flex') { // Check for 'flex' display
+                if (event.key === 'Escape' && modal.style.display === 'flex') {
                     modal.style.display = 'none';
-                    document.body.style.overflow = ''; // Restore scrolling on body
+                    document.body.style.overflow = '';
                 }
             });
         }
 
-        // Listen for messages from the parent window (your main CRM app)
         window.addEventListener('message', function(event) {
-            // IMPORTANT: For security, always verify the origin of the message
-            // In a production environment, replace '*' with the actual origin of your main CRM app.
-            // Example: if (event.origin !== 'https://your-crm-app.com') return;
+            // In a production environment, verify the origin
+            // if (event.origin !== 'https://your-crm-app.com') return;
 
             if (event.data && event.data.type === 'loggedInUser') {
-                loggedInUser = event.data.user; // Store the logged-in user globally
+                loggedInUser = event.data.user;
                 console.log('Master List received user data:', loggedInUser);
                 
-                // Initialize the app with the received user data for initial filtering
-                initializeApp(loggedInUser); 
+                initializeApp(loggedInUser);
             }
         });
 
-        // Initialize the application when the page loads, without initial user data
-        // The message listener will re-initialize with user data if available
         document.addEventListener('DOMContentLoaded', () => initializeApp());
     </script>
 </body>
 </html>
-
