@@ -2538,7 +2538,7 @@
                         legendHtml += `
                             <li>
                                 <span class="legend-color-box" style="background-color:${color}"></span>
-                                <span>${label}: ${value} day(s) (${percentage}%)</span>
+                                <span>${label}: <strong>${value} day(s)</strong> (${percentage}%)</span>
                             </li>
                         `;
                     });
@@ -2918,6 +2918,7 @@
                     activityRadios.forEach(radio => radio.disabled = false);
                     updateAssociatedDropdowns(dmNameSelect, medRepNameSelect, [brickSingleSelect, brickDoubleSelect, brickDoubleVisitsSelect, eventBrickSelect]);
                     updateAssociatedDropdowns(dmNameSelect, coachingMedRepNameSelect);
+                    dmNameSelect.dispatchEvent(new Event('change'));
                 }
                 updateCoachingBadge();
             }
