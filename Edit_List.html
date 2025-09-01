@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Professional Database</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fafbfc;
+            min-height: 100vh;
+            padding: 16px;
+            color: #2d3748;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: none;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: #1a202c;
+            color: white;
+            padding: 24px 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        /* Filters */
+        .filters-section {
+            padding: 24px 32px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-section {
+            flex-grow: 1;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 13px;
+        }
+
+        .filter-select, .search-input, .form-input, .paste-area {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            color: #374151;
+        }
+
+        .filter-select:focus, .search-input:focus, .form-input:focus, .paste-area:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-input {
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .action-button {
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-button:hover {
+            background: #1f2937;
+        }
+        
+        .action-button.delete-btn {
+            background-color: #ef4444; /* Tailwind red-500 */
+        }
+        
+        .action-button.delete-btn:hover {
+            background-color: #dc2626; /* Tailwind red-600 */
+        }
+        
+        /* New styles for the Paste functionality */
+        .paste-data-section {
+            border: 1px dashed #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            background: #fdfdfd;
+            margin-top: 10px;
+        }
+        .paste-data-section .action-button {
+            background: #10b981;
+        }
+        .paste-data-section .action-button:hover {
+            background: #059669;
+        }
+        .paste-area {
+            min-height: 150px;
+            font-family: 'Courier New', Courier, monospace;
+            resize: vertical;
+        }
+
+
+        /* Stats */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            padding: 20px 32px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .stats-item {
+            text-align: center;
+            padding: 8px;
+            cursor: pointer; /* Indicate clickable */
+            transition: background-color 0.2s ease;
+        }
+
+        .stats-item:hover {
+            background-color: #f0f2f5;
+        }
+
+        .stats-number {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a202c;
+            display: block;
+            line-height: 1;
+        }
+
+        /* Style for duplicated HCPs number */
+        .stats-number.red {
+            color: #ef4444; /* Tailwind red-500 equivalent */
+        }
+
+        .stats-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .clickable-note {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+            display: block;
+        }
+
+        /* Table */
+        .table-container {
+            padding: 0;
+            overflow-x: auto; /* Allows horizontal scrolling */
+        }
+
+        .hcp-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 800px; /* Ensure table doesn't shrink too much, allowing scroll */
+        }
+
+        .hcp-table th {
+            background: #f8fafc;
+            color: #374151;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap; /* Added this line */
+        }
+        
+        .hcp-table td[contenteditable="true"] {
+            cursor: pointer;
+        }
+        
+        .hcp-table td[contenteditable="true"]:hover {
+            background-color: #e2e8f0;
+        }
+
+        .hcp-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            vertical-align: top;
+            white-space: nowrap; /* Keep content on a single line */
+            overflow: hidden; /* Hide overflowing content */
+            text-overflow: ellipsis; /* Show ellipsis for overflow */
+            max-width: 150px; /* Adjust as needed for column width */
+        }
+
+        .hcp-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .hcp-name {
+            color: #3b82f6;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: block; /* Ensure the link takes full cell width */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hcp-name:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+        
+        .editable-cell {
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .editable-cell::after {
+            content: "✎";
+            color: #94a3b8;
+            margin-left: 8px;
+            font-size: 12px;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-add {
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        .modal-add .modal-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .modal-header {
+            background: #1a202c;
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close {
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 24px;
+            flex-grow: 1;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        /* Redesigned HCP Details Card */
+        .hcp-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .detail-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .detail-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-section h3 i {
+            color: #3b82f6;
+            font-size: 16px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #1a202c;
+            font-weight: 400;
+            text-align: right;
+            flex-grow: 1;
+        }
+
+        .detail-value.specialty {
+            background: #dc2626;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .detail-value.area {
+            background: #059669;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        /* Full-width layout for single column when needed */
+        .detail-section.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading-overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 1001;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Floating scroll-to-top button */
+        #scrollToTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: #1e3a8a;
+            color: white;
+            cursor: pointer;
+            padding: 10px; /* Reduced padding for a smaller button */
+            border-radius: 6px; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        #scrollToTopBtn:hover {
+            background-color: #1e40af;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 8px;
+            }
+            
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(1, 1fr);
+                gap: 16px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .modal-content {
+                margin: 10px;
+                max-width: none;
+            }
+
+            .hcp-details {
+                grid-template-columns: 1fr;
+            }
+
+            .header, .filters-section, .stats-bar {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .action-buttons {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+        }
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 20;
+            width: 250px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .filter-dropdown label {
+            display: block;
+            padding: 8px 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .filter-dropdown label:hover {
+            background-color: #f1f5f9;
+        }
+        .filter-dropdown .filter-search {
+            width: 100%;
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .hcp-table th {
+            position: relative;
+            cursor: pointer;
+        }
+        .update-name-buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
+        }
+        .update-name-button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        .update-name-button:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Healthcare Professional Database</h1>
+            <p>Comprehensive HCP Management System</p>
+        </div>
+        
+        <div class="filters-section">
+            <div class="search-section">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search HCPs...">
+            </div>
+            <div class="action-buttons">
+                <button id="addHCPBtn" class="action-button" title="Add New HCPS">
+                    <i class="fas fa-plus"></i> Add HCPS
+                </button>
+                <button id="resetBtn" class="action-button" title="Reset all filters">
+                    <i class="fas fa-sync-alt"></i> Reset
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stats-item" id="totalHCPsStat">
+                <span class="stats-number" id="totalHCPs">0</span>
+                <span class="stats-label" id="totalHCPsLabel">Total HCPs</span>
+            </div>
+            <div class="stats-item">
+                <span class="stats-number" id="filteredHCPs">0</span>
+                <span class="stats-label">Filtered Results</span>
+            </div>
+            <div class="stats-item" id="duplicatedHCPsStat">
+                <span class="stats-number" id="duplicatedHCPs">0</span>
+                <span class="stats-label">Duplicated Names</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="hcp-table" id="hcpTable">
+                <thead>
+                    <tr>
+                        <th data-column="no">No</th>
+                        <th data-column="District Manager">District Manager</th>
+                        <th data-column="Governorate">Governorate</th>
+                        <th data-column="medical rep">Medical Rep</th>
+                        <th data-column="area">Area</th>
+                        <th data-column="HCPS">HCPS</th>
+                        <th data-column="Speciality">Speciality</th>
+                        <th data-column="Class">Class</th>
+                        <th data-column="T.V">T.V</th>
+                        <th data-column="Brick">Brick</th>
+                        <th data-column="account">Account</th>
+                        <th data-column="Address">Address</th>
+                        <th data-column="Mobile">Mobile</th>
+                        <th data-column="Saturday">Saturday</th>
+                        <th data-column="Sunday">Sunday</th>
+                        <th data-column="Monday">Monday</th>
+                        <th data-column="Tuesday">Tuesday</th>
+                        <th data-column="Wednesday">Wednesday">Wednesday</th>
+                        <th data-column="Thursday">Thursday</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="hcpTableBody">
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                <div><i class="fas fa-clipboard-list"></i></div>
+                <p>No HCPs found matching your criteria</p>
+            </div>
+        </div>
+    </div>
+    
+    <button onclick="topFunction()" id="scrollToTopBtn" title="Go to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Add/Edit HCP Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content modal-add">
+            <div class="modal-header">
+                <h2 id="addModalTitle">Add New HCPS</h2>
+                <span class="close" id="closeAddModal">&times;</span>
+            </div>
+            <form id="addForm">
+                <div class="modal-body">
+                    <!-- Form fields will be dynamically added here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="addFormCancel" class="action-button">Cancel</button>
+                    <button type="submit" id="addFormSave" class="action-button">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirmation</h2>
+                <span class="close" id="closeConfirmModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="confirmCancelBtn" class="action-button">Cancel</button>
+                <button type="button" id="confirmProceedBtn" class="action-button">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Dropdown Modal for Rep/Manager Name Updates -->
+    <div id="updateNameModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="updateNameModalTitle">Update Name</h2>
+                <span class="close" id="closeUpdateNameModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-700 text-lg mb-4">You are updating the name from "<strong id="oldNameSpan"></strong>".</p>
+                <div class="mb-4">
+                    <label for="newNameInput" class="block text-sm font-medium text-gray-700 mb-1">Enter new name:</label>
+                    <input type="text" id="newNameInput" class="form-input">
+                </div>
+                <div class="mb-4">
+                    <label for="selectNewName" class="block text-sm font-medium text-gray-700 mb-1">Or select an existing name:</label>
+                    <select id="selectNewName" class="form-input">
+                        <!-- Options populated dynamically -->
+                    </select>
+                </div>
+                <p class="text-gray-700 text-lg mt-6 mb-4">Apply this change to:</p>
+                <div class="update-name-buttons-container">
+                    <button id="updateSingleBtn" class="action-button update-name-button" type="button">This row only</button>
+                    <button id="updateAllBtn" class="action-button update-name-button" type="button">All related rows</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase configuration
+        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+        const TABLE_NAME = 'masterlist';
+
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let allData = [];
+        let filteredData = [];
+        let uniqueValues = {};
+        const headers = ["no", "District Manager", "Governorate", "medical rep", "area", "HCPS", "Speciality", "Class", "T.V", "Brick", "account", "Address", "Mobile", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+        const dropdownHeaders = ["District Manager", "Governorate", "medical rep", "area", "Speciality", "Class", "T.V", "Brick"];
+        let currentFilters = {};
+
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const searchInput = document.getElementById('searchInput');
+        const masterlistTable = document.getElementById('hcpTable');
+        const tableBody = document.getElementById('hcpTableBody');
+        const totalCountSpan = document.getElementById('totalHCPs');
+        const filteredCountSpan = document.getElementById('filteredHCPs');
+        const duplicateCountSpan = document.getElementById('duplicatedHCPs');
+
+        const addModal = document.getElementById('addModal');
+        const addForm = document.getElementById('addForm');
+        const confirmModal = document.getElementById('confirmModal');
+        const updateNameModal = document.getElementById('updateNameModal');
+        
+        const confirmMessage = document.getElementById('confirmMessage');
+        const confirmProceedBtn = document.getElementById('confirmProceedBtn');
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        const updateSingleBtn = document.getElementById('updateSingleBtn');
+        const updateAllBtn = document.getElementById('updateAllBtn');
+
+        function showLoading() {
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'flex';
+                loadingOverlay.style.opacity = '1';
+            }
+        }
+
+        function hideLoading() {
+            if (loadingOverlay) {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        async function showConfirm(message) {
+            if (!confirmModal) return false;
+            confirmMessage.textContent = message;
+            confirmProceedBtn.textContent = 'Save';
+            confirmProceedBtn.classList.remove('btn-delete');
+            confirmProceedBtn.classList.add('btn-primary');
+            confirmCancelBtn.textContent = 'Cancel';
+
+            confirmModal.style.display = 'flex';
+            return new Promise((resolve) => {
+                const onProceed = () => {
+                    confirmProceedBtn.removeEventListener('click', onProceed);
+                    confirmCancelBtn.removeEventListener('click', onCancel);
+                    confirmModal.style.display = 'none';
+                    resolve(true);
+                };
+                const onCancel = () => {
+                    confirmProceedBtn.removeEventListener('click', onProceed);
+                    confirmCancelBtn.removeEventListener('click', onCancel);
+                    confirmModal.style.display = 'none';
+                    resolve(false);
+                };
+                confirmProceedBtn.addEventListener('click', onProceed);
+                confirmCancelBtn.addEventListener('click', onCancel);
+            });
+        }
+        
+        async function fetchAllData() {
+            showLoading();
+            let data = [];
+            let offset = 0;
+            const limit = 1000;
+            let hasMore = true;
+
+            while (hasMore) {
+                const { data: fetchedData, error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .select('*')
+                    .range(offset, offset + limit - 1);
+                
+                if (error) {
+                    console.error('Error fetching data:', error);
+                    hideLoading();
+                    return [];
+                }
+
+                if (fetchedData && fetchedData.length > 0) {
+                    data = data.concat(fetchedData);
+                    offset += fetchedData.length;
+                    if (fetchedData.length < limit) {
+                        hasMore = false;
+                    }
+                } else {
+                    hasMore = false;
+                }
+            }
+            data.sort((a, b) => parseInt(a.no) - parseInt(b.no));
+            hideLoading();
+            return data;
+        }
+
+        function calculateMetrics(data) {
+            if (totalCountSpan) {
+                totalCountSpan.textContent = data.length;
+            }
+            const hcpsMap = {};
+            data.forEach(row => {
+                const hcpsName = (row.HCPS || '').toLowerCase().replace(/\s/g, '');
+                if (hcpsName) {
+                    hcpsMap[hcpsName] = (hcpsMap[hcpsName] || 0) + 1;
+                }
+            });
+            let duplicateCount = 0;
+            for (const name in hcpsMap) {
+                if (hcpsMap[name] > 1) {
+                    duplicateCount += 1;
+                }
+            }
+            if (duplicateCountSpan) {
+                duplicateCountSpan.textContent = duplicateCount;
+            }
+        }
+
+        function getUniqueValues(data) {
+            const unique = {};
+            dropdownHeaders.forEach(header => {
+                unique[header] = [...new Set(data.map(item => item[header]).filter(Boolean))].sort();
+            });
+            return unique;
+        }
+        
+        function applyFilters() {
+            let tempFilteredData = allData;
+            
+            // Apply header dropdown filters
+            for (const column in currentFilters) {
+                const selectedOptions = currentFilters[column];
+                if (selectedOptions.length > 0) {
+                    tempFilteredData = tempFilteredData.filter(row => selectedOptions.includes(row[column]));
+                }
+            }
+            
+            // Apply search input filter
+            const searchTerm = searchInput.value.toLowerCase();
+            if (searchTerm) {
+                tempFilteredData = tempFilteredData.filter(row => {
+                    return Object.values(row).some(value =>
+                        String(value).toLowerCase().includes(searchTerm)
+                    );
+                });
+            }
+
+            renderTable(tempFilteredData);
+        }
+        
+        function renderTable(data) {
+            if (!tableBody) return;
+            tableBody.innerHTML = '';
+            filteredData = data;
+            if (filteredCountSpan) {
+                filteredCountSpan.textContent = data.length;
+            }
+            const noResults = document.getElementById('noResults');
+            if (filteredData.length === 0 && noResults) {
+                noResults.style.display = 'flex';
+            } else if (noResults) {
+                noResults.style.display = 'none';
+            }
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = row.no;
+                tr.classList.add('hover:bg-gray-50');
+                
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header];
+                    td.dataset.column = header;
+                    td.classList.add('text-gray-800');
+                    if (header !== 'no' && header !== 'Mobile' && header !== 'Actions') {
+                        td.contentEditable = true;
+                    }
+                    if (header === 'medical rep' || header === 'District Manager') {
+                        td.classList.add('editable-cell');
+                    }
+                    tr.appendChild(td);
+                });
+
+                const deleteTd = document.createElement('td');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Delete';
+                deleteBtn.classList.add('action-button', 'delete-btn');
+                deleteBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    const confirmation = await showConfirm('Are you sure you want to delete this row?');
+                    if (confirmation) {
+                        const { error } = await supabaseClient.from(TABLE_NAME).delete().eq('no', row.no);
+                        if (error) {
+                            console.error('Error deleting row:', error);
+                            alert('Failed to delete row.');
+                        } else {
+                            allData = allData.filter(item => item.no !== row.no);
+                            filteredData = filteredData.filter(item => item.no !== row.no);
+                            calculateMetrics(allData);
+                            renderTable(filteredData);
+                        }
+                    }
+                };
+                deleteTd.appendChild(deleteBtn);
+                tr.appendChild(deleteTd);
+                tableBody.appendChild(tr);
+            });
+        }
+        
+        function setupAddForm() {
+            if (!addForm) return;
+            const modalBody = addForm.querySelector('.modal-body');
+            if (!modalBody) return;
+            modalBody.innerHTML = '';
+            
+            let maxNo = 0;
+            if (allData.length > 0) {
+                maxNo = Math.max(...allData.map(d => parseInt(d.no) || 0));
+            }
+            
+            const pasteSection = document.createElement('div');
+            pasteSection.classList.add('paste-data-section', 'col-span-12');
+            pasteSection.style.display = 'none'; // Initially hidden
+            pasteSection.innerHTML = `
+                <p class="text-gray-600 mb-2">Paste your data below. Ensure it is tab-separated (e.g., from Excel or Google Sheets).</p>
+                <textarea id="pasteTextarea" class="paste-area" placeholder="Paste tab-separated data here..."></textarea>
+            `;
+            const pasteBtn = document.createElement('button');
+            pasteBtn.type = 'button';
+            pasteBtn.classList.add('action-button');
+            pasteBtn.innerHTML = '<i class="fas fa-paste"></i> Paste Data';
+            pasteBtn.addEventListener('click', () => {
+                pasteSection.style.display = pasteSection.style.display === 'none' ? 'block' : 'none';
+                if (pasteSection.style.display === 'block') {
+                    document.getElementById('pasteTextarea').focus();
+                }
+            });
+            
+            modalBody.appendChild(pasteBtn);
+            modalBody.appendChild(pasteSection);
+
+            headers.forEach(header => {
+                const label = document.createElement('label');
+                label.textContent = header;
+                label.classList.add('block', 'text-sm', 'font-medium', 'text-gray-700', 'mb-1');
+                const container = document.createElement('div');
+                container.classList.add('col-span-1');
+                container.appendChild(label);
+                
+                if (header === 'no') {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = header;
+                    input.value = maxNo + 1;
+                    input.readOnly = true;
+                    input.classList.add('form-input', 'bg-gray-100');
+                    container.appendChild(input);
+                } else if (dropdownHeaders.includes(header) && header !== 'T.V') {
+                    const select = document.createElement('select');
+                    select.name = header;
+                    select.classList.add('form-input');
+                    select.innerHTML = `<option value="">Select ${header}</option>`;
+                    if (uniqueValues[header]) {
+                        uniqueValues[header].forEach(val => {
+                            const option = document.createElement('option');
+                            option.value = val;
+                            option.textContent = val;
+                            select.appendChild(option);
+                        });
+                    }
+                    const otherOption = document.createElement('option');
+                    otherOption.value = "other";
+                    otherOption.textContent = "Other...";
+                    select.appendChild(otherOption);
+
+                    container.appendChild(select);
+                    
+                    const otherInput = document.createElement('input');
+                    otherInput.type = 'text';
+                    otherInput.name = `${header}_other`;
+                    otherInput.placeholder = `Enter new ${header}`;
+                    otherInput.classList.add('form-input', 'mt-2');
+                    otherInput.style.display = 'none';
+                    container.appendChild(otherInput);
+                    
+                    select.addEventListener('change', () => {
+                        if (select.value === 'other') {
+                            otherInput.style.display = 'block';
+                        } else {
+                            otherInput.style.display = 'none';
+                        }
+                    });
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = header;
+                    input.classList.add('form-input');
+                    container.appendChild(input);
+                }
+                
+                modalBody.appendChild(container);
+            });
+
+            const pasteTextarea = document.getElementById('pasteTextarea');
+            if (pasteTextarea) {
+                pasteTextarea.addEventListener('paste', handlePaste);
+            }
+        }
+        
+        async function handlePaste(event) {
+            event.preventDefault();
+            const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+            const rows = pastedText.trim().split('\n');
+            
+            if (rows.length > 1) {
+                alert(`Pasted data for multiple rows. Only the first row will be used to fill the form. Please paste one row at a time to avoid issues.`);
+            }
+            
+            const columns = rows[0].trim().split('\t');
+            
+            // Loop through the form headers, skipping the 'no' header
+            for (let i = 1; i < headers.length; i++) {
+                const header = headers[i];
+                const value = columns[i - 1] || ''; // Use columns with an offset of -1
+                
+                const element = document.querySelector(`[name="${header}"]`);
+                if (element) {
+                    if (element.tagName === 'SELECT') {
+                        let optionExists = false;
+                        for (let k = 0; k < element.options.length; k++) {
+                            if (element.options[k].value === value) {
+                                element.value = value;
+                                optionExists = true;
+                                break;
+                            }
+                        }
+                        if (!optionExists) {
+                            element.value = 'other';
+                            const otherInput = document.querySelector(`input[name="${element.name}_other"]`);
+                            if (otherInput) {
+                                otherInput.style.display = 'block';
+                                otherInput.value = value;
+                            }
+                        }
+                    } else {
+                        element.value = value;
+                    }
+                }
+            }
+        }
+
+        async function init() {
+            const data = await fetchAllData();
+            if (data.length > 0) {
+                allData = data;
+                uniqueValues = getUniqueValues(allData);
+                calculateMetrics(allData);
+                renderTable(allData);
+            }
+            setupEventListeners();
+            setupCellEditing();
+        }
+        
+        async function handleCellUpdate(cell, column, oldValue, newValue, rowNo) {
+            if (newValue === oldValue || newValue.trim() === '') {
+                 cell.textContent = oldValue;
+                 return;
+            }
+            
+            const updates = { [column]: newValue };
+            const { error } = await supabaseClient
+                .from(TABLE_NAME)
+                .update(updates)
+                .eq('no', rowNo);
+
+            if (error) {
+                console.error('Error updating cell:', error);
+                alert('Failed to update cell.');
+                cell.textContent = oldValue; // Revert on error
+            } else {
+                allData = allData.map(row => row.no === rowNo ? { ...row, ...updates } : row);
+                filteredData = filteredData.map(row => row.no === rowNo ? { ...row, ...updates } : row);
+                renderTable(filteredData);
+            }
+        }
+        
+        function setupCellEditing() {
+            if (!masterlistTable) return;
+            masterlistTable.addEventListener('click', async (e) => {
+                const cell = e.target.closest('td');
+                if (!cell || cell.dataset.column === 'no' || cell.dataset.column === 'Actions') return;
+
+                const column = cell.dataset.column;
+                const rowNo = cell.closest('tr').dataset.id;
+                const oldValue = cell.textContent;
+
+                if (column === 'medical rep' || column === 'District Manager') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    document.getElementById('oldNameSpan').textContent = oldValue;
+                    document.getElementById('updateNameModalTitle').textContent = `Update ${column}`;
+                    const nameInput = document.getElementById('newNameInput');
+                    const nameSelect = document.getElementById('selectNewName');
+                    
+                    nameInput.value = '';
+                    nameSelect.innerHTML = `<option value="">Select a new name</option>`;
+                    
+                    const uniqueNames = [...new Set(allData.map(item => item[column]).filter(Boolean))].sort();
+                    uniqueNames.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        nameSelect.appendChild(option);
+                    });
+
+                    updateNameModal.style.display = 'flex';
+                    
+                    const updateHandler = async (type) => {
+                        updateNameModal.style.display = 'none';
+                        let newValue = nameInput.value || nameSelect.value;
+                        if (!newValue || newValue === 'other') {
+                            return;
+                        }
+                        
+                        let updates = { [column]: newValue };
+                        
+                        if (type === 'all') {
+                            const { error } = await supabaseClient
+                                .from(TABLE_NAME)
+                                .update(updates)
+                                .eq(column, oldValue);
+
+                            if (error) {
+                                console.error('Error updating all rows:', error);
+                                alert('Failed to update all related rows.');
+                            } else {
+                                alert('All related rows updated successfully. The table will now refresh.');
+                                await init();
+                            }
+                        } else { // single row
+                            const { error } = await supabaseClient
+                                .from(TABLE_NAME)
+                                .update(updates)
+                                .eq('no', rowNo);
+
+                            if (error) {
+                                console.error('Error updating row:', error);
+                                alert('Failed to update this row.');
+                            } else {
+                                allData = allData.map(row => row.no === rowNo ? { ...row, ...updates } : row);
+                                filteredData = filteredData.map(row => row.no === rowNo ? { ...row, ...updates } : row);
+                                renderTable(filteredData);
+                            }
+                        }
+                    };
+
+                    updateSingleBtn.onclick = () => updateHandler('single');
+                    updateAllBtn.onclick = () => updateHandler('all');
+
+                    const closeUpdateNameModal = document.getElementById('closeUpdateNameModal');
+                    if (closeUpdateNameModal) closeUpdateNameModal.onclick = () => {
+                        updateNameModal.style.display = 'none';
+                    };
+                } else {
+                    cell.addEventListener('blur', async (e) => {
+                        const newValue = e.target.textContent;
+                        const originalValue = cell.dataset.originalValue;
+
+                        if (newValue !== originalValue) {
+                            if (newValue.trim() === '') {
+                                // Revert to original value if the new value is empty
+                                e.target.textContent = originalValue;
+                            } else {
+                                const confirmation = await showConfirm('Do you want to save this change?');
+                                if (confirmation) {
+                                    handleCellUpdate(cell, column, originalValue, newValue, rowNo);
+                                } else {
+                                    cell.textContent = originalValue;
+                                }
+                            }
+                        }
+                    }, { once: true });
+                    
+                    cell.addEventListener('focus', (e) => {
+                        cell.dataset.originalValue = e.target.textContent;
+                    }, { once: true });
+                }
+            });
+        }
+        
+        function setupEventListeners() {
+            const addHCPBtn = document.getElementById('addHCPBtn');
+            const closeAddModal = document.getElementById('closeAddModal');
+            const resetBtn = document.getElementById('resetBtn');
+            const addForm = document.getElementById('addForm');
+            const searchInput = document.getElementById('searchInput');
+            const duplicateHCPsSection = document.getElementById('duplicatedHCPsStat');
+            const addFormCancel = document.getElementById('addFormCancel');
+            const closeConfirmModal = document.getElementById('closeConfirmModal');
+            const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+            const masterlistHeaders = document.querySelectorAll('#hcpTable th[data-column]');
+
+            if (addHCPBtn) addHCPBtn.addEventListener('click', () => {
+                setupAddForm();
+                addModal.style.display = 'flex';
+            });
+            
+            if (closeAddModal) closeAddModal.addEventListener('click', () => {
+                addModal.style.display = 'none';
+            });
+            
+            if (resetBtn) resetBtn.addEventListener('click', () => {
+                if (searchInput) searchInput.value = '';
+                currentFilters = {};
+                renderTable(allData);
+                calculateMetrics(allData);
+            });
+
+            if (addForm) addForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(addForm);
+                const newRow = {};
+                for (let [key, value] of formData.entries()) {
+                    if (key.endsWith('_other')) {
+                        const originalKey = key.replace('_other', '');
+                        if (formData.get(originalKey) === 'other') {
+                            newRow[originalKey] = value;
+                        }
+                    } else if (value !== 'other') {
+                        newRow[key] = value;
+                    }
+                }
+                
+                const { data, error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .insert([newRow]);
+                
+                if (error) {
+                    console.error('Error adding new row:', error);
+                    alert('Failed to add new HCPS.');
+                } else {
+                    alert('New HCPS added successfully!');
+                    addModal.style.display = 'none';
+                    await init();
+                }
+            });
+
+            if (searchInput) searchInput.addEventListener('keyup', () => {
+                applyFilters();
+            });
+            
+            if (duplicateHCPsSection) duplicateHCPsSection.addEventListener('click', () => {
+                const hcpsMap = {};
+                allData.forEach(row => {
+                    const hcpsName = (row.HCPS || '').toLowerCase().replace(/\s/g, '');
+                    if (hcpsName) {
+                        hcpsMap[hcpsName] = (hcpsMap[hcpsName] || 0) + 1;
+                    }
+                });
+                const duplicateHCPs = Object.keys(hcpsMap).filter(name => hcpsMap[name] > 1);
+                
+                const filtered = allData.filter(row => duplicateHCPs.includes((row.HCPS || '').toLowerCase().replace(/\s/g, '')));
+                filtered.sort((a, b) => a.HCPS.localeCompare(b.HCPS));
+                
+                renderTable(filtered);
+            });
+            
+            // Floating scroll button logic
+            window.onscroll = function() {
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    if(scrollToTopBtn) scrollToTopBtn.style.display = "block";
+                } else {
+                    if(scrollToTopBtn) scrollToTopBtn.style.display = "none";
+                }
+            };
+            window.onclick = function(event) {
+                if (event.target === addModal || event.target === confirmModal || event.target === updateNameModal) {
+                    event.target.style.display = "none";
+                }
+            }
+            
+            if (addFormCancel) addFormCancel.addEventListener('click', () => {
+                if(addModal) addModal.style.display = 'none';
+            });
+            if (closeConfirmModal) closeConfirmModal.addEventListener('click', () => {
+                if(confirmModal) confirmModal.style.display = 'none';
+            });
+            
+            if (updateSingleBtn) updateSingleBtn.addEventListener('click', () => {
+                 updateNameModal.style.display = 'none';
+            });
+
+            if (updateAllBtn) updateAllBtn.addEventListener('click', () => {
+                 updateNameModal.style.display = 'none';
+            });
+
+            const closeUpdateNameModal = document.getElementById('closeUpdateNameModal');
+            if (closeUpdateNameModal) closeUpdateNameModal.onclick = () => {
+                updateNameModal.style.display = 'none';
+            };
+
+
+            masterlistHeaders.forEach(header => {
+                header.addEventListener('click', (e) => {
+                    const column = e.currentTarget.dataset.column;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    
+                    const existingDropdown = document.querySelector('.filter-dropdown');
+                    if (existingDropdown && existingDropdown.dataset.column === column) {
+                        existingDropdown.remove();
+                        return;
+                    }
+                    if (existingDropdown) {
+                         existingDropdown.remove();
+                    }
+
+                    const dropdown = document.createElement('div');
+                    dropdown.classList.add('filter-dropdown');
+                    dropdown.dataset.column = column;
+                    dropdown.style.top = `${rect.bottom + window.scrollY}px`;
+                    dropdown.style.left = `${rect.left + window.scrollX}px`;
+                    
+                    const filterInput = document.createElement('input');
+                    filterInput.type = 'text';
+                    filterInput.classList.add('filter-search');
+                    filterInput.placeholder = `Search ${column}...`;
+                    dropdown.appendChild(filterInput);
+
+                    const optionsContainer = document.createElement('div');
+                    const uniqueOptions = [...new Set(allData.map(item => item[column]).filter(Boolean))].sort();
+
+                    uniqueOptions.forEach(optionText => {
+                        const label = document.createElement('label');
+                        const isChecked = currentFilters[column] && currentFilters[column].includes(optionText);
+                        label.innerHTML = `<input type="checkbox" value="${optionText}" ${isChecked ? 'checked' : ''}> ${optionText}`;
+                        optionsContainer.appendChild(label);
+                    });
+                    
+                    dropdown.appendChild(optionsContainer);
+                    document.body.appendChild(dropdown);
+                    
+                    filterInput.addEventListener('keyup', () => {
+                        const searchTerm = filterInput.value.toLowerCase();
+                        optionsContainer.querySelectorAll('label').forEach(label => {
+                            const text = label.textContent.toLowerCase();
+                            if (text.includes(searchTerm)) {
+                                label.style.display = 'block';
+                            } else {
+                                label.style.display = 'none';
+                            }
+                        });
+                    });
+                    
+                    optionsContainer.addEventListener('change', () => {
+                        const checkedOptions = Array.from(optionsContainer.querySelectorAll('input:checked')).map(input => input.value);
+                        currentFilters[column] = checkedOptions;
+                        applyFilters();
+                    });
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                const isHeader = e.target.closest('#hcpTable th');
+                const isDropdown = e.target.closest('.filter-dropdown');
+                if (!isHeader && !isDropdown) {
+                    const existingDropdown = document.querySelector('.filter-dropdown');
+                    if (existingDropdown) {
+                        existingDropdown.remove();
+                    }
+                }
+            });
+        }
+        
+        function topFunction() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+        
+        window.onload = () => {
+            init();
+        };
+    </script>
+</body>
+</html>
