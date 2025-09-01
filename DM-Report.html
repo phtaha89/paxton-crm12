@@ -649,9 +649,17 @@
                                 <label for="event-brick-select" class="block text-xs font-medium text-gray-700">Brick</label>
                                 <select id="event-brick-select" name="event-brick-select" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                     <option value="" disabled selected>Select DM first</option>
+                                    <option value="Other">Other</option>
                                 </select>
                                 <p id="event-brick-error" class="error-message">Please select a brick for the event.</p>
                             </div>
+                            <!-- NEW: Other Brick Input Field -->
+                            <div id="other-brick-input-div" class="hidden">
+                                <label for="other-brick-input" class="block text-xs font-medium text-gray-700">Other Brick</label>
+                                <input type="text" id="other-brick-input" name="other-brick-input" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter new brick name">
+                                <p id="other-brick-error" class="error-message">Please enter a brick name.</p>
+                            </div>
+
                             <div id="admin-work-type-div" class="hidden">
                                 <label for="admin-work-type" class="block text-xs font-medium text-gray-700">Admin Work Type</label>
                                 <select id="admin-work-type" name="admin-work-type" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
@@ -1180,6 +1188,8 @@
             const meetingPlaceSelect = document.getElementById('meeting-place-select');
             const eventBrickDiv = document.getElementById('event-brick-div');
             const eventBrickSelect = document.getElementById('event-brick-select');
+            const otherBrickInputDiv = document.getElementById('other-brick-input-div');
+            const otherBrickInput = document.getElementById('other-brick-input');
 
 
             // Modal elements
@@ -1319,6 +1329,8 @@
                 adminWorkTypeDiv.classList.add('hidden');
                 meetingPlaceDiv.classList.add('hidden');
                 eventBrickDiv.classList.add('hidden');
+                otherBrickInputDiv.classList.add('hidden');
+
 
                 if (selectedEventType === 'Admin Work') {
                     adminWorkTypeDiv.classList.remove('hidden');
@@ -1331,7 +1343,7 @@
                         const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
                         const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                         const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                        eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                        eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>${allDmBricksOptions}<option value="Other">Other</option>`;
                     }
                 }
             }
@@ -1976,10 +1988,18 @@
                             isValid = false;
                         }
                     } else if (eventType === 'Event') {
-                        brickValue = eventBrickSelect.value;
-                         if (!brickValue) {
-                            showError('event-brick-error', 'Please select a brick for the event.');
-                            isValid = false;
+                        if (eventBrickSelect.value === 'Other') {
+                            brickValue = otherBrickInput.value.trim();
+                            if (!brickValue) {
+                                showError('other-brick-error', 'Please enter a brick name.');
+                                isValid = false;
+                            }
+                        } else {
+                            brickValue = eventBrickSelect.value;
+                            if (!brickValue) {
+                                showError('event-brick-error', 'Please select a brick for the event.');
+                                isValid = false;
+                            }
                         }
                     }
 
@@ -2057,6 +2077,7 @@
                 reportsTableBody.innerHTML = '';
                 reportsTableHeader.innerHTML = '';
                 noReportsMessage.classList.remove('hidden');
+                otherBrickInputDiv.classList.add('hidden');
 
                 dmNameSelect.value = dmName;
                 if (dmName) {
@@ -2953,7 +2974,7 @@
                 if (targetBrickSelects && targetBrickSelects.length > 0) {
                     const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                     targetBrickSelects.forEach(sel => {
-                        if(sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                        if(sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>${allDmBricksOptions}<option value="Other">Other</option>`;
                     });
                 }
             };
@@ -2963,7 +2984,7 @@
                 const medRepBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                 const allMedRepBricksOptions = medRepBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                 targetBrickSelects.forEach(sel => {
-                    if (sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allMedRepBricksOptions;
+                    if (sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>${allMedRepBricksOptions}<option value="Other">Other</option>`;
                 });
             }
 
@@ -3022,7 +3043,7 @@
                         const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
                         const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                         const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                        brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                        brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>${allDmBricksOptions}`;
                     }
                 }
             });
@@ -3030,6 +3051,16 @@
             // Event Form Logic
             eventTypeSelect.addEventListener('change', (event) => {
                 updateEventTypeVisibility();
+            });
+
+            // Handle "Other" brick input for event form
+            eventBrickSelect.addEventListener('change', (event) => {
+                if (event.target.value === 'Other') {
+                    otherBrickInputDiv.classList.remove('hidden');
+                    otherBrickInput.value = '';
+                } else {
+                    otherBrickInputDiv.classList.add('hidden');
+                }
             });
 
             // Add listeners for the coaching tab dropdowns
