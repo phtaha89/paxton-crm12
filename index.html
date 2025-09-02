@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
-    <!-- Favicon: Added the Paxton LLC logo as the favicon -->
-    <link rel="icon" href="https://i.ibb.co/ZRmVjNch/logo.jpg" type="image/jpeg">
     <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
@@ -57,7 +55,6 @@
         }
 
         /* Main container for the application, taking full available width and height */
-        /* FIX: Changed to a flex container to manage layout and footer positioning */
         .container {
             width: 100%;
             flex-grow: 1;
@@ -68,8 +65,6 @@
         }
 
         /* Header styling with flexbox for alignment */
-        /* FIX: Header is now a non-growing flex item. No more jumping on scroll. */
-        /* ENHANCEMENT: Added backdrop-filter for a modern, glassy effect */
         .header {
             background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
             backdrop-filter: blur(10px); /* Glassy blur effect */
@@ -150,7 +145,6 @@
             font-weight: 500;
             font-size: 0.85rem;
             border: none;
-            /* FIX: Using a more modern easing function for smoother animations */
             transition: all var(--transition-duration-fast) var(--transition-easing);
             text-decoration: none;
             display: inline-flex;
@@ -247,7 +241,6 @@
         }
         
         /* Home view container */
-        /* FIX: Changed flex properties to ensure content scrolls while footer stays visible */
         .home-view {
             display: flex;
             flex-direction: column;
@@ -256,7 +249,6 @@
         }
 
         /* Home view grid for navigation cards */
-        /* FIX: This grid is now the primary scrolling area on the home page */
         .home-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -279,7 +271,6 @@
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
-            /* FIX: Using a smoother, more modern easing function */
             transition: all var(--transition-duration-normal) var(--transition-easing);
             display: flex;
             flex-direction: column;
@@ -334,14 +325,12 @@
         }
         
         /* Full page view container */
-        /* ENHANCEMENT: Made transitions smoother and faster for a better feel */
         .full-page-view {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            /* FIX: Updated transition for a smoother, faster feel */
             transition: opacity var(--transition-duration-fast) var(--transition-easing), transform var(--transition-duration-fast) var(--transition-easing);
             transform: translateY(10px);
             opacity: 0;
@@ -449,23 +438,9 @@
             text-align: center;
             width: 100%;
             max-width: 360px;
-            /* Updated animation to use zoomInFade */
-            animation: zoomInFade 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: fadeInFromCenter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
         }
-        
-        /* New Zooming Animation for Intro and Login */
-        @keyframes zoomInFade {
-            from {
-                opacity: 0;
-                transform: scale(0.5);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
 
         .login-box .login-logo {
             max-width: 60px;
@@ -474,6 +449,10 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        @keyframes fadeInFromCenter {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
         .login-box h2 {
             font-size: 1.05rem;
@@ -563,7 +542,6 @@
         }
 
         /* Footer Styling */
-        /* FIX: Footer is now a non-growing flex item, always visible at the bottom. */
         .footer {
             display: none; /* Hidden by default, shown via JS */
             padding: 8px 15px;
@@ -575,7 +553,6 @@
             color: var(--background-gradient-end);
             flex-shrink: 0; /* Prevent footer from shrinking */
         }
-        /* FIX: Ensure the footer is displayed correctly when it should be visible on mobile */
         .footer.show { display: block; }
         
         /* New Professional Intro Animation Styles */
@@ -589,8 +566,7 @@
             align-items: center;
             z-index: 3000;
             opacity: 1;
-            /* Updated transition delay to match the new animation duration */
-            transition: opacity 0.5s ease-out 1.5s; 
+            transition: opacity 0.5s ease-out 2.5s;
         }
 
         .intro-overlay.fade-out {
@@ -601,10 +577,11 @@
         .intro-content {
             text-align: center;
             position: relative;
-            /* Apply the new zooming animation */
-            animation: zoomInFade 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            animation: fadeInContent 1s ease-out forwards;
         }
 
+        @keyframes fadeInContent { to { opacity: 1; } }
 
         .logo-container {
             position: relative;
@@ -827,7 +804,7 @@
 
         /* Responsive adjustments */
         @media (max-width: 1024px) {
-            .container { padding: 10px; }
+            .container { /* padding: 10px; */ } /* FIX: Removed padding */
             .header { padding: 6px 15px; }
             .user-card { padding: 6px 12px; gap: 10px; max-width: 180px; }
             .user-card-icon { font-size: 1.3rem; }
@@ -848,7 +825,7 @@
         }
 
         @media (max-width: 768px) {
-            .container { padding: 8px; height: 100vh; }
+            .container { /* padding: 8px; */ /* height: 100vh; */ } /* FIX: Removed padding and height */
             .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
             .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
             .user-name { font-size: 0.7rem; }
@@ -860,7 +837,7 @@
             .company-logo { max-width: 40px; }
             .banner h1 { font-size: 1.2rem; }
             .banner .subtitle { font-size: 0.65rem; }
-            .home-grid { grid-template-columns: 1fr; gap: 12px; }
+            .home-grid { grid-template-columns: 1fr; gap: 12px; padding: 8px; } /* FIX: Added padding here */
             .main-card { min-height: 80px; padding: 12px; flex-direction: row; justify-content: flex-start; text-align: left; gap: 15px; }
             .main-card-icon { font-size: 1.8rem; margin-bottom: 0; flex-shrink: 0; }
             .main-card-title { font-size: 1rem; margin-bottom: 0; }
@@ -996,13 +973,11 @@
             <div class="error-state" id="errorMasterList"><div class="error-icon">⚠️</div><div class="error-title">Master List Page Not Found</div><div class="error-text">The Master List file could not be loaded.</div></div>
             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
         </div>
-        <!-- START: Added 'expensesView' container for the new page -->
         <div id="expensesView" class="full-page-view hidden">
             <div class="loading" id="loadingExpenses"><div class="spinner"></div><div class="loading-text">Loading Expenses...</div></div>
             <div class="error-state" id="errorExpenses"><div class="error-icon">⚠️</div><div class="error-title">Expenses Page Not Found</div><div class="error-text">The Expenses file could not be loaded.</div></div>
             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
         </div>
-        <!-- END: Added 'expensesView' container for the new page -->
         <div id="nestedIframeView" class="full-page-view hidden">
             <div class="loading" id="loadingNestedIframe"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
             <div class="error-state" id="errorNestedIframe"><div class="error-icon">⚠️</div><div class="error-title">Page Not Found</div><div class="error-text">The requested file could not be loaded.</div></div>
@@ -1088,7 +1063,6 @@
 
         async function fetchGoogleSheetData() {
             try {
-                // FIX: Add a cache-busting query parameter to ensure fresh data is fetched
                 const response = await fetch(`${GOOGLE_SHEET_URL}&_=${new Date().getTime()}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const csvText = await response.text();
@@ -1155,7 +1129,6 @@
                 }
             }
             
-            // FIX: Order by date descending to get the newest notifications first
             const { data, error } = await query.order('date', { ascending: false });
 
             if (error) {
@@ -1190,8 +1163,6 @@
                         <div class="notification-date">${requestDate}</div>
                     `;
                     item.addEventListener('click', () => showRequestModal(req.id));
-                    // FIX: Use appendChild, as the data is already sorted correctly from the query.
-                    // This ensures the list renders in the correct chronological order (newest on top).
                     notificationDropdown.appendChild(item);
                 });
 
@@ -1201,11 +1172,6 @@
         }
 
         function subscribeToNotifications() {
-            // FIX: This function sets up the real-time listener. When any change
-            // (insert, update, delete) happens in the 'requests' table, Supabase
-            // sends a message. The code then waits 500ms and re-fetches all
-            // notifications to ensure the UI is perfectly in sync. This is how
-            // new notifications appear without needing a page refresh.
             if (notificationChannel) {
                 supabase.removeChannel(notificationChannel);
                 notificationChannel = null;
@@ -1249,10 +1215,10 @@
             `;
 
             if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
-                    detailsHtml += `
-                        <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
-                        <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
-                    `;
+                 detailsHtml += `
+                    <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
+                    <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
+                `;
             }
 
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
@@ -1294,7 +1260,6 @@
             } else {
                 showBlurredMessage('Status updated successfully!', 1500);
                 closeRequestModal();
-                // No need to call fetchNotifications() here, the real-time subscription will trigger it automatically.
             }
         }
 
@@ -1408,7 +1373,6 @@
         }
 
         function showHome() {
-            // FIX: This function now manages the transition smoothly.
             const homeView = document.getElementById('homeView');
             const prevActiveView = document.getElementById(currentActiveViewId);
 
@@ -1419,20 +1383,14 @@
 
             if (prevActiveView && prevActiveView !== homeView) {
                 prevActiveView.classList.remove('active');
-                // Use a short delay to allow the CSS transition to play before hiding
                 setTimeout(() => {
                     prevActiveView.classList.add('hidden');
-                    const iframe = prevActiveView.querySelector('iframe');
-                    if (iframe) iframe.src = 'about:blank';
+                    // FIX: Removed line that cleared iframe src to preserve state
                     homeView.classList.remove('hidden');
-                    // Use a very short delay to re-apply the "active" class and start the entrance animation
                     setTimeout(() => {
                         homeView.classList.add('active');
-                        // Ensure the transition is reset before re-applying the class
-                        homeView.classList.remove('active');
-                        homeView.classList.add('active');
                     }, 10);
-                }, 200); // This delay should match or be slightly less than the CSS transition
+                }, 200); 
             } else {
                 homeView.classList.remove('hidden');
                 homeView.classList.add('active');
@@ -1458,29 +1416,25 @@
             const prevActiveView = document.getElementById(currentActiveViewId);
 
             if (currentActiveViewId !== viewId) {
-                    if (currentActiveViewId && currentActiveViewId !== 'homeView') {
-                        lastPageHistory.push(currentActiveViewId);
-                    }
+                 if (currentActiveViewId && currentActiveViewId !== 'homeView') {
+                     lastPageHistory.push(currentActiveViewId);
+                 }
             }
             
-            // Immediately hide the home view
             document.getElementById('homeView').classList.add('hidden');
             document.querySelector('.footer').classList.remove('show');
             document.getElementById('backButton').classList.remove('hidden');
             document.getElementById('refreshButton').classList.remove('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
 
-            // Hide the previously active view with a transition
             if (prevActiveView && prevActiveView !== targetView) {
                 prevActiveView.classList.remove('active');
                 setTimeout(() => {
                     prevActiveView.classList.add('hidden');
-                    const prevIframe = prevActiveView.querySelector('iframe');
-                    if (prevIframe) prevIframe.src = 'about:blank';
+                    // FIX: Removed line that cleared iframe src to preserve state
                 }, 200);
             }
 
-            // Show the target view after a slight delay for a smooth transition effect
             setTimeout(() => {
                 targetView.classList.remove('hidden');
                 setTimeout(() => targetView.classList.add('active'), 10);
@@ -1493,42 +1447,46 @@
                 renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
                 targetView.querySelector('.loading').classList.remove('show');
             } else {
-                const loadingOverlay = targetView.querySelector('.loading');
-                const errorState = targetView.querySelector('.error-state');
                 const iframe = targetView.querySelector('iframe');
                 
-                loadingOverlay.classList.add('show');
-                errorState.classList.remove('show');
-                
-                // FIX: Add a timestamp to the URL to bypass browser cache on every load.
-                iframe.src = `${fileName}?t=${new Date().getTime()}`;
-                
-                const sendDataToIframe = () => {
-                    if (loggedInUser && iframe.contentWindow) {
-                        const message = { user: loggedInUser };
-                        if (page === 'dashboard') {
-                            message.type = 'dashboardLogin';
-                            message.username = sessionStorage.getItem('dashboardUsername');
-                            message.password = sessionStorage.getItem('dashboardPassword');
-                        } else if (page === 'dm-planning') {
-                            message.type = 'dmPlanningUserPermissions';
-                        } else if (page === 'dm-report') {
-                            message.type = 'dmReportUserPermissions';
-                        } else { 
-                            message.type = 'loggedInUser';
+                // FIX: Only load the iframe if it's not already loaded with the correct page.
+                // This prevents the page from reloading every time it's viewed.
+                if (!iframe.src || !iframe.src.includes(fileName)) {
+                    const loadingOverlay = targetView.querySelector('.loading');
+                    const errorState = targetView.querySelector('.error-state');
+                    
+                    loadingOverlay.classList.add('show');
+                    errorState.classList.remove('show');
+                    
+                    iframe.src = `${fileName}?t=${new Date().getTime()}`;
+                    
+                    const sendDataToIframe = () => {
+                        if (loggedInUser && iframe.contentWindow) {
+                            const message = { user: loggedInUser };
+                            if (page === 'dashboard') {
+                                message.type = 'dashboardLogin';
+                                message.username = sessionStorage.getItem('dashboardUsername');
+                                message.password = sessionStorage.getItem('dashboardPassword');
+                            } else if (page === 'dm-planning') {
+                                message.type = 'dmPlanningUserPermissions';
+                            } else if (page === 'dm-report') {
+                                message.type = 'dmReportUserPermissions';
+                            } else { 
+                                message.type = 'loggedInUser';
+                            }
+                            iframe.contentWindow.postMessage(message, '*');
                         }
-                        iframe.contentWindow.postMessage(message, '*');
-                    }
-                };
-                
-                iframe.onload = () => {
-                    loadingOverlay.classList.remove('show');
-                    sendDataToIframe();
-                };
-                iframe.onerror = () => {
-                    loadingOverlay.classList.remove('show');
-                    errorState.classList.add('show');
-                };
+                    };
+                    
+                    iframe.onload = () => {
+                        loadingOverlay.classList.remove('show');
+                        sendDataToIframe();
+                    };
+                    iframe.onerror = () => {
+                        loadingOverlay.classList.remove('show');
+                        errorState.classList.add('show');
+                    };
+                }
             }
             closeSideMenu();
         }
@@ -1614,17 +1572,15 @@
         
         document.addEventListener('DOMContentLoaded', async function() {
             const introOverlay = document.getElementById('introOverlay');
-            // FIX: Updated the intro fade-out delay to match the new animation duration
             setTimeout(() => {
                 introOverlay.classList.add('fade-out');
                 setTimeout(() => introOverlay.remove(), 500);
-            }, 1500);
+            }, 3000);
 
             await fetchGoogleSheetData();
             const storedUser = localStorage.getItem('loggedInUser');
             const lastPage = localStorage.getItem('currentPage');
 
-            // FIX: Delay the display of the main content to allow the intro animation to finish
             setTimeout(() => {
                 if (storedUser) {
                     loggedInUser = JSON.parse(storedUser);
@@ -1648,7 +1604,7 @@
                 } else {
                     showLoginPage();
                 }
-            }, 2000);
+            }, 3500);
 
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
@@ -1670,10 +1626,9 @@
             document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
             
             document.getElementById('refreshButton').addEventListener('click', async () => {
-                // FIX: Refresh logic now re-fetches all necessary data and forces a cache-less reload.
                 showBlurredMessage('Refreshing...', 1000);
-                await fetchGoogleSheetData(); // Re-fetch sheet data for user mapping
-                fetchNotifications(); // Re-fetch notifications
+                await fetchGoogleSheetData(); 
+                fetchNotifications(); 
 
                 if (!currentActiveViewId) return;
 
