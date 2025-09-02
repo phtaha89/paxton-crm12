@@ -601,8 +601,15 @@
                                     <label for="brick-single" class="block text-xs font-medium text-gray-700">Brick</label>
                                     <select id="brick-single" name="brick-single" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                         <option value="" disabled selected>Select DM first</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                     <p id="brick-single-error" class="error-message">Please select a Brick.</p>
+                                </div>
+                                <!-- NEW: Manual Input for "Other" -->
+                                <div id="manual-brick-single-div" class="hidden">
+                                    <label for="manual-brick-single" class="block text-xs font-medium text-gray-700">Manual Brick Entry</label>
+                                    <input type="text" id="manual-brick-single" name="manual-brick-single" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <p id="manual-brick-single-error" class="error-message">Please enter a brick name.</p>
                                 </div>
                                 <div>
                                     <label for="details-single" class="block text-xs font-medium text-gray-700">Comment</label>
@@ -644,13 +651,20 @@
                                 </select>
                                 <p id="meeting-place-error" class="error-message">Please select a meeting place.</p>
                             </div>
-                             <!-- NEW: Event Brick Dropdown -->
+                            <!-- NEW: Event Brick Dropdown -->
                             <div id="event-brick-div" class="hidden">
                                 <label for="event-brick-select" class="block text-xs font-medium text-gray-700">Brick</label>
                                 <select id="event-brick-select" name="event-brick-select" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                     <option value="" disabled selected>Select DM first</option>
+                                    <option value="Other">Other</option>
                                 </select>
                                 <p id="event-brick-error" class="error-message">Please select a brick for the event.</p>
+                            </div>
+                            <!-- NEW: Manual Input for Event "Other" -->
+                            <div id="manual-brick-event-div" class="hidden">
+                                <label for="manual-brick-event" class="block text-xs font-medium text-gray-700">Manual Brick Entry</label>
+                                <input type="text" id="manual-brick-event" name="manual-brick-event" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <p id="manual-brick-event-error" class="error-message">Please enter a brick name.</p>
                             </div>
                             <div id="admin-work-type-div" class="hidden">
                                 <label for="admin-work-type" class="block text-xs font-medium text-gray-700">Admin Work Type</label>
@@ -739,11 +753,18 @@
                     <div class="form-logo"><i class="fas fa-chalkboard-teacher"></i></div>
                     <h1 class="form-title">Coaching Report</h1>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="coaching-med-rep-name" class="block text-xs font-medium text-gray-700">Medical Representative</label>
                         <select id="coaching-med-rep-name" name="coaching-med-rep-name" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="" disabled selected>Select DM first</option>
+                        </select>
+                    </div>
+                    <!-- NEW: Month Dropdown for Coaching Report -->
+                    <div>
+                        <label for="coaching-month-filter" class="block text-xs font-medium text-gray-700">Month</label>
+                        <select id="coaching-month-filter" name="coaching-month-filter" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <!-- Options will be populated by JS -->
                         </select>
                     </div>
                     <div>
@@ -773,6 +794,15 @@
 
             <!-- Monthly Details Tab Content -->
             <div id="monthly-details-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
+                 <!-- NEW: Month Dropdown for Monthly Details -->
+                <div class="flex flex-row justify-start md:justify-center items-center mb-4 space-x-2 print-hidden">
+                    <div>
+                        <label for="monthly-month-filter" class="block text-xs font-medium text-gray-700">Select Month</label>
+                        <select id="monthly-month-filter" name="monthly-month-filter" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                </div>
                 <div id="monthly-details-print-area" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
                     <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
                         <h2 id="monthly-report-title" class="text-xl md:text-2xl font-bold text-gray-800"></h2>
@@ -850,7 +880,6 @@
 							<div id="chart-legend-container-mobile" class="w-full mt-4">
 							</div>
 						</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1098,6 +1127,7 @@
         let myChart = null; // To store the chart instance
         let myChartMobile = null; // To store the mobile chart instance
         let allSupabaseData = []; // Store the fetched masterlist data
+        let currentMonthFilter = '';
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Supabase configuration
@@ -1152,6 +1182,9 @@
             const brickDoubleSelect = document.getElementById('brick-double');
             const brickDoubleVisitsSelect = document.getElementById('brick-double-visits');
             const brickSingleSelect = document.getElementById('brick-single');
+            // NEW: Manual brick input for single visit
+            const manualBrickSingleDiv = document.getElementById('manual-brick-single-div');
+            const manualBrickSingleInput = document.getElementById('manual-brick-single');
             const reportsTableHeader = document.getElementById('reports-table-head');
             const reportsTableBody = document.getElementById('reports-table-body');
             const coachingReportsTableHead = document.getElementById('coaching-reports-table-head');
@@ -1168,6 +1201,9 @@
             const meetingPlaceSelect = document.getElementById('meeting-place-select');
             const eventBrickDiv = document.getElementById('event-brick-div');
             const eventBrickSelect = document.getElementById('event-brick-select');
+            // NEW: Manual brick input for event
+            const manualBrickEventDiv = document.getElementById('manual-brick-event-div');
+            const manualBrickEventInput = document.getElementById('manual-brick-event');
 
 
             // Modal elements
@@ -1227,6 +1263,9 @@
             const activityChartMobileCtx = document.getElementById('activity-chart-mobile').getContext('2d');
             
             const coachingMedRepNameSelect = document.getElementById('coaching-med-rep-name');
+            // NEW: Month dropdowns
+            const coachingMonthFilter = document.getElementById('coaching-month-filter');
+            const monthlyMonthFilter = document.getElementById('monthly-month-filter');
             const coachingStatusFilter = document.getElementById('coaching-status-filter');
             const coachingReportTableContainer = document.getElementById('coaching-report-table-container');
             const coachingReportsTableBody = document.getElementById('coaching-reports-table-body');
@@ -1256,6 +1295,32 @@
             // --- END NEW ---
 
             // --- FUNCTION DEFINITIONS ---
+            
+            function getMonths() {
+                const now = new Date();
+                const months = [];
+                for (let i = 0; i < 12; i++) {
+                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const monthName = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                    const value = d.getFullYear() + '-' + (d.getMonth() + 1).toString().padStart(2, '0');
+                    months.push({ name: monthName, value: value });
+                }
+                return months;
+            }
+
+            function populateMonthDropdowns() {
+                const months = getMonths();
+                const optionsHtml = months.map(m => `<option value="${m.value}">${m.name}</option>`).join('');
+                coachingMonthFilter.innerHTML = optionsHtml;
+                monthlyMonthFilter.innerHTML = optionsHtml;
+                // Set the current month as the default selection
+                const now = new Date();
+                const currentMonthValue = now.getFullYear() + '-' + (now.getMonth() + 1).toString().padStart(2, '0');
+                coachingMonthFilter.value = currentMonthValue;
+                monthlyMonthFilter.value = currentMonthValue;
+                currentMonthFilter = currentMonthValue;
+            }
+
 
             function updateFormVisibility() {
                 const selectedActivity = document.querySelector('input[name="activity-type"]:checked')?.value;
@@ -1273,7 +1338,7 @@
                     leaveForm.classList.remove('hidden');
                 }
             }
-
+            
             function updateVisitTypeVisibility() {
                 const selectedVisitType = visitTypeSelect.value;
                 doubleVisitForm.classList.add('hidden');
@@ -1292,6 +1357,15 @@
                     }
                 } else if (selectedVisitType === 'Single Visit') {
                     singleVisitForm.classList.remove('hidden');
+                    // Hide manual input by default and update the brick list
+                    manualBrickSingleDiv.classList.add('hidden');
+                    const selectedDm = dmNameSelect.value;
+                    if (selectedDm) {
+                        const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
+                        const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
+                        const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
+                        brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions + `<option value="Other">Other</option>`;
+                    }
                 }
             }
             
@@ -1303,6 +1377,7 @@
                 adminWorkTypeDiv.classList.add('hidden');
                 meetingPlaceDiv.classList.add('hidden');
                 eventBrickDiv.classList.add('hidden');
+                manualBrickEventDiv.classList.add('hidden');
 
                 if (selectedEventType === 'Admin Work') {
                     adminWorkTypeDiv.classList.remove('hidden');
@@ -1315,7 +1390,7 @@
                          const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
                          const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                          const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                         eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                         eventBrickSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions + `<option value="Other">Other</option>`;
                     }
                 }
             }
@@ -1871,7 +1946,14 @@
                             }
                         }
                     } else if (visitType === 'Single Visit') {
-                        if (!brickSingleSelect.value) {
+                        let brickValue = brickSingleSelect.value;
+                        if (brickValue === 'Other') {
+                            brickValue = manualBrickSingleInput.value.trim();
+                            if (!brickValue) {
+                                showError('manual-brick-single-error', 'Please enter a brick name.');
+                                isValid = false;
+                            }
+                        } else if (!brickValue) {
                             showError('brick-single-error', 'Please select a Brick.');
                             isValid = false;
                         }
@@ -1884,7 +1966,7 @@
                                 dm_name: dmName,
                                 activity_type: `Visits (Single Visit)`,
                                 period: document.getElementById('period-single').value,
-                                brick: brickSingleSelect.value,
+                                brick: brickValue,
                                 med_rep: 'N/A',
                                 comment: document.getElementById('details-single').value,
                             };
@@ -1907,7 +1989,13 @@
                         }
                     } else if (eventType === 'Event') {
                         brickValue = eventBrickSelect.value;
-                         if (!brickValue) {
+                        if (brickValue === 'Other') {
+                            brickValue = manualBrickEventInput.value.trim();
+                            if (!brickValue) {
+                                showError('manual-brick-event-error', 'Please enter a brick name.');
+                                isValid = false;
+                            }
+                        } else if (!brickValue) {
                             showError('event-brick-error', 'Please select a brick for the event.');
                             isValid = false;
                         }
@@ -2129,14 +2217,16 @@
                     showNotification('Please select a District Manager to analyze the reports.', 'error');
                     return;
                 }
+                const selectedMonth = monthlyMonthFilter.value;
+                const [year, month] = selectedMonth.split('-');
+                const startOfMonth = new Date(Date.UTC(year, month - 1, 1)).toISOString();
+                const endOfMonth = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)).toISOString();
 
                 const now = new Date();
                 const monthName = now.toLocaleString('en-US', { month: 'long' });
                 const yearShort = now.getFullYear().toString();
                 monthlyReportTitle.textContent = `Month Report Details for ${monthName} ${yearShort}`;
 
-                const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-                const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999)).toISOString();
                 
                 const { data: monthlyReports, error } = await supabase
                     .from(REPORTS_TABLE)
@@ -2481,11 +2571,11 @@
 
                 // 3. Generate PDF from the constructed element
                 const opt = {
-                    margin: 0.5,
-                    filename: `Monthly-Report-${dmName}-${new Date().toISOString().slice(0,10)}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
+                    margin:      0.5,
+                    filename:    `Monthly-Report-${dmName}-${new Date().toISOString().slice(0,10)}.pdf`,
+                    image:       { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
                 html2pdf().from(reportElement).set(opt).save();
             });
@@ -2538,15 +2628,18 @@
                 coachingReportsTableBody.innerHTML = '';
                 coachingReportsTableHead.innerHTML = '';
                 
-                const now = new Date();
-                const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-                
+                const selectedMonth = coachingMonthFilter.value;
+                const [year, month] = selectedMonth.split('-');
+                const startOfMonth = new Date(Date.UTC(year, month - 1, 1)).toISOString();
+                const endOfMonth = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)).toISOString();
+
                 let query = supabase
                     .from(REPORTS_TABLE)
                     .select('id, created_at, brick, comment, med_rep')
                     .eq('dm_name', dmName)
                     .eq('activity_type', 'Visits (Double Visit)')
                     .gte('created_at', startOfMonth)
+                    .lte('created_at', endOfMonth)
                     .order('created_at', { ascending: false });
 
                 if (medRepName) {
@@ -2554,7 +2647,7 @@
                 }
 
                 const { data: doubleVisits, error } = await query;
-                                
+                                        
                 if (error) {
                     showNotification('Could not fetch double visits.', 'error');
                     console.error('Coaching fetch error:', error);
@@ -2791,11 +2884,11 @@
                 
                 const medRepName = document.getElementById('view-med-rep-name').textContent || 'CoachingReport';
                 const opt = {
-                    margin:       0.5,
-                    filename:     `Coaching-Report-${medRepName}-${new Date().toISOString().slice(0,10)}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    margin:      0.5,
+                    filename:    `Coaching-Report-${medRepName}-${new Date().toISOString().slice(0,10)}.pdf`,
+                    image:       { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
                 html2pdf().from(element).set(opt).save();
             });
@@ -2810,6 +2903,7 @@
             async function initializeReportSystem(user) {
                 await fetchDataFromSupabase(); // Use the new Supabase fetch function
                 
+                populateMonthDropdowns();
                 dmNameSelect.innerHTML = `<option value="" disabled selected>Select DM</option>`;
 
                 if (user && user.title && user.title.toLowerCase() === 'admin') {
@@ -2865,7 +2959,11 @@
                 if (targetBrickSelects && targetBrickSelects.length > 0) {
                     const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                     targetBrickSelects.forEach(sel => {
-                        if(sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                        if(sel.id === 'brick-single' || sel.id === 'event-brick-select') {
+                            sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions + `<option value="Other">Other</option>`;
+                        } else if(sel) {
+                            sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
+                        }
                     });
                 }
             };
@@ -2875,7 +2973,7 @@
                 const medRepBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
                 const allMedRepBricksOptions = medRepBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
                 targetBrickSelects.forEach(sel => {
-                    if (sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allMedRepBricksOptions;
+                    if(sel) sel.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allMedRepBricksOptions;
                 });
             }
 
@@ -2927,20 +3025,27 @@
             // Single Visit Logic
             visitTypeSelect.addEventListener('change', (event) => {
                 updateVisitTypeVisibility();
-                if(event.target.value === 'Single Visit') {
-                    const selectedDm = dmNameSelect.value;
-                    if(selectedDm) {
-                        const filteredData = allSupabaseData.filter(row => row['District Manager'] === selectedDm);
-                        const dmBricks = [...new Set(filteredData.map(item => item['Brick']).filter(Boolean))];
-                        const allDmBricksOptions = dmBricks.map(brick => `<option value="${brick}">${brick}</option>`).join('');
-                        brickSingleSelect.innerHTML = `<option value="" disabled selected>Select Brick</option>` + allDmBricksOptions;
-                    }
+            });
+            
+            brickSingleSelect.addEventListener('change', (event) => {
+                if (event.target.value === 'Other') {
+                    manualBrickSingleDiv.classList.remove('hidden');
+                } else {
+                    manualBrickSingleDiv.classList.add('hidden');
                 }
             });
 
             // Event Form Logic
             eventTypeSelect.addEventListener('change', (event) => {
                 updateEventTypeVisibility();
+            });
+
+            eventBrickSelect.addEventListener('change', (event) => {
+                if(event.target.value === 'Other') {
+                    manualBrickEventDiv.classList.remove('hidden');
+                } else {
+                    manualBrickEventDiv.classList.add('hidden');
+                }
             });
 
             // Add listeners for the coaching tab dropdowns
@@ -2959,6 +3064,19 @@
                     fetchAndRenderCoachingReports(dmName, medRepName);
                 }
             });
+
+            coachingMonthFilter.addEventListener('change', () => {
+                const dmName = dmNameSelect.value;
+                const medRepName = coachingMedRepNameSelect.value;
+                if (dmName) {
+                    fetchAndRenderCoachingReports(dmName, medRepName);
+                }
+            });
+            
+            monthlyMonthFilter.addEventListener('change', () => {
+                renderAnalysisPage();
+            });
+
 
             activityRadios.forEach(radio => radio.addEventListener('change', updateFormVisibility));
             
