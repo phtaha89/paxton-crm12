@@ -1297,16 +1297,16 @@
             // --- FUNCTION DEFINITIONS ---
             
             function getMonths() {
-                const now = new Date();
-                const months = [];
-                for (let i = 0; i < 12; i++) {
-                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                    const monthName = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-                    const value = d.getFullYear() + '-' + (d.getMonth() + 1).toString().padStart(2, '0');
-                    months.push({ name: monthName, value: value });
-                }
-                return months;
-            }
+    const months = [];
+    for (let i = 0; i < 12; i++) {
+        const d = new Date(2025, i, 1); // Use 2025 as the year
+        const monthName = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        const value = d.getFullYear() + '-' + (d.getMonth() + 1).toString().padStart(2, '0');
+        months.push({ name: monthName, value: value });
+    }
+    return months;
+}
+
 
             function populateMonthDropdowns() {
                 const months = getMonths();
