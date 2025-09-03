@@ -57,6 +57,11 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
+
+        /* FIX: Preserve line breaks in coaching conclusions */
+        #view-conclusions {
+            white-space: pre-wrap;
+        }
         
         /* --- Notification Styles --- */
         .notification {
@@ -417,10 +422,10 @@
         <!-- Sidebar Navigation for PC -->
         <nav class="side-navigation print-hidden">
             <div class="flex justify-between items-center mb-4">
-                 <h2 id="sidebar-title" class="text-lg font-bold text-gray-800">DM Portal</h2>
-                 <button id="toggle-sidebar" class="text-gray-500 hover:text-gray-700 transition hidden md:block">
-                     <i class="fas fa-bars"></i>
-                 </button>
+                <h2 id="sidebar-title" class="text-lg font-bold text-gray-800">DM Portal</h2>
+                <button id="toggle-sidebar" class="text-gray-500 hover:text-gray-700 transition hidden md:block">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
 
             <div class="main-tab-group">
@@ -794,22 +799,22 @@
 
             <!-- Monthly Details Tab Content -->
             <div id="monthly-details-tab-content" class="p-4 md:p-8 space-y-4 md:space-y-6 hidden">
-                 <!-- NEW: Month Dropdown for Monthly Details -->
-                <div class="flex flex-row justify-start md:justify-center items-center mb-4 space-x-2 print-hidden">
-                    <div>
-                        <label for="monthly-month-filter" class="block text-xs font-medium text-gray-700">Select Month</label>
-                        <select id="monthly-month-filter" name="monthly-month-filter" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <!-- Options will be populated by JS -->
-                        </select>
-                    </div>
-                </div>
                 <div id="monthly-details-print-area" class="container mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-8 space-y-4 md:space-y-6">
+                    <!-- FIX: Month Dropdown moved inside the report area -->
+                    <div class="flex flex-row justify-center items-center mb-4 print-hidden">
+                        <div>
+                            <label for="monthly-month-filter" class="block text-xs font-medium text-gray-700 text-center">Select Month</label>
+                            <select id="monthly-month-filter" name="monthly-month-filter" class="mt-1 block w-full p-1 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <!-- Options will be populated by JS -->
+                            </select>
+                        </div>
+                    </div>
                     <div class="flex flex-col md:flex-row justify-between items-center mb-4 space-y-2 md:space-y-0">
                         <h2 id="monthly-report-title" class="text-xl md:text-2xl font-bold text-gray-800"></h2>
                         <div class="flex space-x-2 print-hidden">
-                             <button id="details-btn" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
-                                 <i class="fas fa-info-circle mr-1"></i> Details
-                             </button>
+                            <button id="details-btn" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
+                                <i class="fas fa-info-circle mr-1"></i> Details
+                            </button>
                             <button id="download-xlsx-btn" class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
                                 <i class="fas fa-file-excel mr-1"></i> XLSX
                             </button>
@@ -1092,10 +1097,10 @@
                     </div>
                 </div>
                  <div class="flex justify-end space-x-2 border-t pt-4 print-hidden">
-                     <button id="print-coaching-btn" class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
-                         <i class="fas fa-print mr-1"></i> Print
-                     </button>
-                     <button id="close-coaching-view-modal-2" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
+                    <button id="print-coaching-btn" class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs font-medium rounded-md transition duration-150 ease-in-out flex items-center">
+                        <i class="fas fa-print mr-1"></i> Print
+                    </button>
+                    <button id="close-coaching-view-modal-2" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md shadow-sm transition">OK</button>
                  </div>
             </div>
         </div>
@@ -1297,15 +1302,15 @@
             // --- FUNCTION DEFINITIONS ---
             
             function getMonths() {
-    const months = [];
-    for (let i = 0; i < 12; i++) {
-        const d = new Date(2025, i, 1); // Use 2025 as the year
-        const monthName = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-        const value = d.getFullYear() + '-' + (d.getMonth() + 1).toString().padStart(2, '0');
-        months.push({ name: monthName, value: value });
-    }
-    return months;
-}
+				const months = [];
+				for (let i = 0; i < 12; i++) {
+					const d = new Date(2025, i, 1); // Use 2025 as the year
+					const monthName = d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+					const value = d.getFullYear() + '-' + (d.getMonth() + 1).toString().padStart(2, '0');
+					months.push({ name: monthName, value: value });
+				}
+				return months;
+			}
 
 
             function populateMonthDropdowns() {
@@ -1348,12 +1353,12 @@
                     doubleVisitForm.classList.remove('hidden');
                     const selectedMedRep = medRepNameSelect.value;
                     if(selectedMedRep) {
-                       doubleVisitModeDiv.classList.remove('hidden');
-                       manualDoubleVisitForm.classList.add('hidden');
-                       visitsModalTriggerDiv.classList.add('hidden');
-                       doubleVisitModeRadios.forEach(radio => radio.checked = false); // Reset radio buttons
+                        doubleVisitModeDiv.classList.remove('hidden');
+                        manualDoubleVisitForm.classList.add('hidden');
+                        visitsModalTriggerDiv.classList.add('hidden');
+                        doubleVisitModeRadios.forEach(radio => radio.checked = false); // Reset radio buttons
                     } else {
-                       doubleVisitModeDiv.classList.add('hidden');
+                        doubleVisitModeDiv.classList.add('hidden');
                     }
                 } else if (selectedVisitType === 'Single Visit') {
                     singleVisitForm.classList.remove('hidden');
@@ -1504,32 +1509,30 @@
 
 
             const showRowDetailsModal = (report) => {
-    rowDetailsContent.innerHTML = '';
-    const detailsHtml = Object.entries(report).map(([key, value]) => {
-        if (key === 'id' || key === 'dm_name') return '';
-        let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-        if (key === 'created_at') {
-            formattedKey = 'Date & Time';
-            const date = new Date(value);
-            const formattedValue = date.toLocaleString(); // Displays the actual time in the user's local timezone
-            return `
-                <div class="p-2 border-b last:border-b-0">
-                    <p class="font-semibold text-gray-800">${formattedKey}:</p>
-                    <p class="text-sm text-gray-600 break-words">${formattedValue}</p>
-                </div>
-            `;
-        }
-        return `
-            <div class="p-2 border-b last:border-b-0">
-                <p class="font-semibold text-gray-800">${formattedKey}:</p>
-                <p class="text-sm text-gray-600 break-words">${value}</p>
-            </div>
-        `;
-    }).join('');
-    rowDetailsContent.innerHTML = detailsHtml;
-    rowDetailsModal.classList.remove('hidden');
-};
+                rowDetailsContent.innerHTML = '';
+                const detailsHtml = Object.entries(report).map(([key, value]) => {
+                    if (key === 'id' || key === 'dm_name') return '';
+                    let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    let formattedValue;
+                    
+                    // FIX: Standardize date/time formatting
+                    if (key === 'created_at') {
+                        formattedKey = 'Date & Time';
+                        formattedValue = new Date(value).toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
+                    } else {
+                        formattedValue = value;
+                    }
 
+                    return `
+                        <div class="p-2 border-b last:border-b-0">
+                            <p class="font-semibold text-gray-800">${formattedKey}:</p>
+                            <p class="text-sm text-gray-600 break-words">${formattedValue}</p>
+                        </div>
+                    `;
+                }).join('');
+                rowDetailsContent.innerHTML = detailsHtml;
+                rowDetailsModal.classList.remove('hidden');
+            };
 
             const hideRowDetailsModal = () => {
                 rowDetailsModal.classList.add('hidden');
@@ -1649,18 +1652,14 @@
                 return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
             };
             
-            const formatUTCTime = (dateString) => {
+            // FIX: Renamed and updated function to consistently use local timezone
+            const formatLocalTime = (dateString) => {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
-                // The DB stores UTC time, so we need to get UTC values to display the correct time
-                const hours = date.getUTCHours();
-                const minutes = date.getUTCMinutes();
-                const seconds = date.getUTCSeconds();
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                const formattedHours = hours % 12 || 12; // Convert to 12-hour format
-                const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-                const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
-                return `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+                return date.toLocaleTimeString('en-US', {
+                    timeZone: 'Africa/Cairo',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+                });
             };
 
             const renderReports = (reports, dmName = '', searchTerm = '') => {
@@ -1719,11 +1718,13 @@
                             newCell.innerHTML = `<button class="delete-report-btn text-red-500 hover:text-red-700" data-id="${report.id}"><i class="fas fa-trash-alt"></i></button>`;
                         } else if (key === 'day_date') {
                             const date = new Date(report.created_at);
-                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
-                            const formattedDateWithoutYear = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+                            // FIX: Use consistent timezone for date
+                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Africa/Cairo' });
+                            const formattedDateWithoutYear = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Africa/Cairo' });
                             newCell.textContent = `${dayName} - ${formattedDateWithoutYear}`;
                         } else if (key === 'created_at') {
-                            newCell.textContent = formatUTCTime(report.created_at);
+                            // FIX: Use updated local time function
+                            newCell.textContent = formatLocalTime(report.created_at);
                         } else if (key === 'comment') {
                             const originalComment = report[key] || 'N/A';
                             const truncatedComment = originalComment.length > 30 ? originalComment.substring(0, 30) + '...' : originalComment;
@@ -2230,10 +2231,11 @@
                 const startOfMonth = new Date(Date.UTC(year, month - 1, 1)).toISOString();
                 const endOfMonth = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)).toISOString();
 
-                const now = new Date();
-                const monthName = now.toLocaleString('en-US', { month: 'long' });
-                const yearShort = now.getFullYear().toString();
-                monthlyReportTitle.textContent = `Month Report Details for ${monthName} ${yearShort}`;
+                const selectedDate = new Date(year, month - 1, 1);
+                const monthName = selectedDate.toLocaleString('en-US', { month: 'long' });
+                const yearShort = selectedDate.getFullYear().toString();
+                // FIX: Update title text
+                monthlyReportTitle.textContent = `Details for ${monthName} ${yearShort}`;
 
                 
                 const { data: monthlyReports, error } = await supabase
@@ -2323,7 +2325,7 @@
                         singleVisitItem.innerHTML = `<span>Total Single Visits:</span> ${calculateTotalDays(analysis.visits.single)} day(s)`;
                         singleVisitItem.addEventListener('click', () => {
                             showDatesModal(`Single Visit Dates`, analysis.visits.single.map(v => ({date: v.created_at.substring(0,10), period: v.period})));
-                            });
+                        });
                         singleVisitsDetailsDiv.appendChild(singleVisitItem);
                 } else {
                     singleVisitsDetailsDiv.innerHTML += `<p class="text-sm text-gray-500">No single visits recorded this month.</p>`;
@@ -2498,7 +2500,7 @@
 
                 // Add Title
                 reportHtml += `<h1>Monthly Report for ${dmName}</h1>`;
-                reportHtml += `<h2>${monthlyReportTitle.textContent.replace('Month Report Details for ', '')}</h2>`;
+                reportHtml += `<h2>${monthlyReportTitle.textContent}</h2>`;
 
                 // Add Summary Boxes
                 const summaryBoxes = document.getElementById('analysis-summary-boxes').cloneNode(true);
@@ -2579,11 +2581,11 @@
 
                 // 3. Generate PDF from the constructed element
                 const opt = {
-                    margin:      0.5,
-                    filename:    `Monthly-Report-${dmName}-${new Date().toISOString().slice(0,10)}.pdf`,
-                    image:       { type: 'jpeg', quality: 0.98 },
+                    margin:       0.5,
+                    filename:     `Monthly-Report-${dmName}-${new Date().toISOString().slice(0,10)}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
-                    jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
                 html2pdf().from(reportElement).set(opt).save();
             });
@@ -2655,7 +2657,7 @@
                 }
 
                 const { data: doubleVisits, error } = await query;
-                                        
+                                                
                 if (error) {
                     showNotification('Could not fetch double visits.', 'error');
                     console.error('Coaching fetch error:', error);
@@ -2892,11 +2894,11 @@
                 
                 const medRepName = document.getElementById('view-med-rep-name').textContent || 'CoachingReport';
                 const opt = {
-                    margin:      0.5,
-                    filename:    `Coaching-Report-${medRepName}-${new Date().toISOString().slice(0,10)}.pdf`,
-                    image:       { type: 'jpeg', quality: 0.98 },
+                    margin:       0.5,
+                    filename:     `Coaching-Report-${medRepName}-${new Date().toISOString().slice(0,10)}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas: { scale: 2, useCORS: true },
-                    jsPDF:       { unit: 'in', format: 'letter', orientation: 'portrait' }
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
                 };
                 html2pdf().from(element).set(opt).save();
             });
