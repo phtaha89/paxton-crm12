@@ -1516,10 +1516,17 @@
                     let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                     let formattedValue = value;
 
-                    // FIX: Standardize date/time formatting to match table
+                    // FIX: Standardize date/time formatting to match table using UTC parts
                     if (key === 'created_at') {
                         formattedKey = 'Date & Time';
-                        formattedValue = value ? new Date(value).toLocaleDateString('en-US', { timeZone: 'Africa/Cairo' }) + ', ' + formatLocalTime(value) : 'N/A';
+                        if (value) {
+                            const date = new Date(value);
+                            const datePart = date.toLocaleDateString('en-US', { timeZone: 'UTC' });
+                            const timePart = formatLocalTime(value);
+                            formattedValue = `${datePart}, ${timePart}`;
+                        } else {
+                            formattedValue = 'N/A';
+                        }
                     }
 
                     return `
@@ -1651,14 +1658,21 @@
                 return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
             };
             
-            // FIX: Renamed and updated function to consistently use local timezone
+            // FIX: This function now formats time using the raw UTC hours from the timestamp, ignoring local timezone conversion.
             const formatLocalTime = (dateString) => {
                 if (!dateString) return 'N/A';
                 const date = new Date(dateString);
-                return date.toLocaleTimeString('en-US', {
-                    timeZone: 'Africa/Cairo',
-                    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
-                });
+                
+                const hours = date.getUTCHours();
+                const minutes = date.getUTCMinutes();
+                const seconds = date.getUTCSeconds();
+
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const formattedHours = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
+                const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+                const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+
+                return `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
             };
 
             const renderReports = (reports, dmName = '', searchTerm = '') => {
@@ -1717,9 +1731,9 @@
                             newCell.innerHTML = `<button class="delete-report-btn text-red-500 hover:text-red-700" data-id="${report.id}"><i class="fas fa-trash-alt"></i></button>`;
                         } else if (key === 'day_date') {
                             const date = new Date(report.created_at);
-                            // FIX: Use consistent timezone for date
-                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'Africa/Cairo' });
-                            const formattedDateWithoutYear = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Africa/Cairo' });
+                            // FIX: Use UTC for date parts to prevent day from changing due to timezone offset
+                            const dayName = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+                            const formattedDateWithoutYear = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
                             newCell.textContent = `${dayName} - ${formattedDateWithoutYear}`;
                         } else if (key === 'created_at') {
                             // FIX: Use updated local time function
