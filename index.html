@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
+    <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Supabase CDN for database interaction -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* CSS Variables for easier theme management and consistency - Adapted from dashboard */
@@ -692,22 +695,12 @@
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: background-color 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .notification-item:hover { background-color: #f1f5f9; }
         .notification-item:last-child { border-bottom: none; }
-        .notification-item i {
-            color: var(--background-gradient-end);
-            width: 1.2em;
-            text-align: center;
-        }
-        .notification-content { flex-grow: 1; }
         .notification-title {
             font-weight: 600;
             color: var(--text-color-dark);
-            font-size: 0.9rem;
         }
         .notification-rep {
             font-size: 0.8rem;
@@ -719,7 +712,7 @@
             margin-top: 4px;
         }
 
-        /* Generic Modal Styles */
+        /* Request Modal Styles */
         .custom-modal-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -747,9 +740,6 @@
             transform: scale(0.9);
             opacity: 0;
             transition: transform var(--transition-duration-normal) ease, opacity var(--transition-duration-normal) ease;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
         }
         .custom-modal-overlay.show .custom-modal-content {
             transform: scale(1);
@@ -762,7 +752,6 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
             margin-bottom: 15px;
-            flex-shrink: 0;
         }
         .modal-header h2 {
             font-size: 1.2rem;
@@ -781,8 +770,6 @@
             font-size: 0.9rem;
             color: var(--text-color-dark);
             line-height: 1.6;
-            overflow-y: auto;
-            padding-right: 10px;
         }
         .modal-body .detail-pair { margin-bottom: 12px; }
         .modal-body .detail-pair strong {
@@ -793,7 +780,7 @@
             font-size: 0.8rem;
             text-transform: uppercase;
         }
-        .modal-body .detail-pair span, .modal-body .detail-pair p { color: var(--text-color-light); margin-top: 0; }
+        .modal-body .detail-pair span { color: var(--text-color-light); }
         .modal-footer {
             margin-top: 20px;
             padding-top: 15px;
@@ -801,20 +788,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-shrink: 0;
         }
-        .modal-footer button {
-             padding: 8px 16px;
-             border: none;
-             border-radius: 8px;
-             font-weight: 500;
-             cursor: pointer;
-             transition: background-color 0.2s ease;
-        }
-        .modal-footer .approve-btn { background-color: #10b981; color: white; }
-        .modal-footer .approve-btn:hover { background-color: #059669; }
-        .modal-footer .reject-btn { background-color: #ef4444; color: white; }
-        .modal-footer .reject-btn:hover { background-color: #dc2626; }
         .modal-footer label {
             font-weight: 600;
             color: var(--text-color-dark);
@@ -827,20 +801,6 @@
             font-size: 0.9rem;
             cursor: pointer;
         }
-        /* Expense Modal Specifics */
-        .expense-items-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-            margin-top: 10px;
-        }
-        .expense-items-table th, .expense-items-table td {
-            padding: 6px;
-            border: 1px solid var(--border-color);
-            text-align: left;
-        }
-        .expense-items-table th { background-color: #f8fafc; }
-        .expense-items-table .amount-col { text-align: right; }
 
         /* Responsive adjustments */
         @media (max-width: 1024px) {
@@ -896,6 +856,7 @@
     </style>
 </head>
 <body>
+    <!-- New Professional Intro Animation Overlay -->
     <div id="introOverlay" class="intro-overlay">
         <div class="intro-content">
             <div class="logo-container">
@@ -906,10 +867,12 @@
         </div>
     </div>
 
+    <!-- Full-page Blurred Message Overlay (for login/logout messages) -->
     <div id="fullPageMessageOverlay" class="full-page-message-overlay">
         <p id="fullPageOverlayMessage"></p>
     </div>
 
+    <!-- Login Page -->
     <div id="loginPage" class="login-container hidden">
         <div class="login-box">
             <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="login-logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/3498db/FFFFFF?text=Logo';">
@@ -927,6 +890,7 @@
         </div>
     </div>
 
+    <!-- Main Application Content (hidden until login) -->
     <div id="appContent" class="container hidden">
         <div class="header">
             <div class="header-inner">
@@ -939,7 +903,8 @@
                         <i class="fas fa-bell"></i>
                         <span class="notification-count" id="notificationCount">0</span>
                         <div class="notification-dropdown hidden" id="notificationDropdown">
-                            </div>
+                            <!-- Notification items will be inserted here -->
+                        </div>
                     </div>
                 </div>
                 <div id="userCard" class="user-card hidden">
@@ -952,6 +917,7 @@
             </div>
         </div>
 
+        <!-- Home View: This section will display the main navigation cards -->
         <div id="homeView" class="home-view">
             <div class="banner">
                 <div class="status-indicator"></div>
@@ -962,9 +928,11 @@
                 </div>
             </div>
             <div class="home-grid">
-                </div>
+                <!-- Cards will be dynamically inserted here by JavaScript -->
+            </div>
         </div>
 
+        <!-- Full Page Views -->
         <div id="crmView" class="full-page-view hidden">
             <div class="loading" id="loadingCrm"><div class="spinner"></div><div class="loading-text">Loading CRM...</div></div>
             <div class="error-state" id="errorCrm"><div class="error-icon">⚠️</div><div class="error-title">CRM Page Not Found</div><div class="error-text">The CRM file could not be loaded.</div></div>
@@ -1018,45 +986,34 @@
     </div>
     <footer class="footer">Developed by DrTahaDesigns</footer>
 
+    <!-- Side Menu -->
     <div id="sideMenuOverlay" class="side-menu-overlay"></div>
     <div id="sideMenu" class="side-menu">
         <div class="side-menu-header">
             <h3>Navigation</h3>
             <button id="closeMenuButton" class="close-menu-button"><i class="fas fa-times"></i></button>
         </div>
-        <nav class="side-menu-nav"></nav>
+        <nav class="side-menu-nav"><!-- Cards will be dynamically inserted here --></nav>
         <div class="side-menu-logout">
             <button id="sideMenuLogoutButton" class="side-menu-logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </div>
     
-    <div id="expenseModal" class="custom-modal-overlay">
-        <div class="custom-modal-content">
-            <div class="modal-header">
-                <h2 id="modalExpenseTitle">Expense Report Details</h2>
-                <button id="modalExpenseCloseButton" class="close-modal-button">&times;</button>
-            </div>
-            <div id="modalExpenseDetails" class="modal-body">
-                </div>
-            <div class="modal-footer">
-                <button id="modalExpenseApproveBtn" class="approve-btn">Approve</button>
-                <button id="modalExpenseRejectBtn" class="reject-btn">Reject</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Request Details Modal -->
     <div id="requestModal" class="custom-modal-overlay">
         <div class="custom-modal-content">
             <div class="modal-header">
                 <h2 id="modalRequestTitle">Request Details</h2>
-                <button id="modalRequestCloseButton" class="close-modal-button">&times;</button>
+                <button id="modalCloseButton" class="close-modal-button">&times;</button>
             </div>
             <div id="modalRequestDetails" class="modal-body">
-                </div>
+                <!-- Request details will be populated here -->
+            </div>
             <div class="modal-footer">
                 <label for="modalStatusSelect">Status:</label>
                 <select id="modalStatusSelect">
-                    </select>
+                    <!-- Status options will be populated here -->
+                </select>
             </div>
         </div>
     </div>
@@ -1071,10 +1028,7 @@
         let loggedInUser = null;
         let googleSheetData = [];
         let lastPageHistory = [];
-        // --- MODIFICATION: Changed to separate channels for clarity ---
-        let requestsChannel = null;
-        let expensesChannel = null;
-        let activeExpenseId = null; // To store the ID of the expense being viewed in the modal
+        let notificationChannel = null;
 
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRGZVMTCJ53ACJBwYVpyBpCFyDn4lYfMlbbldKbRXfnmsN14APuBIJm2jlDMGhPpYi5xXUp4z1YFkte/pub?gid=0&single=true&output=csv';
 
@@ -1113,8 +1067,7 @@
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const csvText = await response.text();
                 googleSheetData = parseCSV(csvText);
-            } catch (error)
-                {
+            } catch (error) {
                 console.error('Error fetching or parsing Google Sheet data:', error);
             }
         }
@@ -1142,147 +1095,100 @@
                 document.getElementById('userCardName').textContent = loggedInUser.username;
                 document.getElementById('userCardTitle').textContent = loggedInUser.title;
                 userCard.classList.remove('hidden');
-                fetchAllNotifications(); // Initial fetch
+                fetchNotifications(); // Initial fetch
             } else {
                 userCard.classList.add('hidden');
                 document.getElementById('notificationBell').classList.add('hidden');
             }
         }
         
-        // --- NEW: Helper function to format expense report type for display ---
-        function getReportTypeDisplayString(report) {
-            // This function is a simplified version from expenses.html for notification purposes
-            const details = JSON.parse(report.details || '{}');
-            if (report.role === 'District Manager') {
-                return details.reportType === 'Trip' ? `Trip: ${details.purpose}` : 'Other Expenses';
-            } else { // Medical Rep
-                return `Daily Log`;
-            }
-        }
-
-        // --- MODIFIED: Renamed and expanded to fetch both requests and expenses ---
-        async function fetchAllNotifications() {
+        async function fetchNotifications() {
             const notificationBell = document.getElementById('notificationBell');
             const notificationCount = document.getElementById('notificationCount');
             const notificationDropdown = document.getElementById('notificationDropdown');
 
-            if (!loggedInUser || loggedInUser.title === 'Medical Representative') {
+            if (!loggedInUser) return;
+
+            if (loggedInUser.title === 'Medical Representative') {
                 notificationBell.classList.add('hidden');
                 return;
             }
 
-            // --- 1. Fetch Pending Requests ---
-            let requestQuery = supabase.from('requests').select('*').eq('status', 'Requested');
+            let query = supabase.from('requests').select('*').eq('status', 'Requested');
+            
             if (loggedInUser.title === 'District Manager') {
                 const dmReps = googleSheetData
                     .filter(row => row['District Manager'] === loggedInUser.username)
                     .map(row => row['medical rep']);
-                requestQuery = dmReps.length > 0 ? requestQuery.in('medRep', dmReps) : requestQuery.eq('medRep', 'null'); // Prevent fetching if no reps
+                
+                if (dmReps.length > 0) {
+                    query = query.in('medRep', dmReps);
+                } else {
+                    notificationBell.classList.add('hidden');
+                    return;
+                }
             }
             
-            // --- 2. Fetch Pending Expenses ---
-            let expenseQuery = supabase.from('expenses').select('*').eq('status', 'Pending');
-            if (loggedInUser.title === 'District Manager') {
-                 const dmReps = googleSheetData
-                    .filter(row => row['District Manager'] === loggedInUser.username)
-                    .map(row => row['medical rep']);
-                expenseQuery = dmReps.length > 0 ? expenseQuery.in('employee_name', dmReps) : expenseQuery.eq('employee_name', 'null');
+            const { data, error } = await query.order('date', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching notifications:', error);
+                return;
             }
-            
-            // --- 3. Execute queries and combine results ---
-            const [
-                { data: requests, error: reqError },
-                { data: expenses, error: expError }
-            ] = await Promise.all([requestQuery, expenseQuery]);
 
-            if (reqError) console.error('Error fetching requests:', reqError);
-            if (expError) console.error('Error fetching expenses:', expError);
-            
-            const formattedRequests = (requests || []).map(r => ({
-                id: r.id,
-                title: r.requestTitle,
-                subtitle: `By: ${r.medRep}`,
-                date: new Date(r.date),
-                type: 'request'
-            }));
-
-            const formattedExpenses = (expenses || []).map(e => ({
-                id: e.id,
-                title: `Expense: ${getReportTypeDisplayString(e)}`,
-                subtitle: `By: ${e.employee_name}`,
-                date: new Date(e.report_date),
-                type: 'expense'
-            }));
-            
-            const allNotifications = [...formattedRequests, ...formattedExpenses]
-                .sort((a, b) => b.date - a.date); // Sort newest first
-
-            if (allNotifications.length > 0) {
+            if (data.length > 0) {
                 const currentCount = parseInt(notificationCount.textContent, 10);
-                notificationCount.textContent = allNotifications.length;
+                notificationCount.textContent = data.length;
                 notificationBell.classList.remove('hidden');
 
-                if (allNotifications.length > currentCount) {
+                if (data.length > currentCount) {
                     notificationCount.classList.add('updated');
-                    setTimeout(() => notificationCount.classList.remove('updated'), 600);
+                    setTimeout(() => {
+                        notificationCount.classList.remove('updated');
+                    }, 600);
                 }
 
-                notificationDropdown.innerHTML = ''; // Clear previous items
-                allNotifications.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'notification-item';
-                    div.dataset.id = item.id;
-                    div.dataset.type = item.type; // 'request' or 'expense'
-                    
-                    const iconClass = item.type === 'request' ? 'fas fa-file-alt' : 'fas fa-receipt';
-
-                    div.innerHTML = `
-                        <i class="${iconClass}"></i>
-                        <div class="notification-content">
-                            <div class="notification-title">${item.title}</div>
-                            <div class="notification-rep">${item.subtitle}</div>
-                            <div class="notification-date">${item.date.toLocaleDateString('en-GB')}</div>
-                        </div>
-                    `;
-                    div.addEventListener('click', () => {
-                        if (item.type === 'request') {
-                            showRequestModal(item.id);
-                        } else {
-                            showExpenseModal(item.id);
-                        }
-                        notificationDropdown.classList.add('hidden');
+                notificationDropdown.innerHTML = '';
+                data.forEach(req => {
+                    const item = document.createElement('div');
+                    item.className = 'notification-item';
+                    item.dataset.requestId = req.id;
+                    const requestDate = new Date(req.date).toLocaleDateString('en-GB', {
+                        day: '2-digit', month: 'short', year: 'numeric'
                     });
-                    notificationDropdown.appendChild(div);
+
+                    item.innerHTML = `
+                        <div class="notification-title">${req.requestTitle}</div>
+                        <div class="notification-rep">By: ${req.medRep}</div>
+                        <div class="notification-date">${requestDate}</div>
+                    `;
+                    item.addEventListener('click', () => showRequestModal(req.id));
+                    notificationDropdown.appendChild(item);
                 });
+
             } else {
                 notificationBell.classList.add('hidden');
             }
         }
 
-        // --- MODIFIED: Renamed and expanded to subscribe to both tables ---
-        function subscribeToAllNotifications() {
-            // Clean up old subscriptions if they exist
-            if (requestsChannel) supabase.removeChannel(requestsChannel);
-            if (expensesChannel) supabase.removeChannel(expensesChannel);
+        function subscribeToNotifications() {
+            if (notificationChannel) {
+                supabase.removeChannel(notificationChannel);
+                notificationChannel = null;
+            }
 
-            const commonCallback = (payload) => {
-                console.log('Real-time change received!', payload);
-                // No need for timeout, fetch directly for instant update
-                fetchAllNotifications(); 
-            };
-            
-            // Channel for 'requests' table
-            requestsChannel = supabase.channel('public:requests')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, commonCallback)
-                .subscribe(status => {
-                    if (status === 'SUBSCRIBED') console.log('Subscribed to requests!');
-                });
-
-            // Channel for 'expenses' table
-            expensesChannel = supabase.channel('public:expenses')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, commonCallback)
-                .subscribe(status => {
-                    if (status === 'SUBSCRIBED') console.log('Subscribed to expenses!');
+            notificationChannel = supabase.channel('public:requests')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
+                    console.log('Real-time change received!', payload);
+                    setTimeout(fetchNotifications, 500); // Re-fetch data on any change
+                })
+                .subscribe((status, err) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Successfully subscribed to real-time notifications!');
+                    }
+                    if (status === 'CHANNEL_ERROR') {
+                        console.error('Subscription error:', err);
+                    }
                 });
         }
         
@@ -1296,9 +1202,11 @@
             }
 
             const modal = document.getElementById('requestModal');
-            document.getElementById('modalRequestTitle').textContent = data.requestTitle;
+            const modalTitle = document.getElementById('modalRequestTitle');
             const modalDetails = document.getElementById('modalRequestDetails');
             const modalStatusSelect = document.getElementById('modalStatusSelect');
+
+            modalTitle.textContent = data.requestTitle;
 
             let detailsHtml = `
                 <div class="detail-pair"><strong>Medical Rep:</strong> <span>${data.medRep || 'N/A'}</span></div>
@@ -1316,72 +1224,30 @@
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
             modalDetails.innerHTML = detailsHtml;
 
-            modalStatusSelect.innerHTML = `
-                <option value="Requested">Requested</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-                ${(data.customerType && data.customerType.toLowerCase() !== 'personal') ? 
-                `<option value="Scheduled">Scheduled</option>
-                 <option value="Pending">Pending</option>
-                 <option value="Postponed">Postponed</option>
-                 <option value="Done">Done</option>` : ''}
-            `;
+            let statusOptions = '';
+            if (data.customerType && data.customerType.toLowerCase() === 'personal') {
+                statusOptions = `
+                    <option value="Requested">Requested</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                `;
+            } else {
+                statusOptions = `
+                    <option value="Requested">Requested</option>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Postponed">Postponed</option>
+                    <option value="Done">Done</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Approved">Approved</option>
+                `;
+            }
+            modalStatusSelect.innerHTML = statusOptions;
             modalStatusSelect.value = data.status;
 
             modalStatusSelect.onchange = null;
             modalStatusSelect.onchange = () => updateRequestStatus(requestId, modalStatusSelect.value);
 
-            modal.classList.add('show');
-        }
-        
-        // --- NEW: Function to show the expense modal ---
-        async function showExpenseModal(expenseId) {
-            activeExpenseId = expenseId;
-            const { data, error } = await supabase.from('expenses').select('*').eq('id', expenseId).single();
-
-            if (error) {
-                console.error('Error fetching expense details:', error);
-                showBlurredMessage('Could not load expense details.', 1500);
-                return;
-            }
-
-            const modal = document.getElementById('expenseModal');
-            const modalDetails = document.getElementById('modalExpenseDetails');
-            
-            const details = JSON.parse(data.details || '{}');
-            const items = JSON.parse(data.items || '[]');
-            
-            let itemsHtml = items.map(item => `
-                <tr>
-                    <td>${item.type}</td>
-                    <td>${item.desc || 'N/A'}</td>
-                    <td class="amount-col">${parseFloat(item.amount).toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            let detailsHtml = `
-                <div class="detail-pair"><strong>Employee:</strong> <p>${data.employee_name}</p></div>
-                <div class="detail-pair"><strong>Role:</strong> <p>${data.role}</p></div>
-                <div class="detail-pair"><strong>Date:</strong> <p>${data.report_date}</p></div>
-                <div class="detail-pair"><strong>Total:</strong> <p>${parseFloat(data.total_amount).toFixed(2)} EGP</p></div>
-            `;
-
-            if (data.role === 'District Manager' && details.reportType === 'Trip') {
-                detailsHtml += `
-                    <div class="detail-pair"><strong>Trip:</strong><p>${details.from} to ${details.to}</p></div>
-                    <div class="detail-pair"><strong>Purpose:</strong><p>${details.purpose}</p></div>`;
-            }
-            
-            detailsHtml += `
-                <div class="detail-pair">
-                    <strong>Expense Items:</strong>
-                    <table class="expense-items-table">
-                        <thead><tr><th>Type</th><th>Description</th><th class="amount-col">Amount (EGP)</th></tr></thead>
-                        <tbody>${itemsHtml}</tbody>
-                    </table>
-                </div>`;
-
-            modalDetails.innerHTML = detailsHtml;
             modal.classList.add('show');
         }
 
@@ -1397,29 +1263,10 @@
             }
         }
 
-        // --- NEW: Function to update expense status ---
-        async function updateExpenseStatus(newStatus) {
-            if (!activeExpenseId) return;
-            const { error } = await supabase.from('expenses').update({ status: newStatus }).eq('id', activeExpenseId);
-            
-            if (error) {
-                console.error('Error updating expense status:', error);
-                showBlurredMessage('Failed to update status.', 1500);
-            } else {
-                showBlurredMessage(`Report ${newStatus.toLowerCase()} successfully!`, 1500);
-                closeExpenseModal();
-            }
-        }
-
         function closeRequestModal() {
             document.getElementById('requestModal').classList.remove('show');
         }
-        
-        // --- NEW: Function to close the expense modal ---
-        function closeExpenseModal() {
-            document.getElementById('expenseModal').classList.remove('show');
-            activeExpenseId = null;
-        }
+
 
         function showBlurredMessage(message, duration, callback = null) {
             const overlay = document.getElementById('fullPageMessageOverlay');
@@ -1439,12 +1286,11 @@
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
             
-            // --- MODIFICATION: Unsubscribe from all channels on logout ---
-            if (requestsChannel) supabase.removeChannel(requestsChannel);
-            if (expensesChannel) supabase.removeChannel(expensesChannel);
-            requestsChannel = null;
-            expensesChannel = null;
-            console.log('Unsubscribed from all notifications.');
+            if (notificationChannel) {
+                supabase.removeChannel(notificationChannel);
+                notificationChannel = null;
+                console.log('Unsubscribed from notifications.');
+            }
 
             loggedInUser = null;
             currentActiveViewId = null;
@@ -1459,8 +1305,7 @@
             applyUserPermissions();
             updateAndShowUserCard();
             populateSideMenu();
-            // --- MODIFICATION: Call the new subscription function ---
-            subscribeToAllNotifications();
+            subscribeToNotifications();
         }
 
         function applyUserPermissions() {
@@ -1604,6 +1449,8 @@
             } else {
                 const iframe = targetView.querySelector('iframe');
                 
+                // FIX: Only load the iframe if it's not already loaded with the correct page.
+                // This prevents the page from reloading every time it's viewed.
                 if (!iframe.src || !iframe.src.includes(fileName)) {
                     const loadingOverlay = targetView.querySelector('.loading');
                     const errorState = targetView.querySelector('.error-state');
@@ -1615,8 +1462,18 @@
                     
                     const sendDataToIframe = () => {
                         if (loggedInUser && iframe.contentWindow) {
-                            const message = { user: loggedInUser, type: 'loggedInUser' };
-                            if (page === 'dashboard') message.type = 'dashboardLogin';
+                            const message = { user: loggedInUser };
+                            if (page === 'dashboard') {
+                                message.type = 'dashboardLogin';
+                                message.username = sessionStorage.getItem('dashboardUsername');
+                                message.password = sessionStorage.getItem('dashboardPassword');
+                            } else if (page === 'dm-planning') {
+                                message.type = 'dmPlanningUserPermissions';
+                            } else if (page === 'dm-report') {
+                                message.type = 'dmReportUserPermissions';
+                            } else { 
+                                message.type = 'loggedInUser';
+                            }
                             iframe.contentWindow.postMessage(message, '*');
                         }
                     };
@@ -1771,50 +1628,53 @@
             document.getElementById('refreshButton').addEventListener('click', async () => {
                 showBlurredMessage('Refreshing...', 1000);
                 await fetchGoogleSheetData(); 
-                fetchAllNotifications();
+                fetchNotifications(); 
 
                 if (!currentActiveViewId) return;
+
                 const activeView = document.getElementById(currentActiveViewId);
                 if (!activeView) return;
 
-                if (currentActiveViewId === 'homeView') renderMainGrid(); 
+                if (currentActiveViewId === 'homeView') {
+                    renderMainGrid();
+                } 
                 else if (currentActiveViewId === 'dmCrmView') {
                     const config = navConfig.home.pages.find(p => p.id === 'dm-crm');
-                    if (config) renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
+                    if (config) {
+                        renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
+                    }
                 }
                 else {
                     const iframe = activeView.querySelector('iframe');
                     if (iframe && iframe.contentWindow) {
                         const loadingOverlay = activeView.querySelector('.loading');
                         if (loadingOverlay) loadingOverlay.classList.add('show');
+                        // Force a reload by changing the src to a new unique URL
                         const currentSrc = iframe.src.split('?')[0];
                         iframe.src = `${currentSrc}?t=${new Date().getTime()}`;
                     }
                 }
             });
 
-            // --- Notification Bell Listeners ---
             const notificationBell = document.getElementById('notificationBell');
             const notificationDropdown = document.getElementById('notificationDropdown');
             notificationBell.addEventListener('click', (event) => {
                 event.stopPropagation();
                 notificationDropdown.classList.toggle('hidden');
             });
+
             document.addEventListener('click', (event) => {
                 if (!notificationBell.contains(event.target)) {
                     notificationDropdown.classList.add('hidden');
                 }
             });
             
-            // --- Modal Close Listeners ---
-            document.getElementById('modalRequestCloseButton').addEventListener('click', closeRequestModal);
-            document.getElementById('requestModal').addEventListener('click', e => e.target.id === 'requestModal' && closeRequestModal());
-            document.getElementById('modalExpenseCloseButton').addEventListener('click', closeExpenseModal);
-            document.getElementById('expenseModal').addEventListener('click', e => e.target.id === 'expenseModal' && closeExpenseModal());
-            
-            // --- NEW: Expense Modal Action Button Listeners ---
-            document.getElementById('modalExpenseApproveBtn').addEventListener('click', () => updateExpenseStatus('Approved'));
-            document.getElementById('modalExpenseRejectBtn').addEventListener('click', () => updateExpenseStatus('Rejected'));
+            document.getElementById('modalCloseButton').addEventListener('click', closeRequestModal);
+            document.getElementById('requestModal').addEventListener('click', (event) => {
+                if (event.target.id === 'requestModal') {
+                    closeRequestModal();
+                }
+            });
         });
     </script>
 </body>
