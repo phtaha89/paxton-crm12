@@ -4,13 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paxton LLC CRM</title>
-    <!-- Favicon: Added the Paxton LLC logo as the favicon -->
-    <link rel="icon" href="https://i.ibb.co/ZRmVjNch/logo.jpg" type="image/jpeg">
-    <!-- Google Fonts: Inter for a modern, clean look -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Supabase CDN for database interaction -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* CSS Variables for easier theme management and consistency - Adapted from dashboard */
@@ -57,7 +52,6 @@
         }
 
         /* Main container for the application, taking full available width and height */
-        /* FIX: Changed to a flex container to manage layout and footer positioning */
         .container {
             width: 100%;
             flex-grow: 1;
@@ -68,8 +62,6 @@
         }
 
         /* Header styling with flexbox for alignment */
-        /* FIX: Header is now a non-growing flex item. No more jumping on scroll. */
-        /* ENHANCEMENT: Added backdrop-filter for a modern, glassy effect */
         .header {
             background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
             backdrop-filter: blur(10px); /* Glassy blur effect */
@@ -150,7 +142,6 @@
             font-weight: 500;
             font-size: 0.85rem;
             border: none;
-            /* FIX: Using a more modern easing function for smoother animations */
             transition: all var(--transition-duration-fast) var(--transition-easing);
             text-decoration: none;
             display: inline-flex;
@@ -247,7 +238,6 @@
         }
         
         /* Home view container */
-        /* FIX: Changed flex properties to ensure content scrolls while footer stays visible */
         .home-view {
             display: flex;
             flex-direction: column;
@@ -256,7 +246,6 @@
         }
 
         /* Home view grid for navigation cards */
-        /* FIX: This grid is now the primary scrolling area on the home page */
         .home-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -279,7 +268,6 @@
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
-            /* FIX: Using a smoother, more modern easing function */
             transition: all var(--transition-duration-normal) var(--transition-easing);
             display: flex;
             flex-direction: column;
@@ -334,14 +322,12 @@
         }
         
         /* Full page view container */
-        /* ENHANCEMENT: Made transitions smoother and faster for a better feel */
         .full-page-view {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            /* FIX: Updated transition for a smoother, faster feel */
             transition: opacity var(--transition-duration-fast) var(--transition-easing), transform var(--transition-duration-fast) var(--transition-easing);
             transform: translateY(10px);
             opacity: 0;
@@ -449,23 +435,9 @@
             text-align: center;
             width: 100%;
             max-width: 360px;
-            /* Updated animation to use zoomInFade */
-            animation: zoomInFade 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: fadeInFromCenter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
         }
-        
-        /* New Zooming Animation for Intro and Login */
-        @keyframes zoomInFade {
-            from {
-                opacity: 0;
-                transform: scale(0.5);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
 
         .login-box .login-logo {
             max-width: 60px;
@@ -474,6 +446,10 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
+        @keyframes fadeInFromCenter {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
 
         .login-box h2 {
             font-size: 1.05rem;
@@ -563,7 +539,6 @@
         }
 
         /* Footer Styling */
-        /* FIX: Footer is now a non-growing flex item, always visible at the bottom. */
         .footer {
             display: none; /* Hidden by default, shown via JS */
             padding: 8px 15px;
@@ -575,7 +550,6 @@
             color: var(--background-gradient-end);
             flex-shrink: 0; /* Prevent footer from shrinking */
         }
-        /* FIX: Ensure the footer is displayed correctly when it should be visible on mobile */
         .footer.show { display: block; }
         
         /* New Professional Intro Animation Styles */
@@ -589,8 +563,7 @@
             align-items: center;
             z-index: 3000;
             opacity: 1;
-            /* Updated transition delay to match the new animation duration */
-            transition: opacity 0.5s ease-out 1.5s; 
+            transition: opacity 0.5s ease-out 2.5s;
         }
 
         .intro-overlay.fade-out {
@@ -601,10 +574,11 @@
         .intro-content {
             text-align: center;
             position: relative;
-            /* Apply the new zooming animation */
-            animation: zoomInFade 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            animation: fadeInContent 1s ease-out forwards;
         }
 
+        @keyframes fadeInContent { to { opacity: 1; } }
 
         .logo-container {
             position: relative;
@@ -718,12 +692,22 @@
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .notification-item:hover { background-color: #f1f5f9; }
         .notification-item:last-child { border-bottom: none; }
+        .notification-item i {
+            color: var(--background-gradient-end);
+            width: 1.2em;
+            text-align: center;
+        }
+        .notification-content { flex-grow: 1; }
         .notification-title {
             font-weight: 600;
             color: var(--text-color-dark);
+            font-size: 0.9rem;
         }
         .notification-rep {
             font-size: 0.8rem;
@@ -735,7 +719,7 @@
             margin-top: 4px;
         }
 
-        /* Request Modal Styles */
+        /* Generic Modal Styles */
         .custom-modal-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -763,6 +747,9 @@
             transform: scale(0.9);
             opacity: 0;
             transition: transform var(--transition-duration-normal) ease, opacity var(--transition-duration-normal) ease;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
         }
         .custom-modal-overlay.show .custom-modal-content {
             transform: scale(1);
@@ -775,6 +762,7 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
             margin-bottom: 15px;
+            flex-shrink: 0;
         }
         .modal-header h2 {
             font-size: 1.2rem;
@@ -793,6 +781,8 @@
             font-size: 0.9rem;
             color: var(--text-color-dark);
             line-height: 1.6;
+            overflow-y: auto;
+            padding-right: 10px;
         }
         .modal-body .detail-pair { margin-bottom: 12px; }
         .modal-body .detail-pair strong {
@@ -803,7 +793,7 @@
             font-size: 0.8rem;
             text-transform: uppercase;
         }
-        .modal-body .detail-pair span { color: var(--text-color-light); }
+        .modal-body .detail-pair span, .modal-body .detail-pair p { color: var(--text-color-light); margin-top: 0; }
         .modal-footer {
             margin-top: 20px;
             padding-top: 15px;
@@ -811,7 +801,20 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-shrink: 0;
         }
+        .modal-footer button {
+             padding: 8px 16px;
+             border: none;
+             border-radius: 8px;
+             font-weight: 500;
+             cursor: pointer;
+             transition: background-color 0.2s ease;
+        }
+        .modal-footer .approve-btn { background-color: #10b981; color: white; }
+        .modal-footer .approve-btn:hover { background-color: #059669; }
+        .modal-footer .reject-btn { background-color: #ef4444; color: white; }
+        .modal-footer .reject-btn:hover { background-color: #dc2626; }
         .modal-footer label {
             font-weight: 600;
             color: var(--text-color-dark);
@@ -824,10 +827,24 @@
             font-size: 0.9rem;
             cursor: pointer;
         }
+        /* Expense Modal Specifics */
+        .expense-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+        .expense-items-table th, .expense-items-table td {
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .expense-items-table th { background-color: #f8fafc; }
+        .expense-items-table .amount-col { text-align: right; }
 
         /* Responsive adjustments */
         @media (max-width: 1024px) {
-            .container { padding: 10px; }
+            .container { /* padding: 10px; */ } /* FIX: Removed padding */
             .header { padding: 6px 15px; }
             .user-card { padding: 6px 12px; gap: 10px; max-width: 180px; }
             .user-card-icon { font-size: 1.3rem; }
@@ -848,7 +865,7 @@
         }
 
         @media (max-width: 768px) {
-            .container { padding: 8px; height: 100vh; }
+            .container { /* padding: 8px; */ /* height: 100vh; */ } /* FIX: Removed padding and height */
             .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
             .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
             .user-name { font-size: 0.7rem; }
@@ -860,7 +877,7 @@
             .company-logo { max-width: 40px; }
             .banner h1 { font-size: 1.2rem; }
             .banner .subtitle { font-size: 0.65rem; }
-            .home-grid { grid-template-columns: 1fr; gap: 12px; }
+            .home-grid { grid-template-columns: 1fr; gap: 12px; padding: 8px; } /* FIX: Added padding here */
             .main-card { min-height: 80px; padding: 12px; flex-direction: row; justify-content: flex-start; text-align: left; gap: 15px; }
             .main-card-icon { font-size: 1.8rem; margin-bottom: 0; flex-shrink: 0; }
             .main-card-title { font-size: 1rem; margin-bottom: 0; }
@@ -879,7 +896,6 @@
     </style>
 </head>
 <body>
-    <!-- New Professional Intro Animation Overlay -->
     <div id="introOverlay" class="intro-overlay">
         <div class="intro-content">
             <div class="logo-container">
@@ -890,12 +906,10 @@
         </div>
     </div>
 
-    <!-- Full-page Blurred Message Overlay (for login/logout messages) -->
     <div id="fullPageMessageOverlay" class="full-page-message-overlay">
         <p id="fullPageOverlayMessage"></p>
     </div>
 
-    <!-- Login Page -->
     <div id="loginPage" class="login-container hidden">
         <div class="login-box">
             <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton LLC Logo" class="login-logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/3498db/FFFFFF?text=Logo';">
@@ -913,7 +927,6 @@
         </div>
     </div>
 
-    <!-- Main Application Content (hidden until login) -->
     <div id="appContent" class="container hidden">
         <div class="header">
             <div class="header-inner">
@@ -926,8 +939,7 @@
                         <i class="fas fa-bell"></i>
                         <span class="notification-count" id="notificationCount">0</span>
                         <div class="notification-dropdown hidden" id="notificationDropdown">
-                            <!-- Notification items will be inserted here -->
-                        </div>
+                            </div>
                     </div>
                 </div>
                 <div id="userCard" class="user-card hidden">
@@ -940,7 +952,6 @@
             </div>
         </div>
 
-        <!-- Home View: This section will display the main navigation cards -->
         <div id="homeView" class="home-view">
             <div class="banner">
                 <div class="status-indicator"></div>
@@ -951,11 +962,9 @@
                 </div>
             </div>
             <div class="home-grid">
-                <!-- Cards will be dynamically inserted here by JavaScript -->
-            </div>
+                </div>
         </div>
 
-        <!-- Full Page Views -->
         <div id="crmView" class="full-page-view hidden">
             <div class="loading" id="loadingCrm"><div class="spinner"></div><div class="loading-text">Loading CRM...</div></div>
             <div class="error-state" id="errorCrm"><div class="error-icon">⚠️</div><div class="error-title">CRM Page Not Found</div><div class="error-text">The CRM file could not be loaded.</div></div>
@@ -996,13 +1005,11 @@
             <div class="error-state" id="errorMasterList"><div class="error-icon">⚠️</div><div class="error-title">Master List Page Not Found</div><div class="error-text">The Master List file could not be loaded.</div></div>
             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
         </div>
-        <!-- START: Added 'expensesView' container for the new page -->
         <div id="expensesView" class="full-page-view hidden">
             <div class="loading" id="loadingExpenses"><div class="spinner"></div><div class="loading-text">Loading Expenses...</div></div>
             <div class="error-state" id="errorExpenses"><div class="error-icon">⚠️</div><div class="error-title">Expenses Page Not Found</div><div class="error-text">The Expenses file could not be loaded.</div></div>
             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
         </div>
-        <!-- END: Added 'expensesView' container for the new page -->
         <div id="nestedIframeView" class="full-page-view hidden">
             <div class="loading" id="loadingNestedIframe"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
             <div class="error-state" id="errorNestedIframe"><div class="error-icon">⚠️</div><div class="error-title">Page Not Found</div><div class="error-text">The requested file could not be loaded.</div></div>
@@ -1011,34 +1018,45 @@
     </div>
     <footer class="footer">Developed by DrTahaDesigns</footer>
 
-    <!-- Side Menu -->
     <div id="sideMenuOverlay" class="side-menu-overlay"></div>
     <div id="sideMenu" class="side-menu">
         <div class="side-menu-header">
             <h3>Navigation</h3>
             <button id="closeMenuButton" class="close-menu-button"><i class="fas fa-times"></i></button>
         </div>
-        <nav class="side-menu-nav"><!-- Cards will be dynamically inserted here --></nav>
+        <nav class="side-menu-nav"></nav>
         <div class="side-menu-logout">
             <button id="sideMenuLogoutButton" class="side-menu-logout-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </div>
     
-    <!-- Request Details Modal -->
+    <div id="expenseModal" class="custom-modal-overlay">
+        <div class="custom-modal-content">
+            <div class="modal-header">
+                <h2 id="modalExpenseTitle">Expense Report Details</h2>
+                <button id="modalExpenseCloseButton" class="close-modal-button">&times;</button>
+            </div>
+            <div id="modalExpenseDetails" class="modal-body">
+                </div>
+            <div class="modal-footer">
+                <button id="modalExpenseApproveBtn" class="approve-btn">Approve</button>
+                <button id="modalExpenseRejectBtn" class="reject-btn">Reject</button>
+            </div>
+        </div>
+    </div>
+
     <div id="requestModal" class="custom-modal-overlay">
         <div class="custom-modal-content">
             <div class="modal-header">
                 <h2 id="modalRequestTitle">Request Details</h2>
-                <button id="modalCloseButton" class="close-modal-button">&times;</button>
+                <button id="modalRequestCloseButton" class="close-modal-button">&times;</button>
             </div>
             <div id="modalRequestDetails" class="modal-body">
-                <!-- Request details will be populated here -->
-            </div>
+                </div>
             <div class="modal-footer">
                 <label for="modalStatusSelect">Status:</label>
                 <select id="modalStatusSelect">
-                    <!-- Status options will be populated here -->
-                </select>
+                    </select>
             </div>
         </div>
     </div>
@@ -1053,7 +1071,10 @@
         let loggedInUser = null;
         let googleSheetData = [];
         let lastPageHistory = [];
-        let notificationChannel = null;
+        // --- MODIFICATION: Changed to separate channels for clarity ---
+        let requestsChannel = null;
+        let expensesChannel = null;
+        let activeExpenseId = null; // To store the ID of the expense being viewed in the modal
 
         const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRGZVMTCJ53ACJBwYVpyBpCFyDn4lYfMlbbldKbRXfnmsN14APuBIJm2jlDMGhPpYi5xXUp4z1YFkte/pub?gid=0&single=true&output=csv';
 
@@ -1088,12 +1109,12 @@
 
         async function fetchGoogleSheetData() {
             try {
-                // FIX: Add a cache-busting query parameter to ensure fresh data is fetched
                 const response = await fetch(`${GOOGLE_SHEET_URL}&_=${new Date().getTime()}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const csvText = await response.text();
                 googleSheetData = parseCSV(csvText);
-            } catch (error) {
+            } catch (error)
+                {
                 console.error('Error fetching or parsing Google Sheet data:', error);
             }
         }
@@ -1121,108 +1142,147 @@
                 document.getElementById('userCardName').textContent = loggedInUser.username;
                 document.getElementById('userCardTitle').textContent = loggedInUser.title;
                 userCard.classList.remove('hidden');
-                fetchNotifications(); // Initial fetch
+                fetchAllNotifications(); // Initial fetch
             } else {
                 userCard.classList.add('hidden');
                 document.getElementById('notificationBell').classList.add('hidden');
             }
         }
         
-        async function fetchNotifications() {
+        // --- NEW: Helper function to format expense report type for display ---
+        function getReportTypeDisplayString(report) {
+            // This function is a simplified version from expenses.html for notification purposes
+            const details = JSON.parse(report.details || '{}');
+            if (report.role === 'District Manager') {
+                return details.reportType === 'Trip' ? `Trip: ${details.purpose}` : 'Other Expenses';
+            } else { // Medical Rep
+                return `Daily Log`;
+            }
+        }
+
+        // --- MODIFIED: Renamed and expanded to fetch both requests and expenses ---
+        async function fetchAllNotifications() {
             const notificationBell = document.getElementById('notificationBell');
             const notificationCount = document.getElementById('notificationCount');
             const notificationDropdown = document.getElementById('notificationDropdown');
 
-            if (!loggedInUser) return;
-
-            if (loggedInUser.title === 'Medical Representative') {
+            if (!loggedInUser || loggedInUser.title === 'Medical Representative') {
                 notificationBell.classList.add('hidden');
                 return;
             }
 
-            let query = supabase.from('requests').select('*').eq('status', 'Requested');
-            
+            // --- 1. Fetch Pending Requests ---
+            let requestQuery = supabase.from('requests').select('*').eq('status', 'Requested');
             if (loggedInUser.title === 'District Manager') {
                 const dmReps = googleSheetData
                     .filter(row => row['District Manager'] === loggedInUser.username)
                     .map(row => row['medical rep']);
-                
-                if (dmReps.length > 0) {
-                    query = query.in('medRep', dmReps);
-                } else {
-                    notificationBell.classList.add('hidden');
-                    return;
-                }
+                requestQuery = dmReps.length > 0 ? requestQuery.in('medRep', dmReps) : requestQuery.eq('medRep', 'null'); // Prevent fetching if no reps
             }
             
-            // FIX: Order by date descending to get the newest notifications first
-            const { data, error } = await query.order('date', { ascending: false });
-
-            if (error) {
-                console.error('Error fetching notifications:', error);
-                return;
+            // --- 2. Fetch Pending Expenses ---
+            let expenseQuery = supabase.from('expenses').select('*').eq('status', 'Pending');
+            if (loggedInUser.title === 'District Manager') {
+                 const dmReps = googleSheetData
+                    .filter(row => row['District Manager'] === loggedInUser.username)
+                    .map(row => row['medical rep']);
+                expenseQuery = dmReps.length > 0 ? expenseQuery.in('employee_name', dmReps) : expenseQuery.eq('employee_name', 'null');
             }
+            
+            // --- 3. Execute queries and combine results ---
+            const [
+                { data: requests, error: reqError },
+                { data: expenses, error: expError }
+            ] = await Promise.all([requestQuery, expenseQuery]);
 
-            if (data.length > 0) {
+            if (reqError) console.error('Error fetching requests:', reqError);
+            if (expError) console.error('Error fetching expenses:', expError);
+            
+            const formattedRequests = (requests || []).map(r => ({
+                id: r.id,
+                title: r.requestTitle,
+                subtitle: `By: ${r.medRep}`,
+                date: new Date(r.date),
+                type: 'request'
+            }));
+
+            const formattedExpenses = (expenses || []).map(e => ({
+                id: e.id,
+                title: `Expense: ${getReportTypeDisplayString(e)}`,
+                subtitle: `By: ${e.employee_name}`,
+                date: new Date(e.report_date),
+                type: 'expense'
+            }));
+            
+            const allNotifications = [...formattedRequests, ...formattedExpenses]
+                .sort((a, b) => b.date - a.date); // Sort newest first
+
+            if (allNotifications.length > 0) {
                 const currentCount = parseInt(notificationCount.textContent, 10);
-                notificationCount.textContent = data.length;
+                notificationCount.textContent = allNotifications.length;
                 notificationBell.classList.remove('hidden');
 
-                if (data.length > currentCount) {
+                if (allNotifications.length > currentCount) {
                     notificationCount.classList.add('updated');
-                    setTimeout(() => {
-                        notificationCount.classList.remove('updated');
-                    }, 600);
+                    setTimeout(() => notificationCount.classList.remove('updated'), 600);
                 }
 
-                notificationDropdown.innerHTML = '';
-                data.forEach(req => {
-                    const item = document.createElement('div');
-                    item.className = 'notification-item';
-                    item.dataset.requestId = req.id;
-                    const requestDate = new Date(req.date).toLocaleDateString('en-GB', {
-                        day: '2-digit', month: 'short', year: 'numeric'
-                    });
+                notificationDropdown.innerHTML = ''; // Clear previous items
+                allNotifications.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'notification-item';
+                    div.dataset.id = item.id;
+                    div.dataset.type = item.type; // 'request' or 'expense'
+                    
+                    const iconClass = item.type === 'request' ? 'fas fa-file-alt' : 'fas fa-receipt';
 
-                    item.innerHTML = `
-                        <div class="notification-title">${req.requestTitle}</div>
-                        <div class="notification-rep">By: ${req.medRep}</div>
-                        <div class="notification-date">${requestDate}</div>
+                    div.innerHTML = `
+                        <i class="${iconClass}"></i>
+                        <div class="notification-content">
+                            <div class="notification-title">${item.title}</div>
+                            <div class="notification-rep">${item.subtitle}</div>
+                            <div class="notification-date">${item.date.toLocaleDateString('en-GB')}</div>
+                        </div>
                     `;
-                    item.addEventListener('click', () => showRequestModal(req.id));
-                    // FIX: Use appendChild, as the data is already sorted correctly from the query.
-                    // This ensures the list renders in the correct chronological order (newest on top).
-                    notificationDropdown.appendChild(item);
+                    div.addEventListener('click', () => {
+                        if (item.type === 'request') {
+                            showRequestModal(item.id);
+                        } else {
+                            showExpenseModal(item.id);
+                        }
+                        notificationDropdown.classList.add('hidden');
+                    });
+                    notificationDropdown.appendChild(div);
                 });
-
             } else {
                 notificationBell.classList.add('hidden');
             }
         }
 
-        function subscribeToNotifications() {
-            // FIX: This function sets up the real-time listener. When any change
-            // (insert, update, delete) happens in the 'requests' table, Supabase
-            // sends a message. The code then waits 500ms and re-fetches all
-            // notifications to ensure the UI is perfectly in sync. This is how
-            // new notifications appear without needing a page refresh.
-            if (notificationChannel) {
-                supabase.removeChannel(notificationChannel);
-                notificationChannel = null;
-            }
+        // --- MODIFIED: Renamed and expanded to subscribe to both tables ---
+        function subscribeToAllNotifications() {
+            // Clean up old subscriptions if they exist
+            if (requestsChannel) supabase.removeChannel(requestsChannel);
+            if (expensesChannel) supabase.removeChannel(expensesChannel);
 
-            notificationChannel = supabase.channel('public:requests')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
-                    console.log('Real-time change received!', payload);
-                    setTimeout(fetchNotifications, 500); // Re-fetch data on any change
-                })
-                .subscribe((status, err) => {
-                    if (status === 'SUBSCRIBED') {
-                        console.log('Successfully subscribed to real-time notifications!');
-                    }
-                    if (status === 'CHANNEL_ERROR') {
-                        console.error('Subscription error:', err);
-                    }
+            const commonCallback = (payload) => {
+                console.log('Real-time change received!', payload);
+                // No need for timeout, fetch directly for instant update
+                fetchAllNotifications(); 
+            };
+            
+            // Channel for 'requests' table
+            requestsChannel = supabase.channel('public:requests')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, commonCallback)
+                .subscribe(status => {
+                    if (status === 'SUBSCRIBED') console.log('Subscribed to requests!');
+                });
+
+            // Channel for 'expenses' table
+            expensesChannel = supabase.channel('public:expenses')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, commonCallback)
+                .subscribe(status => {
+                    if (status === 'SUBSCRIBED') console.log('Subscribed to expenses!');
                 });
         }
         
@@ -1236,11 +1296,9 @@
             }
 
             const modal = document.getElementById('requestModal');
-            const modalTitle = document.getElementById('modalRequestTitle');
+            document.getElementById('modalRequestTitle').textContent = data.requestTitle;
             const modalDetails = document.getElementById('modalRequestDetails');
             const modalStatusSelect = document.getElementById('modalStatusSelect');
-
-            modalTitle.textContent = data.requestTitle;
 
             let detailsHtml = `
                 <div class="detail-pair"><strong>Medical Rep:</strong> <span>${data.medRep || 'N/A'}</span></div>
@@ -1249,39 +1307,81 @@
             `;
 
             if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
-                    detailsHtml += `
-                        <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
-                        <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
-                    `;
+                 detailsHtml += `
+                    <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
+                    <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
+                `;
             }
 
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
             modalDetails.innerHTML = detailsHtml;
 
-            let statusOptions = '';
-            if (data.customerType && data.customerType.toLowerCase() === 'personal') {
-                statusOptions = `
-                    <option value="Requested">Requested</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                `;
-            } else {
-                statusOptions = `
-                    <option value="Requested">Requested</option>
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Postponed">Postponed</option>
-                    <option value="Done">Done</option>
-                    <option value="Rejected">Rejected</option>
-                    <option value="Approved">Approved</option>
-                `;
-            }
-            modalStatusSelect.innerHTML = statusOptions;
+            modalStatusSelect.innerHTML = `
+                <option value="Requested">Requested</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+                ${(data.customerType && data.customerType.toLowerCase() !== 'personal') ? 
+                `<option value="Scheduled">Scheduled</option>
+                 <option value="Pending">Pending</option>
+                 <option value="Postponed">Postponed</option>
+                 <option value="Done">Done</option>` : ''}
+            `;
             modalStatusSelect.value = data.status;
 
             modalStatusSelect.onchange = null;
             modalStatusSelect.onchange = () => updateRequestStatus(requestId, modalStatusSelect.value);
 
+            modal.classList.add('show');
+        }
+        
+        // --- NEW: Function to show the expense modal ---
+        async function showExpenseModal(expenseId) {
+            activeExpenseId = expenseId;
+            const { data, error } = await supabase.from('expenses').select('*').eq('id', expenseId).single();
+
+            if (error) {
+                console.error('Error fetching expense details:', error);
+                showBlurredMessage('Could not load expense details.', 1500);
+                return;
+            }
+
+            const modal = document.getElementById('expenseModal');
+            const modalDetails = document.getElementById('modalExpenseDetails');
+            
+            const details = JSON.parse(data.details || '{}');
+            const items = JSON.parse(data.items || '[]');
+            
+            let itemsHtml = items.map(item => `
+                <tr>
+                    <td>${item.type}</td>
+                    <td>${item.desc || 'N/A'}</td>
+                    <td class="amount-col">${parseFloat(item.amount).toFixed(2)}</td>
+                </tr>
+            `).join('');
+
+            let detailsHtml = `
+                <div class="detail-pair"><strong>Employee:</strong> <p>${data.employee_name}</p></div>
+                <div class="detail-pair"><strong>Role:</strong> <p>${data.role}</p></div>
+                <div class="detail-pair"><strong>Date:</strong> <p>${data.report_date}</p></div>
+                <div class="detail-pair"><strong>Total:</strong> <p>${parseFloat(data.total_amount).toFixed(2)} EGP</p></div>
+            `;
+
+            if (data.role === 'District Manager' && details.reportType === 'Trip') {
+                detailsHtml += `
+                    <div class="detail-pair"><strong>Trip:</strong><p>${details.from} to ${details.to}</p></div>
+                    <div class="detail-pair"><strong>Purpose:</strong><p>${details.purpose}</p></div>`;
+            }
+            
+            detailsHtml += `
+                <div class="detail-pair">
+                    <strong>Expense Items:</strong>
+                    <table class="expense-items-table">
+                        <thead><tr><th>Type</th><th>Description</th><th class="amount-col">Amount (EGP)</th></tr></thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                </div>`;
+
+            modalDetails.innerHTML = detailsHtml;
             modal.classList.add('show');
         }
 
@@ -1294,14 +1394,32 @@
             } else {
                 showBlurredMessage('Status updated successfully!', 1500);
                 closeRequestModal();
-                // No need to call fetchNotifications() here, the real-time subscription will trigger it automatically.
+            }
+        }
+
+        // --- NEW: Function to update expense status ---
+        async function updateExpenseStatus(newStatus) {
+            if (!activeExpenseId) return;
+            const { error } = await supabase.from('expenses').update({ status: newStatus }).eq('id', activeExpenseId);
+            
+            if (error) {
+                console.error('Error updating expense status:', error);
+                showBlurredMessage('Failed to update status.', 1500);
+            } else {
+                showBlurredMessage(`Report ${newStatus.toLowerCase()} successfully!`, 1500);
+                closeExpenseModal();
             }
         }
 
         function closeRequestModal() {
             document.getElementById('requestModal').classList.remove('show');
         }
-
+        
+        // --- NEW: Function to close the expense modal ---
+        function closeExpenseModal() {
+            document.getElementById('expenseModal').classList.remove('show');
+            activeExpenseId = null;
+        }
 
         function showBlurredMessage(message, duration, callback = null) {
             const overlay = document.getElementById('fullPageMessageOverlay');
@@ -1321,11 +1439,12 @@
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
             
-            if (notificationChannel) {
-                supabase.removeChannel(notificationChannel);
-                notificationChannel = null;
-                console.log('Unsubscribed from notifications.');
-            }
+            // --- MODIFICATION: Unsubscribe from all channels on logout ---
+            if (requestsChannel) supabase.removeChannel(requestsChannel);
+            if (expensesChannel) supabase.removeChannel(expensesChannel);
+            requestsChannel = null;
+            expensesChannel = null;
+            console.log('Unsubscribed from all notifications.');
 
             loggedInUser = null;
             currentActiveViewId = null;
@@ -1340,7 +1459,8 @@
             applyUserPermissions();
             updateAndShowUserCard();
             populateSideMenu();
-            subscribeToNotifications();
+            // --- MODIFICATION: Call the new subscription function ---
+            subscribeToAllNotifications();
         }
 
         function applyUserPermissions() {
@@ -1408,7 +1528,6 @@
         }
 
         function showHome() {
-            // FIX: This function now manages the transition smoothly.
             const homeView = document.getElementById('homeView');
             const prevActiveView = document.getElementById(currentActiveViewId);
 
@@ -1419,20 +1538,14 @@
 
             if (prevActiveView && prevActiveView !== homeView) {
                 prevActiveView.classList.remove('active');
-                // Use a short delay to allow the CSS transition to play before hiding
                 setTimeout(() => {
                     prevActiveView.classList.add('hidden');
-                    const iframe = prevActiveView.querySelector('iframe');
-                    if (iframe) iframe.src = 'about:blank';
+                    // FIX: Removed line that cleared iframe src to preserve state
                     homeView.classList.remove('hidden');
-                    // Use a very short delay to re-apply the "active" class and start the entrance animation
                     setTimeout(() => {
                         homeView.classList.add('active');
-                        // Ensure the transition is reset before re-applying the class
-                        homeView.classList.remove('active');
-                        homeView.classList.add('active');
                     }, 10);
-                }, 200); // This delay should match or be slightly less than the CSS transition
+                }, 200); 
             } else {
                 homeView.classList.remove('hidden');
                 homeView.classList.add('active');
@@ -1458,29 +1571,25 @@
             const prevActiveView = document.getElementById(currentActiveViewId);
 
             if (currentActiveViewId !== viewId) {
-                    if (currentActiveViewId && currentActiveViewId !== 'homeView') {
-                        lastPageHistory.push(currentActiveViewId);
-                    }
+                 if (currentActiveViewId && currentActiveViewId !== 'homeView') {
+                     lastPageHistory.push(currentActiveViewId);
+                 }
             }
             
-            // Immediately hide the home view
             document.getElementById('homeView').classList.add('hidden');
             document.querySelector('.footer').classList.remove('show');
             document.getElementById('backButton').classList.remove('hidden');
             document.getElementById('refreshButton').classList.remove('hidden');
             document.getElementById('logoutButton').classList.add('hidden');
 
-            // Hide the previously active view with a transition
             if (prevActiveView && prevActiveView !== targetView) {
                 prevActiveView.classList.remove('active');
                 setTimeout(() => {
                     prevActiveView.classList.add('hidden');
-                    const prevIframe = prevActiveView.querySelector('iframe');
-                    if (prevIframe) prevIframe.src = 'about:blank';
+                    // FIX: Removed line that cleared iframe src to preserve state
                 }, 200);
             }
 
-            // Show the target view after a slight delay for a smooth transition effect
             setTimeout(() => {
                 targetView.classList.remove('hidden');
                 setTimeout(() => targetView.classList.add('active'), 10);
@@ -1493,42 +1602,34 @@
                 renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
                 targetView.querySelector('.loading').classList.remove('show');
             } else {
-                const loadingOverlay = targetView.querySelector('.loading');
-                const errorState = targetView.querySelector('.error-state');
                 const iframe = targetView.querySelector('iframe');
                 
-                loadingOverlay.classList.add('show');
-                errorState.classList.remove('show');
-                
-                // FIX: Add a timestamp to the URL to bypass browser cache on every load.
-                iframe.src = `${fileName}?t=${new Date().getTime()}`;
-                
-                const sendDataToIframe = () => {
-                    if (loggedInUser && iframe.contentWindow) {
-                        const message = { user: loggedInUser };
-                        if (page === 'dashboard') {
-                            message.type = 'dashboardLogin';
-                            message.username = sessionStorage.getItem('dashboardUsername');
-                            message.password = sessionStorage.getItem('dashboardPassword');
-                        } else if (page === 'dm-planning') {
-                            message.type = 'dmPlanningUserPermissions';
-                        } else if (page === 'dm-report') {
-                            message.type = 'dmReportUserPermissions';
-                        } else { 
-                            message.type = 'loggedInUser';
+                if (!iframe.src || !iframe.src.includes(fileName)) {
+                    const loadingOverlay = targetView.querySelector('.loading');
+                    const errorState = targetView.querySelector('.error-state');
+                    
+                    loadingOverlay.classList.add('show');
+                    errorState.classList.remove('show');
+                    
+                    iframe.src = `${fileName}?t=${new Date().getTime()}`;
+                    
+                    const sendDataToIframe = () => {
+                        if (loggedInUser && iframe.contentWindow) {
+                            const message = { user: loggedInUser, type: 'loggedInUser' };
+                            if (page === 'dashboard') message.type = 'dashboardLogin';
+                            iframe.contentWindow.postMessage(message, '*');
                         }
-                        iframe.contentWindow.postMessage(message, '*');
-                    }
-                };
-                
-                iframe.onload = () => {
-                    loadingOverlay.classList.remove('show');
-                    sendDataToIframe();
-                };
-                iframe.onerror = () => {
-                    loadingOverlay.classList.remove('show');
-                    errorState.classList.add('show');
-                };
+                    };
+                    
+                    iframe.onload = () => {
+                        loadingOverlay.classList.remove('show');
+                        sendDataToIframe();
+                    };
+                    iframe.onerror = () => {
+                        loadingOverlay.classList.remove('show');
+                        errorState.classList.add('show');
+                    };
+                }
             }
             closeSideMenu();
         }
@@ -1614,17 +1715,15 @@
         
         document.addEventListener('DOMContentLoaded', async function() {
             const introOverlay = document.getElementById('introOverlay');
-            // FIX: Updated the intro fade-out delay to match the new animation duration
             setTimeout(() => {
                 introOverlay.classList.add('fade-out');
                 setTimeout(() => introOverlay.remove(), 500);
-            }, 1500);
+            }, 3000);
 
             await fetchGoogleSheetData();
             const storedUser = localStorage.getItem('loggedInUser');
             const lastPage = localStorage.getItem('currentPage');
 
-            // FIX: Delay the display of the main content to allow the intro animation to finish
             setTimeout(() => {
                 if (storedUser) {
                     loggedInUser = JSON.parse(storedUser);
@@ -1648,7 +1747,7 @@
                 } else {
                     showLoginPage();
                 }
-            }, 2000);
+            }, 3500);
 
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
@@ -1670,56 +1769,52 @@
             document.getElementById('sideMenuOverlay').addEventListener('click', closeSideMenu);
             
             document.getElementById('refreshButton').addEventListener('click', async () => {
-                // FIX: Refresh logic now re-fetches all necessary data and forces a cache-less reload.
                 showBlurredMessage('Refreshing...', 1000);
-                await fetchGoogleSheetData(); // Re-fetch sheet data for user mapping
-                fetchNotifications(); // Re-fetch notifications
+                await fetchGoogleSheetData(); 
+                fetchAllNotifications();
 
                 if (!currentActiveViewId) return;
-
                 const activeView = document.getElementById(currentActiveViewId);
                 if (!activeView) return;
 
-                if (currentActiveViewId === 'homeView') {
-                    renderMainGrid();
-                } 
+                if (currentActiveViewId === 'homeView') renderMainGrid(); 
                 else if (currentActiveViewId === 'dmCrmView') {
                     const config = navConfig.home.pages.find(p => p.id === 'dm-crm');
-                    if (config) {
-                        renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
-                    }
+                    if (config) renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
                 }
                 else {
                     const iframe = activeView.querySelector('iframe');
                     if (iframe && iframe.contentWindow) {
                         const loadingOverlay = activeView.querySelector('.loading');
                         if (loadingOverlay) loadingOverlay.classList.add('show');
-                        // Force a reload by changing the src to a new unique URL
                         const currentSrc = iframe.src.split('?')[0];
                         iframe.src = `${currentSrc}?t=${new Date().getTime()}`;
                     }
                 }
             });
 
+            // --- Notification Bell Listeners ---
             const notificationBell = document.getElementById('notificationBell');
             const notificationDropdown = document.getElementById('notificationDropdown');
             notificationBell.addEventListener('click', (event) => {
                 event.stopPropagation();
                 notificationDropdown.classList.toggle('hidden');
             });
-
             document.addEventListener('click', (event) => {
                 if (!notificationBell.contains(event.target)) {
                     notificationDropdown.classList.add('hidden');
                 }
             });
             
-            document.getElementById('modalCloseButton').addEventListener('click', closeRequestModal);
-            document.getElementById('requestModal').addEventListener('click', (event) => {
-                if (event.target.id === 'requestModal') {
-                    closeRequestModal();
-                }
-            });
+            // --- Modal Close Listeners ---
+            document.getElementById('modalRequestCloseButton').addEventListener('click', closeRequestModal);
+            document.getElementById('requestModal').addEventListener('click', e => e.target.id === 'requestModal' && closeRequestModal());
+            document.getElementById('modalExpenseCloseButton').addEventListener('click', closeExpenseModal);
+            document.getElementById('expenseModal').addEventListener('click', e => e.target.id === 'expenseModal' && closeExpenseModal());
+            
+            // --- NEW: Expense Modal Action Button Listeners ---
+            document.getElementById('modalExpenseApproveBtn').addEventListener('click', () => updateExpenseStatus('Approved'));
+            document.getElementById('modalExpenseRejectBtn').addEventListener('click', () => updateExpenseStatus('Rejected'));
         });
     </script>
 </body>
