@@ -966,6 +966,7 @@
                 </div>
                 <form id="coaching-evaluation-form">
                     <input type="hidden" id="coaching-report-id">
+                    <input type="hidden" id="coaching-med-rep-name-hidden">
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <label class="block text-sm font-medium text-gray-700">Feedback<span class="error-star" data-for="feedback_score">*</span></label>
@@ -1513,20 +1514,18 @@
                 const detailsHtml = Object.entries(report).map(([key, value]) => {
                     if (key === 'id' || key === 'dm_name') return '';
                     let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                    let formattedValue;
-                    
-                    // FIX: Standardize date/time formatting
+                    let formattedValue = value;
+
+                    // FIX: Standardize date/time formatting to match table
                     if (key === 'created_at') {
                         formattedKey = 'Date & Time';
-                        formattedValue = new Date(value).toLocaleString('en-US', { timeZone: 'Africa/Cairo' });
-                    } else {
-                        formattedValue = value;
+                        formattedValue = value ? new Date(value).toLocaleDateString('en-US', { timeZone: 'Africa/Cairo' }) + ', ' + formatLocalTime(value) : 'N/A';
                     }
 
                     return `
                         <div class="p-2 border-b last:border-b-0">
                             <p class="font-semibold text-gray-800">${formattedKey}:</p>
-                            <p class="text-sm text-gray-600 break-words">${formattedValue}</p>
+                            <p class="text-sm text-gray-600 break-words">${formattedValue || 'N/A'}</p>
                         </div>
                     `;
                 }).join('');
@@ -2766,6 +2765,8 @@
                         <div class="text-sm"><p class="font-semibold">Visit Details:</p><p class="p-1 bg-gray-50 rounded">${visitReport.comment}</p></div>
                     `;
                     coachingReportIdInput.value = visitId;
+                    // FIX: Store the correct med rep name to be saved
+                    document.getElementById('coaching-med-rep-name-hidden').value = visitReport.med_rep;
                     coachingEvaluationForm.reset();
                     starRatings.forEach(resetStars);
                     submitCoachingReportBtn.classList.remove('hidden');
@@ -2848,7 +2849,8 @@
                 const evaluationData = {
                     dm_report_id: coachingReportIdInput.value,
                     dm_name: dmNameSelect.value,
-                    med_rep_name: coachingMedRepNameSelect.value,
+                    // FIX: Get med rep name from the hidden input to ensure it's the correct one from the visit
+                    med_rep_name: document.getElementById('coaching-med-rep-name-hidden').value,
                     feedback_score: parseInt(document.querySelector('.star-rating[data-field="feedback_score"]').dataset.score || 0),
                     opening_score: parseInt(document.querySelector('.star-rating[data-field="opening_score"]').dataset.score || 0),
                     asking_for_commitment_score: parseInt(document.querySelector('.star-rating[data-field="asking_for_commitment_score"]').dataset.score || 0),
