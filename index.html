@@ -1057,11 +1057,6 @@
             <div class="error-state" id="errorExpenses"><div class="error-icon">⚠️</div><div class="error-title">Expenses Page Not Found</div><div class="error-text">The Expenses file could not be loaded.</div></div>
             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
         </div>
-        <div id="coachingReportsView" class="full-page-view hidden">
-             <div class="loading" id="loadingCoachingReports"><div class="spinner"></div><div class="loading-text">Loading Coaching Reports...</div></div>
-             <div class="error-state" id="errorCoachingReports"><div class="error-icon">⚠️</div><div class="error-title">Page Not Found</div><div class="error-text">The Coaching Reports file could not be loaded.</div></div>
-             <div class="iframe-container-fpv"><iframe src=""></iframe></div>
-        </div>
         <div id="nestedIframeView" class="full-page-view hidden">
             <div class="loading" id="loadingNestedIframe"><div class="spinner"></div><div class="loading-text">Loading...</div></div>
             <div class="error-state" id="errorNestedIframe"><div class="error-icon">⚠️</div><div class="error-title">Page Not Found</div><div class="error-text">The requested file could not be loaded.</div></div>
@@ -1217,7 +1212,6 @@
                         subPages: [
                             { id: 'dm-planning', title: 'DM Planning', subtitle: 'Plan and schedule district manager activities.', icon: '📅', viewId: 'nestedIframeView', fileName: 'DM-Plan.html', isNested: true, roles: ['admin', 'District Manager'] },
                             { id: 'dm-report', title: 'DM Report', subtitle: 'View and generate reports for the district.', icon: '📄', viewId: 'nestedIframeView', fileName: 'DM-Report.html', isNested: true, roles: ['admin', 'District Manager'] },
-                            { id: 'coaching-reports', title: 'Coaching Reports', subtitle: 'Evaluate and view team coaching.', icon: '🧑‍🏫', viewId: 'coachingReportsView', fileName: 'DM-Report.html', isNested: true, roles: ['admin', 'District Manager'] }
                         ]
                     },
                     { id: 'master-list', title: 'Master List', subtitle: 'View and manage the master data list.', icon: '📋', viewId: 'masterListView', fileName: 'master list.html', roles: ['admin', 'District Manager'] },
@@ -1976,7 +1970,7 @@
             document.getElementById('backButton').addEventListener('click', () => {
                 if (currentActiveViewId === 'dmCrmView') {
                     showHome();
-                } else if (currentActiveViewId === 'nestedIframeView' || currentActiveViewId === 'coachingReportsView') {
+                } else if (currentActiveViewId === 'nestedIframeView') {
                     loadPage('dm-crm');
                 } else if (lastPageHistory.length > 0) {
                     const lastPage = lastPageHistory.pop();
