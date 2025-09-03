@@ -1529,10 +1529,15 @@
                         }
                     }
 
+                    // FIX: Apply pre-wrap styling for comments
+                    const valueHtml = (key === 'comment')
+                        ? `<p class="text-sm text-gray-600" style="white-space: pre-wrap; word-break: break-word;">${formattedValue || 'N/A'}</p>`
+                        : `<p class="text-sm text-gray-600 break-words">${formattedValue || 'N/A'}</p>`;
+
                     return `
                         <div class="p-2 border-b last:border-b-0">
                             <p class="font-semibold text-gray-800">${formattedKey}:</p>
-                            <p class="text-sm text-gray-600 break-words">${formattedValue || 'N/A'}</p>
+                            ${valueHtml}
                         </div>
                     `;
                 }).join('');
@@ -1619,7 +1624,9 @@
                         console.error('Delete error:', error);
                     } else {
                         showNotification('Report deleted successfully.', 'success');
-                        fetchReportsFromSupabase(dmNameSelect.value);
+                        await fetchReportsFromSupabase(dmNameSelect.value);
+                        // FIX: Update coaching badge immediately after deletion
+                        await updateCoachingBadge();
                     }
                 });
             };
@@ -2266,13 +2273,28 @@
                 
                 allMonthlyReports = monthlyReports || [];
 
+                // FIX: Clear page content when no reports are found for the selected month
                 if (allMonthlyReports.length === 0) {
-                        showNotification(`No reports found for ${selectedDm} this month.`, 'info');
-                        analysisSummarySection.classList.add('hidden');
-                        analysisSummarySectionMobile.classList.add('hidden');
-                        if (myChart) myChart.destroy();
-                        if (myChartMobile) myChartMobile.destroy();
-                        return;
+                    showNotification(`No reports found for ${selectedDm} for ${monthName} ${yearShort}.`, 'info');
+                    // Clear summary boxes
+                    filedVisitsCountSpan.textContent = '0';
+                    eventsCountSpan.textContent = '0';
+                    leavesCountSpan.textContent = '0';
+                    // Hide details sections
+                    filedVisitsDetailsSection.classList.add('hidden');
+                    eventsDetailsSection.classList.add('hidden');
+                    leavesDetailsSection.classList.add('hidden');
+                    // Clear legends
+                    chartLegendContainer.innerHTML = '';
+                    if (document.getElementById('chart-legend-container-mobile')) {
+                        document.getElementById('chart-legend-container-mobile').innerHTML = '';
+                    }
+                    // Hide chart sections
+                    analysisSummarySection.classList.add('hidden');
+                    analysisSummarySectionMobile.classList.add('hidden');
+                    if (myChart) myChart.destroy();
+                    if (myChartMobile) myChartMobile.destroy();
+                    return;
                 }
                 
                 const analysis = {
@@ -2484,11 +2506,11 @@
 
                 // 1. Create a container for the PDF content
                 const reportElement = document.createElement('div');
-                reportElement.style.padding = '0.5in';
+                // FIX: Adjust width and add margin for centering
+                reportElement.style.width = '7.5in'; // Letter width (8.5) - 0.5in margins on each side
+                reportElement.style.margin = '0 auto';
                 reportElement.style.fontFamily = 'Arial, sans-serif';
-                reportElement.style.width = '8.5in';
                 reportElement.style.boxSizing = 'border-box';
-
 
                 // 2. Build the HTML string for the report
                 let reportHtml = `
