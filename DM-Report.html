@@ -1511,10 +1511,7 @@
         if (key === 'created_at') {
             formattedKey = 'Date & Time';
             const date = new Date(value);
-            // If you want to ensure the time is not more than 3 hours ahead,
-            // you can subtract 3 hours if needed, but usually toLocaleString() is sufficient.
-            // Example: date.setHours(date.getHours() - 3);
-            const formattedValue = date.toLocaleString();
+            const formattedValue = date.toLocaleString(); // Displays the actual time in the user's local timezone
             return `
                 <div class="p-2 border-b last:border-b-0">
                     <p class="font-semibold text-gray-800">${formattedKey}:</p>
