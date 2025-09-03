@@ -1504,26 +1504,35 @@
 
 
             const showRowDetailsModal = (report) => {
-                rowDetailsContent.innerHTML = '';
-                const detailsHtml = Object.entries(report).map(([key, value]) => {
-                    if (key === 'id' || key === 'dm_name') return '';
-                    let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                    if (key === 'created_at') {
-    formattedKey = 'Date & Time';
-    formattedValue = new Date(value).toLocaleString('en-US', { timeZone: 'UTC' });
-}
-                    if (key === 'created_at') formattedValue = new Date(value).toLocaleString();
+    rowDetailsContent.innerHTML = '';
+    const detailsHtml = Object.entries(report).map(([key, value]) => {
+        if (key === 'id' || key === 'dm_name') return '';
+        let formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        if (key === 'created_at') {
+            formattedKey = 'Date & Time';
+            const date = new Date(value);
+            // If you want to ensure the time is not more than 3 hours ahead,
+            // you can subtract 3 hours if needed, but usually toLocaleString() is sufficient.
+            // Example: date.setHours(date.getHours() - 3);
+            const formattedValue = date.toLocaleString();
+            return `
+                <div class="p-2 border-b last:border-b-0">
+                    <p class="font-semibold text-gray-800">${formattedKey}:</p>
+                    <p class="text-sm text-gray-600 break-words">${formattedValue}</p>
+                </div>
+            `;
+        }
+        return `
+            <div class="p-2 border-b last:border-b-0">
+                <p class="font-semibold text-gray-800">${formattedKey}:</p>
+                <p class="text-sm text-gray-600 break-words">${value}</p>
+            </div>
+        `;
+    }).join('');
+    rowDetailsContent.innerHTML = detailsHtml;
+    rowDetailsModal.classList.remove('hidden');
+};
 
-                    return `
-                        <div class="p-2 border-b last:border-b-0">
-                            <p class="font-semibold text-gray-800">${formattedKey}:</p>
-                            <p class="text-sm text-gray-600 break-words">${formattedValue}</p>
-                        </div>
-                    `;
-                }).join('');
-                rowDetailsContent.innerHTML = detailsHtml;
-                rowDetailsModal.classList.remove('hidden');
-            };
 
             const hideRowDetailsModal = () => {
                 rowDetailsModal.classList.add('hidden');
