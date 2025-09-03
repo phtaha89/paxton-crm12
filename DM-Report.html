@@ -1512,6 +1512,7 @@
     formattedKey = 'Date & Time';
     formattedValue = new Date(value).toLocaleString('en-US', { timeZone: 'UTC' });
 }
+                    if (key === 'created_at') formattedValue = new Date(value).toLocaleString();
 
                     return `
                         <div class="p-2 border-b last:border-b-0">
