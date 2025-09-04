@@ -847,6 +847,27 @@
         .reject-btn { background-color: #ef4444; color: white; }
         .reject-btn:hover { background-color: #dc2626; }
 
+        /* Expense Items Table Styles */
+        .expense-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .expense-items-table th, .expense-items-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+        .expense-items-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+        }
+        .expense-items-table td:last-child {
+            text-align: right;
+            font-weight: 500;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 1024px) {
             .container { padding: 0 10px 10px; }
@@ -870,7 +891,7 @@
         }
 
         @media (max-width: 768px) {
-            .container { padding: 0 8px 8px; height: 100vh; }
+            .container { padding: 0 0 8px; height: 100vh; }
             .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
             .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
             .user-name { font-size: 0.7rem; }
@@ -878,7 +899,7 @@
             .header-buttons { width: auto; justify-content: flex-start; order: 1; flex-grow: 1; }
             .header-button { flex-grow: 0; padding: 5px 7px; font-size: 0.7rem; }
             .logout-button { width: 70px; display: none; }
-            .banner { padding: 6px 12px; gap: 8px; }
+            .banner { padding: 6px 12px; gap: 8px; border-radius: 0; margin-top: 0; }
             .company-logo { max-width: 40px; }
             .banner h1 { font-size: 1.2rem; }
             .banner .subtitle { font-size: 0.65rem; }
@@ -1247,7 +1268,7 @@
                                     <div class="notification-rep">By: ${item.employee_name}</div>
                                     <div class="notification-date">${new Date(item.date).toLocaleDateString()}</div>
                                 </div>`;
-                            notificationItem.addEventListener('click', () => showExpenseModal(item.id));
+                             notificationItem.addEventListener('click', () => showExpenseModal(item.id));
                         }
                         notificationDropdown.appendChild(notificationItem);
                     });
@@ -1355,7 +1376,7 @@
              const modalTitle = document.getElementById('modalExpenseTitle');
              const modalDetails = document.getElementById('modalExpenseDetails');
              
-             modalTitle.textContent = `Expense: ${data.report_type || 'Daily Log'}`;
+             modalTitle.textContent = data.report_type || 'Expense Details'; // Use report_type for the title
              const details = JSON.parse(data.details || '{}');
              const items = JSON.parse(data.items || '[]');
 
@@ -1367,18 +1388,39 @@
             
              if(data.role === 'District Manager' && details.reportType === 'Trip') {
                  detailsHtml += `
-                    <div class="detail-pair"><strong>Trip:</strong> <span>${details.from} to ${details.to}</span></div>
-                    <div class="detail-pair"><strong>Purpose:</strong> <span>${details.purpose}</span></div>
+                     <div class="detail-pair"><strong>Trip:</strong> <span>${details.from} to ${details.to}</span></div>
+                     <div class="detail-pair"><strong>Purpose:</strong> <span>${details.purpose}</span></div>
                  `;
              }
 
-             if (items.length > 0) {
-                 detailsHtml += '<div class="detail-pair"><strong>Items:</strong></div><ul style="list-style-position: inside; padding-left: 10px;">';
-                 items.forEach(item => {
-                     detailsHtml += `<li>${item.type}: ${item.desc || ''} - <strong>${parseFloat(item.amount).toFixed(2)} EGP</strong></li>`;
-                 });
-                 detailsHtml += '</ul>';
-             }
+            if (items.length > 0) {
+                detailsHtml += `
+                    <div class="detail-pair" style="margin-top: 15px;"><strong>Items:</strong></div>
+                    <table class="expense-items-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                items.forEach(item => {
+                    // Append KM if item type is 'Own Car Travel' and description exists
+                    const description = (item.type === 'Own Car Travel' && item.desc) 
+                        ? `${item.desc} KM` 
+                        : (item.desc || 'N/A');
+                    detailsHtml += `
+                        <tr>
+                            <td>${item.type}</td>
+                            <td>${description}</td>
+                            <td>${parseFloat(item.amount).toFixed(2)} EGP</td>
+                        </tr>
+                    `;
+                });
+                detailsHtml += '</tbody></table>';
+            }
 
              modalDetails.innerHTML = detailsHtml;
              modal.classList.add('show');
@@ -1555,7 +1597,7 @@
 
             if (currentActiveViewId !== viewId) {
                  if (currentActiveViewId && currentActiveViewId !== 'homeView') {
-                      lastPageHistory.push(currentActiveViewId);
+                       lastPageHistory.push(currentActiveViewId);
                  }
             }
             
