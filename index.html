@@ -849,7 +849,7 @@
 
         /* Responsive adjustments */
         @media (max-width: 1024px) {
-            .container { padding: 10px; }
+            .container { padding: 0 10px 10px; }
             .header { padding: 6px 15px; }
             .user-card { padding: 6px 12px; gap: 10px; max-width: 180px; }
             .user-card-icon { font-size: 1.3rem; }
@@ -1602,6 +1602,10 @@
                             message.type = 'dashboardLogin';
                             message.username = sessionStorage.getItem('dashboardUsername');
                             message.password = sessionStorage.getItem('dashboardPassword');
+                        } else if (page === 'dm-planning') {
+                            message.type = 'dmPlanningUserPermissions';
+                        } else if (page === 'dm-report') {
+                            message.type = 'dmReportUserPermissions';
                         } else { 
                             message.type = 'loggedInUser';
                         }
