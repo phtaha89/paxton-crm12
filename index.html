@@ -654,6 +654,17 @@
             font-size: 1.4rem;
             color: var(--text-color-dark);
         }
+        .notification-bell .fa-bell.updated {
+            animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
+        }
+
         .notification-count {
             position: absolute;
             top: -5px;
@@ -680,12 +691,12 @@
 
         .notification-dropdown {
             position: absolute;
-            top: 100%;
-            left: 0;
+            top: calc(100% + 10px); /* Adjust vertical position */
+            left: 0; /* Align to the left of the bell icon */
             background-color: white;
             border-radius: 8px;
             box-shadow: var(--shadow-lg);
-            width: 300px;
+            width: 320px;
             max-height: 400px;
             overflow-y: auto;
             z-index: 101;
@@ -695,9 +706,14 @@
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: background-color 0.2s ease;
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
         .notification-item:hover { background-color: #f1f5f9; }
         .notification-item:last-child { border-bottom: none; }
+        .notification-icon { font-size: 1.2rem; color: var(--text-color-light); }
+        .notification-content { flex-grow: 1; }
         .notification-title {
             font-weight: 600;
             color: var(--text-color-dark);
@@ -711,8 +727,13 @@
             color: var(--text-color-light);
             margin-top: 4px;
         }
+        .no-notifications {
+             padding: 20px;
+             text-align: center;
+             color: var(--text-color-light);
+        }
 
-        /* Request Modal Styles */
+        /* Request & Expense Modal Styles */
         .custom-modal-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -736,10 +757,13 @@
             border-radius: 12px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
             width: 90%;
-            max-width: 500px;
+            max-width: 550px;
             transform: scale(0.9);
             opacity: 0;
             transition: transform var(--transition-duration-normal) ease, opacity var(--transition-duration-normal) ease;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
         }
         .custom-modal-overlay.show .custom-modal-content {
             transform: scale(1);
@@ -752,6 +776,7 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
             margin-bottom: 15px;
+            flex-shrink: 0;
         }
         .modal-header h2 {
             font-size: 1.2rem;
@@ -770,6 +795,8 @@
             font-size: 0.9rem;
             color: var(--text-color-dark);
             line-height: 1.6;
+            overflow-y: auto;
+            flex-grow: 1;
         }
         .modal-body .detail-pair { margin-bottom: 12px; }
         .modal-body .detail-pair strong {
@@ -788,6 +815,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-shrink: 0;
         }
         .modal-footer label {
             font-weight: 600;
@@ -801,10 +829,27 @@
             font-size: 0.9rem;
             cursor: pointer;
         }
+        .modal-footer .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+        }
+        .modal-footer .action-buttons button {
+             padding: 8px 16px;
+             border-radius: 8px;
+             font-weight: 600;
+             cursor: pointer;
+             border: none;
+             transition: background-color 0.2s ease;
+        }
+        .approve-btn { background-color: #10b981; color: white; }
+        .approve-btn:hover { background-color: #059669; }
+        .reject-btn { background-color: #ef4444; color: white; }
+        .reject-btn:hover { background-color: #dc2626; }
 
         /* Responsive adjustments */
         @media (max-width: 1024px) {
-            .container { /* padding: 10px; */ } /* FIX: Removed padding */
+            .container { padding: 10px; }
             .header { padding: 6px 15px; }
             .user-card { padding: 6px 12px; gap: 10px; max-width: 180px; }
             .user-card-icon { font-size: 1.3rem; }
@@ -825,7 +870,7 @@
         }
 
         @media (max-width: 768px) {
-            .container { /* padding: 8px; */ /* height: 100vh; */ } /* FIX: Removed padding and height */
+            .container { padding: 0 8px 8px; height: 100vh; }
             .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
             .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
             .user-name { font-size: 0.7rem; }
@@ -837,7 +882,7 @@
             .company-logo { max-width: 40px; }
             .banner h1 { font-size: 1.2rem; }
             .banner .subtitle { font-size: 0.65rem; }
-            .home-grid { grid-template-columns: 1fr; gap: 12px; padding: 8px; } /* FIX: Added padding here */
+            .home-grid { grid-template-columns: 1fr; gap: 12px; }
             .main-card { min-height: 80px; padding: 12px; flex-direction: row; justify-content: flex-start; text-align: left; gap: 15px; }
             .main-card-icon { font-size: 1.8rem; margin-bottom: 0; flex-shrink: 0; }
             .main-card-title { font-size: 1rem; margin-bottom: 0; }
@@ -1017,6 +1062,25 @@
             </div>
         </div>
     </div>
+    
+    <!-- Expense Details Modal -->
+    <div id="expenseModal" class="custom-modal-overlay">
+        <div class="custom-modal-content">
+            <div class="modal-header">
+                <h2 id="modalExpenseTitle">Expense Details</h2>
+                <button id="modalExpenseCloseButton" class="close-modal-button">&times;</button>
+            </div>
+            <div id="modalExpenseDetails" class="modal-body">
+                <!-- Expense details will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <div class="action-buttons">
+                     <button id="expenseApproveBtn" class="approve-btn">Approve</button>
+                     <button id="expenseRejectBtn" class="reject-btn">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -1026,11 +1090,10 @@
         
         let currentActiveViewId = null;
         let loggedInUser = null;
-        let googleSheetData = [];
+        let masterlistData = []; // Changed from googleSheetData
         let lastPageHistory = [];
         let notificationChannel = null;
-
-        const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRGZVMTCJ53ACJBwYVpyBpCFyDn4lYfMlbbldKbRXfnmsN14APuBIJm2jlDMGhPpYi5xXUp4z1YFkte/pub?gid=0&single=true&output=csv';
+        let currentOpenExpenseId = null;
 
         const navConfig = {
             'home': {
@@ -1061,32 +1124,15 @@
             }
         };
 
-        async function fetchGoogleSheetData() {
+        // Fetches data from the 'masterlist' table in Supabase
+        async function fetchMasterlistData() {
             try {
-                const response = await fetch(`${GOOGLE_SHEET_URL}&_=${new Date().getTime()}`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const csvText = await response.text();
-                googleSheetData = parseCSV(csvText);
+                let { data, error } = await supabase.from('masterlist').select('*');
+                if (error) throw error;
+                masterlistData = data;
             } catch (error) {
-                console.error('Error fetching or parsing Google Sheet data:', error);
+                console.error('Error fetching masterlist data:', error);
             }
-        }
-        
-        function parseCSV(csvText) {
-            const rows = csvText.split('\n').filter(row => row.trim() !== '');
-            if (rows.length === 0) return [];
-            const headers = rows[0].split(',').map(header => header.trim());
-            const data = [];
-
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i].split(',');
-                const rowObject = {};
-                headers.forEach((header, index) => {
-                    rowObject[header] = row[index] ? row[index].trim() : '';
-                });
-                data.push(rowObject);
-            }
-            return data;
         }
 
         function updateAndShowUserCard() {
@@ -1104,70 +1150,116 @@
         
         async function fetchNotifications() {
             const notificationBell = document.getElementById('notificationBell');
-            const notificationCount = document.getElementById('notificationCount');
+            const bellIcon = notificationBell.querySelector('.fa-bell');
+            const notificationCountEl = document.getElementById('notificationCount');
             const notificationDropdown = document.getElementById('notificationDropdown');
 
-            if (!loggedInUser) return;
-
-            if (loggedInUser.title === 'Medical Representative') {
+            if (!loggedInUser || loggedInUser.title === 'Medical Representative') {
                 notificationBell.classList.add('hidden');
                 return;
             }
 
-            let query = supabase.from('requests').select('*').eq('status', 'Requested');
-            
-            if (loggedInUser.title === 'District Manager') {
-                const dmReps = googleSheetData
-                    .filter(row => row['District Manager'] === loggedInUser.username)
-                    .map(row => row['medical rep']);
+            try {
+                // Define queries for requests and expenses
+                let requestsQuery = supabase.from('requests').select('*').eq('status', 'Requested');
+                let expensesQuery = supabase.from('expenses').select('*').eq('status', 'Pending');
                 
-                if (dmReps.length > 0) {
-                    query = query.in('medRep', dmReps);
-                } else {
-                    notificationBell.classList.add('hidden');
-                    return;
+                if (loggedInUser.title === 'District Manager') {
+                    const dmReps = masterlistData
+                        .filter(row => row['District Manager'] === loggedInUser.username)
+                        .map(row => row['medical rep']);
+                    
+                    if (dmReps.length > 0) {
+                        requestsQuery = requestsQuery.in('medRep', dmReps);
+                        expensesQuery = expensesQuery.in('employee_name', dmReps);
+                    } else {
+                        // If a DM has no reps, they have no notifications to see
+                        requestsQuery = requestsQuery.is('id', null); // empty query
+                        expensesQuery = expensesQuery.is('id', null);  // empty query
+                    }
                 }
-            }
-            
-            const { data, error } = await query.order('date', { ascending: false });
 
-            if (error) {
-                console.error('Error fetching notifications:', error);
-                return;
-            }
+                // Fetch both in parallel
+                const [
+                    { data: requestsData, error: requestsError },
+                    { data: expensesData, error: expensesError }
+                ] = await Promise.all([
+                    requestsQuery,
+                    expensesQuery
+                ]);
 
-            if (data.length > 0) {
-                const currentCount = parseInt(notificationCount.textContent, 10);
-                notificationCount.textContent = data.length;
-                notificationBell.classList.remove('hidden');
+                if (requestsError) console.error('Error fetching requests:', requestsError);
+                if (expensesError) console.error('Error fetching expenses:', expensesError);
 
-                if (data.length > currentCount) {
-                    notificationCount.classList.add('updated');
-                    setTimeout(() => {
-                        notificationCount.classList.remove('updated');
-                    }, 600);
-                }
+                const formattedRequests = (requestsData || []).map(r => ({ ...r, type: 'request', date: r.date || r.created_at }));
+                const formattedExpenses = (expensesData || []).map(e => ({ ...e, type: 'expense', date: e.report_date || e.created_at }));
+                
+                const allNotifications = [...formattedRequests, ...formattedExpenses]
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 notificationDropdown.innerHTML = '';
-                data.forEach(req => {
-                    const item = document.createElement('div');
-                    item.className = 'notification-item';
-                    item.dataset.requestId = req.id;
-                    const requestDate = new Date(req.date).toLocaleDateString('en-GB', {
-                        day: '2-digit', month: 'short', year: 'numeric'
+                const currentCount = parseInt(notificationCountEl.textContent, 10);
+                
+                if (allNotifications.length > 0) {
+                    notificationCountEl.textContent = allNotifications.length;
+                    notificationBell.classList.remove('hidden');
+                    
+                    if (allNotifications.length > currentCount) {
+                        notificationCountEl.classList.add('updated');
+                        bellIcon.classList.add('updated');
+                        setTimeout(() => {
+                            notificationCountEl.classList.remove('updated');
+                            bellIcon.classList.remove('updated');
+                        }, 800);
+                    }
+
+                    allNotifications.forEach(item => {
+                        const notificationItem = document.createElement('div');
+                        notificationItem.className = 'notification-item';
+                        
+                        if (item.type === 'request') {
+                            notificationItem.innerHTML = `
+                                <div class="notification-icon"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="notification-content">
+                                    <div class="notification-title">${item.requestTitle}</div>
+                                    <div class="notification-rep">By: ${item.medRep}</div>
+                                    <div class="notification-date">${new Date(item.date).toLocaleDateString()}</div>
+                                </div>`;
+                            notificationItem.addEventListener('click', () => showRequestModal(item.id));
+                        } else if (item.type === 'expense') {
+                             const details = JSON.parse(item.details || '{}');
+                             let expenseTitle = 'Expense Report'; // Default title
+
+                             if (item.role === 'District Manager') {
+                                 if (details.reportType === 'Trip') {
+                                     expenseTitle = `Trip Report (${details.purpose})`;
+                                 } else {
+                                     expenseTitle = `Other Expenses`;
+                                 }
+                             } else { // Medical Representative
+                                 expenseTitle = `Daily Log`;
+                             }
+
+                             notificationItem.innerHTML = `
+                                <div class="notification-icon"><i class="fas fa-file-invoice-dollar" style="color: #10b981;"></i></div>
+                                <div class="notification-content">
+                                    <div class="notification-title">${expenseTitle}</div>
+                                    <div class="notification-rep">By: ${item.employee_name}</div>
+                                    <div class="notification-date">${new Date(item.date).toLocaleDateString()}</div>
+                                </div>`;
+                            notificationItem.addEventListener('click', () => showExpenseModal(item.id));
+                        }
+                        notificationDropdown.appendChild(notificationItem);
                     });
 
-                    item.innerHTML = `
-                        <div class="notification-title">${req.requestTitle}</div>
-                        <div class="notification-rep">By: ${req.medRep}</div>
-                        <div class="notification-date">${requestDate}</div>
-                    `;
-                    item.addEventListener('click', () => showRequestModal(req.id));
-                    notificationDropdown.appendChild(item);
-                });
+                } else {
+                    notificationBell.classList.add('hidden');
+                    notificationCountEl.textContent = '0';
+                    notificationDropdown.innerHTML = '<div class="no-notifications">No new notifications</div>';
+                }
 
-            } else {
-                notificationBell.classList.add('hidden');
+            } catch (err) {
+                console.error('Failed to fetch notifications:', err);
             }
         }
 
@@ -1177,83 +1269,65 @@
                 notificationChannel = null;
             }
 
-            notificationChannel = supabase.channel('public:requests')
+            // Listen to both tables
+            notificationChannel = supabase.channel('public-notifications')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
-                    console.log('Real-time change received!', payload);
-                    setTimeout(fetchNotifications, 500); // Re-fetch data on any change
+                    console.log('Real-time change received on requests!', payload);
+                    setTimeout(fetchNotifications, 500); 
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, payload => {
+                    console.log('Real-time change received on expenses!', payload);
+                    setTimeout(fetchNotifications, 500); 
                 })
                 .subscribe((status, err) => {
-                    if (status === 'SUBSCRIBED') {
-                        console.log('Successfully subscribed to real-time notifications!');
-                    }
-                    if (status === 'CHANNEL_ERROR') {
-                        console.error('Subscription error:', err);
-                    }
+                    if (status === 'SUBSCRIBED') console.log('Successfully subscribed to real-time notifications!');
+                    if (status === 'CHANNEL_ERROR') console.error('Subscription error:', err);
                 });
         }
         
+        // --- Request Modal Functions (Existing) ---
         async function showRequestModal(requestId) {
             const { data, error } = await supabase.from('requests').select('*').eq('id', requestId).single();
-
             if (error) {
                 console.error('Error fetching request details:', error);
                 showBlurredMessage('Could not load request details.', 1500);
                 return;
             }
-
-            const modal = document.getElementById('requestModal');
+            // ... (rest of the function is the same as original)
+             const modal = document.getElementById('requestModal');
             const modalTitle = document.getElementById('modalRequestTitle');
             const modalDetails = document.getElementById('modalRequestDetails');
             const modalStatusSelect = document.getElementById('modalStatusSelect');
 
             modalTitle.textContent = data.requestTitle;
-
             let detailsHtml = `
                 <div class="detail-pair"><strong>Medical Rep:</strong> <span>${data.medRep || 'N/A'}</span></div>
                 <div class="detail-pair"><strong>Area:</strong> <span>${data.area || 'N/A'}</span></div>
-                <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.date).toLocaleDateString()}</span></div>
-            `;
+                <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.date).toLocaleDateString()}</span></div>`;
 
             if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
                  detailsHtml += `
-                    <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
-                    <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
-                `;
+                        <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
+                        <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>`;
             }
-
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
             modalDetails.innerHTML = detailsHtml;
 
             let statusOptions = '';
             if (data.customerType && data.customerType.toLowerCase() === 'personal') {
-                statusOptions = `
-                    <option value="Requested">Requested</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                `;
+                statusOptions = `<option value="Requested">Requested</option><option value="Approved">Approved</option><option value="Rejected">Rejected</option>`;
             } else {
-                statusOptions = `
-                    <option value="Requested">Requested</option>
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Postponed">Postponed</option>
-                    <option value="Done">Done</option>
-                    <option value="Rejected">Rejected</option>
-                    <option value="Approved">Approved</option>
-                `;
+                statusOptions = `<option value="Requested">Requested</option><option value="Scheduled">Scheduled</option><option value="Pending">Pending</option><option value="Postponed">Postponed</option><option value="Done">Done</option><option value="Rejected">Rejected</option><option value="Approved">Approved</option>`;
             }
             modalStatusSelect.innerHTML = statusOptions;
             modalStatusSelect.value = data.status;
-
             modalStatusSelect.onchange = null;
             modalStatusSelect.onchange = () => updateRequestStatus(requestId, modalStatusSelect.value);
-
             modal.classList.add('show');
         }
 
         async function updateRequestStatus(requestId, newStatus) {
             const { error } = await supabase.from('requests').update({ status: newStatus }).eq('id', requestId);
-
             if (error) {
                 console.error('Error updating status:', error);
                 showBlurredMessage('Failed to update status.', 1500);
@@ -1265,6 +1339,67 @@
 
         function closeRequestModal() {
             document.getElementById('requestModal').classList.remove('show');
+        }
+        
+        // --- Expense Modal Functions (New) ---
+        async function showExpenseModal(expenseId) {
+             currentOpenExpenseId = expenseId;
+             const { data, error } = await supabase.from('expenses').select('*').eq('id', expenseId).single();
+             if (error) {
+                 console.error('Error fetching expense details:', error);
+                 showBlurredMessage('Could not load expense details.', 1500);
+                 return;
+             }
+
+             const modal = document.getElementById('expenseModal');
+             const modalTitle = document.getElementById('modalExpenseTitle');
+             const modalDetails = document.getElementById('modalExpenseDetails');
+             
+             modalTitle.textContent = `Expense: ${data.report_type || 'Daily Log'}`;
+             const details = JSON.parse(data.details || '{}');
+             const items = JSON.parse(data.items || '[]');
+
+             let detailsHtml = `
+                 <div class="detail-pair"><strong>Employee:</strong> <span>${data.employee_name}</span></div>
+                 <div class="detail-pair"><strong>Role:</strong> <span>${data.role}</span></div>
+                 <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.report_date).toLocaleDateString()}</span></div>
+                 <div class="detail-pair"><strong>Total Amount:</strong> <span>${parseFloat(data.total_amount).toFixed(2)} EGP</span></div>`;
+            
+             if(data.role === 'District Manager' && details.reportType === 'Trip') {
+                 detailsHtml += `
+                    <div class="detail-pair"><strong>Trip:</strong> <span>${details.from} to ${details.to}</span></div>
+                    <div class="detail-pair"><strong>Purpose:</strong> <span>${details.purpose}</span></div>
+                 `;
+             }
+
+             if (items.length > 0) {
+                 detailsHtml += '<div class="detail-pair"><strong>Items:</strong></div><ul style="list-style-position: inside; padding-left: 10px;">';
+                 items.forEach(item => {
+                     detailsHtml += `<li>${item.type}: ${item.desc || ''} - <strong>${parseFloat(item.amount).toFixed(2)} EGP</strong></li>`;
+                 });
+                 detailsHtml += '</ul>';
+             }
+
+             modalDetails.innerHTML = detailsHtml;
+             modal.classList.add('show');
+        }
+
+        function closeExpenseModal() {
+            document.getElementById('expenseModal').classList.remove('show');
+            currentOpenExpenseId = null;
+        }
+        
+        async function updateExpenseStatus(newStatus) {
+            if (!currentOpenExpenseId) return;
+            const { error } = await supabase.from('expenses').update({ status: newStatus }).eq('id', currentOpenExpenseId);
+            
+            if (error) {
+                console.error('Error updating expense status:', error);
+                showBlurredMessage('Failed to update status.', 1500);
+            } else {
+                showBlurredMessage(`Expense ${newStatus.toLowerCase()} successfully!`, 1500);
+                closeExpenseModal();
+            }
         }
 
 
@@ -1385,12 +1520,15 @@
                 prevActiveView.classList.remove('active');
                 setTimeout(() => {
                     prevActiveView.classList.add('hidden');
-                    // FIX: Removed line that cleared iframe src to preserve state
+                    const iframe = prevActiveView.querySelector('iframe');
+                    if (iframe) iframe.src = 'about:blank';
                     homeView.classList.remove('hidden');
                     setTimeout(() => {
                         homeView.classList.add('active');
+                        homeView.classList.remove('active');
+                        homeView.classList.add('active');
                     }, 10);
-                }, 200); 
+                }, 200);
             } else {
                 homeView.classList.remove('hidden');
                 homeView.classList.add('active');
@@ -1417,7 +1555,7 @@
 
             if (currentActiveViewId !== viewId) {
                  if (currentActiveViewId && currentActiveViewId !== 'homeView') {
-                     lastPageHistory.push(currentActiveViewId);
+                      lastPageHistory.push(currentActiveViewId);
                  }
             }
             
@@ -1431,7 +1569,8 @@
                 prevActiveView.classList.remove('active');
                 setTimeout(() => {
                     prevActiveView.classList.add('hidden');
-                    // FIX: Removed line that cleared iframe src to preserve state
+                    const prevIframe = prevActiveView.querySelector('iframe');
+                    if (prevIframe) prevIframe.src = 'about:blank';
                 }, 200);
             }
 
@@ -1447,46 +1586,37 @@
                 renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
                 targetView.querySelector('.loading').classList.remove('show');
             } else {
+                const loadingOverlay = targetView.querySelector('.loading');
+                const errorState = targetView.querySelector('.error-state');
                 const iframe = targetView.querySelector('iframe');
                 
-                // FIX: Only load the iframe if it's not already loaded with the correct page.
-                // This prevents the page from reloading every time it's viewed.
-                if (!iframe.src || !iframe.src.includes(fileName)) {
-                    const loadingOverlay = targetView.querySelector('.loading');
-                    const errorState = targetView.querySelector('.error-state');
-                    
-                    loadingOverlay.classList.add('show');
-                    errorState.classList.remove('show');
-                    
-                    iframe.src = `${fileName}?t=${new Date().getTime()}`;
-                    
-                    const sendDataToIframe = () => {
-                        if (loggedInUser && iframe.contentWindow) {
-                            const message = { user: loggedInUser };
-                            if (page === 'dashboard') {
-                                message.type = 'dashboardLogin';
-                                message.username = sessionStorage.getItem('dashboardUsername');
-                                message.password = sessionStorage.getItem('dashboardPassword');
-                            } else if (page === 'dm-planning') {
-                                message.type = 'dmPlanningUserPermissions';
-                            } else if (page === 'dm-report') {
-                                message.type = 'dmReportUserPermissions';
-                            } else { 
-                                message.type = 'loggedInUser';
-                            }
-                            iframe.contentWindow.postMessage(message, '*');
+                loadingOverlay.classList.add('show');
+                errorState.classList.remove('show');
+                
+                iframe.src = `${fileName}?t=${new Date().getTime()}`;
+                
+                const sendDataToIframe = () => {
+                    if (loggedInUser && iframe.contentWindow) {
+                        const message = { user: loggedInUser };
+                        if (page === 'dashboard') {
+                            message.type = 'dashboardLogin';
+                            message.username = sessionStorage.getItem('dashboardUsername');
+                            message.password = sessionStorage.getItem('dashboardPassword');
+                        } else { 
+                            message.type = 'loggedInUser';
                         }
-                    };
-                    
-                    iframe.onload = () => {
-                        loadingOverlay.classList.remove('show');
-                        sendDataToIframe();
-                    };
-                    iframe.onerror = () => {
-                        loadingOverlay.classList.remove('show');
-                        errorState.classList.add('show');
-                    };
-                }
+                        iframe.contentWindow.postMessage(message, '*');
+                    }
+                };
+                
+                iframe.onload = () => {
+                    loadingOverlay.classList.remove('show');
+                    sendDataToIframe();
+                };
+                iframe.onerror = () => {
+                    loadingOverlay.classList.remove('show');
+                    errorState.classList.add('show');
+                };
             }
             closeSideMenu();
         }
@@ -1574,37 +1704,37 @@
             const introOverlay = document.getElementById('introOverlay');
             setTimeout(() => {
                 introOverlay.classList.add('fade-out');
-                setTimeout(() => introOverlay.remove(), 500);
+                setTimeout(() => {
+                    if(introOverlay) introOverlay.remove()
+                }, 500);
             }, 3000);
 
-            await fetchGoogleSheetData();
+            await fetchMasterlistData();
             const storedUser = localStorage.getItem('loggedInUser');
             const lastPage = localStorage.getItem('currentPage');
 
-            setTimeout(() => {
-                if (storedUser) {
-                    loggedInUser = JSON.parse(storedUser);
-                    showAppContent();
-                    if (lastPage && lastPage !== 'home' && lastPage !== 'null') {
-                        const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
-                        const targetPage = allPages.find(p => p.id === lastPage);
-                        if (targetPage && (targetPage.roles.includes(loggedInUser.title) || loggedInUser.title === 'admin')) {
-                            if (targetPage.isNested) {
-                                loadPage('dm-crm');
-                                setTimeout(() => loadPage(lastPage), 500);
-                            } else {
-                                loadPage(lastPage);
-                            }
+            if (storedUser) {
+                loggedInUser = JSON.parse(storedUser);
+                showAppContent();
+                if (lastPage && lastPage !== 'home' && lastPage !== 'null') {
+                    const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
+                    const targetPage = allPages.find(p => p.id === lastPage);
+                    if (targetPage && (targetPage.roles.includes(loggedInUser.title) || loggedInUser.title === 'admin')) {
+                        if (targetPage.isNested) {
+                            loadPage('dm-crm');
+                            setTimeout(() => loadPage(lastPage), 500);
                         } else {
-                            showHome();
+                            loadPage(lastPage);
                         }
                     } else {
                         showHome();
                     }
                 } else {
-                    showLoginPage();
+                    showHome();
                 }
-            }, 3500);
+            } else {
+                showLoginPage();
+            }
 
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
@@ -1627,29 +1757,23 @@
             
             document.getElementById('refreshButton').addEventListener('click', async () => {
                 showBlurredMessage('Refreshing...', 1000);
-                await fetchGoogleSheetData(); 
+                await fetchMasterlistData();
                 fetchNotifications(); 
 
                 if (!currentActiveViewId) return;
-
                 const activeView = document.getElementById(currentActiveViewId);
                 if (!activeView) return;
 
                 if (currentActiveViewId === 'homeView') {
                     renderMainGrid();
-                } 
-                else if (currentActiveViewId === 'dmCrmView') {
+                } else if (currentActiveViewId === 'dmCrmView') {
                     const config = navConfig.home.pages.find(p => p.id === 'dm-crm');
-                    if (config) {
-                        renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
-                    }
-                }
-                else {
+                    if (config) renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
+                } else {
                     const iframe = activeView.querySelector('iframe');
                     if (iframe && iframe.contentWindow) {
                         const loadingOverlay = activeView.querySelector('.loading');
                         if (loadingOverlay) loadingOverlay.classList.add('show');
-                        // Force a reload by changing the src to a new unique URL
                         const currentSrc = iframe.src.split('?')[0];
                         iframe.src = `${currentSrc}?t=${new Date().getTime()}`;
                     }
@@ -1671,10 +1795,17 @@
             
             document.getElementById('modalCloseButton').addEventListener('click', closeRequestModal);
             document.getElementById('requestModal').addEventListener('click', (event) => {
-                if (event.target.id === 'requestModal') {
-                    closeRequestModal();
-                }
+                if (event.target.id === 'requestModal') closeRequestModal();
             });
+
+            // New Expense Modal Listeners
+            document.getElementById('modalExpenseCloseButton').addEventListener('click', closeExpenseModal);
+            document.getElementById('expenseModal').addEventListener('click', (event) => {
+                if (event.target.id === 'expenseModal') closeExpenseModal();
+            });
+            document.getElementById('expenseApproveBtn').addEventListener('click', () => updateExpenseStatus('Approved'));
+            document.getElementById('expenseRejectBtn').addEventListener('click', () => updateExpenseStatus('Rejected'));
+
         });
     </script>
 </body>
