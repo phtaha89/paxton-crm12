@@ -1727,7 +1727,7 @@
                     if (loggedInUser && iframe.contentWindow) {
                         const message = {
                             user: loggedInUser,
-                            type: 'loggedInUser' // Always use a consistent type
+                            type: 'loggedInUser' // Default type
                         };
 
                         const pagesNeedingMasterlist = ['crm', 'dm-planning', 'dm-report', 'master-list', 'dashboard'];
@@ -1735,7 +1735,14 @@
                             message.masterlist = masterlistData;
                         }
                         
-                        // The user object containing username and title is now consistently sent to all iframes
+                        // START: Re-add specific message types for DM pages
+                        if (page === 'dm-planning') {
+                            message.type = 'dmPlanningUserPermissions';
+                        } else if (page === 'dm-report') {
+                            message.type = 'dmReportUserPermissions';
+                        }
+                        // END: Re-add specific message types
+                        
                         iframe.contentWindow.postMessage(message, '*');
                     }
                 };
