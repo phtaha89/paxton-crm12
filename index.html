@@ -55,6 +55,7 @@
         }
 
         /* Main container for the application, taking full available width and height */
+        /* FIX: Changed to a flex container to manage layout and footer positioning */
         .container {
             width: 100%;
             flex-grow: 1;
@@ -65,6 +66,8 @@
         }
 
         /* Header styling with flexbox for alignment */
+        /* FIX: Header is now a non-growing flex item. No more jumping on scroll. */
+        /* ENHANCEMENT: Added backdrop-filter for a modern, glassy effect */
         .header {
             background: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
             backdrop-filter: blur(10px); /* Glassy blur effect */
@@ -145,6 +148,7 @@
             font-weight: 500;
             font-size: 0.85rem;
             border: none;
+            /* FIX: Using a more modern easing function for smoother animations */
             transition: all var(--transition-duration-fast) var(--transition-easing);
             text-decoration: none;
             display: inline-flex;
@@ -241,6 +245,7 @@
         }
         
         /* Home view container */
+        /* FIX: Changed flex properties to ensure content scrolls while footer stays visible */
         .home-view {
             display: flex;
             flex-direction: column;
@@ -249,6 +254,7 @@
         }
 
         /* Home view grid for navigation cards */
+        /* FIX: This grid is now the primary scrolling area on the home page */
         .home-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -271,6 +277,7 @@
             box-shadow: var(--shadow-md);
             cursor: pointer;
             text-align: center;
+            /* FIX: Using a smoother, more modern easing function */
             transition: all var(--transition-duration-normal) var(--transition-easing);
             display: flex;
             flex-direction: column;
@@ -325,12 +332,14 @@
         }
         
         /* Full page view container */
+        /* ENHANCEMENT: Made transitions smoother and faster for a better feel */
         .full-page-view {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            /* FIX: Updated transition for a smoother, faster feel */
             transition: opacity var(--transition-duration-fast) var(--transition-easing), transform var(--transition-duration-fast) var(--transition-easing);
             transform: translateY(10px);
             opacity: 0;
@@ -542,6 +551,7 @@
         }
 
         /* Footer Styling */
+        /* FIX: Footer is now a non-growing flex item, always visible at the bottom. */
         .footer {
             display: none; /* Hidden by default, shown via JS */
             padding: 8px 15px;
@@ -553,6 +563,7 @@
             color: var(--background-gradient-end);
             flex-shrink: 0; /* Prevent footer from shrinking */
         }
+        /* FIX: Ensure the footer is displayed correctly when it should be visible on mobile */
         .footer.show { display: block; }
         
         /* New Professional Intro Animation Styles */
@@ -654,17 +665,6 @@
             font-size: 1.4rem;
             color: var(--text-color-dark);
         }
-        .notification-bell .fa-bell.updated {
-            animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
-            40%, 60% { transform: translate3d(3px, 0, 0); }
-        }
-
         .notification-count {
             position: absolute;
             top: -5px;
@@ -683,6 +683,18 @@
             animation: bounce 0.6s ease;
         }
 
+        /* START: Added Bell Animation */
+        @keyframes bell-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .notification-bell.has-notifications .fa-bell {
+            animation: bell-pulse 2s ease-in-out infinite;
+        }
+        /* END: Added Bell Animation */
+
         @keyframes bounce {
             0%, 100% { transform: scale(1); }
             30% { transform: scale(1.4); }
@@ -691,12 +703,12 @@
 
         .notification-dropdown {
             position: absolute;
-            top: calc(100% + 10px); /* Adjust vertical position */
-            left: 0; /* Align to the left of the bell icon */
+            top: 100%;
+            left: 0;
             background-color: white;
             border-radius: 8px;
             box-shadow: var(--shadow-lg);
-            width: 320px;
+            width: 320px; /* Increased width */
             max-height: 400px;
             overflow-y: auto;
             z-index: 101;
@@ -706,14 +718,26 @@
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: background-color 0.2s ease;
-            display: flex;
-            gap: 12px;
-            align-items: center;
         }
         .notification-item:hover { background-color: #f1f5f9; }
         .notification-item:last-child { border-bottom: none; }
-        .notification-icon { font-size: 1.2rem; color: var(--text-color-light); }
-        .notification-content { flex-grow: 1; }
+        
+        /* START: New styles for notification icons */
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .notification-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            width: 25px;
+            text-align: center;
+        }
+        .text-green-500 { color: #22c55e; }
+        .text-yellow-500 { color: #eab308; }
+        /* END: New styles for notification icons */
+
         .notification-title {
             font-weight: 600;
             color: var(--text-color-dark);
@@ -726,11 +750,6 @@
             font-size: 0.7rem;
             color: var(--text-color-light);
             margin-top: 4px;
-        }
-        .no-notifications {
-             padding: 20px;
-             text-align: center;
-             color: var(--text-color-light);
         }
 
         /* Request & Expense Modal Styles */
@@ -757,13 +776,13 @@
             border-radius: 12px;
             box-shadow: 0 6px 16px rgba(0,0,0,0.2);
             width: 90%;
-            max-width: 550px;
+            max-width: 550px; /* Increased width for more details */
             transform: scale(0.9);
             opacity: 0;
             transition: transform var(--transition-duration-normal) ease, opacity var(--transition-duration-normal) ease;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
+            max-height: 90vh; /* Set max height */
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack header, body, footer */
         }
         .custom-modal-overlay.show .custom-modal-content {
             transform: scale(1);
@@ -776,7 +795,7 @@
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
             margin-bottom: 15px;
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevent header from shrinking */
         }
         .modal-header h2 {
             font-size: 1.2rem;
@@ -795,8 +814,8 @@
             font-size: 0.9rem;
             color: var(--text-color-dark);
             line-height: 1.6;
-            overflow-y: auto;
-            flex-grow: 1;
+            overflow-y: auto; /* Allow body to scroll */
+            flex-grow: 1; /* Allow body to take available space */
         }
         .modal-body .detail-pair { margin-bottom: 12px; }
         .modal-body .detail-pair strong {
@@ -815,7 +834,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevent footer from shrinking */
         }
         .modal-footer label {
             font-weight: 600;
@@ -829,48 +848,54 @@
             font-size: 0.9rem;
             cursor: pointer;
         }
+        /* START: Styles for modal approve/reject buttons */
         .modal-footer .action-buttons {
             display: flex;
+            justify-content: flex-end;
+            width: 100%;
             gap: 10px;
-            margin-left: auto;
         }
-        .modal-footer .action-buttons button {
-             padding: 8px 16px;
-             border-radius: 8px;
-             font-weight: 600;
-             cursor: pointer;
-             border: none;
-             transition: background-color 0.2s ease;
+        .modal-footer .modal-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .approve-btn { background-color: #10b981; color: white; }
-        .approve-btn:hover { background-color: #059669; }
-        .reject-btn { background-color: #ef4444; color: white; }
-        .reject-btn:hover { background-color: #dc2626; }
+        .modal-btn.approve { background-color: #10b981; color: white; }
+        .modal-btn.approve:hover { background-color: #059669; }
+        .modal-btn.reject { background-color: #ef4444; color: white; }
+        .modal-btn.reject:hover { background-color: #dc2626; }
+        /* END: Styles for modal approve/reject buttons */
 
-        /* Expense Items Table Styles */
+        /* START: Table style for expense items in modal */
         .expense-items-table {
             width: 100%;
+            margin-top: 15px;
             border-collapse: collapse;
-            margin-top: 10px;
+            font-size: 0.85rem;
         }
         .expense-items-table th, .expense-items-table td {
             border: 1px solid var(--border-color);
-            padding: 8px;
+            padding: 6px 8px;
             text-align: left;
-            font-size: 0.85rem;
         }
         .expense-items-table th {
             background-color: #f8fafc;
             font-weight: 600;
         }
-        .expense-items-table td:last-child {
-            text-align: right;
-            font-weight: 500;
+        .expense-items-table .amount { text-align: right; }
+        .expense-items-table .total-row {
+            font-weight: bold;
+            background-color: #f8fafc;
         }
+        /* END: Table style for expense items in modal */
+
 
         /* Responsive adjustments */
         @media (max-width: 1024px) {
-            .container { padding: 0 10px 10px; }
             .header { padding: 6px 15px; }
             .user-card { padding: 6px 12px; gap: 10px; max-width: 180px; }
             .user-card-icon { font-size: 1.3rem; }
@@ -891,7 +916,7 @@
         }
 
         @media (max-width: 768px) {
-            .container { padding: 0 0 8px; height: 100vh; }
+            .container { height: 100vh; padding: 0; } /* FIX: Removed padding */
             .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
             .user-card { width: 100%; margin-bottom: 0; justify-content: flex-start; order: 2; flex-grow: 1; max-width: 150px; }
             .user-name { font-size: 0.7rem; }
@@ -899,11 +924,11 @@
             .header-buttons { width: auto; justify-content: flex-start; order: 1; flex-grow: 1; }
             .header-button { flex-grow: 0; padding: 5px 7px; font-size: 0.7rem; }
             .logout-button { width: 70px; display: none; }
-            .banner { padding: 6px 12px; gap: 8px; border-radius: 0; margin-top: 0; }
+            .banner { padding: 6px 12px; gap: 8px; width: 100%; margin-top: 0; border-radius: 0; } /* FIX: Banner adjustments */
             .company-logo { max-width: 40px; }
             .banner h1 { font-size: 1.2rem; }
             .banner .subtitle { font-size: 0.65rem; }
-            .home-grid { grid-template-columns: 1fr; gap: 12px; }
+            .home-grid { grid-template-columns: 1fr; gap: 12px; padding: 8px; } /* FIX: Padding for grid */
             .main-card { min-height: 80px; padding: 12px; flex-direction: row; justify-content: flex-start; text-align: left; gap: 15px; }
             .main-card-icon { font-size: 1.8rem; margin-bottom: 0; flex-shrink: 0; }
             .main-card-title { font-size: 1rem; margin-bottom: 0; }
@@ -1083,12 +1108,12 @@
             </div>
         </div>
     </div>
-    
-    <!-- Expense Details Modal -->
+
+    <!-- START: New Expense Details Modal -->
     <div id="expenseModal" class="custom-modal-overlay">
         <div class="custom-modal-content">
             <div class="modal-header">
-                <h2 id="modalExpenseTitle">Expense Details</h2>
+                <h2 id="modalExpenseTitle">Expense Report Details</h2>
                 <button id="modalExpenseCloseButton" class="close-modal-button">&times;</button>
             </div>
             <div id="modalExpenseDetails" class="modal-body">
@@ -1096,13 +1121,13 @@
             </div>
             <div class="modal-footer">
                 <div class="action-buttons">
-                     <button id="expenseApproveBtn" class="approve-btn">Approve</button>
-                     <button id="expenseRejectBtn" class="reject-btn">Reject</button>
+                     <button id="modalExpenseRejectButton" class="modal-btn reject"><i class="fas fa-times"></i> Reject</button>
+                     <button id="modalExpenseApproveButton" class="modal-btn approve"><i class="fas fa-check"></i> Approve</button>
                 </div>
             </div>
         </div>
     </div>
-
+    <!-- END: New Expense Details Modal -->
 
     <script>
         const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
@@ -1111,10 +1136,9 @@
         
         let currentActiveViewId = null;
         let loggedInUser = null;
-        let masterlistData = []; // Changed from googleSheetData
+        let masterlistData = []; // START: Renamed from googleSheetData
         let lastPageHistory = [];
         let notificationChannel = null;
-        let currentOpenExpenseId = null;
 
         const navConfig = {
             'home': {
@@ -1145,16 +1169,39 @@
             }
         };
 
-        // Fetches data from the 'masterlist' table in Supabase
-        async function fetchMasterlistData() {
+        // START: New function to fetch masterlist from Supabase with pagination
+        async function fetchMasterlistFromSupabase() {
             try {
-                let { data, error } = await supabase.from('masterlist').select('*');
-                if (error) throw error;
-                masterlistData = data;
+                const CHUNK_SIZE = 1000; // Supabase default limit
+                let offset = 0;
+                let allData = [];
+                let hasMore = true;
+
+                while(hasMore) {
+                    const { data, error } = await supabase
+                        .from('masterlist')
+                        .select('*')
+                        .range(offset, offset + CHUNK_SIZE - 1);
+
+                    if (error) {
+                        throw error;
+                    }
+
+                    if (data && data.length > 0) {
+                        allData = allData.concat(data);
+                        offset += CHUNK_SIZE;
+                    } else {
+                        hasMore = false;
+                    }
+                }
+                masterlistData = allData;
             } catch (error) {
-                console.error('Error fetching masterlist data:', error);
+                console.error("Error fetching masterlist from Supabase:", error);
+                // Optionally, display an error to the user
+                showBlurredMessage('Could not load essential data. Please refresh.', 3000);
             }
         }
+        // END: New Supabase fetch function
 
         function updateAndShowUserCard() {
             const userCard = document.getElementById('userCard');
@@ -1168,119 +1215,121 @@
                 document.getElementById('notificationBell').classList.add('hidden');
             }
         }
-        
+
+        // START: Helper function to generate a readable title for expense notifications
+        function getExpenseTitle(expense) {
+            try {
+                const details = JSON.parse(expense.details);
+                if (expense.role === 'District Manager') {
+                    return details.reportType === 'Trip' ? `Trip Report: ${details.purpose}` : 'Other Expenses Report';
+                } else { // Medical Representative
+                    return `Expense: ${expense.report_type || 'Daily Log'}`;
+                }
+            } catch (e) {
+                // Fallback in case JSON is invalid
+                return `Expense: ${expense.role}`;
+            }
+        }
+        // END: Helper function
+
         async function fetchNotifications() {
             const notificationBell = document.getElementById('notificationBell');
-            const bellIcon = notificationBell.querySelector('.fa-bell');
-            const notificationCountEl = document.getElementById('notificationCount');
+            const notificationCount = document.getElementById('notificationCount');
             const notificationDropdown = document.getElementById('notificationDropdown');
 
             if (!loggedInUser || loggedInUser.title === 'Medical Representative') {
-                notificationBell.classList.add('hidden');
+                 if (notificationBell) notificationBell.classList.add('hidden');
                 return;
             }
 
-            try {
-                // Define queries for requests and expenses
-                let requestsQuery = supabase.from('requests').select('*').eq('status', 'Requested');
-                let expensesQuery = supabase.from('expenses').select('*').eq('status', 'Pending');
-                
-                if (loggedInUser.title === 'District Manager') {
-                    const dmReps = masterlistData
-                        .filter(row => row['District Manager'] === loggedInUser.username)
-                        .map(row => row['medical rep']);
-                    
-                    if (dmReps.length > 0) {
-                        requestsQuery = requestsQuery.in('medRep', dmReps);
-                        expensesQuery = expensesQuery.in('employee_name', dmReps);
-                    } else {
-                        // If a DM has no reps, they have no notifications to see
-                        requestsQuery = requestsQuery.is('id', null); // empty query
-                        expensesQuery = expensesQuery.is('id', null);  // empty query
-                    }
+            const dmReps = (loggedInUser.title === 'District Manager') 
+                ? masterlistData // FIX: Use masterlistData
+                    .filter(row => row['District Manager'] === loggedInUser.username)
+                    .map(row => row['medical rep'])
+                : [];
+
+            let requestsQuery = supabase.from('requests').select('*').eq('status', 'Requested');
+            if (loggedInUser.title === 'District Manager') {
+                if (dmReps.length > 0) requestsQuery = requestsQuery.in('medRep', dmReps);
+                else requestsQuery = requestsQuery.eq('medRep', 'no-one');
+            }
+
+            let expensesQuery = supabase.from('expenses').select('id, role, employee_name, total_amount, report_date, report_type, details').eq('status', 'Pending');
+            if (loggedInUser.title === 'District Manager') {
+                 if (dmReps.length > 0) expensesQuery = expensesQuery.in('employee_name', dmReps);
+                 else expensesQuery = expensesQuery.eq('employee_name', 'no-one');
+            }
+            
+            const [requestsResult, expensesResult] = await Promise.all([requestsQuery, expensesQuery]);
+
+            if (requestsResult.error || expensesResult.error) {
+                console.error('Error fetching notifications:', requestsResult.error || expensesResult.error);
+                return;
+            }
+
+            const mappedRequests = requestsResult.data.map(req => ({
+                id: req.id,
+                title: req.requestTitle,
+                subtitle: `By: ${req.medRep}`,
+                date: new Date(req.date),
+                type: 'request'
+            }));
+
+            const mappedExpenses = expensesResult.data.map(exp => ({
+                id: exp.id,
+                title: getExpenseTitle(exp),
+                subtitle: `By: ${exp.employee_name} (${parseFloat(exp.total_amount).toFixed(2)} EGP)`,
+                date: new Date(exp.report_date),
+                type: 'expense'
+            }));
+
+            const allNotifications = [...mappedRequests, ...mappedExpenses];
+            allNotifications.sort((a, b) => b.date - a.date);
+
+            if (allNotifications.length > 0) {
+                const currentCount = parseInt(notificationCount.textContent, 10);
+                notificationCount.textContent = allNotifications.length;
+                notificationBell.classList.remove('hidden');
+                notificationBell.classList.add('has-notifications');
+
+                if (allNotifications.length > currentCount) {
+                    notificationCount.classList.add('updated');
+                    setTimeout(() => notificationCount.classList.remove('updated'), 600);
                 }
-
-                // Fetch both in parallel
-                const [
-                    { data: requestsData, error: requestsError },
-                    { data: expensesData, error: expensesError }
-                ] = await Promise.all([
-                    requestsQuery,
-                    expensesQuery
-                ]);
-
-                if (requestsError) console.error('Error fetching requests:', requestsError);
-                if (expensesError) console.error('Error fetching expenses:', expensesError);
-
-                const formattedRequests = (requestsData || []).map(r => ({ ...r, type: 'request', date: r.date || r.created_at }));
-                const formattedExpenses = (expensesData || []).map(e => ({ ...e, type: 'expense', date: e.report_date || e.created_at }));
-                
-                const allNotifications = [...formattedRequests, ...formattedExpenses]
-                    .sort((a, b) => new Date(b.date) - new Date(a.date));
 
                 notificationDropdown.innerHTML = '';
-                const currentCount = parseInt(notificationCountEl.textContent, 10);
-                
-                if (allNotifications.length > 0) {
-                    notificationCountEl.textContent = allNotifications.length;
-                    notificationBell.classList.remove('hidden');
+                allNotifications.forEach(noti => {
+                    const item = document.createElement('div');
+                    item.className = 'notification-item';
                     
-                    if (allNotifications.length > currentCount) {
-                        notificationCountEl.classList.add('updated');
-                        bellIcon.classList.add('updated');
-                        setTimeout(() => {
-                            notificationCountEl.classList.remove('updated');
-                            bellIcon.classList.remove('updated');
-                        }, 800);
-                    }
-
-                    allNotifications.forEach(item => {
-                        const notificationItem = document.createElement('div');
-                        notificationItem.className = 'notification-item';
-                        
-                        if (item.type === 'request') {
-                            notificationItem.innerHTML = `
-                                <div class="notification-icon"><i class="fas fa-clipboard-list"></i></div>
-                                <div class="notification-content">
-                                    <div class="notification-title">${item.requestTitle}</div>
-                                    <div class="notification-rep">By: ${item.medRep}</div>
-                                    <div class="notification-date">${new Date(item.date).toLocaleDateString()}</div>
-                                </div>`;
-                            notificationItem.addEventListener('click', () => showRequestModal(item.id));
-                        } else if (item.type === 'expense') {
-                             const details = JSON.parse(item.details || '{}');
-                             let expenseTitle = 'Expense Report'; // Default title
-
-                             if (item.role === 'District Manager') {
-                                 if (details.reportType === 'Trip') {
-                                     expenseTitle = `Trip Report (${details.purpose})`;
-                                 } else {
-                                     expenseTitle = `Other Expenses`;
-                                 }
-                             } else { // Medical Representative
-                                 expenseTitle = `Daily Log`;
-                             }
-
-                             notificationItem.innerHTML = `
-                                <div class="notification-icon"><i class="fas fa-file-invoice-dollar" style="color: #10b981;"></i></div>
-                                <div class="notification-content">
-                                    <div class="notification-title">${expenseTitle}</div>
-                                    <div class="notification-rep">By: ${item.employee_name}</div>
-                                    <div class="notification-date">${new Date(item.date).toLocaleDateString()}</div>
-                                </div>`;
-                             notificationItem.addEventListener('click', () => showExpenseModal(item.id));
-                        }
-                        notificationDropdown.appendChild(notificationItem);
+                    const iconHtml = noti.type === 'request'
+                        ? '<i class="fas fa-clipboard-list text-yellow-500 notification-icon"></i>'
+                        : '<i class="fas fa-file-invoice-dollar text-green-500 notification-icon"></i>';
+                    
+                    const formattedDate = noti.date.toLocaleDateString('en-GB', {
+                        day: '2-digit', month: 'short', year: 'numeric'
                     });
 
-                } else {
-                    notificationBell.classList.add('hidden');
-                    notificationCountEl.textContent = '0';
-                    notificationDropdown.innerHTML = '<div class="no-notifications">No new notifications</div>';
-                }
+                    item.innerHTML = `
+                        <div class="notification-content">
+                            ${iconHtml}
+                            <div>
+                                <div class="notification-title">${noti.title}</div>
+                                <div class="notification-rep">${noti.subtitle}</div>
+                                <div class="notification-date">${formattedDate}</div>
+                            </div>
+                        </div>`;
 
-            } catch (err) {
-                console.error('Failed to fetch notifications:', err);
+                    if (noti.type === 'request') {
+                        item.addEventListener('click', () => showRequestModal(noti.id));
+                    } else {
+                        item.addEventListener('click', () => showExpenseModal(noti.id));
+                    }
+                    notificationDropdown.appendChild(item);
+                });
+            } else {
+                notificationBell.classList.add('hidden');
+                notificationBell.classList.remove('has-notifications');
             }
         }
 
@@ -1290,160 +1339,171 @@
                 notificationChannel = null;
             }
 
-            // Listen to both tables
             notificationChannel = supabase.channel('public-notifications')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, payload => {
-                    console.log('Real-time change received on requests!', payload);
-                    setTimeout(fetchNotifications, 500); 
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'requests' }, () => {
+                    setTimeout(fetchNotifications, 500);
                 })
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, payload => {
-                    console.log('Real-time change received on expenses!', payload);
-                    setTimeout(fetchNotifications, 500); 
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => {
+                     setTimeout(fetchNotifications, 500);
                 })
                 .subscribe((status, err) => {
-                    if (status === 'SUBSCRIBED') console.log('Successfully subscribed to real-time notifications!');
-                    if (status === 'CHANNEL_ERROR') console.error('Subscription error:', err);
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Successfully subscribed to real-time notifications!');
+                    }
+                    if (status === 'CHANNEL_ERROR') {
+                        console.error('Subscription error:', err);
+                    }
                 });
         }
         
-        // --- Request Modal Functions (Existing) ---
         async function showRequestModal(requestId) {
             const { data, error } = await supabase.from('requests').select('*').eq('id', requestId).single();
+
             if (error) {
                 console.error('Error fetching request details:', error);
                 showBlurredMessage('Could not load request details.', 1500);
                 return;
             }
-            // ... (rest of the function is the same as original)
-             const modal = document.getElementById('requestModal');
+
+            const modal = document.getElementById('requestModal');
             const modalTitle = document.getElementById('modalRequestTitle');
             const modalDetails = document.getElementById('modalRequestDetails');
             const modalStatusSelect = document.getElementById('modalStatusSelect');
 
             modalTitle.textContent = data.requestTitle;
+
             let detailsHtml = `
                 <div class="detail-pair"><strong>Medical Rep:</strong> <span>${data.medRep || 'N/A'}</span></div>
                 <div class="detail-pair"><strong>Area:</strong> <span>${data.area || 'N/A'}</span></div>
-                <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.date).toLocaleDateString()}</span></div>`;
+                <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.date).toLocaleDateString()}</span></div>
+            `;
 
             if (data.customerType && data.customerType.toLowerCase() !== 'personal') {
                  detailsHtml += `
                         <div class="detail-pair"><strong>Customer Type:</strong> <span>${data.customerType}</span></div>
-                        <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>`;
+                        <div class="detail-pair"><strong>Customer Name:</strong> <span>${data.customerName || 'N/A'}</span></div>
+                   `;
             }
+
             detailsHtml += `<div class="detail-pair"><strong>Details:</strong> <span>${data.requestDetails || 'No details provided'}</span></div>`;
             modalDetails.innerHTML = detailsHtml;
 
             let statusOptions = '';
             if (data.customerType && data.customerType.toLowerCase() === 'personal') {
-                statusOptions = `<option value="Requested">Requested</option><option value="Approved">Approved</option><option value="Rejected">Rejected</option>`;
+                statusOptions = `
+                    <option value="Requested">Requested</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                `;
             } else {
-                statusOptions = `<option value="Requested">Requested</option><option value="Scheduled">Scheduled</option><option value="Pending">Pending</option><option value="Postponed">Postponed</option><option value="Done">Done</option><option value="Rejected">Rejected</option><option value="Approved">Approved</option>`;
+                statusOptions = `
+                    <option value="Requested">Requested</option>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Postponed">Postponed</option>
+                    <option value="Done">Done</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Approved">Approved</option>
+                `;
             }
             modalStatusSelect.innerHTML = statusOptions;
             modalStatusSelect.value = data.status;
+
             modalStatusSelect.onchange = null;
             modalStatusSelect.onchange = () => updateRequestStatus(requestId, modalStatusSelect.value);
+
             modal.classList.add('show');
         }
 
         async function updateRequestStatus(requestId, newStatus) {
             const { error } = await supabase.from('requests').update({ status: newStatus }).eq('id', requestId);
+
             if (error) {
                 console.error('Error updating status:', error);
                 showBlurredMessage('Failed to update status.', 1500);
             } else {
                 showBlurredMessage('Status updated successfully!', 1500);
                 closeRequestModal();
+                fetchNotifications();
             }
         }
 
         function closeRequestModal() {
             document.getElementById('requestModal').classList.remove('show');
         }
-        
-        // --- Expense Modal Functions (New) ---
+
         async function showExpenseModal(expenseId) {
-             currentOpenExpenseId = expenseId;
-             const { data, error } = await supabase.from('expenses').select('*').eq('id', expenseId).single();
-             if (error) {
-                 console.error('Error fetching expense details:', error);
-                 showBlurredMessage('Could not load expense details.', 1500);
-                 return;
-             }
+            const { data, error } = await supabase.from('expenses').select('*').eq('id', expenseId).single();
 
-             const modal = document.getElementById('expenseModal');
-             const modalTitle = document.getElementById('modalExpenseTitle');
-             const modalDetails = document.getElementById('modalExpenseDetails');
-             
-             modalTitle.textContent = data.report_type || 'Expense Details'; // Use report_type for the title
-             const details = JSON.parse(data.details || '{}');
-             const items = JSON.parse(data.items || '[]');
-
-             let detailsHtml = `
-                 <div class="detail-pair"><strong>Employee:</strong> <span>${data.employee_name}</span></div>
-                 <div class="detail-pair"><strong>Role:</strong> <span>${data.role}</span></div>
-                 <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.report_date).toLocaleDateString()}</span></div>
-                 <div class="detail-pair"><strong>Total Amount:</strong> <span>${parseFloat(data.total_amount).toFixed(2)} EGP</span></div>`;
-            
-             if(data.role === 'District Manager' && details.reportType === 'Trip') {
-                 detailsHtml += `
-                     <div class="detail-pair"><strong>Trip:</strong> <span>${details.from} to ${details.to}</span></div>
-                     <div class="detail-pair"><strong>Purpose:</strong> <span>${details.purpose}</span></div>
-                 `;
-             }
-
-            if (items.length > 0) {
-                detailsHtml += `
-                    <div class="detail-pair" style="margin-top: 15px;"><strong>Items:</strong></div>
-                    <table class="expense-items-table">
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                items.forEach(item => {
-                    // Append KM if item type is 'Own Car Travel' and description exists
-                    const description = (item.type === 'Own Car Travel' && item.desc) 
-                        ? `${item.desc} KM` 
-                        : (item.desc || 'N/A');
-                    detailsHtml += `
-                        <tr>
-                            <td>${item.type}</td>
-                            <td>${description}</td>
-                            <td>${parseFloat(item.amount).toFixed(2)} EGP</td>
-                        </tr>
-                    `;
-                });
-                detailsHtml += '</tbody></table>';
+            if (error) {
+                console.error('Error fetching expense details:', error);
+                showBlurredMessage('Could not load expense details.', 1500);
+                return;
             }
 
-             modalDetails.innerHTML = detailsHtml;
-             modal.classList.add('show');
+            const modal = document.getElementById('expenseModal');
+            const modalDetails = document.getElementById('modalExpenseDetails');
+            
+            const items = JSON.parse(data.items);
+            const details = JSON.parse(data.details);
+
+            let detailsHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                <div class="detail-pair"><strong>Employee:</strong> <span>${data.employee_name}</span></div>
+                <div class="detail-pair"><strong>Role:</strong> <span>${data.role}</span></div>
+                <div class="detail-pair"><strong>Date:</strong> <span>${new Date(data.report_date).toLocaleDateString('en-GB')}</span></div>
+                <div class="detail-pair"><strong>Total:</strong> <span class="font-bold">${parseFloat(data.total_amount).toFixed(2)} EGP</span></div>`;
+            
+            if (data.role === 'District Manager' && details.reportType === 'Trip') {
+                detailsHtml += `
+                    <div class="detail-pair sm:col-span-2"><strong>Purpose:</strong> <span>${details.purpose}</span></div>
+                    <div class="detail-pair"><strong>From:</strong> <span>${details.from}</span></div>
+                    <div class="detail-pair"><strong>To:</strong> <span>${details.to}</span></div>`;
+            } else if (data.role === 'Medical Representative') {
+                 detailsHtml += `<div class="detail-pair"><strong>Manager:</strong> <span>${details.manager}</span></div>`;
+            }
+            detailsHtml += '</div>';
+
+            detailsHtml += `
+                <table class="expense-items-table">
+                    <thead><tr><th>Type</th><th>Description</th><th class="amount">Amount</th></tr></thead>
+                    <tbody>`;
+            items.forEach(item => {
+                detailsHtml += `<tr>
+                    <td>${item.type}</td>
+                    <td>${item.desc || 'N/A'}</td>
+                    <td class="amount">${parseFloat(item.amount).toFixed(2)}</td>
+                </tr>`;
+            });
+            detailsHtml += `<tr class="total-row">
+                    <td colspan="2" class="amount">Total</td>
+                    <td class="amount">${parseFloat(data.total_amount).toFixed(2)}</td>
+                </tr></tbody>
+                </table>`;
+
+            modalDetails.innerHTML = detailsHtml;
+
+            document.getElementById('modalExpenseApproveButton').onclick = () => updateExpenseStatus(expenseId, 'Approved');
+            document.getElementById('modalExpenseRejectButton').onclick = () => updateExpenseStatus(expenseId, 'Rejected');
+            
+            modal.classList.add('show');
         }
 
         function closeExpenseModal() {
             document.getElementById('expenseModal').classList.remove('show');
-            currentOpenExpenseId = null;
         }
-        
-        async function updateExpenseStatus(newStatus) {
-            if (!currentOpenExpenseId) return;
-            const { error } = await supabase.from('expenses').update({ status: newStatus }).eq('id', currentOpenExpenseId);
-            
+
+        async function updateExpenseStatus(expenseId, newStatus) {
+            const { error } = await supabase.from('expenses').update({ status: newStatus }).eq('id', expenseId);
+
             if (error) {
                 console.error('Error updating expense status:', error);
                 showBlurredMessage('Failed to update status.', 1500);
             } else {
-                showBlurredMessage(`Expense ${newStatus.toLowerCase()} successfully!`, 1500);
+                showBlurredMessage(`Expense status updated to ${newStatus}!`, 1500);
                 closeExpenseModal();
+                fetchNotifications();
             }
         }
-
 
         function showBlurredMessage(message, duration, callback = null) {
             const overlay = document.getElementById('fullPageMessageOverlay');
@@ -1567,8 +1627,6 @@
                     homeView.classList.remove('hidden');
                     setTimeout(() => {
                         homeView.classList.add('active');
-                        homeView.classList.remove('active');
-                        homeView.classList.add('active');
                     }, 10);
                 }, 200);
             } else {
@@ -1590,14 +1648,14 @@
                 showBlurredMessage('You do not have permission to view this page.', 2000);
                 return;
             }
-            const { viewId, fileName, isNested } = config;
+            const { viewId, fileName } = config;
 
             const targetView = document.getElementById(viewId);
             const prevActiveView = document.getElementById(currentActiveViewId);
 
             if (currentActiveViewId !== viewId) {
                  if (currentActiveViewId && currentActiveViewId !== 'homeView') {
-                       lastPageHistory.push(currentActiveViewId);
+                      lastPageHistory.push(currentActiveViewId);
                  }
             }
             
@@ -1639,18 +1697,18 @@
                 
                 const sendDataToIframe = () => {
                     if (loggedInUser && iframe.contentWindow) {
-                        const message = { user: loggedInUser };
-                        if (page === 'dashboard') {
-                            message.type = 'dashboardLogin';
-                            message.username = sessionStorage.getItem('dashboardUsername');
-                            message.password = sessionStorage.getItem('dashboardPassword');
-                        } else if (page === 'dm-planning') {
-                            message.type = 'dmPlanningUserPermissions';
-                        } else if (page === 'dm-report') {
-                            message.type = 'dmReportUserPermissions';
-                        } else { 
-                            message.type = 'loggedInUser';
+                        const message = {
+                            user: loggedInUser,
+                            type: 'loggedInUser'
+                        };
+
+                        // START: Conditionally add masterlist data for specific pages
+                        const pagesNeedingMasterlist = ['crm', 'dm-planning', 'dm-report', 'master-list', 'dashboard'];
+                        if (pagesNeedingMasterlist.includes(page)) {
+                            message.masterlist = masterlistData;
                         }
+                        // END: Conditionally add masterlist data
+
                         iframe.contentWindow.postMessage(message, '*');
                     }
                 };
@@ -1750,37 +1808,38 @@
             const introOverlay = document.getElementById('introOverlay');
             setTimeout(() => {
                 introOverlay.classList.add('fade-out');
-                setTimeout(() => {
-                    if(introOverlay) introOverlay.remove()
-                }, 500);
+                setTimeout(() => introOverlay.remove(), 500);
             }, 3000);
 
-            await fetchMasterlistData();
+            // FIX: Call the new Supabase function
+            await fetchMasterlistFromSupabase();
             const storedUser = localStorage.getItem('loggedInUser');
             const lastPage = localStorage.getItem('currentPage');
 
-            if (storedUser) {
-                loggedInUser = JSON.parse(storedUser);
-                showAppContent();
-                if (lastPage && lastPage !== 'home' && lastPage !== 'null') {
-                    const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
-                    const targetPage = allPages.find(p => p.id === lastPage);
-                    if (targetPage && (targetPage.roles.includes(loggedInUser.title) || loggedInUser.title === 'admin')) {
-                        if (targetPage.isNested) {
-                            loadPage('dm-crm');
-                            setTimeout(() => loadPage(lastPage), 500);
+            setTimeout(() => {
+                if (storedUser) {
+                    loggedInUser = JSON.parse(storedUser);
+                    showAppContent();
+                    if (lastPage && lastPage !== 'home' && lastPage !== 'null') {
+                        const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
+                        const targetPage = allPages.find(p => p.id === lastPage);
+                        if (targetPage && (targetPage.roles.includes(loggedInUser.title) || loggedInUser.title === 'admin')) {
+                            if (targetPage.isNested) {
+                                loadPage('dm-crm');
+                                setTimeout(() => loadPage(lastPage), 500);
+                            } else {
+                                loadPage(lastPage);
+                            }
                         } else {
-                            loadPage(lastPage);
+                            showHome();
                         }
                     } else {
                         showHome();
                     }
                 } else {
-                    showHome();
+                    showLoginPage();
                 }
-            } else {
-                showLoginPage();
-            }
+            }, 3500);
 
             document.getElementById('loginButton').addEventListener('click', handleLogin);
             document.getElementById('logoutButton').addEventListener('click', handleLogout);
@@ -1791,8 +1850,10 @@
                 } else if (currentActiveViewId === 'nestedIframeView') {
                     loadPage('dm-crm');
                 } else if (lastPageHistory.length > 0) {
-                    const lastPage = lastPageHistory.pop();
-                    loadPage(lastPage);
+                    const lastPageId = lastPageHistory.pop();
+                    const allPages = [...navConfig.home.pages, ...(navConfig.home.pages.find(p => p.id === 'dm-crm')?.subPages || [])];
+                    const pageConfig = allPages.find(p => p.viewId === lastPageId);
+                    loadPage(pageConfig ? pageConfig.id : null);
                 } else {
                     showHome();
                 }
@@ -1803,7 +1864,7 @@
             
             document.getElementById('refreshButton').addEventListener('click', async () => {
                 showBlurredMessage('Refreshing...', 1000);
-                await fetchMasterlistData();
+                await fetchMasterlistFromSupabase(); // FIX: Refresh from Supabase
                 fetchNotifications(); 
 
                 if (!currentActiveViewId) return;
@@ -1812,10 +1873,14 @@
 
                 if (currentActiveViewId === 'homeView') {
                     renderMainGrid();
-                } else if (currentActiveViewId === 'dmCrmView') {
+                } 
+                else if (currentActiveViewId === 'dmCrmView') {
                     const config = navConfig.home.pages.find(p => p.id === 'dm-crm');
-                    if (config) renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
-                } else {
+                    if (config) {
+                        renderSubCards(document.getElementById('dmCrmSubGrid'), config.subPages);
+                    }
+                }
+                else {
                     const iframe = activeView.querySelector('iframe');
                     if (iframe && iframe.contentWindow) {
                         const loadingOverlay = activeView.querySelector('.loading');
@@ -1844,14 +1909,11 @@
                 if (event.target.id === 'requestModal') closeRequestModal();
             });
 
-            // New Expense Modal Listeners
+            // Add event listeners for new expense modal
             document.getElementById('modalExpenseCloseButton').addEventListener('click', closeExpenseModal);
             document.getElementById('expenseModal').addEventListener('click', (event) => {
                 if (event.target.id === 'expenseModal') closeExpenseModal();
             });
-            document.getElementById('expenseApproveBtn').addEventListener('click', () => updateExpenseStatus('Approved'));
-            document.getElementById('expenseRejectBtn').addEventListener('click', () => updateExpenseStatus('Rejected'));
-
         });
     </script>
 </body>
