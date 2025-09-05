@@ -696,6 +696,11 @@
         .notification-bell.has-notifications .fa-bell {
             animation: bell-pulse 2s ease-in-out infinite;
         }
+        
+        /* Add a one-time bounce animation for initial load */
+        .notification-bell.initial-load-bounce .fa-bell {
+            animation: bounce 0.8s ease-in-out;
+        }
         /* END: Added Bell Animation */
 
         @keyframes bounce {
@@ -923,9 +928,11 @@
             .header { flex-wrap: nowrap; justify-content: space-between; padding: 6px 8px; z-index: 100; }
             /* START: Fix user card on mobile */
             .user-card {
-                width: auto;
-                max-width: none;
-                flex-grow: 1;
+                width: fit-content; /* Be only as wide as content */
+                max-width: 200px;  /* Set a reasonable limit */
+                flex-grow: 0;      /* Do not grow to fill space */
+                flex-shrink: 0;    /* Do not shrink */
+                margin-left: auto; /* Push to the right */
                 margin-bottom: 0;
                 justify-content: flex-start;
                 order: 2;
@@ -933,7 +940,7 @@
             .user-name { font-size: 0.8rem; }
             .user-title { font-size: 0.7rem; }
              /* END: Fix user card on mobile */
-            .header-buttons { width: auto; justify-content: flex-start; order: 1; flex-shrink: 0; /* Prevent shrinking */ }
+            .header-buttons { width: auto; justify-content: flex-start; order: 1; flex-shrink: 0; flex-grow: 0; /* Prevent growing and shrinking */ }
             .header-button { flex-grow: 0; padding: 5px 7px; font-size: 0.7rem; }
             .logout-button { width: 70px; display: none; }
             .banner { padding: 6px 12px; gap: 8px; width: 100%; margin-top: 0; border-radius: 0; } /* FIX: Banner adjustments */
@@ -1303,6 +1310,15 @@
                 notificationCount.textContent = allNotifications.length;
                 notificationBell.classList.remove('hidden');
                 notificationBell.classList.add('has-notifications');
+
+                // Animate bell on initial load
+                if (!notificationBell.dataset.hasLoaded) {
+                    notificationBell.classList.add('initial-load-bounce');
+                    notificationBell.addEventListener('animationend', () => {
+                        notificationBell.classList.remove('initial-load-bounce');
+                    }, { once: true });
+                    notificationBell.dataset.hasLoaded = 'true';
+                }
 
                 if (allNotifications.length > currentCount) {
                     notificationCount.classList.add('updated');
@@ -1711,22 +1727,15 @@
                     if (loggedInUser && iframe.contentWindow) {
                         const message = {
                             user: loggedInUser,
-                            type: 'loggedInUser'
+                            type: 'loggedInUser' // Always use a consistent type
                         };
 
                         const pagesNeedingMasterlist = ['crm', 'dm-planning', 'dm-report', 'master-list', 'dashboard'];
                         if (pagesNeedingMasterlist.includes(page)) {
                             message.masterlist = masterlistData;
                         }
-
-                        // START: Add specific message types for DM pages
-                        if (page === 'dm-planning') {
-                            message.type = 'dmPlanningUserPermissions';
-                        } else if (page === 'dm-report') {
-                            message.type = 'dmReportUserPermissions';
-                        }
-                        // END: Add specific message types
-
+                        
+                        // The user object containing username and title is now consistently sent to all iframes
                         iframe.contentWindow.postMessage(message, '*');
                     }
                 };
