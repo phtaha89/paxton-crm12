@@ -764,21 +764,25 @@
          * @returns {Array<Object>} The formatted data.
          */
         function prepareData(data) {
-            return data.map(item => {
-                const newItem = {};
-                for (const key in item) {
-                    // Normalize the key to camelCase.
-                    const normalizedKey = key.toLowerCase().replace(/[^a-zA-Z0-9]+(.)?/g, (match, chr) => chr ? chr.toUpperCase() : '').replace(/^./, (match) => match.toLowerCase());
-                    // Special case for 'speciality' as it's spelled with an 'i' in the database
-                    if (normalizedKey === 'speciality') {
-                        newItem[normalizedKey] = item[key];
-                    } else {
-                        newItem[normalizedKey] = item[key];
-                    }
-                }
-                return newItem;
-            });
+    return data.map(item => {
+        const newItem = {};
+        for (const key in item) {
+            // Normalize the key to camelCase.
+            let normalizedKey = key.toLowerCase().replace(/[^a-zA-Z0-9]+(.)?/g, (match, chr) => chr ? chr.toUpperCase() : '').replace(/^./, (match) => match.toLowerCase());
+
+            // Special cases for column names that need custom mapping
+            if (key === 'T.V') {
+                normalizedKey = 'tv'; // Map 'T.V' to 'tv'
+            } else if (normalizedKey === 'speciality') {
+                // Keep 'speciality' as is (already normalized)
+            }
+
+            newItem[normalizedKey] = item[key];
         }
+        return newItem;
+    });
+}
+
 
         /**
          * Calculates the number of duplicated HCP names based on a normalized form.
