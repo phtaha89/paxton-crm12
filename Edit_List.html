@@ -284,19 +284,23 @@
         }
 
         /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+    .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.confirm-modal {
+    z-index: 1002; /* Ensures this modal is on top of others */
+}
 
         .modal-content {
             background: white;
@@ -617,21 +621,21 @@
     </div>
 
     <!-- Confirm Modal -->
-    <div id="confirmModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Confirmation</h2>
-                <span class="close" id="closeConfirmModal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p id="confirmMessage" style="white-space: pre-wrap;"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="confirmCancelBtn" class="action-button secondary">Cancel</button>
-                <button type="button" id="confirmProceedBtn" class="action-button primary">Proceed</button>
-            </div>
+    <div id="confirmModal" class="modal confirm-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Confirmation</h2>
+            <span class="close" id="closeConfirmModal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p id="confirmMessage" style="white-space: pre-wrap;"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id="confirmCancelBtn" class="action-button secondary">Cancel</button>
+            <button type="button" id="confirmProceedBtn" class="action-button primary">Proceed</button>
         </div>
     </div>
+</div>
 
     <!-- Dynamic Dropdown Modal for Rep/Manager Name Updates -->
     <div id="updateNameModal" class="modal">
@@ -662,662 +666,672 @@
     </div>
 
     <script>
-        // Supabase configuration
-        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
-        const TABLE_NAME = 'masterlist';
+    // Supabase configuration
+    const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+    const TABLE_NAME = 'masterlist';
 
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let allData = [];
-        let filteredData = [];
-        let uniqueValues = {};
-        const headers = ["no", "District Manager", "Governorate", "medical rep", "area", "HCPS", "Speciality", "Class", "T.V", "Brick", "account", "Address", "Mobile", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
-        const dropdownHeaders = ["District Manager", "Governorate", "medical rep", "area", "Speciality", "Class", "T.V", "Brick"];
-        let currentFilters = {};
+    let allData = [];
+    let filteredData = [];
+    let uniqueValues = {};
+    const headers = ["no", "District Manager", "Governorate", "medical rep", "area", "HCPS", "Speciality", "Class", "T.V", "Brick", "account", "Address", "Mobile", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+    const dropdownHeaders = ["District Manager", "Governorate", "medical rep", "area", "Speciality", "Class", "T.V", "Brick"];
+    const updatableNameColumns = ["District Manager", "medical rep", "area"];
+    let currentFilters = {};
 
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const searchInput = document.getElementById('searchInput');
-        const hcpTable = document.getElementById('hcpTable');
-        const tableBody = document.getElementById('hcpTableBody');
-        const totalCountSpan = document.getElementById('totalHCPs');
-        const filteredCountSpan = document.getElementById('filteredHCPs');
-        const duplicateCountSpan = document.getElementById('duplicatedHCPs');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const searchInput = document.getElementById('searchInput');
+    const hcpTable = document.getElementById('hcpTable');
+    const tableBody = document.getElementById('hcpTableBody');
+    const totalCountSpan = document.getElementById('totalHCPs');
+    const filteredCountSpan = document.getElementById('filteredHCPs');
+    const duplicateCountSpan = document.getElementById('duplicatedHCPs');
 
-        const addModal = document.getElementById('addModal');
-        const confirmModal = document.getElementById('confirmModal');
-        const updateNameModal = document.getElementById('updateNameModal');
-        
-        const confirmMessage = document.getElementById('confirmMessage');
-        const confirmProceedBtn = document.getElementById('confirmProceedBtn');
-        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
-        const updateSingleBtn = document.getElementById('updateSingleBtn');
-        const updateAllBtn = document.getElementById('updateAllBtn');
+    const addModal = document.getElementById('addModal');
+    const confirmModal = document.getElementById('confirmModal');
+    const updateNameModal = document.getElementById('updateNameModal');
+    
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmProceedBtn = document.getElementById('confirmProceedBtn');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    const updateSingleBtn = document.getElementById('updateSingleBtn');
+    const updateAllBtn = document.getElementById('updateAllBtn');
 
-        function showLoading() {
-            if (loadingOverlay) {
-                loadingOverlay.style.display = 'flex';
-                loadingOverlay.style.opacity = '1';
-            }
+    function showLoading() {
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+            loadingOverlay.style.opacity = '1';
         }
+    }
 
-        function hideLoading() {
-            if (loadingOverlay) {
-                loadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    loadingOverlay.style.display = 'none';
-                }, 300);
-            }
+    function hideLoading() {
+        if (loadingOverlay) {
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 300);
         }
-        
-        function debounce(func, delay) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), delay);
+    }
+    
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    async function showConfirm(message) {
+        if (!confirmModal) return false;
+        confirmMessage.textContent = message;
+        confirmModal.style.display = 'flex';
+        return new Promise((resolve) => {
+            const onProceed = () => {
+                cleanup();
+                resolve(true);
             };
-        }
+            const onCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+            const cleanup = () => {
+                confirmProceedBtn.removeEventListener('click', onProceed);
+                confirmCancelBtn.removeEventListener('click', onCancel);
+                document.getElementById('closeConfirmModal').removeEventListener('click', onCancel);
+                confirmModal.style.display = 'none';
+            }
 
-        async function showConfirm(message) {
-            if (!confirmModal) return false;
-            confirmMessage.textContent = message;
-            confirmModal.style.display = 'flex';
-            return new Promise((resolve) => {
-                const onProceed = () => {
-                    cleanup();
-                    resolve(true);
-                };
-                const onCancel = () => {
-                    cleanup();
-                    resolve(false);
-                };
-                const cleanup = () => {
-                    confirmProceedBtn.removeEventListener('click', onProceed);
-                    confirmCancelBtn.removeEventListener('click', onCancel);
-                    document.getElementById('closeConfirmModal').removeEventListener('click', onCancel);
-                    confirmModal.style.display = 'none';
-                }
+            confirmProceedBtn.addEventListener('click', onProceed);
+            confirmCancelBtn.addEventListener('click', onCancel);
+            document.getElementById('closeConfirmModal').addEventListener('click', onCancel);
+        });
+    }
+    
+    async function fetchAllData() {
+        showLoading();
+        let data = [];
+        let offset = 0;
+        const limit = 1000; // Supabase default limit
+        let hasMore = true;
 
-                confirmProceedBtn.addEventListener('click', onProceed);
-                confirmCancelBtn.addEventListener('click', onCancel);
-                document.getElementById('closeConfirmModal').addEventListener('click', onCancel);
-            });
-        }
-        
-        async function fetchAllData() {
-            showLoading();
-            let data = [];
-            let offset = 0;
-            const limit = 1000; // Supabase default limit
-            let hasMore = true;
+        while (hasMore) {
+            const { data: fetchedData, error } = await supabaseClient
+                .from(TABLE_NAME)
+                .select('*')
+                .order('no', { ascending: true })
+                .range(offset, offset + limit - 1);
+            
+            if (error) {
+                console.error('Error fetching data:', error);
+                hideLoading();
+                return []; // Return empty on error
+            }
 
-            while (hasMore) {
-                const { data: fetchedData, error } = await supabaseClient
-                    .from(TABLE_NAME)
-                    .select('*')
-                    .order('no', { ascending: true })
-                    .range(offset, offset + limit - 1);
-                
-                if (error) {
-                    console.error('Error fetching data:', error);
-                    hideLoading();
-                    return []; // Return empty on error
-                }
-
-                if (fetchedData && fetchedData.length > 0) {
-                    data = data.concat(fetchedData);
-                    offset += fetchedData.length;
-                    if (fetchedData.length < limit) {
-                        hasMore = false;
-                    }
-                } else {
+            if (fetchedData && fetchedData.length > 0) {
+                data = data.concat(fetchedData);
+                offset += fetchedData.length;
+                if (fetchedData.length < limit) {
                     hasMore = false;
                 }
+            } else {
+                hasMore = false;
             }
-            
-            hideLoading();
-            return data;
-        }
-
-
-        function calculateInitialMetrics(data) {
-            if (totalCountSpan) totalCountSpan.textContent = data.length;
-        }
-
-        function getUniqueValues(data) {
-            const unique = {};
-            dropdownHeaders.forEach(header => {
-                unique[header] = [...new Set(data.map(item => item[header]).filter(Boolean))].sort();
-            });
-            return unique;
-        }
-
-        function updateHeaderFilterStates() {
-            document.querySelectorAll('#hcpTable th[data-column]').forEach(th => {
-                const column = th.dataset.column;
-                if (currentFilters[column] && currentFilters[column].length > 0) {
-                    th.classList.add('filter-active');
-                } else {
-                    th.classList.remove('filter-active');
-                }
-            });
         }
         
-        function applyFilters() {
-            let tempFilteredData = allData;
-            
-            const activeFilters = Object.keys(currentFilters).filter(column => currentFilters[column]?.length > 0);
+        hideLoading();
+        return data;
+    }
 
-            if (activeFilters.length > 0) {
-                 tempFilteredData = tempFilteredData.filter(row => {
-                    return activeFilters.every(column => {
-                        return currentFilters[column].includes(row[column]);
-                    });
+
+    function calculateInitialMetrics(data) {
+        if (totalCountSpan) totalCountSpan.textContent = data.length;
+    }
+
+    function getUniqueValues(data) {
+        const unique = {};
+        dropdownHeaders.forEach(header => {
+            unique[header] = [...new Set(data.map(item => item[header]).filter(Boolean))].sort();
+        });
+        return unique;
+    }
+
+    function updateHeaderFilterStates() {
+        document.querySelectorAll('#hcpTable th[data-column]').forEach(th => {
+            const column = th.dataset.column;
+            if (currentFilters[column] && currentFilters[column].length > 0) {
+                th.classList.add('filter-active');
+            } else {
+                th.classList.remove('filter-active');
+            }
+        });
+    }
+    
+    function applyFilters() {
+        let tempFilteredData = allData;
+        
+        const activeFilters = Object.keys(currentFilters).filter(column => currentFilters[column]?.length > 0);
+
+        if (activeFilters.length > 0) {
+             tempFilteredData = tempFilteredData.filter(row => {
+                return activeFilters.every(column => {
+                    return currentFilters[column].includes(row[column]);
                 });
-            }
-            
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            if (searchTerm) {
-                tempFilteredData = tempFilteredData.filter(row => 
-                    Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
-                );
-            }
-
-            renderTable(tempFilteredData);
-            updateHeaderFilterStates();
+            });
         }
         
-        function renderTable(data) {
-            if (!tableBody) return;
-            tableBody.innerHTML = '';
-            filteredData = data;
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        if (searchTerm) {
+            tempFilteredData = tempFilteredData.filter(row => 
+                Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
+            );
+        }
+
+        renderTable(tempFilteredData);
+        updateHeaderFilterStates();
+    }
+    
+   function renderTable(data) {
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    filteredData = data;
+
+    if (filteredCountSpan) filteredCountSpan.textContent = data.length;
+
+    // Calculate and display duplicates
+    const hcpsMap = {};
+    data.forEach(row => {
+        const hcpsName = (row.HCPS || '').toLowerCase().trim();
+        if (hcpsName) {
+            hcpsMap[hcpsName] = (hcpsMap[hcpsName] || 0) + 1;
+        }
+    });
+    const duplicateCount = Object.values(hcpsMap).filter(count => count > 1).length;
+    if (duplicateCountSpan) duplicateCountSpan.textContent = duplicateCount;
+
+    const noResults = document.getElementById('noResults');
+    noResults.style.display = data.length === 0 ? 'block' : 'none';
+
+    // 🔹 Sort rows by "no" ascending before rendering
+    const sortedData = [...data].sort((a, b) => Number(a.no) - Number(b.no));
+
+    sortedData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.dataset.id = row.no;
+
+        headers.forEach(header => {
+            const td = document.createElement('td');
+            if (header === 'no') {
+                td.textContent = row.no; // always original "no"
+            } else {
+                td.textContent = row[header];
+            }
+            td.dataset.column = header;
+            if (header !== 'no' && header !== 'Mobile' && header !== 'Actions') {
+                td.contentEditable = true;
+            }
+            if (updatableNameColumns.includes(header)) {
+                td.classList.add('editable-cell');
+            }
+            tr.appendChild(td);
+        });
+
+        const deleteTd = document.createElement('td');
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        deleteBtn.classList.add('action-button', 'delete-btn');
+        deleteBtn.title = "Delete Row";
+        deleteBtn.style.padding = "8px 10px";
+        deleteBtn.onclick = async (e) => {
+            e.stopPropagation();
+            const confirmation = await showConfirm('Are you sure you want to delete this row? This action cannot be undone.');
+            if (confirmation) {
+                const { error } = await supabaseClient.from(TABLE_NAME).delete().eq('no', row.no);
+                if (error) {
+                    console.error('Error deleting row:', error);
+                    alert('Failed to delete row.');
+                } else {
+                    allData = allData.filter(item => item.no != row.no);
+                    applyFilters(); // Re-apply filters
+                }
+            }
+        };
+        deleteTd.appendChild(deleteBtn);
+        tr.appendChild(deleteTd);
+
+        tableBody.appendChild(tr);
+    });
+}
+
+
+    function handlePaste(event) {
+        event.preventDefault();
+        const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+        const rows = pastedText.trim().split('\n');
+        
+        if (rows.length > 1) {
+            alert(`Pasted data for multiple rows. Only the first row will be used to fill the form.`);
+        }
+        
+        const columns = rows[0].trim().split('\t');
+        const formHeaders = headers.filter(h => h !== 'no' && h !== 'Actions');
+
+        formHeaders.forEach((header, i) => {
+            const value = columns[i] || '';
+            const element = document.querySelector(`#addForm [name="${header}"]`);
             
-            if (filteredCountSpan) filteredCountSpan.textContent = data.length;
+            if (element) {
+                if (element.tagName === 'SELECT') {
+                    let optionExists = Array.from(element.options).some(opt => opt.value === value);
+                    if (optionExists) {
+                        element.value = value;
+                        element.dispatchEvent(new Event('change'));
+                    } else {
+                        element.value = 'other';
+                        element.dispatchEvent(new Event('change'));
+                        const otherInput = document.querySelector(`#addForm input[name="${element.name}_other"]`);
+                        if (otherInput) otherInput.value = value;
+                    }
+                } else {
+                    element.value = value;
+                }
+            }
+        });
+    }
+    
+    function setupAddForm() {
+        const addForm = document.getElementById('addForm');
+        if (!addForm) return;
+        const modalBody = addForm.querySelector('.modal-body');
+        if (!modalBody) return;
+        modalBody.innerHTML = '';
+        
+        const pasteContainer = document.createElement('div');
+        pasteContainer.style.gridColumn = '1 / -1';
+        pasteContainer.innerHTML = `
+            <div style="border: 1px dashed #ccc; padding: 16px; border-radius: 8px; background: #fdfdfd; margin-bottom: 20px;">
+                <button type="button" id="togglePasteBtn" class="action-button secondary"><i class="fas fa-paste"></i> Paste From Spreadsheet</button>
+                <div id="pasteSection" style="display: none; margin-top: 12px;">
+                    <p style="color: var(--medium-gray); margin-bottom: 8px;">Paste one row of tab-separated data below (e.g., from Excel).</p>
+                    <textarea id="pasteTextarea" class="form-input" style="min-height: 100px; font-family: monospace; resize: vertical;" placeholder="Paste data here..."></textarea>
+                </div>
+            </div>
+        `;
+        modalBody.appendChild(pasteContainer);
+        
+        document.getElementById('togglePasteBtn').addEventListener('click', () => {
+            const pasteSection = document.getElementById('pasteSection');
+            pasteSection.style.display = pasteSection.style.display === 'none' ? 'block' : 'none';
+            if (pasteSection.style.display === 'block') {
+                document.getElementById('pasteTextarea').focus();
+            }
+        });
+        document.getElementById('pasteTextarea').addEventListener('paste', handlePaste);
+
+        let maxNo = allData.length > 0 ? Math.max(...allData.map(d => parseInt(d.no) || 0)) : 0;
+        
+        headers.forEach(header => {
+            if (header === "Actions") return;
+            const container = document.createElement('div');
+            const label = document.createElement('label');
+            label.textContent = header;
+            label.className = 'block text-sm font-medium text-gray-700 mb-1';
+            container.appendChild(label);
             
-            // Calculate and display duplicates for the currently visible data
+            if (header === 'no') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = header;
+                input.value = maxNo + 1;
+                input.readOnly = true;
+                input.className = 'form-input bg-gray-100';
+                container.appendChild(input);
+            } else if (dropdownHeaders.includes(header) && uniqueValues[header]) {
+                const select = document.createElement('select');
+                select.name = header;
+                select.className = 'form-select';
+                select.innerHTML = `<option value="">Select ${header}</option>`;
+                uniqueValues[header].forEach(val => {
+                    select.innerHTML += `<option value="${val}">${val}</option>`;
+                });
+                select.innerHTML += `<option value="other">Other...</option>`;
+                container.appendChild(select);
+                
+                const otherInput = document.createElement('input');
+                otherInput.type = 'text';
+                otherInput.name = `${header}_other`;
+                otherInput.placeholder = `Enter new ${header}`;
+                otherInput.className = 'form-input mt-2';
+                otherInput.style.display = 'none';
+                container.appendChild(otherInput);
+                
+                select.addEventListener('change', () => {
+                    otherInput.style.display = select.value === 'other' ? 'block' : 'none';
+                });
+            } else {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = header;
+                input.className = 'form-input';
+                container.appendChild(input);
+            }
+            modalBody.appendChild(container);
+        });
+    }
+    
+    async function handleCellUpdate(cell, column, oldValue, newValue, rowNo) {
+        if (newValue.trim() === '') {
+            cell.textContent = oldValue;
+            return;
+        }
+        
+        const updates = { [column]: newValue };
+        const { error } = await supabaseClient.from(TABLE_NAME).update(updates).eq('no', rowNo);
+
+        if (error) {
+            console.error('Error updating cell:', error);
+            alert('Failed to update cell.');
+            cell.textContent = oldValue;
+        } else {
+            const dataIndex = allData.findIndex(row => row.no == rowNo);
+            if (dataIndex > -1) allData[dataIndex][column] = newValue;
+            applyFilters();
+        }
+    }
+    
+    function setupCellEditing() {
+        if (!hcpTable) return;
+        
+        hcpTable.addEventListener('click', (e) => {
+            const cell = e.target.closest('td.editable-cell');
+            if (!cell) return;
+            
+            e.preventDefault();
+            const column = cell.dataset.column;
+            const rowNo = cell.closest('tr').dataset.id;
+            const oldValue = cell.textContent.trim();
+
+            document.getElementById('oldNameSpan').textContent = oldValue;
+            document.getElementById('updateNameModalTitle').textContent = `Update ${column}`;
+            const nameInput = document.getElementById('newNameInput');
+            const nameSelect = document.getElementById('selectNewName');
+            
+            nameInput.value = '';
+            nameSelect.innerHTML = `<option value="">Select an existing name</option>`;
+            
+            const uniqueNames = [...new Set(allData.map(item => item[column]).filter(Boolean))].sort();
+            uniqueNames.forEach(name => {
+                nameSelect.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+            
+            updateNameModal.style.display = 'flex';
+            
+            const updateHandler = async (type) => {
+                let newValue = (nameInput.value || nameSelect.value || '').trim();
+                if (!newValue || newValue === 'other' || newValue === oldValue) {
+                    updateNameModal.style.display = 'none';
+                    return;
+                }
+                
+                let confirmationMessage = '';
+                if (type === 'all') {
+                    confirmationMessage = `Are you sure you want to change all instances of "${oldValue}" to "${newValue}" in the '${column}' column?`;
+                } else {
+                    confirmationMessage = `Are you sure you want to change "${oldValue}" to "${newValue}" for this row only?`;
+                }
+
+                const confirmation = await showConfirm(confirmationMessage);
+                if (!confirmation) {
+                    updateNameModal.style.display = 'none';
+                    return;
+                }
+                
+                showLoading();
+                const updates = { [column]: newValue };
+                let query = supabaseClient.from(TABLE_NAME).update(updates);
+                
+                query = (type === 'all') ? query.eq(column, oldValue) : query.eq('no', rowNo);
+                
+                const { error } = await query;
+                
+                if (error) {
+                    console.error('Error updating name(s):', error);
+                    alert('Failed to update.');
+                } else {
+                    await init();
+                }
+                hideLoading();
+                updateNameModal.style.display = 'none';
+            };
+
+            updateSingleBtn.onclick = () => updateHandler('single');
+            updateAllBtn.onclick = () => updateHandler('all');
+        });
+        
+        hcpTable.addEventListener('dblclick', (e) => {
+            const cell = e.target.closest('td[contenteditable="true"]');
+            if (!cell || cell.classList.contains('editable-cell') || document.querySelector('.cell-editing')) {
+                return;
+            }
+
+            cell.classList.add('cell-editing');
+            const originalValue = cell.textContent.trim();
+            
+            cell.focus();
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            let hasCleanedUp = false;
+
+            const endEditSession = async (isCancelled = false) => {
+                if (hasCleanedUp) return;
+                hasCleanedUp = true;
+
+                document.removeEventListener('mousedown', mousedownHandler, true);
+                cell.removeEventListener('keydown', keydownHandler);
+                cell.removeEventListener('blur', blurFallbackHandler);
+                cell.classList.remove('cell-editing');
+                cell.blur();
+
+                if (isCancelled) {
+                    cell.textContent = originalValue;
+                    return;
+                }
+
+                const newValue = cell.textContent.trim();
+
+                if (newValue === originalValue || newValue === '') {
+                    cell.textContent = originalValue;
+                    return;
+                }
+
+                const confirmation = await showConfirm(`Save changes for ${cell.dataset.column}?\n\nFrom: "${originalValue}"\nTo: "${newValue}"`);
+                if (confirmation) {
+                    const rowNo = cell.closest('tr').dataset.id;
+                    await handleCellUpdate(cell, cell.dataset.column, originalValue, newValue, rowNo);
+                } else {
+                    cell.textContent = originalValue;
+                }
+            };
+
+            const keydownHandler = (evt) => {
+                if (evt.key === 'Enter') {
+                    evt.preventDefault();
+                    endEditSession(false);
+                } else if (evt.key === 'Escape') {
+                    evt.preventDefault();
+                    endEditSession(true);
+                }
+            };
+
+            const mousedownHandler = (event) => {
+                if (!cell.contains(event.target)) {
+                    endEditSession(false);
+                }
+            };
+            
+            const blurFallbackHandler = () => {
+                 setTimeout(() => endEditSession(false), 50); 
+            };
+
+            cell.addEventListener('keydown', keydownHandler);
+            cell.addEventListener('blur', blurFallbackHandler);
+            document.addEventListener('mousedown', mousedownHandler, true);
+        });
+    }
+    
+    function setupEventListeners() {
+        document.getElementById('addHCPBtn').addEventListener('click', () => {
+            setupAddForm();
+            addModal.style.display = 'flex';
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            searchInput.value = '';
+            currentFilters = {};
+            updateHeaderFilterStates();
+            renderTable(allData);
+        });
+
+        document.getElementById('addForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const formData = new FormData(e.target);
+            const newRow = {};
+            for (let [key, value] of formData.entries()) {
+                if (key.endsWith('_other')) {
+                    const originalKey = key.replace('_other', '');
+                    if (formData.get(originalKey) === 'other') {
+                        newRow[originalKey] = value;
+                    }
+                } else if (value !== 'other') {
+                    newRow[key] = value;
+                }
+            }
+            
+            const { error } = await supabaseClient.from(TABLE_NAME).insert([newRow]);
+            
+            if (error) {
+                console.error('Error adding new row:', error);
+                alert('Failed to add new HCP.');
+            } else {
+                addModal.style.display = 'none';
+                await init();
+            }
+            hideLoading();
+        });
+
+        searchInput.addEventListener('keyup', debounce(applyFilters, 300));
+        
+        document.getElementById('duplicatedHCPsStat').addEventListener('click', () => {
             const hcpsMap = {};
-            data.forEach(row => {
+            // Use filteredData to find duplicates within the current view
+            filteredData.forEach(row => {
                 const hcpsName = (row.HCPS || '').toLowerCase().trim();
                 if (hcpsName) {
                     hcpsMap[hcpsName] = (hcpsMap[hcpsName] || 0) + 1;
                 }
             });
-            const duplicateCount = Object.values(hcpsMap).filter(count => count > 1).length;
-            if (duplicateCountSpan) duplicateCountSpan.textContent = duplicateCount;
-
-            const noResults = document.getElementById('noResults');
-            noResults.style.display = data.length === 0 ? 'block' : 'none';
-
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.dataset.id = row.no;
-                
-                headers.forEach(header => {
-                    const td = document.createElement('td');
-                    td.textContent = row[header];
-                    td.dataset.column = header;
-                    if (header !== 'no' && header !== 'Mobile' && header !== 'Actions') {
-                        td.contentEditable = true;
-                    }
-                    if (header === 'medical rep' || header === 'District Manager') {
-                        td.classList.add('editable-cell');
-                    }
-                    tr.appendChild(td);
-                });
-
-                const deleteTd = document.createElement('td');
-                const deleteBtn = document.createElement('button');
-                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                deleteBtn.classList.add('action-button', 'delete-btn');
-                deleteBtn.title = "Delete Row";
-                deleteBtn.style.padding = "8px 10px";
-                deleteBtn.onclick = async (e) => {
-                    e.stopPropagation();
-                    const confirmation = await showConfirm('Are you sure you want to delete this row? This action cannot be undone.');
-                    if (confirmation) {
-                        const { error } = await supabaseClient.from(TABLE_NAME).delete().eq('no', row.no);
-                        if (error) {
-                            console.error('Error deleting row:', error);
-                            alert('Failed to delete row.');
-                        } else {
-                            allData = allData.filter(item => item.no != row.no);
-                            applyFilters(); // Re-apply filters to refresh view
-                        }
-                    }
-                };
-                deleteTd.appendChild(deleteBtn);
-                tr.appendChild(deleteTd);
-                tableBody.appendChild(tr);
-            });
-        }
-
-        function handlePaste(event) {
-            event.preventDefault();
-            const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-            const rows = pastedText.trim().split('\n');
-            
-            if (rows.length > 1) {
-                alert(`Pasted data for multiple rows. Only the first row will be used to fill the form.`);
-            }
-            
-            const columns = rows[0].trim().split('\t');
-            const formHeaders = headers.filter(h => h !== 'no' && h !== 'Actions');
-
-            formHeaders.forEach((header, i) => {
-                const value = columns[i] || '';
-                const element = document.querySelector(`#addForm [name="${header}"]`);
-                
-                if (element) {
-                    if (element.tagName === 'SELECT') {
-                        let optionExists = Array.from(element.options).some(opt => opt.value === value);
-                        if (optionExists) {
-                            element.value = value;
-                            element.dispatchEvent(new Event('change'));
-                        } else {
-                            element.value = 'other';
-                            element.dispatchEvent(new Event('change'));
-                            const otherInput = document.querySelector(`#addForm input[name="${element.name}_other"]`);
-                            if (otherInput) otherInput.value = value;
-                        }
-                    } else {
-                        element.value = value;
-                    }
-                }
-            });
-        }
+            const duplicateNames = Object.keys(hcpsMap).filter(name => hcpsMap[name] > 1);
+            // Filter the already filteredData to show only the duplicates from the current view
+            const duplicatesToShow = filteredData
+                .filter(row => duplicateNames.includes((row.HCPS || '').toLowerCase().trim()))
+                .sort((a, b) => a.HCPS.localeCompare(b.HCPS));
+            renderTable(duplicatesToShow);
+        });
         
-        function setupAddForm() {
-            const addForm = document.getElementById('addForm');
-            if (!addForm) return;
-            const modalBody = addForm.querySelector('.modal-body');
-            if (!modalBody) return;
-            modalBody.innerHTML = '';
-            
-            const pasteContainer = document.createElement('div');
-            pasteContainer.style.gridColumn = '1 / -1';
-            pasteContainer.innerHTML = `
-                <div style="border: 1px dashed #ccc; padding: 16px; border-radius: 8px; background: #fdfdfd; margin-bottom: 20px;">
-                    <button type="button" id="togglePasteBtn" class="action-button secondary"><i class="fas fa-paste"></i> Paste From Spreadsheet</button>
-                    <div id="pasteSection" style="display: none; margin-top: 12px;">
-                        <p style="color: var(--medium-gray); margin-bottom: 8px;">Paste one row of tab-separated data below (e.g., from Excel).</p>
-                        <textarea id="pasteTextarea" class="form-input" style="min-height: 100px; font-family: monospace; resize: vertical;" placeholder="Paste data here..."></textarea>
-                    </div>
-                </div>
-            `;
-            modalBody.appendChild(pasteContainer);
-            
-            document.getElementById('togglePasteBtn').addEventListener('click', () => {
-                const pasteSection = document.getElementById('pasteSection');
-                pasteSection.style.display = pasteSection.style.display === 'none' ? 'block' : 'none';
-                if (pasteSection.style.display === 'block') {
-                    document.getElementById('pasteTextarea').focus();
-                }
-            });
-            document.getElementById('pasteTextarea').addEventListener('paste', handlePaste);
-
-            let maxNo = allData.length > 0 ? Math.max(...allData.map(d => parseInt(d.no) || 0)) : 0;
-            
-            headers.forEach(header => {
-                if (header === "Actions") return;
-                const container = document.createElement('div');
-                const label = document.createElement('label');
-                label.textContent = header;
-                label.className = 'block text-sm font-medium text-gray-700 mb-1';
-                container.appendChild(label);
-                
-                if (header === 'no') {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = header;
-                    input.value = maxNo + 1;
-                    input.readOnly = true;
-                    input.className = 'form-input bg-gray-100';
-                    container.appendChild(input);
-                } else if (dropdownHeaders.includes(header) && uniqueValues[header]) {
-                    const select = document.createElement('select');
-                    select.name = header;
-                    select.className = 'form-select';
-                    select.innerHTML = `<option value="">Select ${header}</option>`;
-                    uniqueValues[header].forEach(val => {
-                        select.innerHTML += `<option value="${val}">${val}</option>`;
-                    });
-                    select.innerHTML += `<option value="other">Other...</option>`;
-                    container.appendChild(select);
-                    
-                    const otherInput = document.createElement('input');
-                    otherInput.type = 'text';
-                    otherInput.name = `${header}_other`;
-                    otherInput.placeholder = `Enter new ${header}`;
-                    otherInput.className = 'form-input mt-2';
-                    otherInput.style.display = 'none';
-                    container.appendChild(otherInput);
-                    
-                    select.addEventListener('change', () => {
-                        otherInput.style.display = select.value === 'other' ? 'block' : 'none';
-                    });
-                } else {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = header;
-                    input.className = 'form-input';
-                    container.appendChild(input);
-                }
-                modalBody.appendChild(container);
-            });
-        }
-        
-        async function handleCellUpdate(cell, column, oldValue, newValue, rowNo) {
-            if (newValue.trim() === '') {
-                cell.textContent = oldValue;
-                return;
-            }
-            
-            const updates = { [column]: newValue };
-            const { error } = await supabaseClient.from(TABLE_NAME).update(updates).eq('no', rowNo);
-
-            if (error) {
-                console.error('Error updating cell:', error);
-                alert('Failed to update cell.');
-                cell.textContent = oldValue;
+        window.onscroll = () => {
+            const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollToTopBtn.style.display = "block";
             } else {
-                const dataIndex = allData.findIndex(row => row.no == rowNo);
-                if (dataIndex > -1) allData[dataIndex][column] = newValue;
-                applyFilters();
+                scrollToTopBtn.style.display = "none";
+            }
+        };
+        
+        document.getElementById('closeAddModal').onclick = () => addModal.style.display = 'none';
+        document.getElementById('addFormCancel').onclick = () => addModal.style.display = 'none';
+        document.getElementById('closeUpdateNameModal').onclick = () => updateNameModal.style.display = 'none';
+        window.onclick = (event) => {
+            if (event.target === addModal || event.target === confirmModal || event.target === updateNameModal) {
+                event.target.style.display = "none";
             }
         }
-        
-        function setupCellEditing() {
-            if (!hcpTable) return;
-            
-            hcpTable.addEventListener('click', (e) => {
-                const cell = e.target.closest('td.editable-cell');
-                if (!cell) return;
-                
-                e.preventDefault();
-                const column = cell.dataset.column;
-                const rowNo = cell.closest('tr').dataset.id;
-                const oldValue = cell.textContent.trim();
 
-                document.getElementById('oldNameSpan').textContent = oldValue;
-                document.getElementById('updateNameModalTitle').textContent = `Update ${column}`;
-                const nameInput = document.getElementById('newNameInput');
-                const nameSelect = document.getElementById('selectNewName');
+        document.querySelectorAll('#hcpTable th[data-column]').forEach(header => {
+            header.addEventListener('click', (e) => {
+                const column = e.currentTarget.dataset.column;
+                if (!dropdownHeaders.includes(column)) return;
+
+                const rect = e.currentTarget.getBoundingClientRect();
+                document.querySelector('.filter-dropdown')?.remove();
+
+                const dropdown = document.createElement('div');
+                dropdown.className = 'filter-dropdown';
+                dropdown.dataset.column = column;
+                dropdown.style.top = `${rect.bottom + window.scrollY + 5}px`;
+                dropdown.style.left = `${rect.left + window.scrollX}px`;
                 
-                nameInput.value = '';
-                nameSelect.innerHTML = `<option value="">Select an existing name</option>`;
+                dropdown.innerHTML = `
+                    <div class="filter-search-wrapper">
+                        <input type="text" class="filter-search" placeholder="Search options...">
+                    </div>
+                    <div class="filter-options"></div>
+                `;
                 
-                const uniqueNames = [...new Set(allData.map(item => item[column]).filter(Boolean))].sort();
-                uniqueNames.forEach(name => {
-                    nameSelect.innerHTML += `<option value="${name}">${name}</option>`;
+                const optionsContainer = dropdown.querySelector('.filter-options');
+                const uniqueOptions = uniqueValues[column] || [];
+
+                uniqueOptions.forEach(optionText => {
+                    const isChecked = currentFilters[column]?.includes(optionText);
+                    optionsContainer.innerHTML += `<label><input type="checkbox" value="${optionText}" ${isChecked ? 'checked' : ''}> ${optionText}</label>`;
                 });
                 
-                updateNameModal.style.display = 'flex';
+                document.body.appendChild(dropdown);
                 
-                const updateHandler = async (type) => {
-                    let newValue = (nameInput.value || nameSelect.value || '').trim();
-                    if (!newValue || newValue === 'other' || newValue === oldValue) {
-                        updateNameModal.style.display = 'none';
-                        return;
-                    }
-                    
-                    let confirmationMessage = '';
-                    if (type === 'all') {
-                        confirmationMessage = `Are you sure you want to change all instances of "${oldValue}" to "${newValue}" in the '${column}' column?`;
-                    } else {
-                        confirmationMessage = `Are you sure you want to change "${oldValue}" to "${newValue}" for this row only?`;
-                    }
-
-                    const confirmation = await showConfirm(confirmationMessage);
-                    if (!confirmation) {
-                        updateNameModal.style.display = 'none';
-                        return;
-                    }
-                    
-                    showLoading();
-                    const updates = { [column]: newValue };
-                    let query = supabaseClient.from(TABLE_NAME).update(updates);
-                    
-                    query = (type === 'all') ? query.eq(column, oldValue) : query.eq('no', rowNo);
-                    
-                    const { error } = await query;
-                    
-                    if (error) {
-                        console.error('Error updating name(s):', error);
-                        alert('Failed to update.');
-                    } else {
-                        await init();
-                    }
-                    hideLoading();
-                    updateNameModal.style.display = 'none';
-                };
-
-                updateSingleBtn.onclick = () => updateHandler('single');
-                updateAllBtn.onclick = () => updateHandler('all');
-            });
-            
-            hcpTable.addEventListener('dblclick', (e) => {
-                const cell = e.target.closest('td[contenteditable="true"]');
-                if (!cell || cell.classList.contains('editable-cell') || document.querySelector('.cell-editing')) {
-                    return;
-                }
-
-                cell.classList.add('cell-editing');
-                const originalValue = cell.textContent.trim();
-                
-                cell.focus();
-                const selection = window.getSelection();
-                const range = document.createRange();
-                range.selectNodeContents(cell);
-                selection.removeAllRanges();
-                selection.addRange(range);
-
-                let hasCleanedUp = false;
-
-                const endEditSession = async (isCancelled = false) => {
-                    if (hasCleanedUp) return;
-                    hasCleanedUp = true;
-
-                    document.removeEventListener('mousedown', mousedownHandler, true);
-                    cell.removeEventListener('keydown', keydownHandler);
-                    cell.removeEventListener('blur', blurFallbackHandler);
-                    cell.classList.remove('cell-editing');
-                    cell.blur();
-
-                    if (isCancelled) {
-                        cell.textContent = originalValue;
-                        return;
-                    }
-
-                    const newValue = cell.textContent.trim();
-
-                    if (newValue === originalValue || newValue === '') {
-                        cell.textContent = originalValue;
-                        return;
-                    }
-
-                    const confirmation = await showConfirm(`Save changes for ${cell.dataset.column}?\n\nFrom: "${originalValue}"\nTo: "${newValue}"`);
-                    if (confirmation) {
-                        const rowNo = cell.closest('tr').dataset.id;
-                        await handleCellUpdate(cell, cell.dataset.column, originalValue, newValue, rowNo);
-                    } else {
-                        cell.textContent = originalValue;
-                    }
-                };
-
-                const keydownHandler = (evt) => {
-                    if (evt.key === 'Enter') {
-                        evt.preventDefault();
-                        endEditSession(false);
-                    } else if (evt.key === 'Escape') {
-                        evt.preventDefault();
-                        endEditSession(true);
-                    }
-                };
-
-                const mousedownHandler = (event) => {
-                    if (!cell.contains(event.target)) {
-                        endEditSession(false);
-                    }
-                };
-                
-                const blurFallbackHandler = () => {
-                     setTimeout(() => endEditSession(false), 50); 
-                };
-
-                cell.addEventListener('keydown', keydownHandler);
-                cell.addEventListener('blur', blurFallbackHandler);
-                document.addEventListener('mousedown', mousedownHandler, true);
-            });
-        }
-        
-        function setupEventListeners() {
-            document.getElementById('addHCPBtn').addEventListener('click', () => {
-                setupAddForm();
-                addModal.style.display = 'flex';
-            });
-            
-            document.getElementById('resetBtn').addEventListener('click', () => {
-                searchInput.value = '';
-                currentFilters = {};
-                updateHeaderFilterStates();
-                renderTable(allData);
-            });
-
-            document.getElementById('addForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                showLoading();
-                const formData = new FormData(e.target);
-                const newRow = {};
-                for (let [key, value] of formData.entries()) {
-                    if (key.endsWith('_other')) {
-                        const originalKey = key.replace('_other', '');
-                        if (formData.get(originalKey) === 'other') {
-                            newRow[originalKey] = value;
-                        }
-                    } else if (value !== 'other') {
-                        newRow[key] = value;
-                    }
-                }
-                
-                const { error } = await supabaseClient.from(TABLE_NAME).insert([newRow]);
-                
-                if (error) {
-                    console.error('Error adding new row:', error);
-                    alert('Failed to add new HCP.');
-                } else {
-                    addModal.style.display = 'none';
-                    await init();
-                }
-                hideLoading();
-            });
-
-            searchInput.addEventListener('keyup', debounce(applyFilters, 300));
-            
-            document.getElementById('duplicatedHCPsStat').addEventListener('click', () => {
-                const hcpsMap = {};
-                // Use filteredData to find duplicates within the current view
-                filteredData.forEach(row => {
-                    const hcpsName = (row.HCPS || '').toLowerCase().trim();
-                    if (hcpsName) {
-                        hcpsMap[hcpsName] = (hcpsMap[hcpsName] || 0) + 1;
-                    }
+                dropdown.querySelector('.filter-search').addEventListener('keyup', (evt) => {
+                    const searchTerm = evt.target.value.toLowerCase();
+                    optionsContainer.querySelectorAll('label').forEach(label => {
+                       label.style.display = label.textContent.toLowerCase().includes(searchTerm) ? 'block' : 'none';
+                    });
                 });
-                const duplicateNames = Object.keys(hcpsMap).filter(name => hcpsMap[name] > 1);
-                // Filter the already filteredData to show only the duplicates from the current view
-                const duplicatesToShow = filteredData
-                    .filter(row => duplicateNames.includes((row.HCPS || '').toLowerCase().trim()))
-                    .sort((a, b) => a.HCPS.localeCompare(b.HCPS));
-                renderTable(duplicatesToShow);
+                
+                optionsContainer.addEventListener('change', () => {
+                    const checkedOptions = Array.from(optionsContainer.querySelectorAll('input:checked')).map(input => input.value);
+                    currentFilters[column] = checkedOptions;
+                    applyFilters();
+                });
             });
-            
-            window.onscroll = () => {
-                const scrollToTopBtn = document.getElementById("scrollToTopBtn");
-                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                    scrollToTopBtn.style.display = "block";
-                } else {
-                    scrollToTopBtn.style.display = "none";
-                }
-            };
-            
-            document.getElementById('closeAddModal').onclick = () => addModal.style.display = 'none';
-            document.getElementById('addFormCancel').onclick = () => addModal.style.display = 'none';
-            document.getElementById('closeUpdateNameModal').onclick = () => updateNameModal.style.display = 'none';
-            window.onclick = (event) => {
-                if (event.target === addModal || event.target === confirmModal || event.target === updateNameModal) {
-                    event.target.style.display = "none";
-                }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#hcpTable th') && !e.target.closest('.filter-dropdown')) {
+                document.querySelector('.filter-dropdown')?.remove();
             }
+        });
+    }
+    
+    async function init() {
+        const data = await fetchAllData();
+        allData = data;
+        uniqueValues = getUniqueValues(allData);
+        calculateInitialMetrics(allData);
+        renderTable(allData);
+        setupEventListeners();
+        setupCellEditing();
+    }
 
-            document.querySelectorAll('#hcpTable th[data-column]').forEach(header => {
-                header.addEventListener('click', (e) => {
-                    const column = e.currentTarget.dataset.column;
-                    if (!dropdownHeaders.includes(column)) return;
-
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    document.querySelector('.filter-dropdown')?.remove();
-
-                    const dropdown = document.createElement('div');
-                    dropdown.className = 'filter-dropdown';
-                    dropdown.dataset.column = column;
-                    dropdown.style.top = `${rect.bottom + window.scrollY + 5}px`;
-                    dropdown.style.left = `${rect.left + window.scrollX}px`;
-                    
-                    dropdown.innerHTML = `
-                        <div class="filter-search-wrapper">
-                            <input type="text" class="filter-search" placeholder="Search options...">
-                        </div>
-                        <div class="filter-options"></div>
-                    `;
-                    
-                    const optionsContainer = dropdown.querySelector('.filter-options');
-                    const uniqueOptions = uniqueValues[column] || [];
-
-                    uniqueOptions.forEach(optionText => {
-                        const isChecked = currentFilters[column]?.includes(optionText);
-                        optionsContainer.innerHTML += `<label><input type="checkbox" value="${optionText}" ${isChecked ? 'checked' : ''}> ${optionText}</label>`;
-                    });
-                    
-                    document.body.appendChild(dropdown);
-                    
-                    dropdown.querySelector('.filter-search').addEventListener('keyup', (evt) => {
-                        const searchTerm = evt.target.value.toLowerCase();
-                        optionsContainer.querySelectorAll('label').forEach(label => {
-                           label.style.display = label.textContent.toLowerCase().includes(searchTerm) ? 'block' : 'none';
-                        });
-                    });
-                    
-                    optionsContainer.addEventListener('change', () => {
-                        const checkedOptions = Array.from(optionsContainer.querySelectorAll('input:checked')).map(input => input.value);
-                        currentFilters[column] = checkedOptions;
-                        applyFilters();
-                    });
-                });
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('#hcpTable th') && !e.target.closest('.filter-dropdown')) {
-                    document.querySelector('.filter-dropdown')?.remove();
-                }
-            });
-        }
-        
-        async function init() {
-            const data = await fetchAllData();
-            allData = data;
-            uniqueValues = getUniqueValues(allData);
-            calculateInitialMetrics(allData);
-            renderTable(allData);
-            setupEventListeners();
-            setupCellEditing();
-        }
-
-        function topFunction() {
-            document.body.scrollTop = 0;
-            document.documentElement.scrollTop = 0;
-        }
-        
-        window.onload = init;
-    </script>
+    function topFunction() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+    }
+    
+    window.onload = init;
+</script>
 </body>
-</html>
+</html>    
