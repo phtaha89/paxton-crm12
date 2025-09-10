@@ -767,14 +767,13 @@
     return data.map(item => {
         const newItem = {};
         for (const key in item) {
-            // Normalize the key to camelCase.
             let normalizedKey = key.toLowerCase().replace(/[^a-zA-Z0-9]+(.)?/g, (match, chr) => chr ? chr.toUpperCase() : '').replace(/^./, (match) => match.toLowerCase());
 
             // Special cases for column names that need custom mapping
             if (key === 'T.V') {
-                normalizedKey = 'tv'; // Map 'T.V' to 'tv'
-            } else if (normalizedKey === 'speciality') {
-                // Keep 'speciality' as is (already normalized)
+                normalizedKey = 'tv';
+            } else if (key === 'Area' || key === 'AREA') {
+                normalizedKey = 'area';
             }
 
             newItem[normalizedKey] = item[key];
@@ -782,6 +781,7 @@
         return newItem;
     });
 }
+
 
 
         /**
@@ -1134,20 +1134,26 @@
                 </div>
                 
                 <div class="detail-section full-width">
-                    <h3><i class="fas fa-users"></i> Team Assignment</h3>
-                    <div class="detail-row">
-                        <span class="detail-label">Medical Rep</span>
-                        <span class="detail-value" id="hcp-rep">${hcp.medicalRep || 'N/A'}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">District Manager</span>
-                        <span class="detail-value" id="hcp-manager">${hcp.districtManager || 'N/A'}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Governorate</span>
-                        <span class="detail-value" id="hcp-governorate">${hcp.governorate || 'N/A'}</span>
-                    </div>
-                </div>
+    <h3><i class="fas fa-users"></i> Team Assignment</h3>
+    <div class="detail-row">
+        <span class="detail-label">Medical Rep</span>
+        <span class="detail-value" id="hcp-rep">${hcp.medicalRep || 'N/A'}</span>
+    </div>
+    <div class="detail-row">
+        <span class="detail-label">District Manager</span>
+        <span class="detail-value" id="hcp-manager">${hcp.districtManager || 'N/A'}</span>
+    </div>
+    <div class="detail-row">
+        <span class="detail-label">Governorate</span>
+        <span class="detail-value" id="hcp-governorate">${hcp.governorate || 'N/A'}</span>
+    </div>
+    <!-- Add Area here -->
+    <div class="detail-row">
+        <span class="detail-label">Area</span>
+        <span class="detail-value" id="hcp-area">${hcp.area || 'N/A'}</span>
+    </div>
+</div>
+
 
                 <div class="detail-section full-width">
                     <h3><i class="fas fa-calendar-alt"></i> Available Days</h3>
@@ -1229,15 +1235,17 @@
             }
 
             const headers = [
-                'District Manager', 'Governorate', 'Medical Rep', 'Brick', 'HCPs',
-                'Speciality', 'Class', 'T.V', 'Account', 'Address', 'Mobile',
-                'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'
-            ];
-            const headerKeys = [
-                'districtManager', 'governorate', 'medicalRep', 'brick', 'hcps',
-                'speciality', 'class', 'tv', 'account', 'address', 'mobile',
-                'saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday'
-            ];
+    'District Manager', 'Governorate', 'Medical Rep', 'Brick', 'Area', 'HCPs',
+    'Speciality', 'Class', 'T.V', 'Account', 'Address', 'Mobile',
+    'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'
+];
+
+const headerKeys = [
+    'districtManager', 'governorate', 'medicalRep', 'brick', 'area', 'hcps',
+    'speciality', 'class', 'tv', 'account', 'address', 'mobile',
+    'saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday'
+];
+
 
             const exportData = [headers];
             filteredData.forEach(row => {
