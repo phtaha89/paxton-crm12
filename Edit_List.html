@@ -6,21 +6,36 @@
     <title>Healthcare Professional Database</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         :root {
-            --primary-color: #3b82f6; /* blue-500 */
-            --primary-hover: #2563eb; /* blue-600 */
-            --danger-color: #ef4444;  /* red-500 */
-            --danger-hover: #dc2626;  /* red-600 */
-            --dark-gray: #1f2937;    /* gray-800 */
-            --medium-gray: #6b7280; /* gray-500 */
-            --light-gray: #f3f4f6;   /* gray-100 */
-            --border-color: #e5e7eb; /* gray-200 */
-            --background-color: #f9fafb; /* gray-50 */
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --success: #059669;
+            --warning: #d97706;
+            
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
 
         * {
@@ -30,394 +45,351 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--background-color);
-            min-height: 100vh;
-            padding: 16px;
-            color: var(--dark-gray);
-            font-size: 14px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--gray-50);
+            color: var(--gray-900);
             line-height: 1.5;
+            font-size: 14px;
         }
 
-        .container {
-            width: 100%;
-            max-width: none;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            overflow: hidden;
-        }
+        .main-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    max-width: none;
+}
+
 
         /* Header */
-        .header {
-            background: var(--dark-gray);
-            color: white;
-            padding: 24px 32px;
-            border-bottom: 1px solid var(--border-color);
+        .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-title h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.header-title p {
+    margin: 0;
+    color: var(--gray-500);
+    font-size: 0.875rem;
+}
+
+#backButton {
+    padding: 0.5rem 1rem;
+    margin-left: auto; /* Pushes the button to the far right */
+}
+
+
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 1.5rem 2rem;
+            max-width: none;
         }
 
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .header p {
-            opacity: 0.8;
-            font-size: 14px;
-            font-weight: 400;
-        }
-
-        /* Filters */
-        .filters-section {
-            padding: 16px 32px;
-            background: #ffffff;
-            border-bottom: 1px solid var(--border-color);
+        /* Controls Bar */
+        .controls-bar {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius-lg);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 20px;
+            gap: 1rem;
             flex-wrap: wrap;
         }
 
-        .search-section {
-            flex-grow: 1;
+        .search-container {
+            flex: 1;
+            min-width: 300px;
             position: relative;
-        }
-        
-        .search-section .fa-search {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--medium-gray);
-            font-size: 14px;
         }
 
         .search-input {
             width: 100%;
-            padding: 10px 12px 10px 40px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 14px;
-            background: white;
-            color: #374151;
-            transition: all 0.2s ease-in-out;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
         .search-input:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        /* Action Buttons */
-        .action-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 0.875rem;
         }
 
-        .action-button {
-            background: var(--dark-gray);
-            color: white;
-            border: 1px solid transparent;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
+        .controls-actions {
             display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease-in-out;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid transparent;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            text-decoration: none;
         }
-        
-        .action-button.primary {
-            background: var(--primary-color);
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
         }
-        .action-button.primary:hover {
-            background: var(--primary-hover);
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
         }
-        .action-button.secondary {
+
+        .btn-secondary {
             background-color: white;
-            color: var(--dark-gray);
-            border-color: var(--border-color);
+            color: var(--gray-700);
+            border-color: var(--gray-300);
         }
-        .action-button.secondary:hover {
-            background-color: var(--light-gray);
+
+        .btn-secondary:hover {
+            background-color: var(--gray-50);
         }
-        .action-button.delete-btn {
-            background-color: var(--danger-color);
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
         }
-        .action-button.delete-btn:hover {
+
+        .btn-danger:hover {
             background-color: var(--danger-hover);
         }
 
-        /* Stats */
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            background: white;
-            border-bottom: 1px solid var(--border-color);
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.8125rem;
         }
 
-        .stats-item {
-            text-align: left;
-            padding: 20px 32px;
-            cursor: default;
-            transition: background-color 0.2s ease;
-            border-right: 1px solid var(--border-color);
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
-        .stats-item:last-child {
-            border-right: none;
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius-lg);
+            padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.15s ease-in-out;
         }
-        .stats-item.clickable:hover {
-            background-color: var(--light-gray);
+
+        .stat-card.clickable {
             cursor: pointer;
         }
 
-        .stats-number {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--dark-gray);
-            display: block;
+        .stat-card.clickable:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gray-900);
             line-height: 1;
         }
-        .stats-number.red {
-            color: var(--danger-color);
+
+        .stat-value.danger {
+            color: var(--danger);
         }
 
-        .stats-label {
-            font-size: 13px;
-            color: var(--medium-gray);
-            margin-top: 6px;
+        .stat-label {
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
         }
 
-        /* Table */
+        /* Table Container */
+        .table-wrapper {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
         .table-container {
-            padding: 0;
             overflow-x: auto;
+            max-height: 70vh;
+            overflow-y: auto;
         }
 
-        .hcp-table {
+        .data-table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            min-width: 1800px;
+            min-width: 1600px;
         }
 
-        .hcp-table th {
-            background: var(--light-gray);
-            color: #374151;
-            padding: 12px 16px;
+        .data-table th {
+            background: var(--gray-50);
+            padding: 0.75rem;
             text-align: left;
             font-weight: 600;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid var(--border-color);
+            font-size: 0.8125rem;
+            color: var(--gray-700);
+            border-bottom: 1px solid var(--gray-200);
             position: sticky;
             top: 0;
             z-index: 10;
             white-space: nowrap;
             cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .hcp-table th:hover {
-            background-color: #e5e7eb;
-        }
-        .hcp-table th.filter-active {
-            color: var(--primary-color);
-            background-color: #dbeafe; /* blue-200 */
-        }
-        .hcp-table th.filter-active::after {
-            content: ' \f0b0'; /* Font Awesome filter icon */
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
+            transition: background-color 0.15s ease-in-out;
         }
 
-        .hcp-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
+        .data-table th:hover {
+            background: var(--gray-100);
+        }
+
+        .data-table th.filtered {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        .data-table th.filtered::after {
+            content: '\f0b0';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .data-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.875rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 200px;
         }
-        
-        .hcp-table td[contenteditable="true"]:hover {
-            background-color: #eff6ff; /* blue-100 */
-        }
-        .hcp-table td[contenteditable="true"]:focus {
-            background-color: #dbeafe; /* blue-200 */
-            outline: 2px solid var(--primary-color);
-            outline-offset: -2px;
-        }
-        
-        .cell-editing {
-            background-color: #fee2e2 !important; /* red-100 */
-            outline: 2px solid var(--danger-color) !important;
-            outline-offset: -2px;
+
+        .data-table tbody tr:hover {
+            background: var(--gray-50);
         }
 
-        .hcp-table tr:hover {
-            background: var(--light-gray);
+        .data-table tbody tr.duplicate-group {
+            background: #fef3c7;
+        }
+
+        .data-table tbody tr.duplicate-row {
+            background: #fecaca;
         }
 
         .editable-cell {
             cursor: pointer;
             position: relative;
         }
-        .editable-cell::after {
-            content: "✎";
-            color: #9ca3af;
-            margin-left: 8px;
-            font-size: 12px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .hcp-table tr:hover .editable-cell::after {
-            opacity: 1;
+
+        .editable-cell:hover::after {
+            content: '\f044';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            font-size: 0.75rem;
         }
 
-        /* Modal */
-    .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.confirm-modal {
-    z-index: 1002; /* Ensures this modal is on top of others */
-}
-
-        .modal-content {
-            background: white;
-            width: 100%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .modal-add {
-            max-width: 900px;
-        }
-        
-        .modal-add .modal-body {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+        .cell-editing {
+            background: #fee2e2 !important;
+            outline: 2px solid var(--danger) !important;
+            outline-offset: -2px;
         }
 
-        .modal-header {
-            background: var(--dark-gray);
-            color: white;
-            padding: 20px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .data-table td[contenteditable="true"]:hover {
+            background: #eff6ff;
         }
 
-        .modal-header h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
+        .data-table td[contenteditable="true"]:focus {
+            background: #dbeafe;
+            outline: 2px solid var(--primary);
+            outline-offset: -2px;
         }
 
-        .close {
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-        .close:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-body {
-            padding: 24px;
-            flex-grow: 1;
-        }
-        
-        .modal-footer {
-            padding: 16px 24px;
-            background: var(--light-gray);
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-        
-        .form-input, .form-select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            background: white;
-            color: #374151;
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
+        /* No Results */
         .no-results {
             text-align: center;
-            padding: 60px 20px;
-            color: var(--medium-gray);
+            padding: 3rem 1rem;
+            color: var(--gray-500);
         }
 
         .no-results i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--gray-300);
         }
 
         /* Loading */
         .loading-overlay {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.9);
-            z-index: 1001;
-            transition: opacity 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
         }
 
         .spinner {
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid var(--primary-color);
+            width: 2rem;
+            height: 2rem;
+            border: 2px solid var(--gray-200);
+            border-top: 2px solid var(--primary);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
             animation: spin 1s linear infinite;
         }
 
@@ -425,913 +397,1265 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        #scrollToTopBtn {
+
+        /* Modal */
+        .modal {
             display: none;
             position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 99;
-            border: none;
-            outline: none;
-            background-color: var(--dark-gray);
-            color: white;
-            cursor: pointer;
-            padding: 12px 14px;
-            border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-        }
-        #scrollToTopBtn:hover {
-            background-color: #000;
-            transform: translateY(-2px);
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
         }
 
-        /* Dropdown Filter Menu */
-        .filter-dropdown {
-            position: absolute;
+        .modal-content {
             background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 20;
-            width: 250px;
-            max-height: 300px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
             overflow-y: auto;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
             display: flex;
             flex-direction: column;
         }
-        .filter-dropdown .filter-search-wrapper {
-            padding: 8px;
-            border-bottom: 1px solid var(--border-color);
+
+        .modal-content.wide {
+            max-width: 900px;
         }
-        .filter-dropdown .filter-search {
+
+        .modal-header {
+            background: var(--gray-800);
+            color: white;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        }
+
+        .modal-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            background: var(--gray-50);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-select {
+            padding: 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Filter Dropdown */
+        .filter-dropdown {
+            position: absolute;
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 20;
+            width: 250px;
+            max-height: 300px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-search-container {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .filter-search {
             width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            font-size: 0.8125rem;
         }
+
         .filter-options {
-            flex-grow: 1;
+            flex: 1;
             overflow-y: auto;
         }
-        .filter-dropdown label {
+
+        .filter-option {
             display: block;
-            padding: 8px 12px;
+            padding: 0.5rem 0.75rem;
             cursor: pointer;
             user-select: none;
-            font-size: 13px;
+            font-size: 0.8125rem;
+            transition: background-color 0.15s ease-in-out;
         }
-        .filter-dropdown label:hover {
-            background-color: var(--light-gray);
+
+        .filter-option:hover {
+            background: var(--gray-50);
         }
-        .filter-dropdown label input {
-            margin-right: 8px;
+
+        .filter-option input {
+            margin-right: 0.5rem;
         }
-        
-        .update-name-buttons-container {
+
+        /* Scroll to top */
+        .scroll-to-top {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 99;
+            background: var(--gray-800);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.15s ease-in-out;
+        }
+
+        .scroll-to-top:hover {
+            background: var(--gray-900);
+            transform: translateY(-2px);
+        }
+
+        /* Paste Area */
+        .paste-area {
+            grid-column: 1 / -1;
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            background: var(--gray-50);
+            margin-bottom: 1rem;
+        }
+
+        .paste-section {
+            margin-top: 0.75rem;
+        }
+
+        .paste-textarea {
+            min-height: 100px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8125rem;
+            resize: vertical;
+        }
+
+        /* Update Name Modal */
+        .name-update-buttons {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
         }
-        
+
+        /* Responsive */
         @media (max-width: 768px) {
-            body {
-                padding: 8px;
+            .content {
+                padding: 1rem;
             }
-            .filters-section {
+
+            .app-header {
+                padding: 1rem;
+            }
+
+            .controls-bar {
                 flex-direction: column;
                 align-items: stretch;
             }
-            .stats-bar {
+
+            .search-container {
+                min-width: auto;
+            }
+
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
-            .stats-item {
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
+
+            .controls-actions {
+                justify-content: stretch;
             }
-            .stats-item:last-child {
-                border-bottom: none;
+
+            .btn {
+                flex: 1;
+                justify-content: center;
             }
-            .header, .filters-section, .stats-bar {
-                padding-left: 16px;
-                padding-right: 16px;
-            }
+        }
+
+        /* Virtual scrolling performance */
+        .table-container {
+            contain: layout style paint;
+            will-change: scroll-position;
+        }
+
+        .data-table {
+            contain: layout style;
         }
     </style>
 </head>
 <body>
-    <div class="loading-overlay" id="loadingOverlay">
+    <div id="loadingOverlay" class="loading-overlay">
         <div class="spinner"></div>
     </div>
 
-    <div class="container">
-        <div class="header">
-            <h1>Healthcare Professional Database</h1>
-            <p>Comprehensive HCP Management System</p>
-        </div>
-
-        <div class="filters-section">
-            <div class="search-section">
-                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search across all fields...">
-            </div>
-            <div class="action-buttons">
-                <button id="addHCPBtn" class="action-button primary" title="Add New HCPS">
-                    <i class="fas fa-plus"></i> Add HCP(S)
-                </button>
-                <button id="resetBtn" class="action-button secondary" title="Reset all filters">
-                    <i class="fas fa-sync-alt"></i> Reset
-                </button>
-            </div>
-        </div>
-
-        <div class="stats-bar">
-            <div class="stats-item">
-                <span class="stats-number" id="totalHCPs">0</span>
-                <span class="stats-label">Total HCPs</span>
-            </div>
-            <div class="stats-item">
-                <span class="stats-number" id="filteredHCPs">0</span>
-                <span class="stats-label">Filtered Results</span>
-            </div>
-            <div class="stats-item clickable" id="duplicatedHCPsStat">
-                <span class="stats-number red" id="duplicatedHCPs">0</span>
-                <span class="stats-label">Duplicated Names (Click to Show)</span>
-            </div>
-        </div>
-
-        <div class="table-container">
-            <table class="hcp-table" id="hcpTable">
-                <thead>
-                    <tr>
-                        <th data-column="no">No</th>
-                        <th data-column="District Manager">District Manager</th>
-                        <th data-column="Governorate">Governorate</th>
-                        <th data-column="medical rep">Medical Rep</th>
-                        <th data-column="area">Area</th>
-                        <th data-column="HCPS">HCPS</th>
-                        <th data-column="Speciality">Speciality</th>
-                        <th data-column="Class">Class</th>
-                        <th data-column="T.V">T.V</th>
-                        <th data-column="Brick">Brick</th>
-                        <th data-column="account">Account</th>
-                        <th data-column="Address">Address</th>
-                        <th data-column="Mobile">Mobile</th>
-                        <th data-column="Saturday">Saturday</th>
-                        <th data-column="Sunday">Sunday</th>
-                        <th data-column="Monday">Monday</th>
-                        <th data-column="Tuesday">Tuesday</th>
-                        <th data-column="Wednesday">Wednesday</th>
-                        <th data-column="Thursday">Thursday</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="hcpTableBody">
-                </tbody>
-            </table>
-            <div id="noResults" class="no-results" style="display: none;">
-                <i class="fas fa-clipboard-list"></i>
-                <p>No HCPs found matching your criteria</p>
-            </div>
-        </div>
+    <div class="main-container">
+        <header class="app-header">
+    <div class="header-title">
+        <h1>Healthcare Professional Database</h1>
+        <p>Comprehensive HCP Management System</p>
     </div>
-    
-    <button onclick="topFunction()" id="scrollToTopBtn" title="Go to top">
+    <button id="backButton" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+</header>
+
+        <main class="content">
+            <div class="controls-bar">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search across all fields...">
+                </div>
+                <div class="controls-actions">
+                    <button id="addHCPBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add HCP
+                    </button>
+                    <button id="resetBtn" class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i>
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalHCPs">0</div>
+                    <div class="stat-label">Total HCPs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="filteredHCPs">0</div>
+                    <div class="stat-label">Filtered Results</div>
+                </div>
+                <div class="stat-card clickable" id="duplicatesStat">
+                    <div class="stat-value danger" id="duplicatedHCPs">0</div>
+                    <div class="stat-label">Duplicates (Click to View)</div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="table-container" id="tableContainer">
+                    <table class="data-table" id="dataTable">
+                        <thead>
+                            <tr>
+                                <th data-column="no">No</th>
+                                <th data-column="District Manager">District Manager</th>
+                                <th data-column="Governorate">Governorate</th>
+                                <th data-column="medical rep">Medical Rep</th>
+                                <th data-column="area">Area</th>
+                                <th data-column="HCPS">HCPS</th>
+                                <th data-column="Speciality">Speciality</th>
+                                <th data-column="Class">Class</th>
+                                <th data-column="T.V">T.V</th>
+                                <th data-column="Brick">Brick</th>
+                                <th data-column="account">Account</th>
+                                <th data-column="Address">Address</th>
+                                <th data-column="Mobile">Mobile</th>
+                                <th data-column="Saturday">Saturday</th>
+                                <th data-column="Sunday">Sunday</th>
+                                <th data-column="Monday">Monday</th>
+                                <th data-column="Tuesday">Tuesday</th>
+                                <th data-column="Wednesday">Wednesday</th>
+                                <th data-column="Thursday">Thursday</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                    <div id="noResults" class="no-results" style="display: none;">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No HCPs found matching your criteria</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <button class="scroll-to-top" id="scrollToTopBtn">
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- Add/Edit HCP Modal -->
+    <!-- Add HCP Modal -->
     <div id="addModal" class="modal">
-        <div class="modal-content modal-add">
+        <div class="modal-content wide">
             <div class="modal-header">
-                <h2 id="addModalTitle">Add New HCP(S)</h2>
-                <span class="close" id="closeAddModal">&times;</span>
+                <h2>Add New HCP</h2>
+                <span class="modal-close" id="closeAddModal">&times;</span>
             </div>
             <form id="addForm">
                 <div class="modal-body">
-                    <!-- Form fields will be dynamically added here -->
+                    <div class="paste-area">
+                        <button type="button" id="togglePasteBtn" class="btn btn-secondary">
+                            <i class="fas fa-paste"></i>
+                            Paste From Spreadsheet
+                        </button>
+                        <div id="pasteSection" class="paste-section" style="display: none;">
+                            <p style="color: var(--gray-500); margin-bottom: 0.5rem; font-size: 0.875rem;">
+                                Paste tab-separated data from Excel or similar applications:
+                            </p>
+                            <textarea id="pasteTextarea" class="form-input paste-textarea" placeholder="Paste your data here..."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-grid" id="formGrid">
+                        <!-- Form fields will be populated here -->
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="addFormCancel" class="action-button secondary">Cancel</button>
-                    <button type="submit" id="addFormSave" class="action-button primary">Save</button>
+                    <button type="button" id="addFormCancel" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save HCP</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Confirm Modal -->
-    <div id="confirmModal" class="modal confirm-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Confirmation</h2>
-            <span class="close" id="closeConfirmModal">&times;</span>
-        </div>
-        <div class="modal-body">
-            <p id="confirmMessage" style="white-space: pre-wrap;"></p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" id="confirmCancelBtn" class="action-button secondary">Cancel</button>
-            <button type="button" id="confirmProceedBtn" class="action-button primary">Proceed</button>
-        </div>
-    </div>
-</div>
-
-    <!-- Dynamic Dropdown Modal for Rep/Manager Name Updates -->
-    <div id="updateNameModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
             <div class="modal-header">
-                <h2 id="updateNameModalTitle">Update Name</h2>
-                <span class="close" id="closeUpdateNameModal">&times;</span>
+                <h2>Confirm Action</h2>
+                <span class="modal-close" id="closeConfirmModal">&times;</span>
             </div>
             <div class="modal-body">
-                <p>You are updating the name from "<strong><span id="oldNameSpan"></span></strong>".</p>
-                <div style="margin-top: 16px;">
-                    <label for="newNameInput" class="block text-sm font-medium text-gray-700 mb-1">Enter new name:</label>
-                    <input type="text" id="newNameInput" class="form-input">
+                <p id="confirmMessage" style="white-space: pre-wrap;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="confirmCancelBtn" class="btn btn-secondary">Cancel</button>
+                <button type="button" id="confirmProceedBtn" class="btn btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Name Modal -->
+    <div id="updateNameModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="updateNameModalTitle">Update Name</h2>
+                <span class="modal-close" id="closeUpdateNameModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Updating: "<strong><span id="oldNameSpan"></span></strong>"</p>
+                
+                <div class="form-field" style="margin-top: 1rem;">
+                    <label class="form-label" for="newNameInput">New Name:</label>
+                    <input type="text" id="newNameInput" class="form-input" placeholder="Enter new name...">
                 </div>
-                <div style="margin-top: 16px;">
-                    <label for="selectNewName" class="block text-sm font-medium text-gray-700 mb-1">Or select an existing name:</label>
+                
+                <div class="form-field" style="margin-top: 1rem;">
+                    <label class="form-label" for="selectNewName">Or Select Existing:</label>
                     <select id="selectNewName" class="form-select">
-                        <!-- Options populated dynamically -->
+                        <option value="">Choose existing name...</option>
                     </select>
                 </div>
-                <p style="margin-top: 24px; margin-bottom: 16px;">Apply this change to:</p>
-                <div class="update-name-buttons-container">
-                    <button id="updateSingleBtn" class="action-button secondary" type="button">This row only</button>
-                    <button id="updateAllBtn" class="action-button primary" type="button">All related rows</button>
+                
+                <div class="name-update-buttons">
+                    <button id="updateSingleBtn" class="btn btn-secondary" type="button">This Row Only</button>
+                    <button id="updateAllBtn" class="btn btn-primary" type="button">All Related Rows</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-    // Supabase configuration
-    const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
-    const TABLE_NAME = 'masterlist';
+        // Configuration
+        const SUPABASE_URL = 'https://plmevfyxpngzymvzvkzn.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
+        const TABLE_NAME = 'masterlist';
 
-    const { createClient } = supabase;
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let allData = [];
-    let filteredData = [];
-    let uniqueValues = {};
-    const headers = ["no", "District Manager", "Governorate", "medical rep", "area", "HCPS", "Speciality", "Class", "T.V", "Brick", "account", "Address", "Mobile", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
-    const dropdownHeaders = ["District Manager", "Governorate", "medical rep", "area", "Speciality", "Class", "T.V", "Brick"];
-    const updatableNameColumns = ["District Manager", "medical rep", "area"];
-    let currentFilters = {};
+        // Global variables
+        let allData = [];
+        let filteredData = [];
+        let uniqueValues = {};
+        let currentFilters = {};
+        
+        const headers = ["no", "District Manager", "Governorate", "medical rep", "area", "HCPS", "Speciality", "Class", "T.V", "Brick", "account", "Address", "Mobile", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+        const dropdownHeaders = ["District Manager", "Governorate", "medical rep", "area", "Speciality", "Class", "T.V", "Brick"];
+        const updatableNameColumns = ["District Manager", "medical rep", "area"];
 
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const searchInput = document.getElementById('searchInput');
-    const hcpTable = document.getElementById('hcpTable');
-    const tableBody = document.getElementById('hcpTableBody');
-    const totalCountSpan = document.getElementById('totalHCPs');
-    const filteredCountSpan = document.getElementById('filteredHCPs');
-    const duplicateCountSpan = document.getElementById('duplicatedHCPs');
-
-    const addModal = document.getElementById('addModal');
-    const confirmModal = document.getElementById('confirmModal');
-    const updateNameModal = document.getElementById('updateNameModal');
-    
-    const confirmMessage = document.getElementById('confirmMessage');
-    const confirmProceedBtn = document.getElementById('confirmProceedBtn');
-    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
-    const updateSingleBtn = document.getElementById('updateSingleBtn');
-    const updateAllBtn = document.getElementById('updateAllBtn');
-
-    function showLoading() {
-        if (loadingOverlay) {
-            loadingOverlay.style.display = 'flex';
-            loadingOverlay.style.opacity = '1';
-        }
-    }
-
-    function hideLoading() {
-        if (loadingOverlay) {
-            loadingOverlay.style.opacity = '0';
-            setTimeout(() => {
-                loadingOverlay.style.display = 'none';
-            }, 300);
-        }
-    }
-    
-    function debounce(func, delay) {
-        let timeout;
-        return function(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), delay);
+        // DOM elements
+        const elements = {
+            loading: document.getElementById('loadingOverlay'),
+            searchInput: document.getElementById('searchInput'),
+            tableBody: document.getElementById('tableBody'),
+            tableContainer: document.getElementById('tableContainer'),
+            totalCount: document.getElementById('totalHCPs'),
+            filteredCount: document.getElementById('filteredHCPs'),
+            duplicateCount: document.getElementById('duplicatedHCPs'),
+            duplicatesStat: document.getElementById('duplicatesStat'),
+            noResults: document.getElementById('noResults'),
+            addModal: document.getElementById('addModal'),
+            confirmModal: document.getElementById('confirmModal'),
+            updateNameModal: document.getElementById('updateNameModal')
         };
-    }
 
-    async function showConfirm(message) {
-        if (!confirmModal) return false;
-        confirmMessage.textContent = message;
-        confirmModal.style.display = 'flex';
-        return new Promise((resolve) => {
-            const onProceed = () => {
-                cleanup();
-                resolve(true);
-            };
-            const onCancel = () => {
-                cleanup();
-                resolve(false);
-            };
-            const cleanup = () => {
-                confirmProceedBtn.removeEventListener('click', onProceed);
-                confirmCancelBtn.removeEventListener('click', onCancel);
-                document.getElementById('closeConfirmModal').removeEventListener('click', onCancel);
-                confirmModal.style.display = 'none';
+        // Utility functions
+        function showLoading() {
+            if (elements.loading) {
+                elements.loading.style.display = 'flex';
             }
+        }
 
-            confirmProceedBtn.addEventListener('click', onProceed);
-            confirmCancelBtn.addEventListener('click', onCancel);
-            document.getElementById('closeConfirmModal').addEventListener('click', onCancel);
-        });
-    }
-    
-    async function fetchAllData() {
-        showLoading();
-        let data = [];
-        let offset = 0;
-        const limit = 1000; // Supabase default limit
+        function hideLoading() {
+            if (elements.loading) {
+                elements.loading.style.display = 'none';
+            }
+        }
+
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Data fetching with improved performance
+        async function fetchAllData() {
+    showLoading();
+    try {
+        let allRows = [];
+        const batchSize = 500; // Smaller batch size for better parallelism
+        let start = 0;
         let hasMore = true;
+        const maxParallelRequests = 4; // Number of parallel requests to make
 
         while (hasMore) {
-            const { data: fetchedData, error } = await supabaseClient
-                .from(TABLE_NAME)
-                .select('*')
-                .order('no', { ascending: true })
-                .range(offset, offset + limit - 1);
-            
-            if (error) {
-                console.error('Error fetching data:', error);
-                hideLoading();
-                return []; // Return empty on error
+            const promises = [];
+            for (let i = 0; i < maxParallelRequests; i++) {
+                const currentStart = start + (i * batchSize);
+                promises.push(
+                    supabaseClient
+                        .from(TABLE_NAME)
+                        .select('*')
+                        .order('no', { ascending: true })
+                        .range(currentStart, currentStart + batchSize - 1)
+                );
             }
 
-            if (fetchedData && fetchedData.length > 0) {
-                data = data.concat(fetchedData);
-                offset += fetchedData.length;
-                if (fetchedData.length < limit) {
-                    hasMore = false;
+            const results = await Promise.all(promises);
+            let fetchedRows = 0;
+
+            for (const { data, error } of results) {
+                if (error) throw error;
+                if (data && data.length > 0) {
+                    allRows = allRows.concat(data);
+                    fetchedRows += data.length;
                 }
-            } else {
+            }
+
+            if (fetchedRows < maxParallelRequests * batchSize) {
                 hasMore = false;
+            } else {
+                start += maxParallelRequests * batchSize;
             }
         }
-        
+
+        return allRows;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return [];
+    } finally {
         hideLoading();
-        return data;
     }
-
-
-    function calculateInitialMetrics(data) {
-        if (totalCountSpan) totalCountSpan.textContent = data.length;
-    }
-
-    function getUniqueValues(data) {
-        const unique = {};
-        dropdownHeaders.forEach(header => {
-            unique[header] = [...new Set(data.map(item => item[header]).filter(Boolean))].sort();
-        });
-        return unique;
-    }
-
-    function updateHeaderFilterStates() {
-        document.querySelectorAll('#hcpTable th[data-column]').forEach(th => {
-            const column = th.dataset.column;
-            if (currentFilters[column] && currentFilters[column].length > 0) {
-                th.classList.add('filter-active');
-            } else {
-                th.classList.remove('filter-active');
-            }
-        });
-    }
-    
-    function applyFilters() {
-        let tempFilteredData = allData;
-        
-        const activeFilters = Object.keys(currentFilters).filter(column => currentFilters[column]?.length > 0);
-
-        if (activeFilters.length > 0) {
-             tempFilteredData = tempFilteredData.filter(row => {
-                return activeFilters.every(column => {
-                    return currentFilters[column].includes(row[column]);
-                });
-            });
-        }
-        
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        if (searchTerm) {
-            tempFilteredData = tempFilteredData.filter(row => 
-                Object.values(row).some(value => String(value).toLowerCase().includes(searchTerm))
-            );
-        }
-
-        renderTable(tempFilteredData);
-        updateHeaderFilterStates();
-    }
-    
-   function renderTable(data) {
-    if (!tableBody) return;
-    tableBody.innerHTML = '';
-    filteredData = data;
-
-    if (filteredCountSpan) filteredCountSpan.textContent = data.length;
-
-    // Calculate and display duplicates
-    const hcpsMap = {};
-    data.forEach(row => {
-        const hcpsName = (row.HCPS || '').toLowerCase().trim();
-        if (hcpsName) {
-            hcpsMap[hcpsName] = (hcpsMap[hcpsName] || 0) + 1;
-        }
-    });
-    const duplicateCount = Object.values(hcpsMap).filter(count => count > 1).length;
-    if (duplicateCountSpan) duplicateCountSpan.textContent = duplicateCount;
-
-    const noResults = document.getElementById('noResults');
-    noResults.style.display = data.length === 0 ? 'block' : 'none';
-
-    // 🔹 Sort rows by "no" ascending before rendering
-    const sortedData = [...data].sort((a, b) => Number(a.no) - Number(b.no));
-
-    sortedData.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.dataset.id = row.no;
-
-        headers.forEach(header => {
-            const td = document.createElement('td');
-            if (header === 'no') {
-                td.textContent = row.no; // always original "no"
-            } else {
-                td.textContent = row[header];
-            }
-            td.dataset.column = header;
-            if (header !== 'no' && header !== 'Mobile' && header !== 'Actions') {
-                td.contentEditable = true;
-            }
-            if (updatableNameColumns.includes(header)) {
-                td.classList.add('editable-cell');
-            }
-            tr.appendChild(td);
-        });
-
-        const deleteTd = document.createElement('td');
-        const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-        deleteBtn.classList.add('action-button', 'delete-btn');
-        deleteBtn.title = "Delete Row";
-        deleteBtn.style.padding = "8px 10px";
-        deleteBtn.onclick = async (e) => {
-            e.stopPropagation();
-            const confirmation = await showConfirm('Are you sure you want to delete this row? This action cannot be undone.');
-            if (confirmation) {
-                const { error } = await supabaseClient.from(TABLE_NAME).delete().eq('no', row.no);
-                if (error) {
-                    console.error('Error deleting row:', error);
-                    alert('Failed to delete row.');
-                } else {
-                    allData = allData.filter(item => item.no != row.no);
-                    applyFilters(); // Re-apply filters
-                }
-            }
-        };
-        deleteTd.appendChild(deleteBtn);
-        tr.appendChild(deleteTd);
-
-        tableBody.appendChild(tr);
-    });
 }
 
 
-    function handlePaste(event) {
-        event.preventDefault();
-        const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-        const rows = pastedText.trim().split('\n');
-        
-        if (rows.length > 1) {
-            alert(`Pasted data for multiple rows. Only the first row will be used to fill the form.`);
-        }
-        
-        const columns = rows[0].trim().split('\t');
-        const formHeaders = headers.filter(h => h !== 'no' && h !== 'Actions');
-
-        formHeaders.forEach((header, i) => {
-            const value = columns[i] || '';
-            const element = document.querySelector(`#addForm [name="${header}"]`);
+        // Enhanced duplicate detection and display
+        function findDuplicates(data) {
+            const hcpsMap = new Map();
             
-            if (element) {
-                if (element.tagName === 'SELECT') {
-                    let optionExists = Array.from(element.options).some(opt => opt.value === value);
-                    if (optionExists) {
-                        element.value = value;
-                        element.dispatchEvent(new Event('change'));
-                    } else {
-                        element.value = 'other';
-                        element.dispatchEvent(new Event('change'));
-                        const otherInput = document.querySelector(`#addForm input[name="${element.name}_other"]`);
-                        if (otherInput) otherInput.value = value;
+            // Group by HCPS name (case insensitive)
+            data.forEach(row => {
+                const hcpsName = (row.HCPS || '').trim().toLowerCase();
+                if (hcpsName) {
+                    if (!hcpsMap.has(hcpsName)) {
+                        hcpsMap.set(hcpsName, []);
                     }
-                } else {
-                    element.value = value;
+                    hcpsMap.get(hcpsName).push(row);
+                }
+            });
+
+            // Return only groups with duplicates, properly organized
+            const duplicateGroups = [];
+            hcpsMap.forEach((rows, hcpsName) => {
+                if (rows.length > 1) {
+                    // Sort by 'no' to get original first
+                    rows.sort((a, b) => Number(a.no) - Number(b.no));
+                    duplicateGroups.push(...rows);
+                }
+            });
+            
+            return duplicateGroups;
+        }
+
+        // Improved table rendering with virtual scrolling concept
+        function renderTable(data, isDuplicateView = false) {
+            if (!elements.tableBody) return;
+            
+            const fragment = document.createDocumentFragment();
+            filteredData = data;
+            
+            elements.filteredCount.textContent = data.length;
+            
+            // Calculate duplicates
+            const duplicates = findDuplicates(allData);
+            elements.duplicateCount.textContent = new Set(duplicates.map(d => d.HCPS.toLowerCase().trim())).size;
+            
+            elements.noResults.style.display = data.length === 0 ? 'block' : 'none';
+            
+            if (data.length === 0) {
+                elements.tableBody.innerHTML = '';
+                return;
+            }
+
+            // Sort data by 'no' for consistent display
+            const sortedData = [...data].sort((a, b) => Number(a.no) - Number(b.no));
+            
+            if (isDuplicateView) {
+                renderDuplicateView(sortedData, fragment);
+            } else {
+                renderNormalView(sortedData, fragment);
+            }
+            
+            elements.tableBody.innerHTML = '';
+            elements.tableBody.appendChild(fragment);
+        }
+
+        function renderNormalView(data, fragment) {
+            data.forEach(row => {
+                const tr = createTableRow(row);
+                fragment.appendChild(tr);
+            });
+        }
+
+        function renderDuplicateView(data, fragment) {
+            const hcpsGroups = new Map();
+            
+            // Group duplicates
+            data.forEach(row => {
+                const hcpsName = (row.HCPS || '').trim().toLowerCase();
+                if (!hcpsGroups.has(hcpsName)) {
+                    hcpsGroups.set(hcpsName, []);
+                }
+                hcpsGroups.get(hcpsName).push(row);
+            });
+            
+            // Render each group
+            hcpsGroups.forEach((rows, hcpsName) => {
+                if (rows.length > 1) {
+                    rows.sort((a, b) => Number(a.no) - Number(b.no));
+                    
+                    rows.forEach((row, index) => {
+                        const tr = createTableRow(row);
+                        
+                        if (index === 0) {
+                            tr.classList.add('duplicate-group');
+                            tr.title = `${row.HCPS} (Original)`;
+                        } else {
+                            tr.classList.add('duplicate-row');
+                            tr.title = `${row.HCPS} (Duplicate ${index})`;
+                        }
+                        
+                        fragment.appendChild(tr);
+                    });
+                }
+            });
+        }
+
+        function createTableRow(row) {
+            const tr = document.createElement('tr');
+            tr.dataset.id = row.no;
+            
+            headers.forEach(header => {
+                const td = document.createElement('td');
+                td.textContent = row[header] || '';
+                td.dataset.column = header;
+                
+                if (header !== 'no' && header !== 'Mobile') {
+                    td.contentEditable = true;
+                }
+                
+                if (updatableNameColumns.includes(header)) {
+                    td.classList.add('editable-cell');
+                }
+                
+                tr.appendChild(td);
+            });
+            
+            // Actions column
+            const actionsTd = document.createElement('td');
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            deleteBtn.className = 'btn btn-danger btn-sm';
+            deleteBtn.title = 'Delete Row';
+            deleteBtn.onclick = (e) => handleDelete(e, row.no);
+            actionsTd.appendChild(deleteBtn);
+            tr.appendChild(actionsTd);
+            
+            return tr;
+        }
+
+        async function handleDelete(e, rowNo) {
+            e.stopPropagation();
+            const confirmed = await showConfirm('Are you sure you want to delete this row? This action cannot be undone.');
+            
+            if (confirmed) {
+                showLoading();
+                try {
+                    const { error } = await supabaseClient
+                        .from(TABLE_NAME)
+                        .delete()
+                        .eq('no', rowNo);
+                    
+                    if (error) throw error;
+                    
+                    allData = allData.filter(item => item.no != rowNo);
+                    applyFilters();
+                } catch (error) {
+                    console.error('Error deleting row:', error);
+                    alert('Failed to delete row.');
+                } finally {
+                    hideLoading();
                 }
             }
-        });
-    }
-    
-    function setupAddForm() {
-        const addForm = document.getElementById('addForm');
-        if (!addForm) return;
-        const modalBody = addForm.querySelector('.modal-body');
-        if (!modalBody) return;
-        modalBody.innerHTML = '';
-        
-        const pasteContainer = document.createElement('div');
-        pasteContainer.style.gridColumn = '1 / -1';
-        pasteContainer.innerHTML = `
-            <div style="border: 1px dashed #ccc; padding: 16px; border-radius: 8px; background: #fdfdfd; margin-bottom: 20px;">
-                <button type="button" id="togglePasteBtn" class="action-button secondary"><i class="fas fa-paste"></i> Paste From Spreadsheet</button>
-                <div id="pasteSection" style="display: none; margin-top: 12px;">
-                    <p style="color: var(--medium-gray); margin-bottom: 8px;">Paste one row of tab-separated data below (e.g., from Excel).</p>
-                    <textarea id="pasteTextarea" class="form-input" style="min-height: 100px; font-family: monospace; resize: vertical;" placeholder="Paste data here..."></textarea>
-                </div>
-            </div>
-        `;
-        modalBody.appendChild(pasteContainer);
-        
-        document.getElementById('togglePasteBtn').addEventListener('click', () => {
-            const pasteSection = document.getElementById('pasteSection');
-            pasteSection.style.display = pasteSection.style.display === 'none' ? 'block' : 'none';
-            if (pasteSection.style.display === 'block') {
-                document.getElementById('pasteTextarea').focus();
-            }
-        });
-        document.getElementById('pasteTextarea').addEventListener('paste', handlePaste);
-
-        let maxNo = allData.length > 0 ? Math.max(...allData.map(d => parseInt(d.no) || 0)) : 0;
-        
-        headers.forEach(header => {
-            if (header === "Actions") return;
-            const container = document.createElement('div');
-            const label = document.createElement('label');
-            label.textContent = header;
-            label.className = 'block text-sm font-medium text-gray-700 mb-1';
-            container.appendChild(label);
-            
-            if (header === 'no') {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.name = header;
-                input.value = maxNo + 1;
-                input.readOnly = true;
-                input.className = 'form-input bg-gray-100';
-                container.appendChild(input);
-            } else if (dropdownHeaders.includes(header) && uniqueValues[header]) {
-                const select = document.createElement('select');
-                select.name = header;
-                select.className = 'form-select';
-                select.innerHTML = `<option value="">Select ${header}</option>`;
-                uniqueValues[header].forEach(val => {
-                    select.innerHTML += `<option value="${val}">${val}</option>`;
-                });
-                select.innerHTML += `<option value="other">Other...</option>`;
-                container.appendChild(select);
-                
-                const otherInput = document.createElement('input');
-                otherInput.type = 'text';
-                otherInput.name = `${header}_other`;
-                otherInput.placeholder = `Enter new ${header}`;
-                otherInput.className = 'form-input mt-2';
-                otherInput.style.display = 'none';
-                container.appendChild(otherInput);
-                
-                select.addEventListener('change', () => {
-                    otherInput.style.display = select.value === 'other' ? 'block' : 'none';
-                });
-            } else {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.name = header;
-                input.className = 'form-input';
-                container.appendChild(input);
-            }
-            modalBody.appendChild(container);
-        });
-    }
-    
-    async function handleCellUpdate(cell, column, oldValue, newValue, rowNo) {
-        if (newValue.trim() === '') {
-            cell.textContent = oldValue;
-            return;
         }
-        
-        const updates = { [column]: newValue };
-        const { error } = await supabaseClient.from(TABLE_NAME).update(updates).eq('no', rowNo);
 
-        if (error) {
-            console.error('Error updating cell:', error);
-            alert('Failed to update cell.');
-            cell.textContent = oldValue;
-        } else {
-            const dataIndex = allData.findIndex(row => row.no == rowNo);
-            if (dataIndex > -1) allData[dataIndex][column] = newValue;
-            applyFilters();
+        function getUniqueValues(data) {
+            const unique = {};
+            dropdownHeaders.forEach(header => {
+                unique[header] = [...new Set(data.map(item => item[header]).filter(Boolean))].sort();
+            });
+            return unique;
         }
-    }
-    
-    function setupCellEditing() {
-        if (!hcpTable) return;
-        
-        hcpTable.addEventListener('click', (e) => {
-            const cell = e.target.closest('td.editable-cell');
-            if (!cell) return;
+
+        function applyFilters() {
+            let tempData = allData;
             
-            e.preventDefault();
+            // Apply column filters
+            const activeFilters = Object.keys(currentFilters).filter(col => currentFilters[col]?.length > 0);
+            if (activeFilters.length > 0) {
+                tempData = tempData.filter(row => {
+                    return activeFilters.every(column => {
+                        return currentFilters[column].includes(row[column]);
+                    });
+                });
+            }
+            
+            // Apply search filter
+            const searchTerm = elements.searchInput.value.toLowerCase().trim();
+            if (searchTerm) {
+                tempData = tempData.filter(row => 
+                    Object.values(row).some(value => 
+                        String(value).toLowerCase().includes(searchTerm)
+                    )
+                );
+            }
+            
+            renderTable(tempData);
+            updateHeaderFilterStates();
+        }
+
+        function updateHeaderFilterStates() {
+            document.querySelectorAll('[data-column]').forEach(th => {
+                const column = th.dataset.column;
+                if (currentFilters[column]?.length > 0) {
+                    th.classList.add('filtered');
+                } else {
+                    th.classList.remove('filtered');
+                }
+            });
+        }
+
+        // Modal functions
+        async function showConfirm(message) {
+            return new Promise((resolve) => {
+                const confirmMessage = document.getElementById('confirmMessage');
+                const proceedBtn = document.getElementById('confirmProceedBtn');
+                const cancelBtn = document.getElementById('confirmCancelBtn');
+                const closeBtn = document.getElementById('closeConfirmModal');
+                
+                confirmMessage.textContent = message;
+                elements.confirmModal.style.display = 'flex';
+                
+                const cleanup = () => {
+                    elements.confirmModal.style.display = 'none';
+                    proceedBtn.removeEventListener('click', onProceed);
+                    cancelBtn.removeEventListener('click', onCancel);
+                    closeBtn.removeEventListener('click', onCancel);
+                };
+                
+                const onProceed = () => {
+                    cleanup();
+                    resolve(true);
+                };
+                
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+                
+                proceedBtn.addEventListener('click', onProceed);
+                cancelBtn.addEventListener('click', onCancel);
+                closeBtn.addEventListener('click', onCancel);
+            });
+        }
+
+        // Form handling
+        function setupAddForm() {
+            const formGrid = document.getElementById('formGrid');
+            formGrid.innerHTML = '';
+            
+            const maxNo = allData.length > 0 ? Math.max(...allData.map(d => parseInt(d.no) || 0)) : 0;
+            
+            headers.forEach(header => {
+                if (header === 'Actions') return;
+                
+                const field = document.createElement('div');
+                field.className = 'form-field';
+                
+                const label = document.createElement('label');
+                label.className = 'form-label';
+                label.textContent = header;
+                field.appendChild(label);
+                
+                if (header === 'no') {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = header;
+                    input.value = maxNo + 1;
+                    input.readOnly = true;
+                    input.className = 'form-input';
+                    input.style.backgroundColor = 'var(--gray-100)';
+                    field.appendChild(input);
+                } else if (dropdownHeaders.includes(header) && uniqueValues[header]) {
+                    const select = document.createElement('select');
+                    select.name = header;
+                    select.className = 'form-select';
+                    
+                    select.innerHTML = `<option value="">Select ${header}</option>`;
+                    uniqueValues[header].forEach(val => {
+                        select.innerHTML += `<option value="${val}">${val}</option>`;
+                    });
+                    select.innerHTML += `<option value="other">Other...</option>`;
+                    
+                    field.appendChild(select);
+                    
+                    const otherInput = document.createElement('input');
+                    otherInput.type = 'text';
+                    otherInput.name = `${header}_other`;
+                    otherInput.placeholder = `Enter new ${header}`;
+                    otherInput.className = 'form-input';
+                    otherInput.style.marginTop = '0.5rem';
+                    otherInput.style.display = 'none';
+                    field.appendChild(otherInput);
+                    
+                    select.addEventListener('change', () => {
+                        otherInput.style.display = select.value === 'other' ? 'block' : 'none';
+                    });
+                } else {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = header;
+                    input.className = 'form-input';
+                    field.appendChild(input);
+                }
+                
+                formGrid.appendChild(field);
+            });
+        }
+
+        // Cell editing
+        function setupCellEditing() {
+            const dataTable = document.getElementById('dataTable');
+            
+            // Handle editable cell clicks
+            dataTable.addEventListener('click', (e) => {
+                const cell = e.target.closest('td.editable-cell');
+                if (!cell) return;
+                
+                e.preventDefault();
+                showNameUpdateModal(cell);
+            });
+            
+            // Handle double-click editing
+            dataTable.addEventListener('dblclick', (e) => {
+                const cell = e.target.closest('td[contenteditable="true"]');
+                if (!cell || cell.classList.contains('editable-cell')) return;
+                
+                startCellEdit(cell);
+            });
+        }
+
+        function showNameUpdateModal(cell) {
             const column = cell.dataset.column;
             const rowNo = cell.closest('tr').dataset.id;
             const oldValue = cell.textContent.trim();
-
+            
             document.getElementById('oldNameSpan').textContent = oldValue;
             document.getElementById('updateNameModalTitle').textContent = `Update ${column}`;
+            
             const nameInput = document.getElementById('newNameInput');
             const nameSelect = document.getElementById('selectNewName');
             
             nameInput.value = '';
-            nameSelect.innerHTML = `<option value="">Select an existing name</option>`;
+            nameSelect.innerHTML = '<option value="">Choose existing name...</option>';
             
             const uniqueNames = [...new Set(allData.map(item => item[column]).filter(Boolean))].sort();
             uniqueNames.forEach(name => {
                 nameSelect.innerHTML += `<option value="${name}">${name}</option>`;
             });
             
-            updateNameModal.style.display = 'flex';
+            elements.updateNameModal.style.display = 'flex';
             
-            const updateHandler = async (type) => {
-                let newValue = (nameInput.value || nameSelect.value || '').trim();
-                if (!newValue || newValue === 'other' || newValue === oldValue) {
-                    updateNameModal.style.display = 'none';
-                    return;
-                }
-                
-                let confirmationMessage = '';
-                if (type === 'all') {
-                    confirmationMessage = `Are you sure you want to change all instances of "${oldValue}" to "${newValue}" in the '${column}' column?`;
-                } else {
-                    confirmationMessage = `Are you sure you want to change "${oldValue}" to "${newValue}" for this row only?`;
-                }
+            document.getElementById('updateSingleBtn').onclick = () => updateName('single', column, oldValue, rowNo);
+            document.getElementById('updateAllBtn').onclick = () => updateName('all', column, oldValue, rowNo);
+        }
 
-                const confirmation = await showConfirm(confirmationMessage);
-                if (!confirmation) {
-                    updateNameModal.style.display = 'none';
-                    return;
-                }
+        async function updateName(type, column, oldValue, rowNo) {
+            const newNameInput = document.getElementById('newNameInput');
+            const nameSelect = document.getElementById('selectNewName');
+            
+            const newValue = (newNameInput.value || nameSelect.value || '').trim();
+            if (!newValue || newValue === oldValue) {
+                elements.updateNameModal.style.display = 'none';
+                return;
+            }
+            
+            const message = type === 'all' 
+                ? `Change all instances of "${oldValue}" to "${newValue}" in the '${column}' column?`
+                : `Change "${oldValue}" to "${newValue}" for this row only?`;
                 
-                showLoading();
+            const confirmed = await showConfirm(message);
+            if (!confirmed) {
+                elements.updateNameModal.style.display = 'none';
+                return;
+            }
+            
+            showLoading();
+            try {
                 const updates = { [column]: newValue };
                 let query = supabaseClient.from(TABLE_NAME).update(updates);
                 
-                query = (type === 'all') ? query.eq(column, oldValue) : query.eq('no', rowNo);
+                if (type === 'all') {
+                    query = query.eq(column, oldValue);
+                } else {
+                    query = query.eq('no', rowNo);
+                }
                 
                 const { error } = await query;
+                if (error) throw error;
                 
-                if (error) {
-                    console.error('Error updating name(s):', error);
-                    alert('Failed to update.');
-                } else {
-                    await init();
-                }
+                await init();
+            } catch (error) {
+                console.error('Error updating name:', error);
+                alert('Failed to update.');
+            } finally {
                 hideLoading();
-                updateNameModal.style.display = 'none';
-            };
-
-            updateSingleBtn.onclick = () => updateHandler('single');
-            updateAllBtn.onclick = () => updateHandler('all');
-        });
-        
-        hcpTable.addEventListener('dblclick', (e) => {
-            const cell = e.target.closest('td[contenteditable="true"]');
-            if (!cell || cell.classList.contains('editable-cell') || document.querySelector('.cell-editing')) {
-                return;
+                elements.updateNameModal.style.display = 'none';
             }
+        }
 
+        function startCellEdit(cell) {
+            if (document.querySelector('.cell-editing')) return;
+            
             cell.classList.add('cell-editing');
             const originalValue = cell.textContent.trim();
             
             cell.focus();
-            const selection = window.getSelection();
-            const range = document.createRange();
-            range.selectNodeContents(cell);
-            selection.removeAllRanges();
-            selection.addRange(range);
-
+            selectAllText(cell);
+            
             let hasCleanedUp = false;
-
-            const endEditSession = async (isCancelled = false) => {
+            
+            const endEdit = async (cancelled = false) => {
                 if (hasCleanedUp) return;
                 hasCleanedUp = true;
-
-                document.removeEventListener('mousedown', mousedownHandler, true);
-                cell.removeEventListener('keydown', keydownHandler);
-                cell.removeEventListener('blur', blurFallbackHandler);
+                
                 cell.classList.remove('cell-editing');
+                document.removeEventListener('mousedown', handleClickOutside, true);
+                cell.removeEventListener('keydown', handleKeydown);
                 cell.blur();
-
-                if (isCancelled) {
+                
+                if (cancelled) {
                     cell.textContent = originalValue;
                     return;
                 }
-
+                
                 const newValue = cell.textContent.trim();
-
                 if (newValue === originalValue || newValue === '') {
                     cell.textContent = originalValue;
                     return;
                 }
-
-                const confirmation = await showConfirm(`Save changes for ${cell.dataset.column}?\n\nFrom: "${originalValue}"\nTo: "${newValue}"`);
-                if (confirmation) {
-                    const rowNo = cell.closest('tr').dataset.id;
-                    await handleCellUpdate(cell, cell.dataset.column, originalValue, newValue, rowNo);
+                
+                const confirmed = await showConfirm(`Save changes?\n\nFrom: "${originalValue}"\nTo: "${newValue}"`);
+                if (confirmed) {
+                    await updateCell(cell, originalValue, newValue);
                 } else {
                     cell.textContent = originalValue;
                 }
             };
-
-            const keydownHandler = (evt) => {
+            
+            const handleKeydown = (evt) => {
                 if (evt.key === 'Enter') {
                     evt.preventDefault();
-                    endEditSession(false);
+                    endEdit(false);
                 } else if (evt.key === 'Escape') {
                     evt.preventDefault();
-                    endEditSession(true);
+                    endEdit(true);
                 }
             };
-
-            const mousedownHandler = (event) => {
+            
+            const handleClickOutside = (event) => {
                 if (!cell.contains(event.target)) {
-                    endEditSession(false);
+                    endEdit(false);
                 }
             };
             
-            const blurFallbackHandler = () => {
-                 setTimeout(() => endEditSession(false), 50); 
-            };
+            cell.addEventListener('keydown', handleKeydown);
+            document.addEventListener('mousedown', handleClickOutside, true);
+        }
 
-            cell.addEventListener('keydown', keydownHandler);
-            cell.addEventListener('blur', blurFallbackHandler);
-            document.addEventListener('mousedown', mousedownHandler, true);
-        });
-    }
-    
-    function setupEventListeners() {
-        document.getElementById('addHCPBtn').addEventListener('click', () => {
-            setupAddForm();
-            addModal.style.display = 'flex';
-        });
-        
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            searchInput.value = '';
-            currentFilters = {};
-            updateHeaderFilterStates();
-            renderTable(allData);
-        });
+        function selectAllText(element) {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
 
-        document.getElementById('addForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            showLoading();
-            const formData = new FormData(e.target);
-            const newRow = {};
-            for (let [key, value] of formData.entries()) {
-                if (key.endsWith('_other')) {
-                    const originalKey = key.replace('_other', '');
-                    if (formData.get(originalKey) === 'other') {
-                        newRow[originalKey] = value;
-                    }
-                } else if (value !== 'other') {
-                    newRow[key] = value;
-                }
-            }
+        async function updateCell(cell, oldValue, newValue) {
+            const column = cell.dataset.column;
+            const rowNo = cell.closest('tr').dataset.id;
             
-            const { error } = await supabaseClient.from(TABLE_NAME).insert([newRow]);
-            
-            if (error) {
-                console.error('Error adding new row:', error);
-                alert('Failed to add new HCP.');
-            } else {
-                addModal.style.display = 'none';
-                await init();
-            }
-            hideLoading();
-        });
-
-        searchInput.addEventListener('keyup', debounce(applyFilters, 300));
-        
-        document.getElementById('duplicatedHCPsStat').addEventListener('click', () => {
-            const hcpsMap = {};
-            // Use filteredData to find duplicates within the current view
-            filteredData.forEach(row => {
-                const hcpsName = (row.HCPS || '').toLowerCase().trim();
-                if (hcpsName) {
-                    hcpsMap[hcpsName] = (hcpsMap[hcpsName] || 0) + 1;
+            try {
+                const { error } = await supabaseClient
+                    .from(TABLE_NAME)
+                    .update({ [column]: newValue })
+                    .eq('no', rowNo);
+                
+                if (error) throw error;
+                
+                const dataIndex = allData.findIndex(row => row.no == rowNo);
+                if (dataIndex > -1) {
+                    allData[dataIndex][column] = newValue;
                 }
-            });
-            const duplicateNames = Object.keys(hcpsMap).filter(name => hcpsMap[name] > 1);
-            // Filter the already filteredData to show only the duplicates from the current view
-            const duplicatesToShow = filteredData
-                .filter(row => duplicateNames.includes((row.HCPS || '').toLowerCase().trim()))
-                .sort((a, b) => a.HCPS.localeCompare(b.HCPS));
-            renderTable(duplicatesToShow);
-        });
-        
-        window.onscroll = () => {
-            const scrollToTopBtn = document.getElementById("scrollToTopBtn");
-            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                scrollToTopBtn.style.display = "block";
-            } else {
-                scrollToTopBtn.style.display = "none";
-            }
-        };
-        
-        document.getElementById('closeAddModal').onclick = () => addModal.style.display = 'none';
-        document.getElementById('addFormCancel').onclick = () => addModal.style.display = 'none';
-        document.getElementById('closeUpdateNameModal').onclick = () => updateNameModal.style.display = 'none';
-        window.onclick = (event) => {
-            if (event.target === addModal || event.target === confirmModal || event.target === updateNameModal) {
-                event.target.style.display = "none";
+                applyFilters();
+            } catch (error) {
+                console.error('Error updating cell:', error);
+                alert('Failed to update cell.');
+                cell.textContent = oldValue;
             }
         }
 
-        document.querySelectorAll('#hcpTable th[data-column]').forEach(header => {
-            header.addEventListener('click', (e) => {
-                const column = e.currentTarget.dataset.column;
-                if (!dropdownHeaders.includes(column)) return;
+        // Paste functionality
+        function handlePaste(event) {
+            event.preventDefault();
+            const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+            const rows = pastedText.trim().split('\n');
+            
+            if (rows.length > 1) {
+                alert('Multiple rows detected. Only the first row will be used.');
+            }
+            
+            const columns = rows[0].trim().split('\t');
+            const formHeaders = headers.filter(h => h !== 'no' && h !== 'Actions');
+            
+            formHeaders.forEach((header, i) => {
+                const value = columns[i] || '';
+                const element = document.querySelector(`#addForm [name="${header}"]`);
+                
+                if (element) {
+                    if (element.tagName === 'SELECT') {
+                        const optionExists = Array.from(element.options).some(opt => opt.value === value);
+                        if (optionExists) {
+                            element.value = value;
+                        } else {
+                            element.value = 'other';
+                            const otherInput = document.querySelector(`#addForm input[name="${element.name}_other"]`);
+                            if (otherInput) otherInput.value = value;
+                        }
+                        element.dispatchEvent(new Event('change'));
+                    } else {
+                        element.value = value;
+                    }
+                }
+            });
+        }
 
-                const rect = e.currentTarget.getBoundingClientRect();
-                document.querySelector('.filter-dropdown')?.remove();
+        // Event listeners
+        function setupEventListeners() {
+            // Search
+            elements.searchInput.addEventListener('input', debounce(applyFilters, 300));
+            
+            // Buttons
+            document.getElementById('addHCPBtn').addEventListener('click', () => {
+                setupAddForm();
+                elements.addModal.style.display = 'flex';
+            });
+            
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                elements.searchInput.value = '';
+                currentFilters = {};
+                updateHeaderFilterStates();
+                renderTable(allData);
+            });
+            
+            // Duplicates stat click
+            elements.duplicatesStat.addEventListener('click', () => {
+                const duplicates = findDuplicates(allData);
+                if (duplicates.length > 0) {
+                    renderTable(duplicates, true);
+                }
+            });
+            
+            // Form submission
+            document.getElementById('addForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await handleFormSubmit(e);
+            });
+            
+            // Paste functionality
+            document.getElementById('togglePasteBtn').addEventListener('click', () => {
+                const pasteSection = document.getElementById('pasteSection');
+                pasteSection.style.display = pasteSection.style.display === 'none' ? 'block' : 'none';
+                if (pasteSection.style.display === 'block') {
+                    document.getElementById('pasteTextarea').focus();
+                }
+            });
+            
+            document.getElementById('pasteTextarea').addEventListener('paste', handlePaste);
+            
+            // Modal close handlers
+            document.getElementById('closeAddModal').onclick = () => elements.addModal.style.display = 'none';
+            document.getElementById('addFormCancel').onclick = () => elements.addModal.style.display = 'none';
+            document.getElementById('closeUpdateNameModal').onclick = () => elements.updateNameModal.style.display = 'none';
+            
+            // Click outside modal to close
+            window.onclick = (event) => {
+                if (event.target === elements.addModal || 
+                    event.target === elements.confirmModal || 
+                    event.target === elements.updateNameModal) {
+                    event.target.style.display = 'none';
+                }
+            };
+            
+            // Scroll to top
+            window.onscroll = () => {
+                const scrollBtn = document.getElementById('scrollToTopBtn');
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    scrollBtn.style.display = 'block';
+                } else {
+                    scrollBtn.style.display = 'none';
+                }
+            };
+            
+            document.getElementById('scrollToTopBtn').onclick = () => {
+    document.getElementById('tableContainer').scrollTop = 0;
+};
 
-                const dropdown = document.createElement('div');
-                dropdown.className = 'filter-dropdown';
-                dropdown.dataset.column = column;
-                dropdown.style.top = `${rect.bottom + window.scrollY + 5}px`;
-                dropdown.style.left = `${rect.left + window.scrollX}px`;
-                
-                dropdown.innerHTML = `
-                    <div class="filter-search-wrapper">
-                        <input type="text" class="filter-search" placeholder="Search options...">
-                    </div>
-                    <div class="filter-options"></div>
-                `;
-                
-                const optionsContainer = dropdown.querySelector('.filter-options');
-                const uniqueOptions = uniqueValues[column] || [];
+            
+            // Filter dropdowns
+            setupFilterDropdowns();
+        }
 
-                uniqueOptions.forEach(optionText => {
-                    const isChecked = currentFilters[column]?.includes(optionText);
-                    optionsContainer.innerHTML += `<label><input type="checkbox" value="${optionText}" ${isChecked ? 'checked' : ''}> ${optionText}</label>`;
-                });
-                
-                document.body.appendChild(dropdown);
-                
-                dropdown.querySelector('.filter-search').addEventListener('keyup', (evt) => {
-                    const searchTerm = evt.target.value.toLowerCase();
-                    optionsContainer.querySelectorAll('label').forEach(label => {
-                       label.style.display = label.textContent.toLowerCase().includes(searchTerm) ? 'block' : 'none';
-                    });
-                });
-                
-                optionsContainer.addEventListener('change', () => {
-                    const checkedOptions = Array.from(optionsContainer.querySelectorAll('input:checked')).map(input => input.value);
-                    currentFilters[column] = checkedOptions;
-                    applyFilters();
+        function setupFilterDropdowns() {
+            document.querySelectorAll('[data-column]').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    const column = e.currentTarget.dataset.column;
+                    if (!dropdownHeaders.includes(column)) return;
+                    
+                    showFilterDropdown(e.currentTarget, column);
                 });
             });
-        });
+            
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('[data-column]') && !e.target.closest('.filter-dropdown')) {
+                    document.querySelector('.filter-dropdown')?.remove();
+                }
+            });
+        }
 
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#hcpTable th') && !e.target.closest('.filter-dropdown')) {
-                document.querySelector('.filter-dropdown')?.remove();
+        function showFilterDropdown(headerElement, column) {
+    document.querySelector('.filter-dropdown')?.remove();
+
+    const rect = headerElement.getBoundingClientRect();
+    const dropdown = document.createElement('div');
+    dropdown.className = 'filter-dropdown';
+    dropdown.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    dropdown.style.left = `${rect.left + window.scrollX}px`;
+
+    dropdown.innerHTML = `
+        <div class="filter-search-container">
+            <input type="text" class="filter-search" placeholder="Search options...">
+        </div>
+        <div class="filter-options"></div>
+    `;
+
+    const optionsContainer = dropdown.querySelector('.filter-options');
+    const uniqueOptions = uniqueValues[column] || [];
+
+    uniqueOptions.forEach(optionText => {
+        const isChecked = currentFilters[column]?.includes(optionText);
+        const label = document.createElement('label');
+        label.className = 'filter-option';
+        label.innerHTML = `<input type="checkbox" value="${optionText}" ${isChecked ? 'checked' : ''}> ${optionText}`;
+        optionsContainer.appendChild(label);
+    });
+
+    document.body.appendChild(dropdown);
+
+    // Search functionality
+    dropdown.querySelector('.filter-search').addEventListener('input', (evt) => {
+        const searchTerm = evt.target.value.toLowerCase();
+        optionsContainer.querySelectorAll('label').forEach(label => {
+            label.style.display = label.textContent.toLowerCase().includes(searchTerm) ? 'block' : 'none';
+        });
+    });
+
+    // Filter change handling
+    optionsContainer.addEventListener('change', () => {
+        const checkedOptions = Array.from(optionsContainer.querySelectorAll('input:checked'))
+            .map(input => input.value);
+
+        // If no options are checked, remove the column from currentFilters
+        if (checkedOptions.length === 0) {
+            delete currentFilters[column];
+        } else {
+            currentFilters[column] = checkedOptions;
+        }
+
+        applyFilters();
+    });
+}
+
+
+        async function handleFormSubmit(e) {
+            showLoading();
+            try {
+                const formData = new FormData(e.target);
+                const newRow = {};
+                
+                for (let [key, value] of formData.entries()) {
+                    if (key.endsWith('_other')) {
+                        const originalKey = key.replace('_other', '');
+                        if (formData.get(originalKey) === 'other') {
+                            newRow[originalKey] = value;
+                        }
+                    } else if (value !== 'other') {
+                        newRow[key] = value;
+                    }
+                }
+                
+                const { error } = await supabaseClient.from(TABLE_NAME).insert([newRow]);
+                if (error) throw error;
+                
+                elements.addModal.style.display = 'none';
+                await init();
+            } catch (error) {
+                console.error('Error adding new row:', error);
+                alert('Failed to add new HCP.');
+            } finally {
+                hideLoading();
             }
-        });
-    }
-    
-    async function init() {
-        const data = await fetchAllData();
-        allData = data;
-        uniqueValues = getUniqueValues(allData);
-        calculateInitialMetrics(allData);
-        renderTable(allData);
-        setupEventListeners();
-        setupCellEditing();
-    }
+        }
+        document.getElementById('backButton').addEventListener('click', function() {
+    window.location.href = 'masterlist.html';
+});
 
-    function topFunction() {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-    }
-    
-    window.onload = init;
-</script>
+
+        // Initialize application
+        async function init() {
+            showLoading();
+            try {
+                allData = await fetchAllData();
+                uniqueValues = getUniqueValues(allData);
+                elements.totalCount.textContent = allData.length;
+                renderTable(allData);
+                setupEventListeners();
+                setupCellEditing();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('Failed to load data.');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Start the application
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
-</html>    
+</html>
