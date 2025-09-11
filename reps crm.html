@@ -1529,7 +1529,8 @@
                                     </div>
                                     <div class="button-group">
                                         <button id="weeklyPlanFilterButton" class="action-button submit-btn"><i class="fas fa-filter"></i> Apply Filter</button>
-                                                                            </div>
+                                        <button id="weeklyPlanRetrieveButton" class="action-button retrieve-btn"><i class="fas fa-sync-alt"></i> Retrieve</button>
+                                    </div>
                                     <div class="filters-grid">
                                         <div class="filter-group">
                                             <label for="weeklyPlanEventType">Event Type</label>
@@ -1580,20 +1581,14 @@
                                         <div id="weeklyPlanRepNameArea" class="rep-badge"></div>
                                     </div>
                                     <div class="date-boxes">
-    <div class="filter-group">
-        <label for="weeklyPlanStartDate">Start Date</label>
-        <input type="date" id="weeklyPlanStartDate">
-    </div>
-    <div class="filter-group">
-        <label for="weeklyPlanEndDate">End Date</label>
-        <input type="date" id="weeklyPlanEndDate" readonly>
-    </div>
-    <!-- ADD THIS LINE -->
-    <button id="weeklyPlanRetrieveButton" class="action-button retrieve-btn">
-        <i class="fas fa-sync-alt"></i> Retrieve
-    </button>
-</div>
-
+                                        <div class="filter-group">
+                                            <label for="weeklyPlanStartDate">Start Date</label>
+                                            <input type="date" id="weeklyPlanStartDate">
+                                        </div>
+                                        <div class="filter-group">
+                                            <label for="weeklyPlanEndDate">End Date</label>
+                                            <input type="date" id="weeklyPlanEndDate" readonly>
+                                        </div>
                                     </div>
                                     <div id="weeklyPlanAmActivitiesTable" class="table-container">
                                         <div class="card-title">AM Activities</div>
@@ -2730,514 +2725,286 @@
             }
         }
         class WeeklyPlanManager {
-    constructor() {
-        this.elements = {
-            loading: document.getElementById('weeklyPlanLoading'),
-            error: document.getElementById('weeklyPlanError'),
-            success: document.getElementById('weeklyPlanSuccess'),
-            content: document.getElementById('weeklyPlanContent'),
-            medicalReps: document.getElementById('weeklyPlanMedicalReps'),
-            bricks: document.getElementById('weeklyPlanBricks'),
-            dayFilter: document.getElementById('weeklyPlanDayFilter'),
-            filterButton: document.getElementById('weeklyPlanFilterButton'),
-            resetButton: document.getElementById('weeklyPlanResetButton'),
-            retrieveButton: document.getElementById('weeklyPlanRetrieveButton'),
-            eventType: document.getElementById('weeklyPlanEventType'),
-            eventNameGroup: document.getElementById('weeklyPlanEventNameGroup'),
-            eventName: document.getElementById('weeklyPlanEventName'),
-            eventTimeGroup: document.getElementById('weeklyPlanEventTimeGroup'),
-            eventTime: document.getElementById('weeklyPlanEventTime'),
-            hcpTable: document.getElementById('weeklyPlanHcpTable'),
-            hcpTableBody: document.querySelector('#weeklyPlanHcpTable tbody'),
-            statsDisplay: document.getElementById('weeklyPlanStatsDisplay'),
-            repArea: document.getElementById('weeklyPlanRepArea'),
-            repNameArea: document.getElementById('weeklyPlanRepNameArea'),
-            startDate: document.getElementById('weeklyPlanStartDate'),
-            endDate: document.getElementById('weeklyPlanEndDate'),
-            amActivitiesTable: document.getElementById('weeklyPlanAmActivitiesTable'),
-            pmActivitiesTable: document.getElementById('weeklyPlanPmActivitiesTable'),
-            submitButton: document.getElementById('weeklyPlanSubmitButton'),
-            saturdayAm: document.getElementById('saturdayAm'),
-            sundayAm: document.getElementById('sundayAm'),
-            mondayAm: document.getElementById('mondayAm'),
-            tuesdayAm: document.getElementById('tuesdayAm'),
-            wednesdayAm: document.getElementById('wednesdayAm'),
-            thursdayAm: document.getElementById('thursdayAm'),
-            saturdayPm: document.getElementById('saturdayPm'),
-            sundayPm: document.getElementById('sundayPm'),
-            mondayPm: document.getElementById('mondayPm'),
-            tuesdayPm: document.getElementById('tuesdayPm'),
-            wednesdayPm: document.getElementById('wednesdayPm'),
-            thursdayPm: document.getElementById('thursdayPm'),
-        };
-        this.weeklyPlanData = {
-            Saturday: { am: [], pm: [] },
-            Sunday: { am: [], pm: [] },
-            Monday: { am: [], pm: [] },
-            Tuesday: { am: [], pm: [] },
-            Wednesday: { am: [], pm: [] },
-            Thursday: { am: [], pm: [] }
-        };
-        this.movedHCPs = new Set();
-        this.currentRepArea = '';
-        this.currentRepName = '';
-        this.visitCounts = {};
-        this.bricks = new Set();
-        this.setupEventListeners();
-    }
-
-    setupEventListeners() {
-        this.elements.filterButton.addEventListener('click', () => this.applyFilter());
-        this.elements.resetButton.addEventListener('click', () => this.reset());
-        this.elements.retrieveButton.addEventListener('click', () => this.retrieveWeeklyPlan());
-        this.elements.medicalReps.addEventListener('change', () => this.handleRepChange());
-        this.elements.bricks.addEventListener('change', () => this.updateStatistics());
-        this.elements.dayFilter.addEventListener('change', () => this.applyFilter());
-        this.elements.startDate.addEventListener('change', () => {
-            this.reset();
-            this.updateEndDate();
-        });
-        this.elements.eventType.addEventListener('change', () => this.handleEventTypeChange());
-        this.elements.eventTime.addEventListener('change', () => this.handleEventTimeChange());
-        this.elements.submitButton.addEventListener('click', () => this.submitWeeklyPlan());
-    }
-
-    initialize(repName) {
-        this.elements.loading.style.display = 'none';
-        this.elements.content.style.display = 'block';
-        this.currentRepName = repName;
-        this.elements.medicalReps.innerHTML = `<option value="${repName}">${repName}</option>`;
-        this.elements.medicalReps.value = repName;
-        this.elements.medicalReps.disabled = true;
-        this.processVisitData();
-        this.handleRepChange();
-        this.setDefaultDates();
-    }
-
-    reset() {
-        this.elements.bricks.innerHTML = '<option value="">Select a Brick</option>';
-        this.elements.bricks.disabled = true;
-        this.elements.dayFilter.selectedIndex = 0;
-        this.weeklyPlanData = {
-            Saturday: { am: [], pm: [] },
-            Sunday: { am: [], pm: [] },
-            Monday: { am: [], pm: [] },
-            Tuesday: { am: [], pm: [] },
-            Wednesday: { am: [], pm: [] },
-            Thursday: { am: [], pm: [] }
-        };
-        this.movedHCPs.clear();
-        this.renderWeeklyPlan();
-        this.elements.statsDisplay.style.display = 'none';
-        this.elements.hcpTable.style.display = 'none';
-        this.elements.eventType.selectedIndex = 0;
-        this.elements.eventName.value = '';
-        this.elements.eventNameGroup.style.display = 'none';
-        this.elements.eventTime.selectedIndex = 0;
-        this.elements.eventTimeGroup.style.display = 'none';
-        if (this.currentRepName) this.handleRepChange();
-        this.elements.submitButton.disabled = false;
-    }
-
-    showMessage(message, type) {
-        const messageElement = type === 'success' ? this.elements.success : this.elements.error;
-        messageElement.textContent = message;
-        messageElement.style.display = 'block';
-        messageElement.scrollIntoView({ behavior: 'smooth' });
-        setTimeout(() => { messageElement.style.display = 'none'; }, 5000);
-    }
-
-    processVisitData() {
-        const currentMonthStart = formManager.getCurrentMonthStart();
-        const currentMonthVisits = globalSupabaseVisits.filter(visit => formManager.getCairoDate(new Date(visit.visit_date)) >= currentMonthStart);
-        this.visitCounts = {};
-        currentMonthVisits.forEach(visit => {
-            this.visitCounts[visit.hcp_name] = (this.visitCounts[visit.hcp_name] || 0) + 1;
-        });
-    }
-
-    handleRepChange() {
-        const selectedRep = this.elements.medicalReps.value;
-        this.currentRepName = selectedRep;
-        const filteredData = globalMasterlistData.filter(row => row['medical rep'] === selectedRep);
-        const area = filteredData.length > 0 ? filteredData[0]['area'] : 'Not Found';
-        this.bricks = new Set(filteredData.map(row => row['Brick']).filter(Boolean));
-        populateSelect(this.elements.bricks, [...this.bricks]);
-        this.currentRepArea = area;
-        this.elements.repArea.textContent = `Area: ${this.currentRepArea}`;
-        this.elements.repNameArea.textContent = `Medical Rep: ${this.currentRepName}`;
-        this.updateStatistics();
-        this.elements.bricks.disabled = this.bricks.size === 0;
-        this.applyFilter();
-    }
-
-    updateStatistics() {
-        const selectedRep = this.elements.medicalReps.value,
-              selectedBrick = this.elements.bricks.value;
-        if (!selectedRep) {
-            this.elements.statsDisplay.style.display = 'none';
-            return;
-        }
-        const filteredData = globalMasterlistData.filter(row => row['medical rep'] === selectedRep);
-        const unvisitedCount = filteredData.filter(row => {
-            const visits = this.visitCounts[row['HCPS']] || 0,
-                  targetVisits = parseInt(row['T.V']) || 3,
-                  remainingVisits = targetVisits - visits;
-            return remainingVisits === targetVisits && (selectedBrick === '' || row['Brick'] === selectedBrick);
-        }).length;
-        this.elements.statsDisplay.textContent = `Unvisited HCPs in ${selectedBrick || 'total'}: ${unvisitedCount}`;
-        this.elements.statsDisplay.style.display = 'block';
-    }
-
-    applyFilter() {
-        const selectedRep = this.elements.medicalReps.value;
-        const selectedDay = this.elements.dayFilter.value;
-        const selectedBrick = this.elements.bricks.value;
-        if (!selectedRep) {
-            this.showMessage('Please select a Medical Representative.', 'error');
-            return;
-        }
-        let filteredHCPs = globalMasterlistData.filter(row => {
-            return row['medical rep'] === selectedRep &&
-                   (selectedDay === '' || row[selectedDay].trim() !== '') &&
-                   (selectedBrick === '' || row['Brick'] === selectedBrick) &&
-                   !this.movedHCPs.has(row['HCPS']);
-        });
-        this.populateHCPTable(filteredHCPs, selectedDay);
-    }
-
-    populateHCPTable(hcpData, selectedDay) {
-        this.elements.hcpTableBody.innerHTML = '';
-        const sortedData = hcpData.sort((a, b) => {
-            const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
-            const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
-            const targetA = parseInt(a['T.V']) || 0;
-            const targetB = parseInt(b['T.V']) || 0;
-            if (remainingA === targetA && remainingB !== targetB) return -1;
-            if (remainingB === targetB && remainingA !== targetA) return 1;
-            return remainingB - remainingA;
-        });
-        sortedData.forEach(row => {
-            const actualVisits = this.visitCounts[row['HCPS']] || 0;
-            const targetVisits = parseInt(row['T.V']) || 0;
-            const remainingVisits = targetVisits - actualVisits;
-            let remainingClass = '';
-            if (remainingVisits <= 0) {
-                remainingClass = 'remaining-zero-or-negative';
-                if (remainingVisits < 0) {
-                    remainingClass += ' negative';
-                }
-            } else if (remainingVisits < targetVisits) {
-                remainingClass = 'remaining-less';
-            } else {
-                remainingClass = 'remaining-equal';
+            constructor() {
+                this.elements = {
+                    loading: document.getElementById('weeklyPlanLoading'), error: document.getElementById('weeklyPlanError'), success: document.getElementById('weeklyPlanSuccess'),
+                    content: document.getElementById('weeklyPlanContent'), medicalReps: document.getElementById('weeklyPlanMedicalReps'), bricks: document.getElementById('weeklyPlanBricks'),
+                    dayFilter: document.getElementById('weeklyPlanDayFilter'), filterButton: document.getElementById('weeklyPlanFilterButton'), resetButton: document.getElementById('weeklyPlanResetButton'),
+                    retrieveButton: document.getElementById('weeklyPlanRetrieveButton'), eventType: document.getElementById('weeklyPlanEventType'), eventNameGroup: document.getElementById('weeklyPlanEventNameGroup'),
+                    eventName: document.getElementById('weeklyPlanEventName'), eventTimeGroup: document.getElementById('weeklyPlanEventTimeGroup'), eventTime: document.getElementById('weeklyPlanEventTime'),
+                    hcpTable: document.getElementById('weeklyPlanHcpTable'), hcpTableBody: document.querySelector('#weeklyPlanHcpTable tbody'), statsDisplay: document.getElementById('weeklyPlanStatsDisplay'),
+                    repArea: document.getElementById('weeklyPlanRepArea'), repNameArea: document.getElementById('weeklyPlanRepNameArea'), startDate: document.getElementById('weeklyPlanStartDate'),
+                    endDate: document.getElementById('weeklyPlanEndDate'), amActivitiesTable: document.getElementById('weeklyPlanAmActivitiesTable'), pmActivitiesTable: document.getElementById('weeklyPlanPmActivitiesTable'),
+                    submitButton: document.getElementById('weeklyPlanSubmitButton'), saturdayAm: document.getElementById('saturdayAm'), sundayAm: document.getElementById('sundayAm'),
+                    mondayAm: document.getElementById('mondayAm'), tuesdayAm: document.getElementById('tuesdayAm'), wednesdayAm: document.getElementById('wednesdayAm'), thursdayAm: document.getElementById('thursdayAm'),
+                    saturdayPm: document.getElementById('saturdayPm'), sundayPm: document.getElementById('sundayPm'), mondayPm: document.getElementById('mondayPm'), tuesdayPm: document.getElementById('tuesdayPm'),
+                    wednesdayPm: document.getElementById('wednesdayPm'), thursdayPm: document.getElementById('thursdayPm'),
+                };
+                this.weeklyPlanData = { Saturday: { am: [], pm: [] }, Sunday: { am: [], pm: [] }, Monday: { am: [], pm: [] }, Tuesday: { am: [], pm: [] }, Wednesday: { am: [], pm: [] }, Thursday: { am: [], pm: [] } };
+                this.movedHCPs = new Set(); this.currentRepArea = ''; this.currentRepName = ''; this.visitCounts = {}; this.bricks = new Set();
+                this.setupEventListeners();
             }
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${row['HCPS']}</td>
-                <td>${row['Speciality']}</td>
-                <td>${row['Class']}</td>
-                <td>${row['T.V']}</td>
-                <td class="${remainingClass}">${remainingVisits}</td>
-                <td>${row['Brick']}</td>
-                <td>${row['Address']}</td>
-                <td>${row['Mobile']}</td>
-                <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
-                <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
-                <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
-                <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
-                <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
-                <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
-            `;
-            tr.addEventListener('click', () => {
-                if (!this.elements.dayFilter.value) {
-                    this.showMessage('Please select a Day first.', 'error');
+            setupEventListeners() {
+                this.elements.filterButton.addEventListener('click', () => this.applyFilter());
+                this.elements.resetButton.addEventListener('click', () => this.reset());
+                this.elements.retrieveButton.addEventListener('click', () => this.retrieveWeeklyPlan());
+                this.elements.medicalReps.addEventListener('change', () => this.handleRepChange());
+                this.elements.bricks.addEventListener('change', () => this.updateStatistics());
+                this.elements.dayFilter.addEventListener('change', () => this.applyFilter());
+                this.elements.startDate.addEventListener('change', () => this.updateEndDate());
+                this.elements.eventType.addEventListener('change', () => this.handleEventTypeChange());
+                this.elements.eventTime.addEventListener('change', () => this.handleEventTimeChange());
+                this.elements.submitButton.addEventListener('click', () => this.submitWeeklyPlan());
+            }
+            initialize(repName) {
+                this.elements.loading.style.display = 'none'; this.elements.content.style.display = 'block'; this.currentRepName = repName;
+                this.elements.medicalReps.innerHTML = `<option value="${repName}">${repName}</option>`; this.elements.medicalReps.value = repName; this.elements.medicalReps.disabled = true;
+                this.processVisitData(); this.handleRepChange(); this.setDefaultDates();
+            }
+            reset() {
+                this.elements.bricks.innerHTML = '<option value="">Select a Brick</option>'; this.elements.bricks.disabled = true; this.elements.dayFilter.selectedIndex = 0;
+                this.weeklyPlanData = { Saturday: { am: [], pm: [] }, Sunday: { am: [], pm: [] }, Monday: { am: [], pm: [] }, Tuesday: { am: [], pm: [] }, Wednesday: { am: [], pm: [] }, Thursday: { am: [], pm: [] } };
+                this.movedHCPs.clear(); this.renderWeeklyPlan(); this.elements.statsDisplay.style.display = 'none'; this.elements.hcpTable.style.display = 'none';
+                this.elements.eventType.selectedIndex = 0; this.elements.eventName.value = ''; this.elements.eventNameGroup.style.display = 'none';
+                this.elements.eventTime.selectedIndex = 0; this.elements.eventTimeGroup.style.display = 'none';
+                if (this.currentRepName) this.handleRepChange(); this.setDefaultDates();
+            }
+            showMessage(message, type) {
+                const messageElement = type === 'success' ? this.elements.success : this.elements.error;
+                messageElement.textContent = message; messageElement.style.display = 'block'; messageElement.scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => { messageElement.style.display = 'none'; }, 5000);
+            }
+            processVisitData() {
+                const currentMonthStart = formManager.getCurrentMonthStart();
+                const currentMonthVisits = globalSupabaseVisits.filter(visit => formManager.getCairoDate(new Date(visit.visit_date)) >= currentMonthStart);
+                this.visitCounts = {}; currentMonthVisits.forEach(visit => { this.visitCounts[visit.hcp_name] = (this.visitCounts[visit.hcp_name] || 0) + 1; });
+            }
+            handleRepChange() {
+                const selectedRep = this.elements.medicalReps.value; this.currentRepName = selectedRep;
+                // Changed globalGoogleData to globalMasterlistData
+                const filteredData = globalMasterlistData.filter(row => row['medical rep'] === selectedRep);
+                const area = filteredData.length > 0 ? filteredData[0]['area'] : 'Not Found';
+                this.bricks = new Set(filteredData.map(row => row['Brick']).filter(Boolean));
+                populateSelect(this.elements.bricks, [...this.bricks]); this.currentRepArea = area;
+                this.elements.repArea.textContent = `Area: ${this.currentRepArea}`; this.elements.repNameArea.textContent = `Medical Rep: ${this.currentRepName}`;
+                this.updateStatistics(); this.elements.bricks.disabled = this.bricks.size === 0; this.applyFilter();
+            }
+            updateStatistics() {
+                const selectedRep = this.elements.medicalReps.value, selectedBrick = this.elements.bricks.value;
+                if (!selectedRep) { this.elements.statsDisplay.style.display = 'none'; return; }
+                // Changed globalGoogleData to globalMasterlistData
+                const filteredData = globalMasterlistData.filter(row => row['medical rep'] === selectedRep);
+                const unvisitedCount = filteredData.filter(row => { const visits = this.visitCounts[row['HCPS']] || 0, targetVisits = parseInt(row['T.V']) || 3, remainingVisits = targetVisits - visits; return remainingVisits === targetVisits && (selectedBrick === '' || row['Brick'] === selectedBrick); }).length;
+                this.elements.statsDisplay.textContent = `Unvisited HCPs in ${selectedBrick || 'total'}: ${unvisitedCount}`; this.elements.statsDisplay.style.display = 'block';
+            }
+            applyFilter() {
+                const selectedRep = this.elements.medicalReps.value;
+                const selectedDay = this.elements.dayFilter.value;
+                const selectedBrick = this.elements.bricks.value;
+
+                if (!selectedRep) {
+                    this.showMessage('Please select a Medical Representative.', 'error');
                     return;
                 }
-                this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
-                this.elements.hcpTableBody.removeChild(tr);
-            });
-            this.elements.hcpTableBody.appendChild(tr);
-        });
-        this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
-    }
+                // Changed globalGoogleData to globalMasterlistData
+                let filteredHCPs = globalMasterlistData.filter(row => {
+                    return row['medical rep'] === selectedRep &&
+                           (selectedDay === '' || row[selectedDay].trim() !== '') &&
+                           (selectedBrick === '' || row['Brick'] === selectedBrick) &&
+                           !this.movedHCPs.has(row['HCPS']);
+                });
 
-    addToWeeklyPlan(hcpName, visitTime, day, speciality) {
-        const hcpRow = globalMasterlistData.find(row => row['HCPS'] === hcpName);
-        if (hcpRow) {
-            const brick = hcpRow['Brick'] || '';
-            const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(speciality);
-            if (isPriority) {
-                this.weeklyPlanData[day].am.push({
-                    name: hcpName,
-                    time: visitTime,
-                    speciality: speciality,
-                    brick: brick,
-                    isNew: true
-                });
-            } else {
-                const plan = this.weeklyPlanData[day].pm;
-                plan.push({
-                    name: hcpName,
-                    time: visitTime,
-                    speciality: speciality,
-                    brick: brick,
-                    isNew: true
-                });
-                this.movedHCPs.add(hcpName);
+                this.populateHCPTable(filteredHCPs, selectedDay);
             }
-            this.renderWeeklyPlan();
-        }
-    }
 
-    renderWeeklyPlan() {
-        ['saturdayAm', 'sundayAm', 'mondayAm', 'tuesdayAm', 'wednesdayAm', 'thursdayAm', 'saturdayPm', 'sundayPm', 'mondayPm', 'tuesdayPm', 'wednesdayPm', 'thursdayPm'].forEach(id => {
-            document.getElementById(id).innerHTML = '';
-        });
-        Object.keys(this.weeklyPlanData).forEach(day => {
-            const amCell = document.getElementById(`${day.toLowerCase()}Am`),
-                  pmCell = document.getElementById(`${day.toLowerCase()}Pm`);
-            this.weeklyPlanData[day].am.forEach(item => {
-                const itemDiv = this.createPlanItemDiv(item, day, true);
-                amCell.appendChild(itemDiv);
-                this.attachRemoveEventListener(itemDiv, item, day, true);
-            });
-            this.weeklyPlanData[day].pm.forEach(item => {
-                const itemDiv = this.createPlanItemDiv(item, day, false);
-                pmCell.appendChild(itemDiv);
-                this.attachRemoveEventListener(itemDiv, item, day, false);
-            });
-        });
-    }
+            populateHCPTable(hcpData, selectedDay) {
+                this.elements.hcpTableBody.innerHTML = '';
+                // Sort the data based on remaining visits
+                const sortedData = hcpData.sort((a, b) => {
+                    const remainingA = (parseInt(a['T.V']) || 0) - (this.visitCounts[a['HCPS']] || 0);
+                    const remainingB = (parseInt(b['T.V']) || 0) - (this.visitCounts[b['HCPS']] || 0);
+                    const targetA = parseInt(a['T.V']) || 0;
+                    const targetB = parseInt(b['T.V']) || 0;
+                    if (remainingA === targetA && remainingB !== targetB) return -1;
+                    if (remainingB === targetB && remainingA !== targetA) return 1;
+                    return remainingB - remainingA;
+                });
 
-    attachRemoveEventListener(itemDiv, item, day, isAm) {
-        const removeButton = itemDiv.querySelector('.remove-button');
-        if (removeButton) {
-            removeButton.addEventListener('click', (event) => {
-                event.stopPropagation();
-                const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.name);
-                this.removeFromWeeklyPlan(item.name, day, isAm, isEvent, item.brick);
-            });
-        }
-    }
+                sortedData.forEach(row => {
+                    const actualVisits = this.visitCounts[row['HCPS']] || 0;
+                    const targetVisits = parseInt(row['T.V']) || 0;
+                    const remainingVisits = targetVisits - actualVisits;
 
-    createPlanItemDiv(item, day, isAm) {
-        const div = document.createElement('div');
-        const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.name);
-        const removeButtonClass = item.isNew ? 'remove-button' : 'remove-button hidden';
-        if (isEvent) {
-            div.className = 'event-box';
-            div.innerHTML = `<strong>${item.name}</strong><br>${item.brick}<br><span class="v-t">${item.speciality}</span><span class="${removeButtonClass}">X</span>`;
-        } else {
-            div.className = isAm ? 'Speciality-box' : 'hcp-box';
-            div.innerHTML = `${item.name}<br><span class="v-t">${item.time || 'N/A'}</span><br>${item.brick || 'N/A'}<span class="${removeButtonClass}">X</span>`;
-        }
-        return div;
-    }
+                    // Determine the class for the Remaining column
+                    let remainingClass = '';
+                    if (remainingVisits <= 0) {
+                        remainingClass = 'remaining-zero-or-negative';
+                        if (remainingVisits < 0) {
+                            remainingClass += ' negative';
+                        }
+                    } else if (remainingVisits < targetVisits) {
+                        remainingClass = 'remaining-less';
+                    } else {
+                        remainingClass = 'remaining-equal';
+                    }
 
-    removeFromWeeklyPlan(hcpName, day, isAm, isEvent, eventBrick = '') {
-        let planArray = isAm ? this.weeklyPlanData[day].am : this.weeklyPlanData[day].pm;
-        let removedItemIndex = planArray.findIndex(item => item.name === hcpName && (!isEvent || item.brick === eventBrick));
-        if (removedItemIndex > -1) {
-            const [removedItem] = planArray.splice(removedItemIndex, 1);
-            const movedKey = isEvent ? hcpName + eventBrick : hcpName;
-            this.movedHCPs.delete(movedKey);
-            if (!isEvent) this.addHCPToTable(removedItem);
-            this.renderWeeklyPlan();
-        }
-    }
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row['HCPS']}</td>
+                        <td>${row['Speciality']}</td>
+                        <td>${row['Class']}</td>
+                        <td>${row['T.V']}</td>
+                        <td class="${remainingClass}">${remainingVisits}</td>
+                        <td>${row['Brick']}</td>
+                        <td>${row['Address']}</td>
+                        <td>${row['Mobile']}</td>
+                        <td class="${selectedDay === 'Saturday' ? 'highlight' : ''}">${row['Saturday']}</td>
+                        <td class="${selectedDay === 'Sunday' ? 'highlight' : ''}">${row['Sunday']}</td>
+                        <td class="${selectedDay === 'Monday' ? 'highlight' : ''}">${row['Monday']}</td>
+                        <td class="${selectedDay === 'Tuesday' ? 'highlight' : ''}">${row['Tuesday']}</td>
+                        <td class="${selectedDay === 'Wednesday' ? 'highlight' : ''}">${row['Wednesday']}</td>
+                        <td class="${selectedDay === 'Thursday' ? 'highlight' : ''}">${row['Thursday']}</td>
+                    `;
 
-    addHCPToTable(hcpData) {
-        if (globalMasterlistData.find(row => row['HCPS'] === hcpData.name)) this.applyFilter();
-    }
-
-    setDefaultDates() {
-        const nowInCairo = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
-        const day = nowInCairo.getDay();
-        let startDate = new Date(nowInCairo);
-        if (day < 4) {
-            startDate.setDate(nowInCairo.getDate() - (day + 1));
-        } else {
-            startDate.setDate(nowInCairo.getDate() + (6 - day));
-        }
-        this.elements.startDate.value = formManager.getCairoDate(startDate);
-        this.updateEndDate();
-    }
-
-    updateEndDate() {
-        const startDate = new Date(this.elements.startDate.value);
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 5);
-        this.elements.endDate.value = formManager.getCairoDate(endDate);
-    }
-
-    handleEventTypeChange() {
-        const show = !!this.elements.eventType.value;
-        this.elements.eventNameGroup.style.display = show ? 'flex' : 'none';
-        this.elements.eventTimeGroup.style.display = show ? 'flex' : 'none';
-        if (!show) {
-            this.elements.eventName.value = '';
-            this.elements.eventTime.selectedIndex = 0;
-        }
-    }
-
-    handleEventTimeChange() {
-        const eventType = this.elements.eventType.value,
-              eventTime = this.elements.eventTime.value,
-              eventName = this.elements.eventName.value,
-              day = this.elements.dayFilter.value;
-        if (!day) {
-            this.showMessage('Please select a Day first.', 'error');
-            this.elements.eventTime.selectedIndex = 0;
-            return;
-        }
-        if (!eventName) {
-            this.showMessage('Please enter an Event Name.', 'error');
-            this.elements.eventTime.selectedIndex = 0;
-            return;
-        }
-        if (eventType && eventTime) this.addEventToSchedule(eventType, eventTime, eventName, day);
-    }
-
-    addEventToSchedule(eventType, eventTime, eventName, day) {
-        const eventEntry = {
-            name: eventType,
-            time: eventTime,
-            speciality: eventTime,
-            brick: eventName,
-            isNew: true
-        };
-        const movedKey = eventType + eventName;
-        if (eventTime === 'AM' || eventTime === 'Full Day') this.weeklyPlanData[day].am.push(eventEntry);
-        if (eventTime === 'PM' || eventTime === 'Full Day') this.weeklyPlanData[day].pm.push(eventEntry);
-        this.movedHCPs.add(movedKey);
-        this.renderWeeklyPlan();
-        this.elements.eventType.selectedIndex = 0;
-        this.elements.eventName.value = '';
-        this.elements.eventNameGroup.style.display = 'none';
-        this.elements.eventTime.selectedIndex = 0;
-        this.elements.eventTimeGroup.style.display = 'none';
-    }
-
-    async submitWeeklyPlan() {
-        const startDate = this.elements.startDate.value,
-              endDate = this.elements.endDate.value,
-              selectedRep = this.elements.medicalReps.value;
-        if (!selectedRep) {
-            this.showMessage('Please select a Medical Representative.', 'error');
-            return;
-        }
-        const plansToSubmit = [];
-        const submittedItems = new Set();
-        Object.keys(this.weeklyPlanData).forEach(day => {
-            [...this.weeklyPlanData[day].am, ...this.weeklyPlanData[day].pm].forEach(item => {
-                const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.name);
-                const itemIdentifier = isEvent ? `${item.name}-${day}-${item.speciality}-${item.brick}` : `${item.name}-${day}-${item.time}`;
-                if (!submittedItems.has(itemIdentifier)) {
-                    plansToSubmit.push({
-                        hcp_name: item.name,
-                        visit_time: item.time,
-                        visit_day: day,
-                        Speciality: item.speciality,
-                        medical_rep_name: this.currentRepName,
-                        medical_rep_area: this.currentRepArea,
-                        brick: item.brick,
-                        start_date: startDate,
-                        end_date: endDate,
+                    tr.addEventListener('click', () => {
+                        if (!this.elements.dayFilter.value) {
+                            this.showMessage('Please select a Day first.', 'error');
+                            return;
+                        }
+                        this.addToWeeklyPlan(row['HCPS'], row[this.elements.dayFilter.value], this.elements.dayFilter.value, row['Speciality']);
+                        this.elements.hcpTableBody.removeChild(tr);
                     });
-                    submittedItems.add(itemIdentifier);
-                }
-            });
-        });
-        if (plansToSubmit.length === 0) {
-            this.showMessage('Weekly plan is empty. Nothing to submit.', 'error');
-            return;
-        }
-        try {
-            await fetch(`${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`, {
-                method: 'DELETE',
-                headers: {
-                    'apikey': SUPABASE_API_KEY,
-                    'Authorization': `Bearer ${SUPABASE_API_KEY}`
-                }
-            });
-            const response = await fetch(SUPABASE_WEEKLY_PLANS_URL, {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_API_KEY,
-                    'Authorization': `Bearer ${SUPABASE_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(plansToSubmit)
-            });
-            if (!response.ok) throw new Error('Failed to submit plan');
-            this.showMessage('Weekly plan submitted successfully!', 'success');
-            setTimeout(() => this.reset(), 3000);
-        } catch (error) {
-            console.error('Error submitting weekly plan:', error);
-            this.showMessage('Error submitting weekly plan.', 'error');
-        }
-    }
 
-    async retrieveWeeklyPlan() {
-    const selectedRep = this.elements.medicalReps.value,
-          startDate = this.elements.startDate.value,
-          endDate = this.elements.endDate.value;
-    if (!selectedRep) {
-        this.showMessage('Please select a Medical Representative.', 'error');
-        return;
-    }
-    try {
-        const data = await fetchPaginatedData(
-            `${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`,
-            SUPABASE_API_KEY
-        );
-        if (data.length === 0) {
-            this.showMessage('No weekly plan found for the selected criteria.', 'error');
-            return;
-        }
-        this.reset();
-        this.elements.medicalReps.value = selectedRep;
-        this.handleRepChange();
-        this.elements.startDate.value = startDate;
-        this.elements.endDate.value = endDate;
-        data.forEach(item => {
-            const day = item.visit_day,
-                  entry = {
-                      name: item.hcp_name,
-                      time: item.visit_time,
-                      speciality: item.Speciality,
-                      brick: item.brick,
-                      isNew: false
-                  };
-            const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.hcp_name);
-            const movedKey = isEvent ? item.hcp_name + item.brick : item.hcp_name;
-            this.movedHCPs.add(movedKey);
-            if (day && this.weeklyPlanData[day]) {
-                if (isEvent) {
-                    if (item.Speciality === 'AM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].am.push(entry);
-                    if (item.Speciality === 'PM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].pm.push(entry);
-                } else {
-                     const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
-                     if(isPriority) this.weeklyPlanData[day].am.push(entry);
-                     else this.weeklyPlanData[day].pm.push(entry);
+                    this.elements.hcpTableBody.appendChild(tr);
+                });
+
+                this.elements.hcpTable.style.display = sortedData.length > 0 ? 'table' : 'none';
+            }
+            addToWeeklyPlan(hcpName, visitTime, day, speciality) {
+                // Changed globalGoogleData to globalMasterlistData
+                const hcpRow = globalMasterlistData.find(row => row['HCPS'] === hcpName);
+                if (hcpRow) {
+                    const brick = hcpRow['Brick'] || ''; const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(speciality);
+                    if (isPriority) { this.weeklyPlanData[day].am.push({ name: hcpName, time: visitTime, speciality: speciality, brick: brick, isNew: true }); }
+                    else { const plan = this.weeklyPlanData[day].pm; plan.push({ name: hcpName, time: visitTime, speciality: speciality, brick: brick, isNew: true }); this.movedHCPs.add(hcpName); }
+                    this.renderWeeklyPlan();
                 }
             }
-        });
-        this.renderWeeklyPlan();
-        // Disable submit button only if the start date is in the past
-        const today = new Date();
-        const planStartDate = new Date(startDate);
-        this.elements.submitButton.disabled = planStartDate < today;
-        this.applyFilter();
-        this.showMessage('Weekly plan retrieved successfully!', 'success');
-    } catch (error) {
-        console.error('Error retrieving weekly plan:', error);
-        this.showMessage('Error retrieving weekly plan.', 'error');
-    }
-}
+            renderWeeklyPlan() {
+                ['saturdayAm', 'sundayAm', 'mondayAm', 'tuesdayAm', 'wednesdayAm', 'thursdayAm', 'saturdayPm', 'sundayPm', 'mondayPm', 'tuesdayPm', 'wednesdayPm', 'thursdayPm'].forEach(id => { document.getElementById(id).innerHTML = ''; });
+                Object.keys(this.weeklyPlanData).forEach(day => {
+                    const amCell = document.getElementById(`${day.toLowerCase()}Am`), pmCell = document.getElementById(`${day.toLowerCase()}Pm`);
+                    this.weeklyPlanData[day].am.forEach(item => { const itemDiv = this.createPlanItemDiv(item, day, true); amCell.appendChild(itemDiv); this.attachRemoveEventListener(itemDiv, item, day, true); });
+                    this.weeklyPlanData[day].pm.forEach(item => { const itemDiv = this.createPlanItemDiv(item, day, false); pmCell.appendChild(itemDiv); this.attachRemoveEventListener(itemDiv, item, day, false); });
+                });
+            }
+            attachRemoveEventListener(itemDiv, item, day, isAm) {
+                const removeButton = itemDiv.querySelector('.remove-button');
+                if (removeButton) { removeButton.addEventListener('click', (event) => { event.stopPropagation(); const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.name); this.removeFromWeeklyPlan(item.name, day, isAm, isEvent, item.brick); }); }
+            }
+            createPlanItemDiv(item, day, isAm) {
+                const div = document.createElement('div'); const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.name); const removeButtonClass = item.isNew ? 'remove-button' : 'remove-button hidden';
+                if (isEvent) { div.className = 'event-box'; div.innerHTML = `<strong>${item.name}</strong><br>${item.brick}<br><span class="v-t">${item.speciality}</span><span class="${removeButtonClass}">X</span>`; }
+                else { div.className = isAm ? 'Speciality-box' : 'hcp-box'; div.innerHTML = `${item.name}<br><span class="v-t">${item.time || 'N/A'}</span><br>${item.brick || 'N/A'}<span class="${removeButtonClass}">X</span>`; }
+                return div;
+            }
+            removeFromWeeklyPlan(hcpName, day, isAm, isEvent, eventBrick = '') {
+                let planArray = isAm ? this.weeklyPlanData[day].am : this.weeklyPlanData[day].pm;
+                let removedItemIndex = planArray.findIndex(item => item.name === hcpName && (!isEvent || item.brick === eventBrick));
+                if (removedItemIndex > -1) {
+                    const [removedItem] = planArray.splice(removedItemIndex, 1); const movedKey = isEvent ? hcpName + eventBrick : hcpName;
+                    this.movedHCPs.delete(movedKey); if (!isEvent) this.addHCPToTable(removedItem); this.renderWeeklyPlan();
+                }
+            }
+            addHCPToTable(hcpData) { if (globalMasterlistData.find(row => row['HCPS'] === hcpData.name)) this.applyFilter(); }
+            setDefaultDates() {
+                const nowInCairo = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
+                const day = nowInCairo.getDay(); // 0=Sun, 6=Sat
+                let startDate = new Date(nowInCairo);
 
+                if (day < 4) { // Sunday (0), Monday (1), Tuesday (2), Wednesday (3)
+                    // Go back to the previous Saturday
+                    startDate.setDate(nowInCairo.getDate() - (day + 1));
+                } else { // Thursday (4), Friday (5), Saturday (6)
+                    // Go forward to the upcoming Saturday
+                    startDate.setDate(nowInCairo.getDate() + (6 - day));
+                }
 
+                this.elements.startDate.value = formManager.getCairoDate(startDate);
+                this.updateEndDate();
+            }
+            updateEndDate() {
+                const startDate = new Date(this.elements.startDate.value); const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 5); this.elements.endDate.value = formManager.getCairoDate(endDate);
+            }
+            handleEventTypeChange() {
+                const show = !!this.elements.eventType.value;
+                this.elements.eventNameGroup.style.display = show ? 'flex' : 'none'; this.elements.eventTimeGroup.style.display = show ? 'flex' : 'none';
+                if (!show) { this.elements.eventName.value = ''; this.elements.eventTime.selectedIndex = 0; }
+            }
+            handleEventTimeChange() {
+                const eventType = this.elements.eventType.value, eventTime = this.elements.eventTime.value, eventName = this.elements.eventName.value, day = this.elements.dayFilter.value;
+                if (!day) { this.showMessage('Please select a Day first.', 'error'); this.elements.eventTime.selectedIndex = 0; return; }
+                if (!eventName) { this.showMessage('Please enter an Event Name.', 'error'); this.elements.eventTime.selectedIndex = 0; return; }
+                if (eventType && eventTime) this.addEventToSchedule(eventType, eventTime, eventName, day);
+            }
+            addEventToSchedule(eventType, eventTime, eventName, day) {
+                const eventEntry = { name: eventType, time: eventTime, speciality: eventTime, brick: eventName, isNew: true }; const movedKey = eventType + eventName;
+                if (eventTime === 'AM' || eventTime === 'Full Day') this.weeklyPlanData[day].am.push(eventEntry);
+                if (eventTime === 'PM' || eventTime === 'Full Day') this.weeklyPlanData[day].pm.push(eventEntry);
+                this.movedHCPs.add(movedKey); this.renderWeeklyPlan();
+                this.elements.eventType.selectedIndex = 0; this.elements.eventName.value = ''; this.elements.eventNameGroup.style.display = 'none';
+                this.elements.eventTime.selectedIndex = 0; this.elements.eventTimeGroup.style.display = 'none';
+            }
+            async submitWeeklyPlan() {
+                const startDate = this.elements.startDate.value, endDate = this.elements.endDate.value, selectedRep = this.elements.medicalReps.value;
+                if (!selectedRep) { this.showMessage('Please select a Medical Representative.', 'error'); return; }
+                const plansToSubmit = []; const submittedItems = new Set();
+                Object.keys(this.weeklyPlanData).forEach(day => {
+                    [...this.weeklyPlanData[day].am, ...this.weeklyPlanData[day].pm].forEach(item => {
+                        const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.name);
+                        const itemIdentifier = isEvent ? `${item.name}-${day}-${item.speciality}-${item.brick}` : `${item.name}-${day}-${item.time}`;
+                        if (!submittedItems.has(itemIdentifier)) {
+                            plansToSubmit.push({ hcp_name: item.name, visit_time: item.time, visit_day: day, Speciality: item.speciality, medical_rep_name: this.currentRepName, medical_rep_area: this.currentRepArea, brick: item.brick, start_date: startDate, end_date: endDate, });
+                            submittedItems.add(itemIdentifier);
+                        }
+                    });
+                });
+                if (plansToSubmit.length === 0) { this.showMessage('Weekly plan is empty. Nothing to submit.', 'error'); return; }
+                try {
+                    await fetch(`${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_API_KEY, 'Authorization': `Bearer ${SUPABASE_API_KEY}` } });
+                    const response = await fetch(SUPABASE_WEEKLY_PLANS_URL, { method: 'POST', headers: { 'apikey': SUPABASE_API_KEY, 'Authorization': `Bearer ${SUPABASE_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(plansToSubmit) });
+                    if (!response.ok) throw new Error('Failed to submit plan');
+                    this.showMessage('Weekly plan submitted successfully!', 'success'); setTimeout(() => this.reset(), 3000);
+                } catch (error) { console.error('Error submitting weekly plan:', error); this.showMessage('Error submitting weekly plan.', 'error'); }
+            }
+            async retrieveWeeklyPlan() {
+                const selectedRep = this.elements.medicalReps.value, startDate = this.elements.startDate.value, endDate = this.elements.endDate.value;
+                if (!selectedRep) { this.showMessage('Please select a Medical Representative.', 'error'); return; }
+                try {
+                    const data = await fetchPaginatedData(`${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`, SUPABASE_API_KEY);
+                    if (data.length === 0) { this.showMessage('No weekly plan found for the selected criteria.', 'error'); return; }
+                    this.reset(); this.elements.medicalReps.value = selectedRep; this.handleRepChange();
+                    this.elements.startDate.value = startDate; this.elements.endDate.value = endDate;
+                    data.forEach(item => {
+                        const day = item.visit_day, entry = { name: item.hcp_name, time: item.visit_time, speciality: item.Speciality, brick: item.brick, isNew: false };
+                        const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.hcp_name);
+                        const movedKey = isEvent ? item.hcp_name + item.brick : item.hcp_name;
+                        this.movedHCPs.add(movedKey);
+                        if (day && this.weeklyPlanData[day]) {
+                            if (isEvent) {
+                                if (item.Speciality === 'AM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].am.push(entry);
+                                if (item.Speciality === 'PM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].pm.push(entry);
+                            } else {
+                                 const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
+                                 if(isPriority) this.weeklyPlanData[day].am.push(entry); else this.weeklyPlanData[day].pm.push(entry);
+                            }
+                        }
+                    });
+                    this.renderWeeklyPlan(); this.applyFilter(); this.showMessage('Weekly plan retrieved successfully!', 'success');
+                } catch (error) { console.error('Error retrieving weekly plan:', error); this.showMessage('Error retrieving weekly plan.', 'error'); }
+            }
+        }
 
         const formManager = new FormManager();
         const dashboardManager = new DashboardManager();
