@@ -1529,8 +1529,7 @@
                                     </div>
                                     <div class="button-group">
                                         <button id="weeklyPlanFilterButton" class="action-button submit-btn"><i class="fas fa-filter"></i> Apply Filter</button>
-                                        <button id="weeklyPlanRetrieveButton" class="action-button retrieve-btn"><i class="fas fa-sync-alt"></i> Retrieve</button>
-                                    </div>
+                                                                            </div>
                                     <div class="filters-grid">
                                         <div class="filter-group">
                                             <label for="weeklyPlanEventType">Event Type</label>
@@ -1581,14 +1580,20 @@
                                         <div id="weeklyPlanRepNameArea" class="rep-badge"></div>
                                     </div>
                                     <div class="date-boxes">
-                                        <div class="filter-group">
-                                            <label for="weeklyPlanStartDate">Start Date</label>
-                                            <input type="date" id="weeklyPlanStartDate">
-                                        </div>
-                                        <div class="filter-group">
-                                            <label for="weeklyPlanEndDate">End Date</label>
-                                            <input type="date" id="weeklyPlanEndDate" readonly>
-                                        </div>
+    <div class="filter-group">
+        <label for="weeklyPlanStartDate">Start Date</label>
+        <input type="date" id="weeklyPlanStartDate">
+    </div>
+    <div class="filter-group">
+        <label for="weeklyPlanEndDate">End Date</label>
+        <input type="date" id="weeklyPlanEndDate" readonly>
+    </div>
+    <!-- ADD THIS LINE -->
+    <button id="weeklyPlanRetrieveButton" class="action-button retrieve-btn">
+        <i class="fas fa-sync-alt"></i> Retrieve
+    </button>
+</div>
+
                                     </div>
                                     <div id="weeklyPlanAmActivitiesTable" class="table-container">
                                         <div class="card-title">AM Activities</div>
@@ -3175,57 +3180,63 @@
     }
 
     async retrieveWeeklyPlan() {
-        const selectedRep = this.elements.medicalReps.value,
-              startDate = this.elements.startDate.value,
-              endDate = this.elements.endDate.value;
-        if (!selectedRep) {
-            this.showMessage('Please select a Medical Representative.', 'error');
+    const selectedRep = this.elements.medicalReps.value,
+          startDate = this.elements.startDate.value,
+          endDate = this.elements.endDate.value;
+    if (!selectedRep) {
+        this.showMessage('Please select a Medical Representative.', 'error');
+        return;
+    }
+    try {
+        const data = await fetchPaginatedData(
+            `${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`,
+            SUPABASE_API_KEY
+        );
+        if (data.length === 0) {
+            this.showMessage('No weekly plan found for the selected criteria.', 'error');
             return;
         }
-        try {
-            const data = await fetchPaginatedData(`${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`, SUPABASE_API_KEY);
-            if (data.length === 0) {
-                this.showMessage('No weekly plan found for the selected criteria.', 'error');
-                return;
-            }
-            this.reset();
-            this.elements.medicalReps.value = selectedRep;
-            this.handleRepChange();
-            this.elements.startDate.value = startDate;
-            this.elements.endDate.value = endDate;
-            data.forEach(item => {
-                const day = item.visit_day,
-                      entry = {
-                          name: item.hcp_name,
-                          time: item.visit_time,
-                          speciality: item.Speciality,
-                          brick: item.brick,
-                          isNew: false
-                      };
-                const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.hcp_name);
-                const movedKey = isEvent ? item.hcp_name + item.brick : item.hcp_name;
-                this.movedHCPs.add(movedKey);
-                if (day && this.weeklyPlanData[day]) {
-                    if (isEvent) {
-                        if (item.Speciality === 'AM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].am.push(entry);
-                        if (item.Speciality === 'PM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].pm.push(entry);
-                    } else {
-                         const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
-                         if(isPriority) this.weeklyPlanData[day].am.push(entry);
-                         else this.weeklyPlanData[day].pm.push(entry);
-                    }
+        this.reset();
+        this.elements.medicalReps.value = selectedRep;
+        this.handleRepChange();
+        this.elements.startDate.value = startDate;
+        this.elements.endDate.value = endDate;
+        data.forEach(item => {
+            const day = item.visit_day,
+                  entry = {
+                      name: item.hcp_name,
+                      time: item.visit_time,
+                      speciality: item.Speciality,
+                      brick: item.brick,
+                      isNew: false
+                  };
+            const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.hcp_name);
+            const movedKey = isEvent ? item.hcp_name + item.brick : item.hcp_name;
+            this.movedHCPs.add(movedKey);
+            if (day && this.weeklyPlanData[day]) {
+                if (isEvent) {
+                    if (item.Speciality === 'AM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].am.push(entry);
+                    if (item.Speciality === 'PM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].pm.push(entry);
+                } else {
+                     const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
+                     if(isPriority) this.weeklyPlanData[day].am.push(entry);
+                     else this.weeklyPlanData[day].pm.push(entry);
                 }
-            });
-            this.renderWeeklyPlan();
-            this.elements.submitButton.disabled = true;
-            this.applyFilter();
-            this.showMessage('Weekly plan retrieved successfully!', 'success');
-        } catch (error) {
-            console.error('Error retrieving weekly plan:', error);
-            this.showMessage('Error retrieving weekly plan.', 'error');
-        }
+            }
+        });
+        this.renderWeeklyPlan();
+        // Disable submit button only if the start date is in the past
+        const today = new Date();
+        const planStartDate = new Date(startDate);
+        this.elements.submitButton.disabled = planStartDate < today;
+        this.applyFilter();
+        this.showMessage('Weekly plan retrieved successfully!', 'success');
+    } catch (error) {
+        console.error('Error retrieving weekly plan:', error);
+        this.showMessage('Error retrieving weekly plan.', 'error');
     }
 }
+
 
 
         const formManager = new FormManager();
