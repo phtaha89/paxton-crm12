@@ -1098,9 +1098,10 @@
                 td.textContent = row[header] || '';
                 td.dataset.column = header;
                 
-                if (header !== 'no' && header !== 'Mobile') {
-                    td.contentEditable = true;
-                }
+if (header !== 'no') {
+    td.contentEditable = true;
+}
+
                 
                 if (updatableNameColumns.includes(header)) {
                     td.classList.add('editable-cell');
