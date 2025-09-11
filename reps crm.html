@@ -2788,10 +2788,9 @@
         this.elements.medicalReps.addEventListener('change', () => this.handleRepChange());
         this.elements.bricks.addEventListener('change', () => this.updateStatistics());
         this.elements.dayFilter.addEventListener('change', () => this.applyFilter());
-        this.elements.startDate.addEventListener('change', () => this.updateEndDate());
         this.elements.startDate.addEventListener('change', () => {
             this.reset();
-            this.setDefaultDates();
+            this.updateEndDate();
         });
         this.elements.eventType.addEventListener('change', () => this.handleEventTypeChange());
         this.elements.eventTime.addEventListener('change', () => this.handleEventTimeChange());
@@ -2832,7 +2831,7 @@
         this.elements.eventTime.selectedIndex = 0;
         this.elements.eventTimeGroup.style.display = 'none';
         if (this.currentRepName) this.handleRepChange();
-        this.setDefaultDates();
+        this.elements.submitButton.disabled = false;
     }
 
     showMessage(message, type) {
@@ -3211,9 +3210,9 @@
                         if (item.Speciality === 'AM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].am.push(entry);
                         if (item.Speciality === 'PM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].pm.push(entry);
                     } else {
-                        const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
-                        if (isPriority) this.weeklyPlanData[day].am.push(entry);
-                        else this.weeklyPlanData[day].pm.push(entry);
+                         const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
+                         if(isPriority) this.weeklyPlanData[day].am.push(entry);
+                         else this.weeklyPlanData[day].pm.push(entry);
                     }
                 }
             });
@@ -3227,6 +3226,7 @@
         }
     }
 }
+
 
         const formManager = new FormManager();
         const dashboardManager = new DashboardManager();
