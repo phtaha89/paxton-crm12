@@ -986,64 +986,66 @@
 
         // Enhanced duplicate detection and display
         function findDuplicates(data) {
-            const hcpsMap = new Map();
-            
-            // Group by HCPS name (case insensitive)
-            data.forEach(row => {
-                const hcpsName = (row.HCPS || '').trim().toLowerCase();
-                if (hcpsName) {
-                    if (!hcpsMap.has(hcpsName)) {
-                        hcpsMap.set(hcpsName, []);
-                    }
-                    hcpsMap.get(hcpsName).push(row);
-                }
-            });
+    const hcpsMap = new Map();
 
-            // Return only groups with duplicates, properly organized
-            const duplicateGroups = [];
-            hcpsMap.forEach((rows, hcpsName) => {
-                if (rows.length > 1) {
-                    // Sort by 'no' to get original first
-                    rows.sort((a, b) => Number(a.no) - Number(b.no));
-                    duplicateGroups.push(...rows);
-                }
-            });
-            
-            return duplicateGroups;
+    // Group by HCPS name (case insensitive)
+    data.forEach(row => {
+        const hcpsName = (row.HCPS || '').trim().toLowerCase();
+        if (hcpsName) {
+            if (!hcpsMap.has(hcpsName)) {
+                hcpsMap.set(hcpsName, []);
+            }
+            hcpsMap.get(hcpsName).push(row);
         }
+    });
+
+    // Return only groups with duplicates, properly organized
+    const duplicateGroups = [];
+    hcpsMap.forEach((rows, hcpsName) => {
+        if (rows.length > 1) {
+            // Sort by 'no' to get original first
+            rows.sort((a, b) => Number(a.no) - Number(b.no));
+            duplicateGroups.push(...rows);
+        }
+    });
+
+    return duplicateGroups;
+}
+
 
         // Improved table rendering with virtual scrolling concept
         function renderTable(data, isDuplicateView = false) {
-            if (!elements.tableBody) return;
-            
-            const fragment = document.createDocumentFragment();
-            filteredData = data;
-            
-            elements.filteredCount.textContent = data.length;
-            
-            // Calculate duplicates
-            const duplicates = findDuplicates(allData);
-            elements.duplicateCount.textContent = new Set(duplicates.map(d => d.HCPS.toLowerCase().trim())).size;
-            
-            elements.noResults.style.display = data.length === 0 ? 'block' : 'none';
-            
-            if (data.length === 0) {
-                elements.tableBody.innerHTML = '';
-                return;
-            }
+    if (!elements.tableBody) return;
 
-            // Sort data by 'no' for consistent display
-            const sortedData = [...data].sort((a, b) => Number(a.no) - Number(b.no));
-            
-            if (isDuplicateView) {
-                renderDuplicateView(sortedData, fragment);
-            } else {
-                renderNormalView(sortedData, fragment);
-            }
-            
-            elements.tableBody.innerHTML = '';
-            elements.tableBody.appendChild(fragment);
-        }
+    const fragment = document.createDocumentFragment();
+    filteredData = data;
+
+    elements.filteredCount.textContent = data.length;
+
+    // Calculate duplicates from filteredData
+    const duplicates = findDuplicates(filteredData);
+    elements.duplicateCount.textContent = new Set(duplicates.map(d => d.HCPS.toLowerCase().trim())).size;
+
+    elements.noResults.style.display = data.length === 0 ? 'block' : 'none';
+
+    if (data.length === 0) {
+        elements.tableBody.innerHTML = '';
+        return;
+    }
+
+    // Sort data by 'no' for consistent display
+    const sortedData = [...data].sort((a, b) => Number(a.no) - Number(b.no));
+
+    if (isDuplicateView) {
+        renderDuplicateView(sortedData, fragment);
+    } else {
+        renderNormalView(sortedData, fragment);
+    }
+
+    elements.tableBody.innerHTML = '';
+    elements.tableBody.appendChild(fragment);
+}
+
 
         function renderNormalView(data, fragment) {
             data.forEach(row => {
@@ -1053,38 +1055,39 @@
         }
 
         function renderDuplicateView(data, fragment) {
-            const hcpsGroups = new Map();
-            
-            // Group duplicates
-            data.forEach(row => {
-                const hcpsName = (row.HCPS || '').trim().toLowerCase();
-                if (!hcpsGroups.has(hcpsName)) {
-                    hcpsGroups.set(hcpsName, []);
+    const hcpsGroups = new Map();
+
+    // Group duplicates
+    data.forEach(row => {
+        const hcpsName = (row.HCPS || '').trim().toLowerCase();
+        if (!hcpsGroups.has(hcpsName)) {
+            hcpsGroups.set(hcpsName, []);
+        }
+        hcpsGroups.get(hcpsName).push(row);
+    });
+
+    // Render each group
+    hcpsGroups.forEach((rows, hcpsName) => {
+        if (rows.length > 1) {
+            rows.sort((a, b) => Number(a.no) - Number(b.no));
+
+            rows.forEach((row, index) => {
+                const tr = createTableRow(row);
+
+                if (index === 0) {
+                    tr.classList.add('duplicate-group');
+                    tr.title = `${row.HCPS} (Original)`;
+                } else {
+                    tr.classList.add('duplicate-row');
+                    tr.title = `${row.HCPS} (Duplicate ${index})`;
                 }
-                hcpsGroups.get(hcpsName).push(row);
-            });
-            
-            // Render each group
-            hcpsGroups.forEach((rows, hcpsName) => {
-                if (rows.length > 1) {
-                    rows.sort((a, b) => Number(a.no) - Number(b.no));
-                    
-                    rows.forEach((row, index) => {
-                        const tr = createTableRow(row);
-                        
-                        if (index === 0) {
-                            tr.classList.add('duplicate-group');
-                            tr.title = `${row.HCPS} (Original)`;
-                        } else {
-                            tr.classList.add('duplicate-row');
-                            tr.title = `${row.HCPS} (Duplicate ${index})`;
-                        }
-                        
-                        fragment.appendChild(tr);
-                    });
-                }
+
+                fragment.appendChild(tr);
             });
         }
+    });
+}
+
 
         function createTableRow(row) {
             const tr = document.createElement('tr');
@@ -1525,11 +1528,12 @@
             
             // Duplicates stat click
             elements.duplicatesStat.addEventListener('click', () => {
-                const duplicates = findDuplicates(allData);
-                if (duplicates.length > 0) {
-                    renderTable(duplicates, true);
-                }
-            });
+    const duplicates = findDuplicates(filteredData);
+    if (duplicates.length > 0) {
+        renderTable(duplicates, true);
+    }
+});
+
             
             // Form submission
             document.getElementById('addForm').addEventListener('submit', async (e) => {
