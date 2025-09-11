@@ -2789,6 +2789,10 @@
         this.elements.bricks.addEventListener('change', () => this.updateStatistics());
         this.elements.dayFilter.addEventListener('change', () => this.applyFilter());
         this.elements.startDate.addEventListener('change', () => this.updateEndDate());
+        this.elements.startDate.addEventListener('change', () => {
+            this.reset();
+            this.setDefaultDates();
+        });
         this.elements.eventType.addEventListener('change', () => this.handleEventTypeChange());
         this.elements.eventTime.addEventListener('change', () => this.handleEventTimeChange());
         this.elements.submitButton.addEventListener('click', () => this.submitWeeklyPlan());
@@ -2841,9 +2845,7 @@
 
     processVisitData() {
         const currentMonthStart = formManager.getCurrentMonthStart();
-        const currentMonthVisits = globalSupabaseVisits.filter(visit =>
-            formManager.getCairoDate(new Date(visit.visit_date)) >= currentMonthStart
-        );
+        const currentMonthVisits = globalSupabaseVisits.filter(visit => formManager.getCairoDate(new Date(visit.visit_date)) >= currentMonthStart);
         this.visitCounts = {};
         currentMonthVisits.forEach(visit => {
             this.visitCounts[visit.hcp_name] = (this.visitCounts[visit.hcp_name] || 0) + 1;
@@ -2877,8 +2879,7 @@
             const visits = this.visitCounts[row['HCPS']] || 0,
                   targetVisits = parseInt(row['T.V']) || 3,
                   remainingVisits = targetVisits - visits;
-            return remainingVisits === targetVisits &&
-                   (selectedBrick === '' || row['Brick'] === selectedBrick);
+            return remainingVisits === targetVisits && (selectedBrick === '' || row['Brick'] === selectedBrick);
         }).length;
         this.elements.statsDisplay.textContent = `Unvisited HCPs in ${selectedBrick || 'total'}: ${unvisitedCount}`;
         this.elements.statsDisplay.style.display = 'block';
@@ -2986,14 +2987,12 @@
     }
 
     renderWeeklyPlan() {
-        ['saturdayAm', 'sundayAm', 'mondayAm', 'tuesdayAm', 'wednesdayAm', 'thursdayAm',
-         'saturdayPm', 'sundayPm', 'mondayPm', 'tuesdayPm', 'wednesdayPm', 'thursdayPm'
-        ].forEach(id => {
+        ['saturdayAm', 'sundayAm', 'mondayAm', 'tuesdayAm', 'wednesdayAm', 'thursdayAm', 'saturdayPm', 'sundayPm', 'mondayPm', 'tuesdayPm', 'wednesdayPm', 'thursdayPm'].forEach(id => {
             document.getElementById(id).innerHTML = '';
         });
         Object.keys(this.weeklyPlanData).forEach(day => {
-            const amCell = document.getElementById(`${day.toLowerCase()}Am`);
-            const pmCell = document.getElementById(`${day.toLowerCase()}Pm`);
+            const amCell = document.getElementById(`${day.toLowerCase()}Am`),
+                  pmCell = document.getElementById(`${day.toLowerCase()}Pm`);
             this.weeklyPlanData[day].am.forEach(item => {
                 const itemDiv = this.createPlanItemDiv(item, day, true);
                 amCell.appendChild(itemDiv);
@@ -3024,29 +3023,17 @@
         const removeButtonClass = item.isNew ? 'remove-button' : 'remove-button hidden';
         if (isEvent) {
             div.className = 'event-box';
-            div.innerHTML = `
-                <strong>${item.name}</strong><br>
-                ${item.brick}<br>
-                <span class="v-t">${item.speciality}</span>
-                <span class="${removeButtonClass}">X</span>
-            `;
+            div.innerHTML = `<strong>${item.name}</strong><br>${item.brick}<br><span class="v-t">${item.speciality}</span><span class="${removeButtonClass}">X</span>`;
         } else {
             div.className = isAm ? 'Speciality-box' : 'hcp-box';
-            div.innerHTML = `
-                ${item.name}<br>
-                <span class="v-t">${item.time || 'N/A'}</span><br>
-                ${item.brick || 'N/A'}
-                <span class="${removeButtonClass}">X</span>
-            `;
+            div.innerHTML = `${item.name}<br><span class="v-t">${item.time || 'N/A'}</span><br>${item.brick || 'N/A'}<span class="${removeButtonClass}">X</span>`;
         }
         return div;
     }
 
     removeFromWeeklyPlan(hcpName, day, isAm, isEvent, eventBrick = '') {
         let planArray = isAm ? this.weeklyPlanData[day].am : this.weeklyPlanData[day].pm;
-        let removedItemIndex = planArray.findIndex(item =>
-            item.name === hcpName && (!isEvent || item.brick === eventBrick)
-        );
+        let removedItemIndex = planArray.findIndex(item => item.name === hcpName && (!isEvent || item.brick === eventBrick));
         if (removedItemIndex > -1) {
             const [removedItem] = planArray.splice(removedItemIndex, 1);
             const movedKey = isEvent ? hcpName + eventBrick : hcpName;
@@ -3057,20 +3044,16 @@
     }
 
     addHCPToTable(hcpData) {
-        if (globalMasterlistData.find(row => row['HCPS'] === hcpData.name)) {
-            this.applyFilter();
-        }
+        if (globalMasterlistData.find(row => row['HCPS'] === hcpData.name)) this.applyFilter();
     }
 
     setDefaultDates() {
         const nowInCairo = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
-        const day = nowInCairo.getDay(); // 0=Sun, 6=Sat
+        const day = nowInCairo.getDay();
         let startDate = new Date(nowInCairo);
-        if (day < 4) { // Sunday (0), Monday (1), Tuesday (2), Wednesday (3)
-            // Go back to the previous Saturday
+        if (day < 4) {
             startDate.setDate(nowInCairo.getDate() - (day + 1));
-        } else { // Thursday (4), Friday (5), Saturday (6)
-            // Go forward to the upcoming Saturday
+        } else {
             startDate.setDate(nowInCairo.getDate() + (6 - day));
         }
         this.elements.startDate.value = formManager.getCairoDate(startDate);
@@ -3082,19 +3065,6 @@
         const endDate = new Date(startDate);
         endDate.setDate(startDate.getDate() + 5);
         this.elements.endDate.value = formManager.getCairoDate(endDate);
-
-        // Reset weekly plan tables
-        this.reset();
-
-        // Disable submit button if the selected week is in the past
-        const today = new Date(new Date().toLocaleString('en-US', { timeZone: 'Africa/Cairo' }));
-        today.setHours(0, 0, 0, 0);
-        if (startDate < today) {
-            this.elements.submitButton.disabled = true;
-            this.showMessage('You can only add plans for the upcoming week.', 'error');
-        } else {
-            this.elements.submitButton.disabled = false;
-        }
     }
 
     handleEventTypeChange() {
@@ -3122,9 +3092,7 @@
             this.elements.eventTime.selectedIndex = 0;
             return;
         }
-        if (eventType && eventTime) {
-            this.addEventToSchedule(eventType, eventTime, eventName, day);
-        }
+        if (eventType && eventTime) this.addEventToSchedule(eventType, eventTime, eventName, day);
     }
 
     addEventToSchedule(eventType, eventTime, eventName, day) {
@@ -3136,12 +3104,8 @@
             isNew: true
         };
         const movedKey = eventType + eventName;
-        if (eventTime === 'AM' || eventTime === 'Full Day') {
-            this.weeklyPlanData[day].am.push(eventEntry);
-        }
-        if (eventTime === 'PM' || eventTime === 'Full Day') {
-            this.weeklyPlanData[day].pm.push(eventEntry);
-        }
+        if (eventTime === 'AM' || eventTime === 'Full Day') this.weeklyPlanData[day].am.push(eventEntry);
+        if (eventTime === 'PM' || eventTime === 'Full Day') this.weeklyPlanData[day].pm.push(eventEntry);
         this.movedHCPs.add(movedKey);
         this.renderWeeklyPlan();
         this.elements.eventType.selectedIndex = 0;
@@ -3164,9 +3128,7 @@
         Object.keys(this.weeklyPlanData).forEach(day => {
             [...this.weeklyPlanData[day].am, ...this.weeklyPlanData[day].pm].forEach(item => {
                 const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.name);
-                const itemIdentifier = isEvent ?
-                    `${item.name}-${day}-${item.speciality}-${item.brick}` :
-                    `${item.name}-${day}-${item.time}`;
+                const itemIdentifier = isEvent ? `${item.name}-${day}-${item.speciality}-${item.brick}` : `${item.name}-${day}-${item.time}`;
                 if (!submittedItems.has(itemIdentifier)) {
                     plansToSubmit.push({
                         hcp_name: item.name,
@@ -3188,16 +3150,13 @@
             return;
         }
         try {
-            await fetch(
-                `${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'apikey': SUPABASE_API_KEY,
-                        'Authorization': `Bearer ${SUPABASE_API_KEY}`
-                    }
+            await fetch(`${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_API_KEY,
+                    'Authorization': `Bearer ${SUPABASE_API_KEY}`
                 }
-            );
+            });
             const response = await fetch(SUPABASE_WEEKLY_PLANS_URL, {
                 method: 'POST',
                 headers: {
@@ -3225,10 +3184,7 @@
             return;
         }
         try {
-            const data = await fetchPaginatedData(
-                `${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`,
-                SUPABASE_API_KEY
-            );
+            const data = await fetchPaginatedData(`${SUPABASE_WEEKLY_PLANS_URL}?medical_rep_name=eq.${encodeURIComponent(selectedRep)}&start_date=gte.${startDate}&end_date=lte.${endDate}`, SUPABASE_API_KEY);
             if (data.length === 0) {
                 this.showMessage('No weekly plan found for the selected criteria.', 'error');
                 return;
@@ -3239,36 +3195,30 @@
             this.elements.startDate.value = startDate;
             this.elements.endDate.value = endDate;
             data.forEach(item => {
-                const day = item.visit_day;
-                const entry = {
-                    name: item.hcp_name,
-                    time: item.visit_time,
-                    speciality: item.Speciality,
-                    brick: item.brick,
-                    isNew: false
-                };
+                const day = item.visit_day,
+                      entry = {
+                          name: item.hcp_name,
+                          time: item.visit_time,
+                          speciality: item.Speciality,
+                          brick: item.brick,
+                          isNew: false
+                      };
                 const isEvent = ['Meeting', 'Training', 'Event', 'Annual Leave', 'Sick Leave', 'Official Leave'].includes(item.hcp_name);
                 const movedKey = isEvent ? item.hcp_name + item.brick : item.hcp_name;
                 this.movedHCPs.add(movedKey);
                 if (day && this.weeklyPlanData[day]) {
                     if (isEvent) {
-                        if (item.Speciality === 'AM' || item.Speciality === 'Full Day') {
-                            this.weeklyPlanData[day].am.push(entry);
-                        }
-                        if (item.Speciality === 'PM' || item.Speciality === 'Full Day') {
-                            this.weeklyPlanData[day].pm.push(entry);
-                        }
+                        if (item.Speciality === 'AM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].am.push(entry);
+                        if (item.Speciality === 'PM' || item.Speciality === 'Full Day') this.weeklyPlanData[day].pm.push(entry);
                     } else {
                         const isPriority = ['Account', 'Hospital', 'Dialysis Center', 'Oncology Center'].includes(item.Speciality);
-                        if (isPriority) {
-                            this.weeklyPlanData[day].am.push(entry);
-                        } else {
-                            this.weeklyPlanData[day].pm.push(entry);
-                        }
+                        if (isPriority) this.weeklyPlanData[day].am.push(entry);
+                        else this.weeklyPlanData[day].pm.push(entry);
                     }
                 }
             });
             this.renderWeeklyPlan();
+            this.elements.submitButton.disabled = true;
             this.applyFilter();
             this.showMessage('Weekly plan retrieved successfully!', 'success');
         } catch (error) {
