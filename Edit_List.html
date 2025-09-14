@@ -1238,60 +1238,65 @@ if (header !== 'no') {
             const maxNo = allData.length > 0 ? Math.max(...allData.map(d => parseInt(d.no) || 0)) : 0;
             
             headers.forEach(header => {
-                if (header === 'Actions') return;
-                
-                const field = document.createElement('div');
-                field.className = 'form-field';
-                
-                const label = document.createElement('label');
-                label.className = 'form-label';
-                label.textContent = header;
-                field.appendChild(label);
-                
-                if (header === 'no') {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = header;
-                    input.value = maxNo + 1;
-                    input.readOnly = true;
-                    input.className = 'form-input';
-                    input.style.backgroundColor = 'var(--gray-100)';
-                    field.appendChild(input);
-                } else if (dropdownHeaders.includes(header) && uniqueValues[header]) {
-                    const select = document.createElement('select');
-                    select.name = header;
-                    select.className = 'form-select';
-                    
-                    select.innerHTML = `<option value="">Select ${header}</option>`;
-                    uniqueValues[header].forEach(val => {
-                        select.innerHTML += `<option value="${val}">${val}</option>`;
-                    });
-                    select.innerHTML += `<option value="other">Other...</option>`;
-                    
-                    field.appendChild(select);
-                    
-                    const otherInput = document.createElement('input');
-                    otherInput.type = 'text';
-                    otherInput.name = `${header}_other`;
-                    otherInput.placeholder = `Enter new ${header}`;
-                    otherInput.className = 'form-input';
-                    otherInput.style.marginTop = '0.5rem';
-                    otherInput.style.display = 'none';
-                    field.appendChild(otherInput);
-                    
-                    select.addEventListener('change', () => {
-                        otherInput.style.display = select.value === 'other' ? 'block' : 'none';
-                    });
-                } else {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = header;
-                    input.className = 'form-input';
-                    field.appendChild(input);
-                }
-                
-                formGrid.appendChild(field);
-            });
+    const field = document.createElement('div'); // Create a new field div for each header
+    field.className = 'form-field';
+
+    const label = document.createElement('label');
+    label.className = 'form-label';
+    label.textContent = header;
+    field.appendChild(label);
+
+    if (header === 'no') {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = header;
+        input.value = maxNo + 1;
+        input.readOnly = true;
+        input.className = 'form-input';
+        input.style.backgroundColor = 'var(--gray-100)';
+        field.appendChild(input);
+    } else if (dropdownHeaders.includes(header) && uniqueValues[header]) {
+        const select = document.createElement('select');
+        select.name = header;
+        select.className = 'form-select';
+        select.innerHTML = `<option value="">Select ${header}</option>`;
+        uniqueValues[header].forEach(val => {
+            select.innerHTML += `<option value="${val}">${val}</option>`;
+        });
+        select.innerHTML += `<option value="other">Other...</option>`;
+        field.appendChild(select);
+
+        const otherInput = document.createElement('input');
+        otherInput.type = 'text';
+        otherInput.name = `${header}_other`;
+        otherInput.placeholder = `Enter new ${header}`;
+        otherInput.className = 'form-input';
+        otherInput.style.marginTop = '0.5rem';
+        otherInput.style.display = 'none';
+        field.appendChild(otherInput);
+
+        select.addEventListener('change', () => {
+            otherInput.style.display = select.value === 'other' ? 'block' : 'none';
+        });
+    } else if (['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'].includes(header)) {
+        // Set default value to '-' for day fields
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = header;
+        input.value = '-';
+        input.className = 'form-input';
+        field.appendChild(input);
+    } else {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = header;
+        input.className = 'form-input';
+        field.appendChild(input);
+    }
+
+    formGrid.appendChild(field); // Append the field div to the form grid
+});
+
         }
 
         // Cell editing
@@ -1685,34 +1690,42 @@ document.getElementById('tableContainer').addEventListener('scroll', updateScrol
 
 
         async function handleFormSubmit(e) {
-            showLoading();
-            try {
-                const formData = new FormData(e.target);
-                const newRow = {};
-                
-                for (let [key, value] of formData.entries()) {
-                    if (key.endsWith('_other')) {
-                        const originalKey = key.replace('_other', '');
-                        if (formData.get(originalKey) === 'other') {
-                            newRow[originalKey] = value;
-                        }
-                    } else if (value !== 'other') {
-                        newRow[key] = value;
-                    }
+    showLoading();
+    try {
+        const formData = new FormData(e.target);
+        const newRow = {};
+
+        for (let [key, value] of formData.entries()) {
+            if (key.endsWith('_other')) {
+                const originalKey = key.replace('_other', '');
+                if (formData.get(originalKey) === 'other') {
+                    newRow[originalKey] = value;
                 }
-                
-                const { error } = await supabaseClient.from(TABLE_NAME).insert([newRow]);
-                if (error) throw error;
-                
-                elements.addModal.style.display = 'none';
-                await init();
-            } catch (error) {
-                console.error('Error adding new row:', error);
-                alert('Failed to add new HCP.');
-            } finally {
-                hideLoading();
+            } else if (value !== 'other') {
+                newRow[key] = value;
             }
         }
+
+        // Ensure day fields are included, even if empty
+        ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+            if (!newRow[day]) {
+                newRow[day] = '-';
+            }
+        });
+
+        const { error } = await supabaseClient.from(TABLE_NAME).insert([newRow]);
+        if (error) throw error;
+
+        elements.addModal.style.display = 'none';
+        await init();
+    } catch (error) {
+        console.error('Error adding new row:', error);
+        alert('Failed to add new HCP.');
+    } finally {
+        hideLoading();
+    }
+}
+
         document.getElementById('backButton').addEventListener('click', function() {
     window.location.href = 'master list.html';
 });
