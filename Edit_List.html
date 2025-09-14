@@ -1483,38 +1483,50 @@ if (header !== 'no') {
 
         // Paste functionality
         function handlePaste(event) {
-            event.preventDefault();
-            const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-            const rows = pastedText.trim().split('\n');
-            
-            if (rows.length > 1) {
-                alert('Multiple rows detected. Only the first row will be used.');
-            }
-            
-            const columns = rows[0].trim().split('\t');
-            const formHeaders = headers.filter(h => h !== 'no' && h !== 'Actions');
-            
-            formHeaders.forEach((header, i) => {
-                const value = columns[i] || '';
-                const element = document.querySelector(`#addForm [name="${header}"]`);
-                
-                if (element) {
-                    if (element.tagName === 'SELECT') {
-                        const optionExists = Array.from(element.options).some(opt => opt.value === value);
-                        if (optionExists) {
-                            element.value = value;
-                        } else {
-                            element.value = 'other';
-                            const otherInput = document.querySelector(`#addForm input[name="${element.name}_other"]`);
-                            if (otherInput) otherInput.value = value;
-                        }
-                        element.dispatchEvent(new Event('change'));
-                    } else {
-                        element.value = value;
-                    }
+    event.preventDefault();
+    const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+    const rows = pastedText.trim().split('\n');
+
+    if (rows.length > 1) {
+        alert('Multiple rows detected. Only the first row will be used.');
+    }
+
+    const columns = rows[0].trim().split('\t');
+    const formHeaders = headers.filter(h => h !== 'no' && h !== 'Actions');
+
+    // Extract HCP name from pasted data
+    const hcpNameIndex = formHeaders.indexOf('HCPS');
+    const hcpName = columns[hcpNameIndex] || '';
+
+    // Check for duplicate HCP name
+    if (hcpName && isHcpNameDuplicate(hcpName)) {
+        alert(`Error: HCP name "${hcpName}" already exists!`);
+        return; // Stop pasting if duplicate
+    }
+
+    // Apply pasted data if no duplicate
+    formHeaders.forEach((header, i) => {
+        const value = columns[i] || '';
+        const element = document.querySelector(`#addForm [name="${header}"]`);
+
+        if (element) {
+            if (element.tagName === 'SELECT') {
+                const optionExists = Array.from(element.options).some(opt => opt.value === value);
+                if (optionExists) {
+                    element.value = value;
+                } else {
+                    element.value = 'other';
+                    const otherInput = document.querySelector(`#addForm input[name="${element.name}_other"]`);
+                    if (otherInput) otherInput.value = value;
                 }
-            });
+                element.dispatchEvent(new Event('change'));
+            } else {
+                element.value = value;
+            }
         }
+    });
+}
+
 
         // Event listeners
         function setupEventListeners() {
@@ -1713,6 +1725,13 @@ document.getElementById('tableContainer').addEventListener('scroll', updateScrol
             }
         });
 
+        // Check for duplicate HCP name
+        if (isHcpNameDuplicate(newRow.HCPS)) {
+            alert(`Error: HCP name "${newRow.HCPS}" already exists!`);
+            hideLoading();
+            return; // Stop submission if duplicate
+        }
+
         const { error } = await supabaseClient.from(TABLE_NAME).insert([newRow]);
         if (error) throw error;
 
@@ -1726,9 +1745,17 @@ document.getElementById('tableContainer').addEventListener('scroll', updateScrol
     }
 }
 
+
         document.getElementById('backButton').addEventListener('click', function() {
     window.location.href = 'master list.html';
 });
+
+function isHcpNameDuplicate(hcpName, excludeRowNo = null) {
+    return allData.some(row =>
+        row.HCPS?.trim().toLowerCase() === hcpName?.trim().toLowerCase() &&
+        (excludeRowNo === null || row.no != excludeRowNo)
+    );
+}
 
 
         // Initialize application
