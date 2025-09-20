@@ -1188,160 +1188,155 @@
         }
 
         async function generateMonthlyReport() {
-            const employeeName = monthlyReportEmployeeSelect.value;
-            const monthValue = monthlyReportMonthSelect.value;
+    const employeeName = monthlyReportEmployeeSelect.value;
+    const monthValue = monthlyReportMonthSelect.value;
+    if (!employeeName || !monthValue) {
+        showMessage("Missing Information", "Please select both an employee and a month to generate the monthly report.");
+        return;
+    }
+    hideMonthlyReportOptionsModal();
+    showMessage("Generating Report", "Please wait while we prepare your monthly report...", null);
+    try {
+        const { data: reports, error } = await supabase
+            .from('expenses')
+            .select('*')
+            .eq('employee_name', employeeName)
+            .order('report_date', { ascending: true });
+        if (error) throw error;
 
-            if (!employeeName || !monthValue) {
-                showMessage("Missing Information", "Please select both an employee and a month to generate the monthly report.");
-                return;
-            }
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const selectedMonth = parseInt(monthValue);
 
-            hideMonthlyReportOptionsModal();
-            showMessage("Generating Report", "Please wait while we prepare your monthly report...", null);
+        // Filter out reports with status "Rejected"
+        const allRelevantReports = reports.filter(report => {
+            const reportDate = new Date(report.report_date);
+            return (
+                isDateInMonthlyReportRange(reportDate, selectedMonth, currentYear) &&
+                report.status !== "Rejected"
+            );
+        });
 
-            try {
-                const { data: reports, error } = await supabase
-                    .from('expenses')
-                    .select('*')
-                    .eq('employee_name', employeeName)
-                    .order('report_date', { ascending: true });
-
-                if (error) throw error;
-                
-                const today = new Date();
-                const currentYear = today.getFullYear();
-                const selectedMonth = parseInt(monthValue);
-                
-                const allRelevantReports = reports.filter(report => {
-                    const reportDate = new Date(report.report_date);
-                    return isDateInMonthlyReportRange(reportDate, selectedMonth, currentYear);
-                });
-
-                if (allRelevantReports.length === 0) {
-                    showMessage("No Reports Found", `No reports found for ${employeeName} in the selected period.`);
-                    return;
-                }
-
-                let totalMonthlyExpenses = 0;
-                let reportTableRows = '';
-                
-                allRelevantReports.forEach(report => {
-                    totalMonthlyExpenses += parseFloat(report.total_amount);
-                    const reportTypeDisplay = getReportTypeDisplayString(report);
-                    const items = JSON.parse(report.items);
-                    const status = report.status;
-                    const reportDetails = JSON.parse(report.details);
-
-                    let tripDetailsHtml = '';
-                    if (report.role === 'District Manager' && reportDetails.reportType === 'Trip') {
-                        tripDetailsHtml += `
-                            <p style="margin:0.25rem 0;"><strong>Purpose:</strong> ${reportDetails.purpose}</p>
-                            <p style="margin:0.25rem 0;"><strong>Trip:</strong> ${reportDetails.from} to ${reportDetails.to}</p>
-                        `;
-                    }
-
-                    let expenseItemsHtml = items.map(item => `
-                        <tr>
-                            <td class="pr-2 align-top">${item.type}:</td>
-                            <td class="pr-2 align-top">${item.desc || 'N/A'}</td>
-                            <td class="text-right align-top">${parseFloat(item.amount).toFixed(2)} EGP</td>
-                        </tr>
-                    `).join('');
-
-                    reportTableRows += `
-                        <tr class="border-b border-gray-200">
-                            <td class="py-1 px-2 align-top font-bold">${report.report_date}</td>
-                            <td class="py-1 px-2 align-top">${reportTypeDisplay}</td>
-                            <td class="py-1 px-2 align-top">
-                                ${tripDetailsHtml}
-                                <table style="width:100%; font-size: 0.7rem;">
-                                    ${expenseItemsHtml}
-                                </table>
-                            </td>
-                            <td class="py-1 px-2 text-right align-top">${parseFloat(report.total_amount).toFixed(2)}</td>
-                            <td class="py-1 px-2 text-center align-top">${status}</td>
-                        </tr>
-                    `;
-                });
-
-                const monthlyReportHtml = `
-                    <html>
-                        <head>
-                            <title>Monthly Expense Report - ${employeeName} - ${months[selectedMonth - 1]}</title>
-                            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-                            <style>
-                                body { font-family: 'Inter', sans-serif; color: #111827; margin: 0.5rem; font-size: 11px; }
-                                .header { text-align: center; margin-bottom: 1rem; }
-                                .header img { height: 2.5rem; margin-bottom: 0.25rem; border-radius: 50%; }
-                                .header h1 { font-size: 1.2rem; font-weight: 700; color: #1e3a8a; margin: 0; }
-                                .header p { font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0 0; }
-                                .report-details { margin-bottom: 0.75rem; }
-                                .report-details h2 { font-size: 1rem; margin-bottom: 0.25rem; }
-                                .report-details p { font-size: 0.75rem; }
-                                .report-table { width: 100%; border-collapse: collapse; }
-                                .report-table th, .report-table td { padding: 0.2rem; border: 1px solid #e5e7eb; }
-                                .report-table th { background-color: #f1f5f9; text-align: left; }
-                                .report-table tr:nth-child(even) { background-color: #f9fafb; }
-                                .summary { margin-top: 0.75rem; text-align: right; font-size: 12px; font-weight: 600; }
-                                .signatures { margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; font-size: 11px; }
-                                .signatures div { border-top: 1px solid #374151; padding-top: 0.25rem; }
-                                @media print { .no-print { display: none; } }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="header">
-                                <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton Logo">
-                                <h1>Monthly Expense Report</h1>
-                                <p>Paxton LLC</p>
-                            </div>
-                            <div class="report-details">
-                                <h2>Employee: ${employeeName}</h2>
-                                <p>Report Period: 25th ${months[selectedMonth === 1 ? 11 : selectedMonth - 2]} to 25th ${months[selectedMonth - 1]}</p>
-                            </div>
-                            <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Report Type</th>
-                                        <th>Details</th>
-                                        <th class="text-right">Total (EGP)</th>
-                                        <th class="text-center">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${reportTableRows}
-                                </tbody>
-                            </table>
-                            <div class="summary">
-                                <p>Grand Total: EGP ${totalMonthlyExpenses.toFixed(2)}</p>
-                            </div>
-                            <div class="signatures">
-                                <div>
-                                    <p><strong>Direct Manager</strong></p>
-                                    <p class="font-light text-gray-500">Signature & Date</p>
-                                </div>
-                                <div>
-                                    <p><strong>Commercial Director</strong></p>
-                                    <p class="font-light text-gray-500">Signature & Date</p>
-                                </div>
-                            </div>
-                            <div class="no-print" style="text-align: center; margin-top: 2rem;">
-                                <button onclick="window.print()" style="background-color: #3b82f6; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 1rem;">Print Report</button>
-                            </div>
-                        </body>
-                    </html>
-                `;
-
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(monthlyReportHtml);
-                printWindow.document.close();
-                printWindow.focus();
-                hideMessage();
-            } catch (error) {
-                console.error('Error generating monthly report:', error);
-                showMessage("Error", "Failed to generate monthly report. Please try again.");
-            }
+        if (allRelevantReports.length === 0) {
+            showMessage("No Reports Found", `No reports found for ${employeeName} in the selected period.`);
+            return;
         }
+        let totalMonthlyExpenses = 0;
+        let reportTableRows = '';
+
+        allRelevantReports.forEach(report => {
+            totalMonthlyExpenses += parseFloat(report.total_amount);
+            const reportTypeDisplay = getReportTypeDisplayString(report);
+            const items = JSON.parse(report.items);
+            const status = report.status;
+            const reportDetails = JSON.parse(report.details);
+            let tripDetailsHtml = '';
+            if (report.role === 'District Manager' && reportDetails.reportType === 'Trip') {
+                tripDetailsHtml += `
+                    <p style="margin:0.25rem 0;"><strong>Purpose:</strong> ${reportDetails.purpose}</p>
+                    <p style="margin:0.25rem 0;"><strong>Trip:</strong> ${reportDetails.from} to ${reportDetails.to}</p>
+                `;
+            }
+            let expenseItemsHtml = items.map(item => `
+                <tr>
+                    <td class="pr-2 align-top">${item.type}:</td>
+                    <td class="pr-2 align-top">${item.desc || 'N/A'}</td>
+                    <td class="text-right align-top">${parseFloat(item.amount).toFixed(2)} EGP</td>
+                </tr>
+            `).join('');
+            reportTableRows += `
+                <tr class="border-b border-gray-200">
+                    <td class="py-1 px-2 align-top font-bold">${report.report_date}</td>
+                    <td class="py-1 px-2 align-top">${reportTypeDisplay}</td>
+                    <td class="py-1 px-2 align-top">
+                        ${tripDetailsHtml}
+                        <table style="width:100%; font-size: 0.7rem;">
+                            ${expenseItemsHtml}
+                        </table>
+                    </td>
+                    <td class="py-1 px-2 text-right align-top">${parseFloat(report.total_amount).toFixed(2)}</td>
+                    <td class="py-1 px-2 text-center align-top">${status}</td>
+                </tr>
+            `;
+        });
+        const monthlyReportHtml = `
+            <html>
+                <head>
+                    <title>Monthly Expense Report - ${employeeName} - ${months[selectedMonth - 1]}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Inter', sans-serif; color: #111827; margin: 0.5rem; font-size: 11px; }
+                        .header { text-align: center; margin-bottom: 1rem; }
+                        .header img { height: 2.5rem; margin-bottom: 0.25rem; border-radius: 50%; }
+                        .header h1 { font-size: 1.2rem; font-weight: 700; color: #1e3a8a; margin: 0; }
+                        .header p { font-size: 0.8rem; color: #6b7280; margin: 0.25rem 0 0 0; }
+                        .report-details { margin-bottom: 0.75rem; }
+                        .report-details h2 { font-size: 1rem; margin-bottom: 0.25rem; }
+                        .report-details p { font-size: 0.75rem; }
+                        .report-table { width: 100%; border-collapse: collapse; }
+                        .report-table th, .report-table td { padding: 0.2rem; border: 1px solid #e5e7eb; }
+                        .report-table th { background-color: #f1f5f9; text-align: left; }
+                        .report-table tr:nth-child(even) { background-color: #f9fafb; }
+                        .summary { margin-top: 0.75rem; text-align: right; font-size: 12px; font-weight: 600; }
+                        .signatures { margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; font-size: 11px; }
+                        .signatures div { border-top: 1px solid #374151; padding-top: 0.25rem; }
+                        @media print { .no-print { display: none; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <img src="https://i.ibb.co/ZRmVjNch/logo.jpg" alt="Paxton Logo">
+                        <h1>Monthly Expense Report</h1>
+                        <p>Paxton LLC</p>
+                    </div>
+                    <div class="report-details">
+                        <h2>Employee: ${employeeName}</h2>
+                        <p>Report Period: 25th ${months[selectedMonth === 1 ? 11 : selectedMonth - 2]} to 25th ${months[selectedMonth - 1]}</p>
+                    </div>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Report Type</th>
+                                <th>Details</th>
+                                <th class="text-right">Total (EGP)</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${reportTableRows}
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <p>Grand Total: EGP ${totalMonthlyExpenses.toFixed(2)}</p>
+                    </div>
+                    <div class="signatures">
+                        <div>
+                            <p><strong>Direct Manager</strong></p>
+                            <p class="font-light text-gray-500">Signature & Date</p>
+                        </div>
+                        <div>
+                            <p><strong>Commercial Director</strong></p>
+                            <p class="font-light text-gray-500">Signature & Date</p>
+                        </div>
+                    </div>
+                    <div class="no-print" style="text-align: center; margin-top: 2rem;">
+                        <button onclick="window.print()" style="background-color: #3b82f6; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.375rem; cursor: pointer; font-size: 1rem;">Print Report</button>
+                    </div>
+                </body>
+            </html>
+        `;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(monthlyReportHtml);
+        printWindow.document.close();
+        printWindow.focus();
+        hideMessage();
+    } catch (error) {
+        console.error('Error generating monthly report:', error);
+        showMessage("Error", "Failed to generate monthly report. Please try again.");
+    }
+}
+
 
         function printReport(rowElement, printType) {
             if (printType === 'single') {
