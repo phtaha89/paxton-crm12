@@ -1118,8 +1118,7 @@
         async function updateStatus(newStatus) {
     if (activeReportRow) {
         const reportId = activeReportRow.dataset.id;
-        const oldStatus = activeReportRow.dataset.status;
-        const amount = parseFloat(activeReportRow.dataset.total);
+        const oldStatus = activeReportRow.querySelector('.status-cell').textContent.trim();
 
         const { error } = await supabase
             .from('expenses')
@@ -1137,20 +1136,14 @@
             statusCell.innerHTML = getStatusBadge(newStatus);
         }
 
-        // Update the total expenses immediately
-        const totalElement = document.getElementById('totalExpensesValue');
-        let currentTotal = parseFloat(totalElement.textContent.replace('EGP ', ''));
-        if (oldStatus !== 'Rejected' && newStatus === 'Rejected') {
-            currentTotal -= amount;
-        } else if (oldStatus === 'Rejected' && newStatus !== 'Rejected') {
-            currentTotal += amount;
-        }
-        totalElement.textContent = `EGP ${currentTotal.toFixed(2)}`;
+        // Recalculate the total for the current filter
+        filterReports();
 
         closeModal();
         showMessage("Success", `Report status updated to '${newStatus}'.`);
     }
 }
+
 
 
 
