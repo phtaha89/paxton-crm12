@@ -1718,12 +1718,14 @@
         return isEmployeeMatch && isStatusMatch && isMonthMatch;
     });
 
-    // Calculate total expenses for filtered data
-    const totalExpenses = filteredData.reduce((sum, report) => sum + parseFloat(report.total_amount), 0);
+    // Calculate total expenses for filtered data, excluding rejected reports
+    const totalExpenses = filteredData.reduce((sum, report) =>
+        report.status !== 'Rejected' ? sum + parseFloat(report.total_amount) : sum, 0);
     document.getElementById('totalExpensesValue').textContent = `EGP ${totalExpenses.toFixed(2)}`;
 
     filteredData.forEach(report => addNewReportToTable(report, reportsTableBody));
 }
+
 
         
         // --- Initialization Functions ---
