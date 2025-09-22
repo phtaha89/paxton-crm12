@@ -1116,28 +1116,43 @@
 
         // --- admin/Manager status update logic ---
         async function updateStatus(newStatus) {
-            if (activeReportRow) {
-                const reportId = activeReportRow.dataset.id;
-                
-                const { error } = await supabase
-                    .from('expenses')
-                    .update({ status: newStatus })
-                    .eq('id', reportId);
-                    
-                if (error) {
-                    console.error('Error updating status:', error);
-                    showMessage("Error", "Failed to update report status.");
-                    return;
-                }
-                
-                const statusCell = activeReportRow.querySelector('.status-cell');
-                if (statusCell) {
-                    statusCell.innerHTML = getStatusBadge(newStatus);
-                }
-                closeModal();
-                showMessage("Success", `Report status updated to '${newStatus}'.`);
-            }
+    if (activeReportRow) {
+        const reportId = activeReportRow.dataset.id;
+        const oldStatus = activeReportRow.dataset.status;
+        const amount = parseFloat(activeReportRow.dataset.total);
+
+        const { error } = await supabase
+            .from('expenses')
+            .update({ status: newStatus })
+            .eq('id', reportId);
+
+        if (error) {
+            console.error('Error updating status:', error);
+            showMessage("Error", "Failed to update report status.");
+            return;
         }
+
+        const statusCell = activeReportRow.querySelector('.status-cell');
+        if (statusCell) {
+            statusCell.innerHTML = getStatusBadge(newStatus);
+        }
+
+        // Update the total expenses immediately
+        const totalElement = document.getElementById('totalExpensesValue');
+        let currentTotal = parseFloat(totalElement.textContent.replace('EGP ', ''));
+        if (oldStatus !== 'Rejected' && newStatus === 'Rejected') {
+            currentTotal -= amount;
+        } else if (oldStatus === 'Rejected' && newStatus !== 'Rejected') {
+            currentTotal += amount;
+        }
+        totalElement.textContent = `EGP ${currentTotal.toFixed(2)}`;
+
+        closeModal();
+        showMessage("Success", `Report status updated to '${newStatus}'.`);
+    }
+}
+
+
 
         // --- Print Modals and Logic (New) ---
         function showPrintConfirmation(rowElement) {
