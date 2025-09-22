@@ -215,6 +215,14 @@
                 padding: 1.5rem;
             }
         }
+        #totalExpensesBox {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -270,73 +278,77 @@
                     <div id="dynamicFormContainer"></div>
                 </div>
             </div>
-            <!-- Admin View -->
-            <div id="adminView" class="hidden">
-                <div class="page-header">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h2 class="text-mobile-xl font-bold text-gray-900">Dashboard</h2>
-                            <p class="text-mobile-sm text-gray-500">Expense reports</p>
-                        </div>
-                        <button onclick="goBackToRoleSelection()" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200">
-                            <i class="fas fa-arrow-left mr-1"></i>Back
-                        </button>
-                    </div>
+           <!-- Admin View -->
+<div id="adminView" class="hidden">
+    <div class="page-header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-mobile-xl font-bold text-gray-900">Dashboard</h2>
+                <p class="text-mobile-sm text-gray-500">Expense reports</p>
+            </div>
+            <button onclick="goBackToRoleSelection()" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200">
+                <i class="fas fa-arrow-left mr-1"></i>Back
+            </button>
+        </div>
+    </div>
+    <div class="mobile-card">
+        <!-- Filters - Mobile Stack -->
+        <div class="mb-4">
+            <h3 class="text-mobile-lg font-medium text-gray-900 mb-3">Filters</h3>
+            <div class="space-y-3">
+                <div class="form-group">
+                    <label for="employeeFilter">Employee</label>
+                    <select id="employeeFilter" class="mobile-input">
+                        <option value="all">All Employees</option>
+                    </select>
                 </div>
-
-                <div class="mobile-card">
-                    <!-- Filters - Mobile Stack -->
-                    <div class="mb-4">
-                        <h3 class="text-mobile-lg font-medium text-gray-900 mb-3">Filters</h3>
-                        <div class="space-y-3">
-                            <div class="form-group">
-                                <label for="employeeFilter">Employee</label>
-                                <select id="employeeFilter" class="mobile-input">
-                                    <option value="all">All Employees</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="statusFilter">Status</label>
-                                <select id="statusFilter" class="mobile-input">
-                                    <option value="all">All Statuses</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Rejected">Rejected</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="monthFilter">Month</label>
-                                <select id="monthFilter" class="mobile-input">
-                                    <option value="all">All Months</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Reports Table -->
-                    <div class="table-container">
-                        <table class="w-full mobile-table">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Employee</th>
-                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Role</th>
-                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Report Type</th>
-                                    <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Manager</th>
-                                    <th class="text-right text-mobile-xs font-medium text-gray-500 uppercase">Amount (EGP)</th>
-                                    <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Status</th>
-                                    <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reportsTableBody" class="bg-white divide-y divide-gray-200">
-                                <!-- All reports will be loaded here -->
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="form-group">
+                    <label for="statusFilter">Status</label>
+                    <select id="statusFilter" class="mobile-input">
+                        <option value="all">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="monthFilter">Month</label>
+                    <select id="monthFilter" class="mobile-input">
+                        <option value="all">All Months</option>
+                    </select>
                 </div>
             </div>
         </div>
+        <!-- Total Expenses Box -->
+        <div id="totalExpensesBox" class="mobile-card mb-4">
+            <div class="flex justify-between items-center">
+                <span class="text-mobile-lg font-medium text-gray-900">Total Expenses:</span>
+                <span id="totalExpensesValue" class="text-mobile-xl font-bold text-green-600">EGP 0.00</span>
+            </div>
+        </div>
+        <!-- Reports Table -->
+        <div class="table-container">
+            <table class="w-full mobile-table">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Employee</th>
+                        <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Role</th>
+                        <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase">Report Type</th>
+                        <th class="text-left text-mobile-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Manager</th>
+                        <th class="text-right text-mobile-xs font-medium text-gray-500 uppercase">Amount (EGP)</th>
+                        <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="text-center text-mobile-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="reportsTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- All reports will be loaded here -->
+                </tbody>
+            </table>
+        </div>
     </div>
+</div>
+
 
     <!-- Message Modal -->
     <div id="messageModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
@@ -1669,46 +1681,50 @@
         }
         
         async function retrieveAllReports() {
-            try {
-                const { data, error } = await supabase.from('expenses').select('*').order('report_date', { ascending: false });
-                if (error) throw error;
-                
-                allReportsData = data;
-                if (reportsTableBody) reportsTableBody.innerHTML = '';
-                filterReports();
-            } catch (error) {
-                console.error('Error retrieving all reports:', error);
-                showMessage("Error", "Failed to retrieve reports. Please try again.");
-            }
-        }
+    try {
+        const { data, error } = await supabase.from('expenses').select('*').order('report_date', { ascending: false });
+        if (error) throw error;
+
+        allReportsData = data;
+        if (reportsTableBody) reportsTableBody.innerHTML = '';
+        filterReports(); // This will also update the total
+    } catch (error) {
+        console.error('Error retrieving all reports:', error);
+        showMessage("Error", "Failed to retrieve reports. Please try again.");
+    }
+}
+
 
         function filterReports() {
-            if (!reportsTableBody) {
-                console.error("Reports table body not found.");
-                return;
-            }
-            const employeeFilter = employeeFilterSelect.value;
-            const statusFilter = statusFilterSelect.value;
-            const monthFilter = monthFilterSelect.value;
+    if (!reportsTableBody) {
+        console.error("Reports table body not found.");
+        return;
+    }
+    const employeeFilter = employeeFilterSelect.value;
+    const statusFilter = statusFilterSelect.value;
+    const monthFilter = monthFilterSelect.value;
+    reportsTableBody.innerHTML = '';
 
-            reportsTableBody.innerHTML = '';
-            
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            
-            const filteredData = allReportsData.filter(report => {
-                const reportDate = new Date(report.report_date);
-                const reportMonth = (reportDate.getMonth() + 1).toString().padStart(2, '0');
+    const today = new Date();
+    const currentYear = today.getFullYear();
 
-                const isEmployeeMatch = employeeFilter === 'all' || report.employee_name === employeeFilter;
-                const isStatusMatch = statusFilter === 'all' || report.status === statusFilter;
-                const isMonthMatch = monthFilter === 'all' || isDateInMonthlyReportRange(reportDate, parseInt(monthFilter), currentYear);
-                
-                return isEmployeeMatch && isStatusMatch && isMonthMatch;
-            });
-            
-            filteredData.forEach(report => addNewReportToTable(report, reportsTableBody));
-        }
+    const filteredData = allReportsData.filter(report => {
+        const reportDate = new Date(report.report_date);
+        const reportMonth = (reportDate.getMonth() + 1).toString().padStart(2, '0');
+        const isEmployeeMatch = employeeFilter === 'all' || report.employee_name === employeeFilter;
+        const isStatusMatch = statusFilter === 'all' || report.status === statusFilter;
+        const isMonthMatch = monthFilter === 'all' || isDateInMonthlyReportRange(reportDate, parseInt(monthFilter), currentYear);
+
+        return isEmployeeMatch && isStatusMatch && isMonthMatch;
+    });
+
+    // Calculate total expenses for filtered data
+    const totalExpenses = filteredData.reduce((sum, report) => sum + parseFloat(report.total_amount), 0);
+    document.getElementById('totalExpensesValue').textContent = `EGP ${totalExpenses.toFixed(2)}`;
+
+    filteredData.forEach(report => addNewReportToTable(report, reportsTableBody));
+}
+
         
         // --- Initialization Functions ---
         async function fetchMasterlistFromSupabase() {
