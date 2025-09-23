@@ -933,28 +933,28 @@
 
         // --- Message Modal Logic ---
         function showMessage(title, body, customButtons = null) {
-            if (!messageModalTitle || !messageModalBody || !messageModal || !messageModalActions) {
-                console.error("Message modal elements not found.");
-                return;
-            }
-            messageModalTitle.textContent = title;
-            messageModalBody.textContent = body;
-            messageModal.classList.remove('hidden');
-            setTimeout(() => { messageModal.classList.remove('opacity-0'); }, 10);
+    if (!messageModalTitle || !messageModalBody || !messageModal || !messageModalActions) {
+        console.error("Message modal elements not found.");
+        return;
+    }
+    messageModalTitle.textContent = title;
+    messageModalBody.textContent = body;
+    messageModal.classList.remove('hidden');
+    setTimeout(() => { messageModal.classList.remove('opacity-0'); }, 10);
+    messageModalActions.innerHTML = '';
+    if (customButtons) {
+        customButtons.forEach(btn => {
+            const buttonElement = document.createElement('button');
+            buttonElement.textContent = btn.text;
+            buttonElement.onclick = btn.onClick;
+            buttonElement.className = btn.className;
+            messageModalActions.appendChild(buttonElement);
+        });
+    } else {
+        messageModalActions.innerHTML = `<button onclick="hideMessage()" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700">OK</button>`;
+    }
+}
 
-            messageModalActions.innerHTML = '';
-            if (customButtons) {
-                customButtons.forEach(btn => {
-                    const buttonElement = document.createElement('button');
-                    buttonElement.textContent = btn.text;
-                    buttonElement.onclick = btn.onClick;
-                    buttonElement.className = btn.className;
-                    messageModalActions.appendChild(buttonElement);
-                });
-            } else {
-                messageModalActions.innerHTML = `<button onclick="hideMessage()" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700">OK</button>`;
-            }
-        }
 
         function hideMessage() {
             if (messageModal) {
@@ -1060,14 +1060,15 @@
         }
 
         function closeModal() {
-            if (reportModal) {
-                reportModal.classList.add('opacity-0');
-                setTimeout(() => {
-                    reportModal.classList.add('hidden');
-                    activeReportRow = null;
-                }, 300);
-            }
-        }
+    if (reportModal) {
+        reportModal.classList.add('opacity-0');
+        setTimeout(() => {
+            reportModal.classList.add('hidden');
+            activeReportRow = null;
+        }, 300);
+    }
+}
+
         
         async function deleteReport(rowElement) {
             const reportId = rowElement.dataset.id;
@@ -1120,23 +1121,28 @@
     const reportId = activeReportRow.dataset.id;
     const oldStatus = activeReportRow.dataset.status;
     const amount = parseFloat(activeReportRow.dataset.total);
+
     // Update the status in Supabase
     const { error } = await supabase
         .from('expenses')
         .update({ status: newStatus })
         .eq('id', reportId);
+
     if (error) {
         console.error('Error updating status:', error);
         showMessage("Error", "Failed to update report status.");
         return;
     }
+
     // Update the status in the row
     const statusCell = activeReportRow.querySelector('.status-cell');
     if (statusCell) {
         statusCell.innerHTML = getStatusBadge(newStatus);
     }
+
     // Update the dataset status for future reference
     activeReportRow.dataset.status = newStatus;
+
     // Update the total expenses immediately
     const totalElement = document.getElementById('totalExpensesValue');
     let currentTotal = parseFloat(totalElement.textContent.replace('EGP ', ''));
@@ -1146,11 +1152,17 @@
         currentTotal -= amount;
     }
     totalElement.textContent = `EGP ${currentTotal.toFixed(2)}`;
+
     // Update the status counts immediately
     updateStatusCounts();
+
+    // Close the modal
     closeModal();
+
+    // Show success message
     showMessage("Success", `Report status updated to '${newStatus}'.`);
 }
+
 
 
 
