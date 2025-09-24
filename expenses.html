@@ -1133,16 +1133,14 @@
         return;
     }
 
-    // Update the status in the row
+    // Update row UI
     const statusCell = activeReportRow.querySelector('.status-cell');
     if (statusCell) {
         statusCell.innerHTML = getStatusBadge(newStatus);
     }
-
-    // Update the dataset status for future reference
     activeReportRow.dataset.status = newStatus;
 
-    // Update the total expenses immediately
+    // Update totals
     const totalElement = document.getElementById('totalExpensesValue');
     let currentTotal = parseFloat(totalElement.textContent.replace('EGP ', ''));
     if (oldStatus === 'Rejected' && newStatus !== 'Rejected') {
@@ -1152,18 +1150,24 @@
     }
     totalElement.textContent = `EGP ${currentTotal.toFixed(2)}`;
 
-    // Update the status counts immediately
+    // Update counts
     updateStatusCounts();
 
-    // ✅ Show success message first, then close modal
+    // Success message
     showMessage("Success", `Report status updated to '${newStatus}'.`);
 
-    // Delay closing slightly to let message appear
+    // Close modal safely
     setTimeout(() => {
-        closeModal();
+        try {
+            closeModal(); // if defined
+        } catch (e) {
+            console.warn("closeModal not working:", e);
+            // fallback: force hide
+            const modal = document.getElementById('yourModalId');
+            if (modal) modal.style.display = "none";
+        }
     }, 300);
 }
-
 
 
 
