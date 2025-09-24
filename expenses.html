@@ -1116,40 +1116,67 @@
 
         // --- admin/Manager status update logic ---
         async function updateStatus(newStatus) {
-    if (!activeReportRow) return;
-    const reportId = activeReportRow.dataset.id;
-    const oldStatus = activeReportRow.dataset.status;
-    const amount = parseFloat(activeReportRow.dataset.total);
-    // Update the status in Supabase
-    const { error } = await supabase
-        .from('expenses')
-        .update({ status: newStatus })
-        .eq('id', reportId);
-    if (error) {
-        console.error('Error updating status:', error);
-        showMessage("Error", "Failed to update report status.");
+    const data = activeReportRow.dataset;
+    const reportId = data.id;
+    const originalStatus = data.status;
+
+    if (newStatus === originalStatus) {
+        showMessage('Update Error', 'The report is already ' + newStatus + '.', [{
+            text: 'OK',
+            onClick: () => {
+                hideMessage();
+                closeModal(); // Close modal on error as well
+            },
+            className: 'mobile-btn bg-red-600 text-white hover:bg-red-700 w-full sm:w-auto'
+        }]);
         return;
     }
-    // Update the status in the row
-    const statusCell = activeReportRow.querySelector('.status-cell');
-    if (statusCell) {
-        statusCell.innerHTML = getStatusBadge(newStatus);
+
+    try {
+        const {
+            error
+        } = await supabase
+            .from('expense_reports')
+            .update({
+                status: newStatus,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', reportId);
+
+        if (error) {
+            console.error('Error updating status:', error.message);
+            showMessage('Error', 'Failed to update report status.', [{
+                text: 'OK',
+                onClick: hideMessage,
+                className: 'mobile-btn bg-red-600 text-white hover:bg-red-700'
+            }]);
+            return;
+        }
+
+        // Update the status in the UI
+        const statusCell = activeReportRow.querySelector('.status-cell');
+        if (statusCell) {
+            statusCell.innerHTML = getStatusBadge(newStatus);
+        }
+
+        // Update the cached data
+        const reportToUpdate = allReportsData.find(report => report.id === reportId);
+        if (reportToUpdate) {
+            reportToUpdate.status = newStatus;
+        }
+
+        showMessage('Success', `Report status has been successfully updated to ${newStatus}.`);
+        
+        closeModal(); // This is the line you need to add to close the modal.
+
+    } catch (err) {
+        console.error('Unexpected error:', err.message);
+        showMessage('Error', 'An unexpected error occurred. Please try again.');
+        closeModal();
+    } finally {
+        // Refresh the table to reflect the changes after status update
+        filterReports();
     }
-    // Update the dataset status for future reference
-    activeReportRow.dataset.status = newStatus;
-    // Update the total expenses immediately
-    const totalElement = document.getElementById('totalExpensesValue');
-    let currentTotal = parseFloat(totalElement.textContent.replace('EGP ', ''));
-    if (oldStatus === 'Rejected' && newStatus !== 'Rejected') {
-        currentTotal += amount;
-    } else if (oldStatus !== 'Rejected' && newStatus === 'Rejected') {
-        currentTotal -= amount;
-    }
-    totalElement.textContent = `EGP ${currentTotal.toFixed(2)}`;
-    // Update the status counts immediately
-    updateStatusCounts();
-    closeModal();
-    showMessage("Success", `Report status updated to '${newStatus}'.`);
 }
 
 
