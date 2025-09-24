@@ -1120,23 +1120,28 @@
     const reportId = activeReportRow.dataset.id;
     const oldStatus = activeReportRow.dataset.status;
     const amount = parseFloat(activeReportRow.dataset.total);
+
     // Update the status in Supabase
     const { error } = await supabase
         .from('expenses')
         .update({ status: newStatus })
         .eq('id', reportId);
+
     if (error) {
         console.error('Error updating status:', error);
         showMessage("Error", "Failed to update report status.");
         return;
     }
+
     // Update the status in the row
     const statusCell = activeReportRow.querySelector('.status-cell');
     if (statusCell) {
         statusCell.innerHTML = getStatusBadge(newStatus);
     }
+
     // Update the dataset status for future reference
     activeReportRow.dataset.status = newStatus;
+
     // Update the total expenses immediately
     const totalElement = document.getElementById('totalExpensesValue');
     let currentTotal = parseFloat(totalElement.textContent.replace('EGP ', ''));
@@ -1146,11 +1151,19 @@
         currentTotal -= amount;
     }
     totalElement.textContent = `EGP ${currentTotal.toFixed(2)}`;
+
     // Update the status counts immediately
     updateStatusCounts();
-    closeModal();
+
+    // ✅ Show success message first, then close modal
     showMessage("Success", `Report status updated to '${newStatus}'.`);
+
+    // Delay closing slightly to let message appear
+    setTimeout(() => {
+        closeModal();
+    }, 300);
 }
+
 
 
 
