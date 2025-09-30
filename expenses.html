@@ -380,22 +380,18 @@
                 <!-- Content will be injected by JS -->
             </div>
             <div id="modalActions" class="p-mobile border-t border-gray-200">
-    <div class="flex flex-col sm:flex-row gap-2 sm:justify-end">
-        <button id="approveBtn" onclick="updateStatus('Approved')" class="mobile-btn bg-green-600 text-white hover:bg-green-700 w-full sm:w-auto">
-            <i class="fas fa-check mr-1"></i>Approve
-        </button>
-        <button id="rejectBtn" onclick="updateStatus('Rejected')" class="mobile-btn bg-red-600 text-white hover:bg-red-700 w-full sm:w-auto">
-            <i class="fas fa-times mr-1"></i>Reject
-        </button>
-        <button id="paidBtn" onclick="updateStatus('Paid')" class="mobile-btn bg-blue-600 text-white hover:bg-blue-700 w-full sm:w-auto">
-            <i class="fas fa-money-bill-wave mr-1"></i>Paid
-        </button>
-        <button onclick="closeModal()" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200 w-full sm:w-auto">
-            Close
-        </button>
-    </div>
-</div>
-
+                <div class="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                    <button id="approveBtn" onclick="updateStatus('Approved')" class="mobile-btn bg-green-600 text-white hover:bg-green-700 w-full sm:w-auto">
+                        <i class="fas fa-check mr-1"></i>Approve
+                    </button>
+                    <button id="rejectBtn" onclick="updateStatus('Rejected')" class="mobile-btn bg-red-600 text-white hover:bg-red-700 w-full sm:w-auto">
+                        <i class="fas fa-times mr-1"></i>Reject
+                    </button>
+                    <button onclick="closeModal()" class="mobile-btn bg-gray-100 text-gray-700 hover:bg-gray-200 w-full sm:w-auto">
+                        Close
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     <!-- Print Confirmation Modal (New) -->
@@ -905,12 +901,10 @@
         }
         
         function getStatusBadge(status) {
-    if (status === 'Approved') return `<span class="status-badge bg-green-100 text-green-800">Approved</span>`;
-    if (status === 'Rejected') return `<span class="status-badge bg-red-100 text-red-800">Rejected</span>`;
-    if (status === 'Paid') return `<span class="status-badge bg-blue-100 text-blue-800">Paid</span>`;
-    return `<span class="status-badge bg-yellow-100 text-yellow-800">Pending</span>`;
-}
-
+            if (status === 'Approved') return `<span class="status-badge bg-green-100 text-green-800">Approved</span>`;
+            if (status === 'Rejected') return `<span class="status-badge bg-red-100 text-red-800">Rejected</span>`;
+            return `<span class="status-badge bg-yellow-100 text-yellow-800">Pending</span>`;
+        }
         
         // Helper function to get the formatted report type string
         function getReportTypeDisplayString(report) {
@@ -1055,22 +1049,15 @@
             const isFromTeamReports = rowElement.closest('#myTeamReportsTableBody') !== null;
             
             const showApproveReject = loggedInUser && (loggedInUser.title === 'admin' || (loggedInUser.title === 'District Manager' && isFromTeamReports));
-const showPaid = loggedInUser && (loggedInUser.title === 'admin' || (loggedInUser.title === 'District Manager' && isFromTeamReports));
 
-if (showApproveReject) {
-    approveBtn.classList.remove('hidden');
-    rejectBtn.classList.remove('hidden');
-} else {
-    approveBtn.classList.add('hidden');
-    rejectBtn.classList.add('hidden');
-}
-
-if (showPaid) {
-    paidBtn.classList.remove('hidden');
-} else {
-    paidBtn.classList.add('hidden');
-}
-
+            if (showApproveReject) {
+                approveBtn.classList.remove('hidden');
+                rejectBtn.classList.remove('hidden');
+            } else {
+                approveBtn.classList.add('hidden');
+                rejectBtn.classList.add('hidden');
+            }
+        }
 
         function closeModal() {
             if (reportModal) {
@@ -1133,48 +1120,37 @@ if (showPaid) {
     const reportId = activeReportRow.dataset.id;
     const oldStatus = activeReportRow.dataset.status;
     const amount = parseFloat(activeReportRow.dataset.total);
-
     // Update the status in Supabase
     const { error } = await supabase
         .from('expenses')
         .update({ status: newStatus })
         .eq('id', reportId);
-
     if (error) {
         console.error('Error updating status:', error);
         showMessage("Error", "Failed to update report status.");
         return;
     }
-
     // Update the status in the row
     const statusCell = activeReportRow.querySelector('.status-cell');
     if (statusCell) {
         statusCell.innerHTML = getStatusBadge(newStatus);
     }
-
     // Update the dataset status for future reference
     activeReportRow.dataset.status = newStatus;
-
     // Update the total expenses immediately
     const totalElement = document.getElementById('totalExpensesValue');
     let currentTotal = parseFloat(totalElement.textContent.replace('EGP ', ''));
-
-    // Only update total if the status is not "Rejected"
     if (oldStatus === 'Rejected' && newStatus !== 'Rejected') {
         currentTotal += amount;
     } else if (oldStatus !== 'Rejected' && newStatus === 'Rejected') {
         currentTotal -= amount;
     }
-
     totalElement.textContent = `EGP ${currentTotal.toFixed(2)}`;
-
     // Update the status counts immediately
     updateStatusCounts();
-
     closeModal();
     showMessage("Success", `Report status updated to '${newStatus}'.`);
 }
-
 
 
 
