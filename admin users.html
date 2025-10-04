@@ -7,11 +7,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
     * {
       box-sizing: border-box;
     }
-
     body {
       font-family: 'Inter', sans-serif;
       background-color: #f8fafc;
@@ -21,7 +19,6 @@
       padding: 0;
       min-height: 100vh;
     }
-
     /* Header Banner */
     .header-banner {
       background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
@@ -51,14 +48,12 @@
       font-size: 0.8rem;
       font-weight: 500;
     }
-
     /* Main Content Layout - Mobile First */
     .main-container {
       padding: 1rem;
       width: 100%;
       margin: 0 auto;
     }
-
     /* Tab Navigation - Horizontal on mobile */
     .tab-nav {
       display: flex;
@@ -89,7 +84,6 @@
       border-color: transparent;
       box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
     }
-
     /* Tab Content */
     .tab-content {
       width: 100%;
@@ -105,7 +99,6 @@
       from { opacity: 0; transform: translateY(5px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     /* Card Styles */
     .card {
       background: white;
@@ -129,7 +122,6 @@
     .card-body {
       padding: 1.25rem;
     }
-
     /* Form Styles */
     .form-input {
       width: 100%;
@@ -145,8 +137,8 @@
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    .form-group { 
-      margin-bottom: 1rem; 
+    .form-group {
+      margin-bottom: 1rem;
     }
     .form-group label {
       display: block;
@@ -160,7 +152,6 @@
       flex-direction: column;
       gap: 1rem;
     }
-
     /* Button Styles */
     .btn {
       display: inline-flex;
@@ -200,11 +191,10 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(107, 114, 128, 0.25);
     }
-    .btn-sm { 
-      padding: 0.425rem 0.75rem; 
-      font-size: 0.8125rem; 
+    .btn-sm {
+      padding: 0.425rem 0.75rem;
+      font-size: 0.8125rem;
     }
-
     /* User List Styles */
     .user-item {
       margin-bottom: 0.75rem;
@@ -225,24 +215,24 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    .user-info { 
-      display: flex; 
-      align-items: center; 
-      gap: 0.75rem; 
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
       flex: 1;
       min-width: 0;
       text-align: left;
     }
     .user-avatar {
-      width: 36px; 
-      height: 36px; 
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      display: flex; 
-      align-items: center; 
+      display: flex;
+      align-items: center;
       justify-content: center;
-      color: white; 
-      font-weight: 600; 
+      color: white;
+      font-weight: 600;
       font-size: 0.875rem;
       flex-shrink: 0;
     }
@@ -251,17 +241,17 @@
       min-width: 0;
       text-align: left;
     }
-    .user-details h4 { 
-      margin: 0; 
-      font-size: 0.9375rem; 
-      color: #1e293b; 
+    .user-details h4 {
+      margin: 0;
+      font-size: 0.9375rem;
+      color: #1e293b;
       font-weight: 600;
       text-align: left;
       white-space: normal;
       word-break: break-word;
     }
-    .user-details p { 
-      margin: 0; 
+    .user-details p {
+      margin: 0;
       font-size: 0.8125rem;
       text-align: left;
       white-space: normal;
@@ -272,22 +262,21 @@
     .title-admin { color: #ea580c; }
     .title-default { color: #64748b; }
     .user-id {
-      background: #e2e8f0; 
+      background: #e2e8f0;
       color: #475569;
-      padding: 0.25rem 0.5rem; 
+      padding: 0.25rem 0.5rem;
       border-radius: 0.375rem;
-      font-size: 0.75rem; 
+      font-size: 0.75rem;
       font-weight: 500;
       flex-shrink: 0;
       margin-left: 0.5rem;
     }
-    .user-actions { 
-      display: flex; 
-      gap: 0.375rem; 
+    .user-actions {
+      display: flex;
+      gap: 0.375rem;
       flex-shrink: 0;
       margin-left: 0.5rem;
     }
-
     /* Edit form styles */
     .edit-form {
       background: #f8fafc;
@@ -307,69 +296,67 @@
       color: #1e293b;
     }
     .password-display-group {
-      display: flex; 
-      align-items: center; 
-      gap: 0.5rem; 
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       margin-bottom: 0.875rem;
     }
-    .password-display-group .form-input { 
-      flex: 1; 
-      background-color: #f1f5f9; 
+    .password-display-group .form-input {
+      flex: 1;
+      background-color: #f1f5f9;
     }
     .password-display-group .btn-copy {
-      padding: 0.625rem 0.75rem; 
-      font-size: 0.75rem; 
+      padding: 0.625rem 0.75rem;
+      font-size: 0.75rem;
       background: #4b5563;
-      color: white; 
-      border-radius: 0.375rem; 
+      color: white;
+      border-radius: 0.375rem;
       cursor: pointer;
       border: none;
       flex-shrink: 0;
     }
-
     /* Alert & Modal Styles */
     .alert {
-      padding: 0.875rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.875rem; 
+      padding: 0.875rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.875rem;
     }
-    .alert-success { 
-      background-color: #dcfce7; color: #166534; border: 1px solid #a7f3d0; 
+    .alert-success {
+      background-color: #dcfce7; color: #166534; border: 1px solid #a7f3d0;
     }
-    .alert-error { 
-      background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; 
+    .alert-error {
+      background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;
     }
-    .loading, .no-users { 
-      text-align: center; padding: 2rem 1rem; color: #6b7280; font-size: 0.875rem; 
+    .loading, .no-users {
+      text-align: center; padding: 2rem 1rem; color: #6b7280; font-size: 0.875rem;
     }
-    .no-users { 
-      background: white; border-radius: 0.75rem; border: 2px dashed #e2e8f0; 
+    .no-users {
+      background: white; border-radius: 0.75rem; border: 2px dashed #e2e8f0;
     }
-
     .modal {
       display: none; position: fixed; z-index: 2000; left: 0; top: 0;
       width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
       justify-content: center; align-items: center; padding: 1rem;
     }
     .modal-content {
-      background-color: white; padding: 0; border-radius: 0.75rem; border: 1px solid #e2e8f0; 
+      background-color: white; padding: 0; border-radius: 0.75rem; border: 1px solid #e2e8f0;
       width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
       animation: animatetop 0.3s ease;
     }
-    @keyframes animatetop { 
-      from { transform: translateY(-20px); opacity: 0 } 
-      to { transform: translateY(0); opacity: 1 } 
+    @keyframes animatetop {
+      from { transform: translateY(-20px); opacity: 0 }
+      to { transform: translateY(0); opacity: 1 }
     }
     .modal-header {
       padding: 1rem; background: #3b82f6; color: white;
       border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .modal-header h3 { 
+    .modal-header h3 {
       margin: 0; font-size: 1.125rem; font-weight: 600;
     }
-    .close-button { 
+    .close-button {
       color: white; font-size: 1.5rem; font-weight: bold; cursor: pointer; line-height: 1; padding: 0.25rem;
     }
-    .modal-body { 
+    .modal-body {
       padding: 1.25rem; text-align: center; font-size: 0.9375rem;
     }
     .modal-footer {
@@ -377,7 +364,6 @@
       border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem;
       display: flex; gap: 0.75rem; justify-content: flex-end;
     }
-    
     /* Mobile-specific layout for user card */
     @media (max-width: 480px) {
       .user-card {
@@ -394,7 +380,6 @@
         margin-left: auto;
       }
     }
-
     /* PC / Desktop improvements */
     @media (min-width: 768px) {
       .main-container {
@@ -429,6 +414,70 @@
         font-size: 1.5rem;
       }
     }
+    /* Search Box Styles */
+    .search-box {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      background-color: white;
+    }
+    .search-box:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    .clear-search {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #9ca3af;
+      padding: 0;
+      line-height: 1;
+      display: none;
+    }
+    .clear-search:hover {
+      color: #6b7280;
+    }
+    .search-box:not(:placeholder-shown) + .clear-search {
+      display: block;
+    }
+    /* Notification Styles */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      background: white;
+      border: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+      animation: slideIn 0.3s ease-out;
+      display: none;
+    }
+    .notification-success {
+      background-color: #dcfce7;
+      color: #166534;
+      border-color: #a7f3d0;
+    }
+    .notification-error {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border-color: #fca5a5;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -440,17 +489,15 @@
       </div>
     </div>
   </div>
-
   <div id="appContent" class="main-container">
     <div class="dashboard-layout">
       <nav class="tab-nav">
         <button class="tab-button active" data-tab="addUser">Add User</button>
         <button class="tab-button" data-tab="currentUsers">Manage Users</button>
       </nav>
-
       <div class="tab-content">
-        <div id="message"></div>
-        
+        <div id="notification" class="notification"></div>
+
         <div id="addUser" class="tab-pane active">
           <div class="card">
             <div class="card-header">
@@ -482,13 +529,16 @@
             </div>
           </div>
         </div>
-
         <div id="currentUsers" class="tab-pane">
           <div class="card">
             <div class="card-header">
               <h2>Current Users</h2>
             </div>
             <div class="card-body">
+              <div style="position: relative; margin-bottom: 1rem;">
+                <input type="text" id="searchInput" class="search-box" placeholder="Search users..." onkeyup="searchUsers()">
+                <button type="button" id="clearSearch" class="clear-search" onclick="clearSearch()">×</button>
+              </div>
               <div id="usersList" class="loading">Loading users...</div>
             </div>
           </div>
@@ -496,7 +546,6 @@
       </div>
     </div>
   </div>
-
   <div id="confirmationModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -512,27 +561,32 @@
       </div>
     </div>
   </div>
-
   <script>
     // Supabase client initialization
     const { createClient } = supabase;
     const supabaseUrl = 'https://plmevfyxpngzymvzvkzn.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsbWV2Znl4cG5nenltdnp2a3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NjM5NDEsImV4cCI6MjA2NjMzOTk0MX0.lUm3efHFCL3aAB-PL7H54BpnvcpbXxp1BeUzw0yjp5c';
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
-
     let users = [];
     let activeEditId = null;
     let confirmCallback = null;
-
-    const messageDiv = document.getElementById('message');
+    const notificationDiv = document.getElementById('notification');
     const confirmationModal = document.getElementById('confirmationModal');
     const modalMessage = document.getElementById('modalMessage');
     const modalConfirmBtn = document.getElementById('modalConfirmBtn');
 
+    function showNotification(text, type = 'success') {
+      notificationDiv.textContent = text;
+      notificationDiv.className = `notification notification-${type}`;
+      notificationDiv.style.display = 'block';
+      setTimeout(() => {
+        notificationDiv.style.display = 'none';
+      }, 5000);
+    }
+
     function setupTabs() {
         const tabButtons = document.querySelectorAll('.tab-button');
         const tabPanes = document.querySelectorAll('.tab-pane');
-
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 tabButtons.forEach(btn => btn.classList.remove('active'));
@@ -542,11 +596,6 @@
                 document.getElementById(tabId).classList.add('active');
             });
         });
-    }
-
-    function showMessage(text, type = 'success') {
-      messageDiv.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
-      setTimeout(() => { messageDiv.innerHTML = ''; }, 5000);
     }
 
     function showConfirmationModal(message, callback) {
@@ -587,9 +636,9 @@
         textarea.select();
         try {
             document.execCommand('copy');
-            showMessage('Password copied to clipboard!', 'success');
+            showNotification('Password copied to clipboard!');
         } catch (err) {
-            showMessage('Failed to copy password.', 'error');
+            showNotification('Failed to copy password.', 'error');
         }
         document.body.removeChild(textarea);
     }
@@ -598,28 +647,29 @@
       try {
         const { data, error } = await supabaseClient.from('users').select('*');
         if (error) throw error;
-        
+
         data.sort((a, b) => b.id - a.id);
         users = data;
-
         updateUserCount();
         displayUsers();
       } catch (err) {
-        showMessage('Failed to load users: ' + err.message, 'error');
+        showNotification('Failed to load users: ' + err.message, 'error');
         document.getElementById('usersList').innerHTML = '<div class="alert alert-error">Failed to load users.</div>';
       }
     }
 
-    function displayUsers() {
+    function displayUsers(filteredUsers = null) {
       const usersList = document.getElementById('usersList');
-      if (!users.length) {
+      const usersToDisplay = filteredUsers || users;
+
+      if (!usersToDisplay.length) {
         usersList.innerHTML = '<div class="no-users">No users found.<br>Add your first user to get started.</div>';
         return;
       }
 
       usersList.innerHTML = `
         <div class="users-list">
-          ${users.map(user => `
+          ${usersToDisplay.map(user => `
             <div class="user-item">
               <div class="user-card">
                 <div class="user-info">
@@ -672,14 +722,32 @@
         </div>`;
     }
 
+    function searchUsers() {
+      const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!searchTerm) {
+        displayUsers();
+        return;
+      }
+      const filteredUsers = users.filter(user =>
+        user.username.toLowerCase().includes(searchTerm) ||
+        user.title.toLowerCase().includes(searchTerm)
+      );
+      displayUsers(filteredUsers);
+    }
+
+    function clearSearch() {
+      const searchInput = document.getElementById('searchInput');
+      searchInput.value = '';
+      searchInput.focus();
+      displayUsers();
+    }
+
     function editUser(userId) {
         const editForm = document.getElementById(`editForm${userId}`);
         const isVisible = editForm.style.display === 'block';
-
         document.querySelectorAll('.edit-form').forEach(form => {
             form.style.display = 'none';
         });
-
         if (!isVisible) {
             editForm.style.display = 'block';
             activeEditId = userId;
@@ -693,20 +761,18 @@
       const username = document.getElementById('newUsername').value.trim();
       const password = document.getElementById('newPassword').value.trim();
       const title = document.getElementById('newTitle').value.trim();
-
       if (!username || !password || !title) {
-        return showMessage('Username, password, and title are required', 'error');
+        return showNotification('Username, password, and title are required', 'error');
       }
-
       try {
         const { error } = await supabaseClient.from('users').insert([{ username, password, title }]);
         if (error) throw error;
-        showMessage('User added successfully!');
+        showNotification('User added successfully!');
         e.target.reset();
         await loadUsers();
         document.querySelector('.tab-button[data-tab="currentUsers"]').click();
       } catch (err) {
-        showMessage('Error adding user: ' + err.message, 'error');
+        showNotification('Error adding user: ' + err.message, 'error');
       }
     });
 
@@ -719,11 +785,9 @@
       const username = document.getElementById(`editUsername${userId}`).value.trim();
       const title = document.getElementById(`editTitle${userId}`).value.trim();
       const password = document.getElementById(`editPassword${userId}`).value.trim();
-
       if (!username || !title) {
-        return showMessage('Username and title are required', 'error');
+        return showNotification('Username and title are required', 'error');
       }
-
       try {
         const updateData = { username, title };
         if (password) {
@@ -731,33 +795,32 @@
         }
         const { error } = await supabaseClient.from('users').update(updateData).eq('id', userId);
         if (error) throw error;
-        showMessage('User updated successfully!');
+        showNotification('User updated successfully!');
         cancelEdit(userId);
         loadUsers();
       } catch (err) {
-        showMessage('Update failed: ' + err.message, 'error');
+        showNotification('Update failed: ' + err.message, 'error');
       }
     }
 
     async function deleteUser(userId) {
       const user = users.find(u => u.id === userId);
       if (user && user.title.toLowerCase() === 'admin') {
-        return showMessage('Admin users cannot be deleted.', 'error');
+        return showNotification('Admin users cannot be deleted.', 'error');
       }
-
       showConfirmationModal('Are you sure you want to delete this user? This action cannot be undone.', async (confirmed) => {
         if (!confirmed) return;
         try {
           const { error } = await supabaseClient.from('users').delete().eq('id', userId);
           if (error) throw error;
-          showMessage('User deleted successfully!');
+          showNotification('User deleted successfully!');
           loadUsers();
         } catch (err) {
-          showMessage('Delete failed: ' + err.message, 'error');
+          showNotification('Delete failed: ' + err.message, 'error');
         }
       });
     }
-    
+
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.user-item') && !e.target.closest('.modal-content')) {
         document.querySelectorAll('.edit-form').forEach(form => {
@@ -766,7 +829,7 @@
         activeEditId = null;
       }
     });
-    
+
     document.addEventListener('DOMContentLoaded', () => {
         setupTabs();
         loadUsers();
