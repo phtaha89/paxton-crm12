@@ -821,7 +821,7 @@
                 
                 descriptionInput.addEventListener('input', () => {
                     const km = parseFloat(descriptionInput.value) || 0;
-                    const worth = km * 1.7; // Fixed rate per KM
+                    const worth = km * 1.9; // Fixed rate per KM
                     amountInput.value = worth.toFixed(2);
                     const formId = selectElement.closest('form').id;
                     const containerId = formId === 'managerExpenseForm' ? 'managerExpensesContainer' : 'repExpensesContainer';
