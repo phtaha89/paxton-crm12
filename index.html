@@ -10,12 +10,13 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- PWA meta tags -->
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Core Hub">
-<meta name="theme-color" content="#1a365d">
-<link rel="apple-touch-icon" href="https://i.ibb.co/N2GZ9CmT/Your-Sales-Ecosystem.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Core Hub">
+    <meta name="theme-color" content="#1a365d">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/N2GZ9CmT/Your-Sales-Ecosystem.png">
+    <link rel="manifest" id="pwaManifestLink">
     <!-- Supabase CDN for database interaction -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -972,29 +973,29 @@
             .footer.show { display: block; }
         }
         .install-banner {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--card-bg);
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
-    padding: 12px 16px;
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    z-index: 3000;
-    animation: slideUp 0.3s ease-out;
-}
-.install-banner.show { display: flex; }
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.install-banner-text { font-size: 0.85rem; color: var(--text-color-dark); flex-grow: 1; }
-.install-banner-text strong { display: block; font-size: 0.9rem; }
-.install-banner-buttons { display: flex; gap: 8px; flex-shrink: 0; }
-.install-banner button {
-    padding: 8px 14px; border-radius: 8px; border: none;
-    font-weight: 600; font-size: 0.85rem; cursor: pointer;
-}
-.install-btn-accept { background: var(--primary-dark); color: white; }
-.install-btn-dismiss { background: #f1f5f9; color: var(--text-color-light); }
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--card-bg);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+            padding: 12px 16px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            z-index: 3000;
+            animation: slideUp 0.3s ease-out;
+        }
+        .install-banner.show { display: flex; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .install-banner-text { font-size: 0.85rem; color: var(--text-color-dark); flex-grow: 1; }
+        .install-banner-text strong { display: block; font-size: 0.9rem; }
+        .install-banner-buttons { display: flex; gap: 8px; flex-shrink: 0; }
+        .install-banner button {
+            padding: 8px 14px; border-radius: 8px; border: none;
+            font-weight: 600; font-size: 0.85rem; cursor: pointer;
+        }
+        .install-btn-accept { background: var(--primary-dark); color: white; }
+        .install-btn-dismiss { background: #f1f5f9; color: var(--text-color-light); }
     </style>
 </head>
 <body>
@@ -1180,6 +1181,18 @@
     </div>
     <!-- END: New Expense Details Modal -->
 
+    <!-- PWA Install Banner -->
+    <div id="installBanner" class="install-banner">
+        <div class="install-banner-text">
+            <strong>Install Core Hub</strong>
+            <span id="installBannerMsg">Add to your home screen for quick access.</span>
+        </div>
+        <div class="install-banner-buttons">
+            <button id="installDismissBtn" class="install-btn-dismiss">Not now</button>
+            <button id="installAcceptBtn" class="install-btn-accept">Install</button>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://rhgthtvvgtcczsyjnhol.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoZ3RodHZ2Z3RjY3pzeWpuaG9sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0ODQwNTgsImV4cCI6MjA5MzA2MDA1OH0.VKyBKb3Ud-QF3XLf7HgOnQhbbQzcxYu23vxHTNhC6SU';
@@ -1266,52 +1279,6 @@
             }
         }
         // END: Helper function
-        // --- PWA Install Prompt ---
-let deferredInstallPrompt = null;
-
-function isStandalone() {
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
-function isIOS() {
-    return /iphone|ipad|ipod/i.test(navigator.userAgent);
-}
-
-function showInstallBanner(iosMode) {
-    if (isStandalone() || localStorage.getItem('installBannerDismissed') === 'true') return;
-    const banner = document.getElementById('installBanner');
-    const msg = document.getElementById('installBannerMsg');
-    const acceptBtn = document.getElementById('installAcceptBtn');
-    if (iosMode) {
-        msg.textContent = 'Tap the Share icon, then "Add to Home Screen".';
-        acceptBtn.style.display = 'none';
-    }
-    banner.classList.add('show');
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    showInstallBanner(false);
-});
-
-document.getElementById('installAcceptBtn')?.addEventListener('click', async () => {
-    document.getElementById('installBanner').classList.remove('show');
-    if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        await deferredInstallPrompt.userChoice;
-        deferredInstallPrompt = null;
-    }
-});
-
-document.getElementById('installDismissBtn')?.addEventListener('click', () => {
-    document.getElementById('installBanner').classList.remove('show');
-    localStorage.setItem('installBannerDismissed', 'true');
-});
-
-// iOS has no beforeinstallprompt event — show manual instructions instead
-if (isIOS() && !isStandalone()) {
-    setTimeout(() => showInstallBanner(true), 3500); // after intro overlay fades
-}
 
         async function fetchNotifications() {
             const notificationBell = document.getElementById('notificationBell');
@@ -1962,6 +1929,68 @@ if (isIOS() && !isStandalone()) {
             notificationBell.addEventListener('click', (e) => { e.stopPropagation(); notificationDropdown.classList.toggle('hidden'); });
             document.addEventListener('click', (e) => { if (!notificationBell.contains(e.target)) notificationDropdown.classList.add('hidden'); });
 
+            // --- PWA Install Prompt ---
+            let deferredInstallPrompt = null;
+            const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+            function showInstallBanner(iosMode) {
+                if (isStandalone() || localStorage.getItem('installBannerDismissed') === 'true') return;
+                const banner = document.getElementById('installBanner');
+                if (!banner) return;
+                if (iosMode) {
+                    document.getElementById('installBannerMsg').textContent = 'Tap the Share icon, then "Add to Home Screen".';
+                    document.getElementById('installAcceptBtn').style.display = 'none';
+                }
+                banner.classList.add('show');
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredInstallPrompt = e;
+                showInstallBanner(false);
+            });
+
+            document.getElementById('installAcceptBtn')?.addEventListener('click', async () => {
+                document.getElementById('installBanner').classList.remove('show');
+                if (deferredInstallPrompt) {
+                    deferredInstallPrompt.prompt();
+                    await deferredInstallPrompt.userChoice;
+                    deferredInstallPrompt = null;
+                }
+            });
+
+            document.getElementById('installDismissBtn')?.addEventListener('click', () => {
+                document.getElementById('installBanner').classList.remove('show');
+                localStorage.setItem('installBannerDismissed', 'true');
+            });
+
+            if (isIOS() && !isStandalone()) {
+                setTimeout(() => showInstallBanner(true), 3500);
+            }
+
+            // Build a minimal manifest.json on the fly via a Blob URL so no separate file is needed
+            try {
+                const manifest = {
+                    name: "Core Hub CRM",
+                    short_name: "Core Hub",
+                    start_url: "./",
+                    display: "standalone",
+                    background_color: "#1a365d",
+                    theme_color: "#1a365d",
+                    icons: [
+                        { src: "https://i.ibb.co/N2GZ9CmT/Your-Sales-Ecosystem.png", sizes: "192x192", type: "image/png" },
+                        { src: "https://i.ibb.co/N2GZ9CmT/Your-Sales-Ecosystem.png", sizes: "512x512", type: "image/png" }
+                    ]
+                };
+                const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+                const manifestURL = URL.createObjectURL(manifestBlob);
+                const manifestLink = document.getElementById('pwaManifestLink');
+                if (manifestLink) manifestLink.setAttribute('href', manifestURL);
+            } catch (e) {
+                console.warn('Manifest generation failed:', e);
+            }
+
             // 3. Boot after 500ms — fetch masterlist (max 4s) then show login or home
             setTimeout(async function() {
                 try {
@@ -1992,16 +2021,5 @@ if (isIOS() && !isStandalone()) {
             }, 500);
         });
     </script>
-    <!-- PWA Install Banner -->
-<div id="installBanner" class="install-banner">
-    <div class="install-banner-text">
-        <strong>Install Core Hub</strong>
-        <span id="installBannerMsg">Add to your home screen for quick access.</span>
-    </div>
-    <div class="install-banner-buttons">
-        <button id="installDismissBtn" class="install-btn-dismiss">Not now</button>
-        <button id="installAcceptBtn" class="install-btn-accept">Install</button>
-    </div>
-</div>
 </body>
 </html>
